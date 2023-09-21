@@ -14,208 +14,210 @@ from models import init_db, Student, Faculty, UniversityAdmin
 from flask_jwt_extended import JWTManager
 from decorators.auth_decorators import studentRequired, facultyRequired, preventAuthenticated, universityAdminRequired
 
-load_dotenv()  # Load environment variables from .env file
-app = Flask(__name__)
+def create_app():
+    load_dotenv()  # Load environment variables from .env file
+    app = Flask(__name__)
 
-# SETUP YOUR POSTGRE DATABASE HERE
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour (in seconds)
-# Replace 'your-secret-key' with an actual secret key
-app.secret_key = os.getenv('SECRET_KEY')
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-# cache.init_app(app)
+    # SETUP YOUR POSTGRE DATABASE HERE
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+    app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour (in seconds)
+    # Replace 'your-secret-key' with an actual secret key
+    app.secret_key = os.getenv('SECRET_KEY')
+    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+    # cache.init_app(app)
 
-CORS(app)
-jwt = JWTManager(app)
-init_db(app)
+    CORS(app)
+    jwt = JWTManager(app)
+    init_db(app)
 
-# The Api Key is static for development mode. The Api key in future must refresh in order to secure the api endpoint of the application
-student_api_key = os.getenv('STUDENT_API_KEY')
-faculty_api_key = os.getenv('FACULTY_API_KEY')
-university_admin_api_key = os.getenv('UNIVERSITY_ADMIN_API_KEY')
-system_admin_api_key = os.getenv('SYSTEM_ADMIN_API_KEY')
+    # The Api Key is static for development mode. The Api key in future must refresh in order to secure the api endpoint of the application
+    student_api_key = os.getenv('STUDENT_API_KEY')
+    faculty_api_key = os.getenv('FACULTY_API_KEY')
+    university_admin_api_key = os.getenv('UNIVERSITY_ADMIN_API_KEY')
+    system_admin_api_key = os.getenv('SYSTEM_ADMIN_API_KEY')
 
-# The api base url for api endpoints
-student_api_base_url = os.getenv("STUDENT_API_BASE_URL")
-faculty_api_base_url = os.getenv("FACULTY_API_BASE_URL")
-university_admin_api_base_url = os.getenv("UNIVERSITY_ADMIN_API_BASE_URL")
-
-
-@app.context_processor
-def custom_context_processor():
-    authenticated = False
-    if 'user_role' in session:
-        authenticated = True
-    return {'authenticated': authenticated}
-
-# ===========================================================================
-# ROUTING FOR THE APPLICATION (http:localhost:3000)
+    # The api base url for api endpoints
+    student_api_base_url = os.getenv("STUDENT_API_BASE_URL")
+    faculty_api_base_url = os.getenv("FACULTY_API_BASE_URL")
+    university_admin_api_base_url = os.getenv("UNIVERSITY_ADMIN_API_BASE_URL")
 
 
-@app.route('/')
-@preventAuthenticated
-def home():
-    session.permanent = True
-    return render_template('main/index.html')
+    @app.context_processor
+    def custom_context_processor():
+        authenticated = False
+        if 'user_role' in session:
+            authenticated = True
+        return {'authenticated': authenticated}
+
+    # ===========================================================================
+    # ROUTING FOR THE APPLICATION (http:localhost:3000)
 
 
-@app.route('/logout')
-def logout():
-    # Clear session data including JWT token and user role
-    session.clear()
-    return redirect(url_for('home'))  # Redirect to home or appropriate route
-
-# ========================================================================
+    @app.route('/')
+    @preventAuthenticated
+    def home():
+        session.permanent = True
+        return render_template('main/index.html')
 
 
-# ALL STUDENT ROUTES HERE
-@app.route('/student')
-@preventAuthenticated
-def studentLogin():
-    session.permanent = True
-    return render_template('student/login.html')
+    @app.route('/logout')
+    def logout():
+        # Clear session data including JWT token and user role
+        session.clear()
+        return redirect(url_for('home'))  # Redirect to home or appropriate route
+
+    # ========================================================================
 
 
-@app.route('/student/home')
-@studentRequired
-def studentHome():
-    session.permanent = True
-    return render_template('student/home.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="home")
+    # ALL STUDENT ROUTES HERE
+    @app.route('/student')
+    @preventAuthenticated
+    def studentLogin():
+        session.permanent = True
+        return render_template('student/login.html')
 
 
-@app.route('/student/grade')
-@studentRequired
-def studentGrade():
-    session.permanent = True
-    return render_template('student/grades.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="grades")
+    @app.route('/student/home')
+    @studentRequired
+    def studentHome():
+        session.permanent = True
+        return render_template('student/home.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="home")
 
 
-@app.route('/student/profile')
-@studentRequired
-def studentProfile():
-    session.permanent = True
-    return render_template('student/profile.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="profile")
+    @app.route('/student/grade')
+    @studentRequired
+    def studentGrade():
+        session.permanent = True
+        return render_template('student/grades.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="grades")
 
 
-@app.route('/student/change-password')
-@studentRequired
-def changePassword():
-    session.permanent = True
-    return render_template('student/change_password.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url,  current_page="change-password")
+    @app.route('/student/profile')
+    @studentRequired
+    def studentProfile():
+        session.permanent = True
+        return render_template('student/profile.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="profile")
 
 
-# ========================================================================
+    @app.route('/student/change-password')
+    @studentRequired
+    def changePassword():
+        session.permanent = True
+        return render_template('student/change_password.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url,  current_page="change-password")
 
 
-# ALL FACULTY ROUTES HERE
-@app.route('/faculty')
-@preventAuthenticated
-def facultyLogin():
-    return render_template('faculty/login.html')
+    # ========================================================================
 
 
-@app.route('/faculty/dashboard')
-@facultyRequired
-def facultyHome():
-    session.permanent = True
-    return render_template('faculty/dashboard.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="dashboard")
+    # ALL FACULTY ROUTES HERE
+    @app.route('/faculty')
+    @preventAuthenticated
+    def facultyLogin():
+        return render_template('faculty/login.html')
 
 
-@app.route('/faculty/grades')
-@facultyRequired
-def facultyGrades():
-    session.permanent = True
-    return render_template('faculty/grades.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="grades")
+    @app.route('/faculty/dashboard')
+    @facultyRequired
+    def facultyHome():
+        session.permanent = True
+        return render_template('faculty/dashboard.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="dashboard")
 
 
-@app.route('/faculty/class-comparison')
-@facultyRequired
-def facultyClassComparison():
-    session.permanent = True
-    return render_template('faculty/class-comparison.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="class-comparison")
+    @app.route('/faculty/grades')
+    @facultyRequired
+    def facultyGrades():
+        session.permanent = True
+        return render_template('faculty/grades.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="grades")
 
 
-@app.route('/faculty/profile')
-@facultyRequired
-def facultyProfile():
-    session.permanent = True
-    return render_template('faculty/profile.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="profile")
+    @app.route('/faculty/class-comparison')
+    @facultyRequired
+    def facultyClassComparison():
+        session.permanent = True
+        return render_template('faculty/class-comparison.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="class-comparison")
 
 
-@app.route('/faculty/change-password')
-@facultyRequired
-def facultyChangePassword():
-    session.permanent = True
-    return render_template('faculty/change_password.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="change-password")
+    @app.route('/faculty/profile')
+    @facultyRequired
+    def facultyProfile():
+        session.permanent = True
+        return render_template('faculty/profile.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="profile")
 
 
-# ========================================================================
+    @app.route('/faculty/change-password')
+    @facultyRequired
+    def facultyChangePassword():
+        session.permanent = True
+        return render_template('faculty/change_password.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="change-password")
 
 
-# ALL UNIVERSITY ADMIN ROUTES HERE
-@app.route('/university-admin')
-@preventAuthenticated
-def universityAdminLogin():
-    return render_template('universityadmin/login.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url)
+    # ========================================================================
 
 
-@app.route('/university-admin/home')
-@universityAdminRequired
-def universityAdminHome():
-    session.permanent = True
-    return render_template('universityadmin/home.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="home")
+    # ALL UNIVERSITY ADMIN ROUTES HERE
+    @app.route('/university-admin')
+    @preventAuthenticated
+    def universityAdminLogin():
+        return render_template('universityadmin/login.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url)
 
 
-@app.route('/university-admin/class-performance')
-@universityAdminRequired
-def universityClassPerformance():
-    session.permanent = True
-    return render_template('universityadmin/class-performance.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
+    @app.route('/university-admin/home')
+    @universityAdminRequired
+    def universityAdminHome():
+        session.permanent = True
+        return render_template('universityadmin/home.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="home")
 
 
-@app.route('/university-admin/profile')
-@universityAdminRequired
-def universityProfile():
-    session.permanent = True
-    return render_template('universityadmin/profile.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="profile")
+    @app.route('/university-admin/class-performance')
+    @universityAdminRequired
+    def universityClassPerformance():
+        session.permanent = True
+        return render_template('universityadmin/class-performance.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
 
 
-@app.route('/university-admin/change-password')
-@universityAdminRequired
-def universityChangePassword():
-    session.permanent = True
-    return render_template('universityadmin/change-password.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
+    @app.route('/university-admin/profile')
+    @universityAdminRequired
+    def universityProfile():
+        session.permanent = True
+        return render_template('universityadmin/profile.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="profile")
 
 
-# ========================================================================
-# Register the API blueprint
-app.register_blueprint(university_admin_api,
-                       url_prefix='/api/v1/university-admin')
-app.register_blueprint(faculty_api, url_prefix='/api/v1/faculty')
-app.register_blueprint(student_api, url_prefix='/api/v1/student')
+    @app.route('/university-admin/change-password')
+    @universityAdminRequired
+    def universityChangePassword():
+        session.permanent = True
+        return render_template('universityadmin/change-password.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
 
 
-@app.route('/page_not_found')  # Define an actual route
-def page_not_found():
-    return handle_404_error(None)
+    # ========================================================================
+    # Register the API blueprint
+    app.register_blueprint(university_admin_api,
+                        url_prefix='/api/v1/university-admin')
+    app.register_blueprint(faculty_api, url_prefix='/api/v1/faculty')
+    app.register_blueprint(student_api, url_prefix='/api/v1/student')
 
 
-@app.errorhandler(404)
-def handle_404_error(e):
-    return render_template('404.html'), 404
-
-# ========================================================================
-# TESTING
-
-# ========================================================================
-#  host='127.0.0.1',
-#         port=5001,
+    @app.route('/page_not_found')  # Define an actual route
+    def page_not_found():
+        return handle_404_error(None)
 
 
-if __name__ == '__main__':
-    app.run(
+    @app.errorhandler(404)
+    def handle_404_error(e):
+        return render_template('404.html'), 404
 
-        debug=True
-    )
+    # ========================================================================
+    # TESTING
+
+    # ========================================================================
+    #  host='127.0.0.1',
+    #         port=5001,
+
+
+    # if __name__ == '__main__':
+    #     app.run(
+
+    #         debug=True
+    #     )
+    return app
