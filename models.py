@@ -1,0 +1,454 @@
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect
+from flask_login import UserMixin
+
+# from data2.student import student_data
+# from data2.faculty import faculty_data
+# from data2.universityadmin import university_admin_data
+# from data2.systemadmin import system_admin_data
+# from data2.course import course_data
+# from data2.courseEnrolled import course_enrolled_data
+# from data2.subject import subject_data
+# from data2.classes import class_data
+# from data2.classSubject import class_subject_data
+# from data2.studentClassSubjectGrade import student_class_subject_grade_data
+# from data2.studentClassGrade import student_class_grade_data
+# from data2.classSubjectGrade import class_subject_grade_data
+# from data2.classGrade import class_grade_data
+# from data2.courseGrade import course_grade_data
+
+db = SQLAlchemy()
+
+
+class Student(db.Model, UserMixin):
+    __tablename__ = 'Students'
+
+    StudentId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    StudentNumber = db.Column(db.String(30), unique=True)  # UserID
+    Name = db.Column(db.String(50), nullable=False)  # Name
+    Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
+    Password = db.Column(db.String(128), nullable=False)  # Password
+    Gender = db.Column(db.Integer)  # Gender
+    DateOfBirth = db.Column(db.Date)  # DateOfBirth
+    PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
+    ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
+    MobileNumber = db.Column(db.String(11))  # MobileNumber
+    Dropout = db.Column(db.Boolean)  # Dropout
+    IsGraduated = db.Column(db.Boolean, default=True)
+
+    def to_dict(self):
+        return {
+            'StudentId': self.StudentId,
+            'StudentNumber': self.StudentNumber,
+            'Name': self.Name,
+            'Email': self.Email,
+            'Password': self.Password,
+            'Gender': self.Gender,
+            'DateOfBirth': self.DateOfBirth,
+            'PlaceOfBirth': self.PlaceOfBirth,
+            'ResidentialAddress': self.ResidentialAddress,
+            'MobileNumber': self.MobileNumber,
+            'Dropout': self.Dropout,
+            'IsGraduated': self.IsGraduated
+        }
+
+    def get_id(self):
+        return str(self.StudentId)  # Convert to string to ensure compatibility
+
+
+class Faculty(db.Model, UserMixin):
+    __tablename__ = 'Faculties'
+
+    TeacherId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    TeacherNumber = db.Column(db.String(30), unique=True)  # UserID
+    Name = db.Column(db.String(50), nullable=False)  # Name
+    Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
+    Password = db.Column(db.String(128), nullable=False)  # Password
+    Gender = db.Column(db.Integer)  # Gender
+    DateOfBirth = db.Column(db.Date)  # DateOfBirth
+    PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
+    ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
+    MobileNumber = db.Column(db.String(11))  # MobileNumber
+    IsActive = db.Column(db.Boolean, default=True)
+
+    def to_dict(self):
+        return {
+            'TeacherId': self.TeacherId,
+            'TeacherNumber': self.TeacherNumber,
+            'Name': self.Name,
+            'Email': self.Email,
+            'Password': self.Password,
+            'Gender': self.Gender,
+            'DateOfBirth': self.DateOfBirth,
+            'PlaceOfBirth': self.PlaceOfBirth,
+            'ResidentialAddress': self.ResidentialAddress,
+            'MobileNumber': self.MobileNumber,
+            'IsActive': self.IsActive
+        }
+
+    def get_id(self):
+        return str(self.TeacherId)  # Convert to string to ensure compatibility
+
+
+class UniversityAdmin(db.Model, UserMixin):
+    __tablename__ = 'UniversityAdmins'
+
+    UnivAdminId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    UnivAdminNumber = db.Column(db.String(30), primary_key=True)  # UserID
+    Name = db.Column(db.String(50), nullable=False)  # Name
+    Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
+    Password = db.Column(db.String(128), nullable=False)  # Password
+    Gender = db.Column(db.Integer)  # Gender
+    DateOfBirth = db.Column(db.Date)  # DateOfBirth
+    PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
+    ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
+    MobileNumber = db.Column(db.String(11))  # MobileNumber
+    IsActive = db.Column(db.Boolean, default=True)
+
+    def to_dict(self):
+        return {
+            'UnivAdminId': self.UnivAdminId,
+            'UnivAdminNumber': self.UnivAdminNumber,
+            'Name': self.Name,
+            'Email': self.Email,
+            'Password': self.Password,
+            'Gender': self.Gender,
+            'DateOfBirth': self.DateOfBirth,
+            'PlaceOfBirth': self.PlaceOfBirth,
+            'ResidentialAddress': self.ResidentialAddress,
+            'MobileNumber': self.MobileNumber,
+            'IsActive': self.IsActive
+        }
+
+    def get_id(self):
+        # Convert to string to ensure compatibility
+        return str(self.UnivAdminId)
+
+
+class SystemAdmin(db.Model, UserMixin):
+    __tablename__ = 'SystemAdmins'
+
+    SysAdminId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    SysAdminNumber = db.Column(db.String(30), primary_key=True)  # UserID
+    Name = db.Column(db.String(50), nullable=False)  # Name
+    Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
+    Password = db.Column(db.String(128), nullable=False)  # Password
+    Gender = db.Column(db.Integer)  # Gender
+    DateOfBirth = db.Column(db.Date)  # DateOfBirth
+    PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
+    ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
+    MobileNumber = db.Column(db.String(11))  # MobileNumber
+    IsActive = db.Column(db.Boolean, default=True)
+
+    def to_dict(self):
+        return {
+            'SysAdminId': self.SysAdminId,
+            'SysAdminNumber': self.SysAdminNumber,
+            'Name': self.Name,
+            'Email': self.Email,
+            'Password': self.Password,
+            'Gender': self.Gender,
+            'DateOfBirth': self.DateOfBirth,
+            'PlaceOfBirth': self.PlaceOfBirth,
+            'ResidentialAddress': self.ResidentialAddress,
+            'MobileNumber': self.MobileNumber,
+            'IsActive': self.IsActive
+        }
+
+    def get_id(self):
+        # Convert to string to ensure compatibility
+        return str(self.SysAdminId)
+
+
+class Course(db.Model):
+    __tablename__ = 'Course'
+
+    CourseId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    CourseCode = db.Column(db.String(10), unique=True)
+    Name = db.Column(db.String(200))
+    Description = db.Column(db.String(200))
+
+    def to_dict(self):
+        return {
+            'CourseId': self.CourseId,
+            'CourseCode': self.CourseCode,
+            'Name': self.Name,
+            'Description': self.Description
+        }
+
+
+class CourseEnrolled(db.Model):
+    __tablename__ = 'CourseEnrolled'
+
+    CourseId = db.Column(db.Integer, db.ForeignKey(
+        'Course.CourseId', ondelete="CASCADE"), primary_key=True)
+    StudentId = db.Column(db.Integer, db.ForeignKey(
+        'Students.StudentId', ondelete="CASCADE"), primary_key=True)
+    DateEnrolled = db.Column(db.Date)
+
+    def to_dict(self):
+        return {
+            'CourseId': self.CourseId,
+            'StudentId': self.StudentId,
+            'DateEnrolled': self.DateEnrolled
+        }
+
+
+class Class(db.Model):
+    __tablename__ = 'Class'
+
+    ClassId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    CourseId = db.Column(db.Integer, db.ForeignKey(
+        'Course.CourseId', ondelete="CASCADE"))
+    Year = db.Column(db.Integer)
+    Section = db.Column(db.Integer)
+    Semester = db.Column(db.Integer)
+    Batch = db.Column(db.Integer)
+    IsGradeFinalized = db.Column(db.Boolean, default=False)
+
+    def to_dict(self):
+        return {
+            'ClassId': self.ClassId,
+            'CourseId': self.CourseId,
+            'Year': self.Year,
+            'Section': self.Section,
+            'Semester': self.Semester,
+            'Batch': self.Batch,
+            'IsGradeFinalized': self.IsGradeFinalized
+        }
+
+
+class Subject(db.Model):
+    __tablename__ = 'Subject'
+
+    SubjectId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    SubjectCode = db.Column(db.String(20), unique=True)
+    Name = db.Column(db.String(100))
+    Description = db.Column(db.String(200))
+    Units = db.Column(db.Float)
+    IsNSTP = db.Column(db.Boolean, default=False)
+
+    def to_dict(self):
+        return {
+            'SubjectId': self.SubjectId,
+            'SubjectCode': self.SubjectCode,
+            'Name': self.Name,
+            'Description': self.Description,
+            'Units': self.Units,
+            'IsNSTP': self.IsNSTP,
+        }
+
+
+class ClassSubject(db.Model):
+    __tablename__ = 'ClassSubject'
+
+    ClassSubjectId = db.Column(
+        db.Integer, primary_key=True, autoincrement=True)
+    ClassId = db.Column(db.Integer, db.ForeignKey(
+        'Class.ClassId', ondelete="CASCADE"))
+    SubjectId = db.Column(db.Integer, db.ForeignKey(
+        'Subject.SubjectId', ondelete="CASCADE"))
+    TeacherId = db.Column(db.Integer, db.ForeignKey(
+        'Faculties.TeacherId', ondelete="CASCADE"))
+    Schedule = db.Column(db.String(100))
+
+    # Adding a unique constraint on the combination of ClassId, SubjectId, and TeacherId
+    __table_args__ = (db.UniqueConstraint(
+        'ClassId', 'SubjectId', 'TeacherId', name='_unique_class_subject_teacher'),)
+
+    def to_dict(self):
+        return {
+            'ClassSubjectId': self.ClassSubjectId,
+            'ClassId': self.ClassId,
+            'SubjectId': self.SubjectId,
+            'TeacherId': self.TeacherId,
+            'Semester': self.Semester,
+        }
+
+
+class StudentClassSubjectGrade(db.Model):
+    __tablename__ = 'StudentClassSubjectGrade'
+
+    # StudentClassSubjectGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ClassSubjectId = db.Column(db.Integer, db.ForeignKey(
+        'ClassSubject.ClassSubjectId', ondelete="CASCADE"), primary_key=True)
+    StudentId = db.Column(db.Integer, db.ForeignKey(
+        'Students.StudentId', ondelete="CASCADE"), primary_key=True)
+    Grade = db.Column(db.Float)
+    DateEnrolled = db.Column(db.Date)
+    AcademicStatus = db.Column(db.Integer)
+
+    def to_dict(self):
+        return {
+            'ClassSubjectId': self.ClassSubjectId,
+            'StudentId': self.StudentId,
+            'Grade': self.Grade,
+            'DateEnrolled': self.DateEnrolled,
+            'AcademicStatus': self.AcademicStatus,
+        }
+
+
+class StudentClassGrade(db.Model):
+    __tablename__ = 'StudentClassGrade'
+
+    # StudentClassGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    StudentId = db.Column(db.Integer, db.ForeignKey(
+        'Students.StudentId', ondelete="CASCADE"), primary_key=True)
+    ClassId = db.Column(db.Integer, db.ForeignKey(
+        'Class.ClassId', ondelete="CASCADE"), primary_key=True)
+    Grade = db.Column(db.Float)
+    IsLister = db.Column(db.Integer)
+
+    def to_dict(self):
+        return {
+            'StudentId': self.StudentId,
+            'ClassId': self.ClassId,
+            'Grade': self.Grade,
+            'IsLister': self.IsLister
+        }
+
+
+class ClassSubjectGrade(db.Model):
+    __tablename__ = 'ClassSubjectGrade'
+
+    ClassSubjectGradeId = db.Column(
+        db.Integer, primary_key=True, autoincrement=True)
+    ClassSubjectId = db.Column(db.Integer, db.ForeignKey(
+        'ClassSubject.ClassSubjectId', ondelete="CASCADE"), unique=True)
+    Grade = db.Column(db.Float)
+    Passed = db.Column(db.Integer)
+    Failed = db.Column(db.Integer)
+    Incomplete = db.Column(db.Integer)
+    Dropout = db.Column(db.Integer)
+
+    def to_dict(self):
+        return {
+            'ClassSubjectGradeId': self.ClassSubjectGradeId,
+            'ClassSubjectId': self.ClassSubjectId,
+            'Grade': self.Grade,
+            'Passed': self.Passed,
+            'Failed': self.Failed,
+            'Incomplete': self.Incomplete,
+            'Dropout': self.Dropout
+        }
+
+
+class ClassGrade(db.Model):
+    __tablename__ = 'ClassGrade'
+
+    ClassGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ClassId = db.Column(db.Integer, db.ForeignKey(
+        'Class.ClassId', ondelete="CASCADE"), unique=True)
+    DeansLister = db.Column(db.Integer)
+    PresidentsLister = db.Column(db.Integer)
+    Grade = db.Column(db.Float)
+
+    def to_dict(self):
+        return {
+            'ClassGradeId': self.ClassGradeId,
+            'ClassId': self.ClassId,
+            'DeanLister': self.DeanLister,
+            'PresidentLister': self.PresidentLister,
+            'Grade': self.Grade
+        }
+
+
+class CourseGrade(db.Model):
+    __tablename__ = 'CourseGrade'
+
+    CourseGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    CourseId = db.Column(db.Integer, db.ForeignKey(
+        'Course.CourseId', ondelete="CASCADE"))
+    Year = db.Column(db.Integer, primary_key=True)
+    # Semester = db.Column(db.Integer, primary_key=True)
+    Grade = db.Column(db.Float)
+
+    def to_dict(self):
+        return {
+            'CourseGradeId': self.CourseGradeId,
+            'CourseId': self.CourseId,
+            'Year': self.Year,
+            'Grade': self.Grade,
+        }
+
+
+def init_db(app):
+    db.init_app(app)
+    # with app.app_context():
+    #     inspector = inspect(db.engine)
+    #     if not inspector.has_table('Students'):
+    #         db.create_all()
+    #         create_sample_data()
+
+# =====================================================================================================
+# INSERTING DATA
+
+
+# def create_sample_data():
+#     for data in student_data:
+#         student = Student(**data)
+#         db.session.add(student)
+
+#     for data in faculty_data:
+#         faculty = Faculty(**data)
+#         db.session.add(faculty)
+
+#     for data in university_admin_data:
+#         university_admin = UniversityAdmin(**data)
+#         db.session.add(university_admin)
+
+#     for data in system_admin_data:
+#         system_admin = SystemAdmin(**data)
+#         db.session.add(system_admin)
+
+#     for data in course_data:
+#         course = Course(**data)
+#         db.session.add(course)
+#         db.session.flush()
+
+#     for data in course_enrolled_data:
+#         course_enrolled = CourseEnrolled(**data)
+#         db.session.add(course_enrolled)
+#         db.session.flush()
+
+#     for data in subject_data:
+#         subject = Subject(**data)
+#         db.session.add(subject)
+#         db.session.flush()
+
+#     for data in class_data:
+#         class_ = Class(**data)
+#         db.session.add(class_)
+#         db.session.flush()
+
+#     for data in class_subject_data:
+#         class_subject = ClassSubject(**data)
+#         db.session.add(class_subject)
+#         db.session.flush()
+
+#     for data in student_class_subject_grade_data:
+#         student_class_subject_grade = StudentClassSubjectGrade(**data)
+#         db.session.add(student_class_subject_grade)
+#         db.session.flush()
+
+#     for data in student_class_grade_data:
+#         student_class_grade = StudentClassGrade(**data)
+#         db.session.add(student_class_grade)
+#         db.session.flush()
+
+#     for data in class_subject_grade_data:
+#         class_subject_grade = ClassSubjectGrade(**data)
+#         db.session.add(class_subject_grade)
+#         db.session.flush()
+
+#     for data in class_grade_data:
+#         class_grade = ClassGrade(**data)
+#         db.session.add(class_grade)
+#         db.session.flush()
+
+#     for data in course_grade_data:
+#         course_grade = CourseGrade(**data)
+#         db.session.add(course_grade)
+#         db.session.flush()
+
+#     db.session.commit()

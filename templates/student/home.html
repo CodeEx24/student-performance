@@ -1,0 +1,392 @@
+{% extends "student/layout.html" %}
+
+<!----------------- TITLE ----------------->
+{% block title %} Student - Home Page {% endblock title %}
+
+<!----------------- STYLES ----------------->
+{% block style %}
+<style>
+  /* Apply bold style to the header cells */
+  .e-headertext {
+    color: white;
+    font-weight: bolder !important;
+    font-size: 16px !important;
+  }
+
+  th.e-headercell {
+    background-color: #6376eb !important;
+    color: white;
+  }
+
+  #response {
+    position: relative;
+    width: 100%; /* Set the width of the parent */
+    height: auto; /* Let the height adjust based on content */
+  }
+
+  #columnChartContainer {
+    position: relative;
+    width: 100%; /* Inherit the width of the parent */
+    height: 100%; /* Inherit the height of the parent */
+  }
+</style>
+{% endblock %}
+
+<!----------------- CONTENTS ----------------->
+{% block content %}
+<div class="lg:px-40 md:px-16 py-4 w-screen px-8">
+  <h3 class="text-3xl font-bold text-c4 mb-4">Dashboard</h3>
+
+  <div class="flex flex-wrap lg:flex-wrap md:flex-no-wrap md:gap-4 lg:gap-4">
+    <div
+      class="bg-white lg:w-4/12 md:w-6/12 md:flex-1 w-screen md:mb-0 mb-4 rounded-lg p-6 shadow-md"
+    >
+      <p class="font-bold text-c1 opacity-80">Previous Semester</p>
+      <div class="flex justify-between">
+        <p id="gpa" class="font-bold text-c1 text-4xl"></p>
+        <p class="bg-primary mt-2 text-white px-2 py-1 rounded-md font-bold">
+          Latest GPA
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="bg-white lg:w-4/12 md:w-6/12 md:flex-1 w-screen md:mb-0 mb-4 rounded-lg p-6 shadow-md"
+    >
+      <p class="font-bold text-c1 opacity-80">Total Average Grade</p>
+      <div class="flex justify-between">
+        <p id="overall-gpa" class="font-bold text-c1 text-4xl"></p>
+        <p class="bg-success mt-2 text-white px-2 py-1 rounded-md font-bold">
+          Overall GPA
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="bg-white lg:w-4/12 md:w-6/12 md:flex-1 w-screen md:mb-0 mb-4 rounded-lg p-6 shadow-md"
+    >
+      <p class="font-bold text-c1 opacity-80">Risk of Failing</p>
+      <div class="flex justify-between">
+        <p class="font-bold text-c1 text-4xl">
+          7% <span class="text-c1 text-base">Percent</span>
+        </p>
+        <p class="bg-info mt-2 text-white px-2 py-1 rounded-md font-bold">
+          Percentage
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="hidden md:flex md:flex-1 lg:hidden md:w-6/12 w-screen md:mb-4 rounded-lg p-6"
+    ></div>
+  </div>
+
+  <div class="flex lg:flex-nowrap flex-wrap gap-4 md:mt-4">
+    <div class="lg:w-9/12 w-screen rounded-lg bg-white p-6 shadow-md">
+      <div id="response" class="rounded-lg text-black">
+        <p class="text-2xl font-bold text-c1">Performance Overview Report</p>
+        <div id="columnChartContainer" class=""></div>
+      </div>
+    </div>
+    <div class="lg:w-3/12 lg:grow w-screen rounded-lg p-6 shadow-md bg-white">
+      <h3 class="text-2xl text-c1 font-bold mb-3">Previous Grade</h3>
+      <div id="grid"></div>
+    </div>
+  </div>
+
+  <div class="bg-white mt-4 p-8 rounded-lg shadow-md">
+    <div id="linechartPerformance"></div>
+  </div>
+</div>
+
+<!----------------- FOOTER CONTENTS ----------------->
+<div class="bg-white lg:px-40 shadow-md">
+  <footer class="items-center justify-between mx-auto px-8 py-8">
+    <h1 class="text-c1 text-2xl mb-2 font-bold">Contact Information</h1>
+    <div class="flex flex-wrap lg:flex-nowrap gap-4">
+      <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+        <h5 class="text-lg font-semibold md:font-bold">Email:</h5>
+        <p class="text-lg">quezoncity@pup.edu.ph</p>
+      </div>
+      <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+        <h5 class="text-lg font-semibold md:font-bold">Postal Mail:</h5>
+        <p class="text-lg">PUP Quezon City Branch</p>
+        <p class="text-lg">Don Fabian St., Commonwealth</p>
+        <p class="text-lg">Quezon City Philippines</p>
+      </div>
+      <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+        <h5 class="text-lg font-semibold md:font-bold">Telephone:</h5>
+        <p class="text-lg">(632) 8952-7818</p>
+        <p class="text-lg">(632) 8287-8204</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+{% endblock %}
+
+<!----------------- SCRIPTS ----------------->
+{% block script %}
+
+<!-- FETCHING CURRENT GPA -->
+<script>
+  async function fetchStudentGpa() {
+    if (apiKey) {
+      const response = await fetch(`${api_base_url}/gpa`, {
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const responseData = await response.json();
+      displayGPA(responseData);
+    }
+  }
+
+  function displayGPA(data) {
+    const gpa = document.getElementById('gpa');
+
+    gpa.innerHTML = `${
+      data.Grade ? data.Grade : 'No GPA Available'
+    }<span class="text-c1 text-base ml-2 mb-1">GPA</span>`;
+  }
+
+  fetchStudentGpa();
+</script>
+
+<!-- FETCH STUDENT OVERALL GPA -->
+<script>
+  async function fetchStudentOverallGpa() {
+    if (apiKey) {
+      const response = await fetch(`${api_base_url}/overall-gpa`, {
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const data_overall_gpa = await response.json();
+      // console.log(data_overall_gpa);
+      displayOverallGPA(data_overall_gpa);
+    }
+  }
+
+  function displayOverallGPA(data) {
+    const overallGpa = document.getElementById('overall-gpa');
+
+    overallGpa.innerHTML = `${
+      data.Grade ? data.Grade.toFixed(2) : 'No GPA Available'
+    }<span class="text-c1 text-base ml-2 mb-1">GPA</span>`;
+  }
+
+  fetchStudentOverallGpa();
+</script>
+
+<!-- STUDENT PERFORMANCE OVER TIME -->
+<script>
+  async function fetchStudentPerformanceOvertime() {
+    if (apiKey) {
+      const response = await fetch(`${api_base_url}/performance`, {
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const data_performance = await response.json();
+      displayPerformance(data_performance);
+    }
+  }
+
+  function displayPerformance(data_performance) {
+    var chartData = [...data_performance];
+    console.log(data_performance[data_performance.length - 1].Year);
+    // Create the chart
+    var chart = new ej.charts.Chart({
+      primaryXAxis: {
+        title: 'Year',
+        minimum: data_performance[data_performance.length - 1].Year - 1,
+        maximum: data_performance[0].Year + 1,
+        interval: 1,
+      },
+      primaryYAxis: {
+        minimum: 20,
+        maximum: 100,
+        interval: 20,
+        title: 'Grade',
+        labelFormat: '{value}',
+      },
+      series: [
+        {
+          dataSource: chartData.filter((data) => data.Semester === 1),
+          xName: 'Year',
+          yName: 'Grade',
+          name: '1st Semester',
+          type: 'Column',
+          fill: '#6376EB',
+        },
+        {
+          dataSource: chartData.filter((data) => data.Semester === 2),
+          xName: 'Year',
+          yName: 'Grade',
+          name: '2nd Semester',
+          type: 'Column',
+          fill: '#5EEE82',
+        },
+        {
+          dataSource: chartData.filter((data) => data.Semester === 3),
+          xName: 'Year',
+          yName: 'Grade',
+          name: 'Summer Term',
+          type: 'Column',
+          fill: '#29BAF2',
+        },
+      ],
+      title: 'Performance',
+      // dataLabel: {
+      //   visible: true,
+      //   position: 'Top',
+      //   font: {
+      //     fontWeight: '600',
+      //   },
+      //   format: '${point.y}%',
+      // },
+      tooltip: {
+        enable: true,
+        format:
+          'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
+      },
+    });
+
+    // Render the chart
+    chart.appendTo('#columnChartContainer');
+  }
+
+  fetchStudentPerformanceOvertime();
+</script>
+
+<!-- COURSE PERFORMANCE OVER TIME -->
+<script>
+  async function fetchCoursePerformanceOvertime() {
+    if (apiKey) {
+      const response = await fetch(`${api_base_url}/course-performance`, {
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const course_performance_data = await response.json();
+
+      displayCoursePerformance(
+        course_performance_data.List,
+        course_performance_data.Course
+      );
+    }
+  }
+  fetchCoursePerformanceOvertime();
+
+  function displayCoursePerformance(course_performance_data, course_name) {
+    var chartData = [...course_performance_data];
+    console.log('COURSE PERFORMANCE: ', course_performance_data);
+    // Create the chart
+    var chart = new ej.charts.Chart({
+      primaryXAxis: {
+        title: 'Year',
+        minimum:
+          course_performance_data[course_performance_data.length - 1].Year,
+        maximum: course_performance_data[0].Year + 1,
+        interval: 1,
+      },
+      primaryYAxis: {
+        minimum: 20,
+        maximum: 100,
+        interval: 20,
+        title: 'Grade',
+        labelFormat: '{value}%',
+      },
+      series: [
+        {
+          dataSource: chartData,
+          xName: 'Year',
+          yName: 'Grade',
+          name: course_name,
+          type: 'Line',
+          marker: {
+            visible: true,
+            width: 10,
+            height: 10,
+          },
+        },
+      ],
+      title: 'Course Performance',
+      tooltip: {
+        enable: true,
+      },
+    });
+
+    // Render the chart
+    chart.appendTo('#linechartPerformance');
+  }
+</script>
+
+<!-- SUBJECT PREVIOUS GRADE TABLE -->
+<script>
+  async function fetchPreviousSubjectGrade() {
+    if (apiKey) {
+      const response = await fetch(`${api_base_url}/previous-grade`, {
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const list_previous_subject_grade = await response.json();
+      displayPreviousSubjectGrade(list_previous_subject_grade);
+    }
+  }
+  fetchPreviousSubjectGrade();
+
+  function displayPreviousSubjectGrade(list_previous_subject_grade) {
+    console.log('PREVIOUS GRADE: ', list_previous_subject_grade);
+
+    var data = [...list_previous_subject_grade];
+    var grid = new ej.grids.Grid({
+      dataSource: data,
+      columns: [
+        { field: 'Code', headerText: 'Subject Code', width: 140 },
+        { field: 'Units', headerText: 'Units', width: 90 },
+        { field: 'Grade', headerText: 'Grade', width: 90 },
+      ],
+    });
+    grid.appendTo('#grid');
+  }
+</script>
+
+{% endblock %}

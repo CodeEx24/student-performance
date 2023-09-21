@@ -1,0 +1,331 @@
+{% extends "faculty/layout.html" %}
+
+<!----------------- TITLE ----------------->
+{% block title %} SPS - Grades {% endblock title %} {% block styles %}
+<style>
+  /* Set the chart container to 100% width */
+  #columnChartContainer {
+    position: relative;
+    width: 100%; /* Inherit the width of the parent */
+    height: 100%; /* Inherit the height of the parent */
+  }
+</style>
+{% endblock styles %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+<div class="p-4 md:ml-72">
+  <div class="border-2 border-gray-200 border-dashed rounded-lg">
+    <div class="grid grid-cols-1">
+      <!-- IMPORTING GRADES (FUTURE PURPOSES) -->
+      <!-- <div
+        class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+      >
+        <div class="flex items-end justify-between">
+          <div class="w-full bg-white p-4 mt-4">
+            <div id="Grid"></div>
+          </div>
+        </div>
+      </div> -->
+      <div
+        class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+      >
+        <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+          Grades
+        </h3>
+        <hr class="mx-2" />
+        <div class="flex items-end justify-between">
+          <div class="w-full bg-white p-4 mt-4">
+            <div id="Grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- The Modal -->
+  <div
+    id="myModal"
+    class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+  >
+    <!-- Modal Overlay -->
+    <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+    <!-- Modal Content -->
+    <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="flex justify-between">
+          <h2 class="text-c1 text-2xl font-semibold">Performance Details</h2>
+          <button class="modal-close" onclick="closeModal()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+                fill="#000"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="grid grid-cols-2 mt-4">
+          <div class="flex">
+            <h4 class="text-c1 font-bold">Student Name:&nbsp;</h4>
+            <p id="student-name">Jocarl Basco</p>
+          </div>
+          <div class="flex mb-4">
+            <h4 class="text-c1 font-bold">Student Number:&nbsp;</h4>
+            <p id="student-number">Jocarl Basco</p>
+          </div>
+          <div id="columnChartContainer" class="w-full col-span-2"></div>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body w-full relative"></div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!----------------- SCRIPTS ----------------->
+{% block script %}
+
+<!-- FETCHING SPECIFIC STUDENT PERFORMANCE -->
+<script>
+  // JavaScript function to show the modal
+  async function fetchStudentPerformance(student_id, student_name) {
+    if (apiKey) {
+      const response = await fetch(
+        `${api_base_url}/student/performance/${student_id}`,
+        {
+          headers: {
+            'X-Api-Key': apiKey,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const data_performance = await response.json();
+
+      displayPerformance(data_performance, student_id, student_name);
+    }
+  }
+
+  // JavaScript function to close the modal
+  function closeModal() {
+    document.getElementById('myModal').classList.add('hidden');
+  }
+
+  function displayPerformance(data_performance, student_id, student_name) {
+    if (data_performance) {
+      var chartData = [...data_performance];
+      // console.log(data_performance[data_performance.length - 1].Year);
+      // // Create the chart
+      // console.log('chartData: ', chartData);
+      var chart = new ej.charts.Chart({
+        primaryXAxis: {
+          title: 'Year',
+          minimum: data_performance[data_performance.length - 1].Year - 1,
+          maximum: data_performance[0].Year + 1,
+          interval: 1,
+        },
+        primaryYAxis: {
+          minimum: 20,
+          maximum: 100,
+          interval: 20,
+          title: 'Grade',
+          labelFormat: '{value}',
+        },
+        series: [
+          {
+            dataSource: chartData.filter((data) => data.Semester === 1),
+            xName: 'Year',
+            yName: 'Grade',
+            name: '1st Semester',
+            type: 'Column',
+            fill: '#6376EB',
+          },
+          {
+            dataSource: chartData.filter((data) => data.Semester === 2),
+            xName: 'Year',
+            yName: 'Grade',
+            name: '2nd Semester',
+            type: 'Column',
+            fill: '#5EEE82',
+          },
+          {
+            dataSource: chartData.filter((data) => data.Semester === 3),
+            xName: 'Year',
+            yName: 'Grade',
+            name: 'Summer Term',
+            type: 'Column',
+            fill: '#29BAF2',
+          },
+        ],
+        title: 'Performance',
+        // dataLabel: {
+        //   visible: true,
+        //   position: 'Top',
+        //   font: {
+        //     fontWeight: '600',
+        //   },
+        //   format: '${point.y}%',
+        // },
+        tooltip: {
+          enable: true,
+          format:
+            'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
+        },
+      });
+
+      // Render the chart
+      chart.appendTo('#columnChartContainer');
+    }
+
+    document.getElementById('student-name').innerText = student_name;
+    document.getElementById('student-number').innerText = student_id;
+
+    document.getElementById('myModal').classList.remove('hidden');
+  }
+</script>
+
+<!-- GRIDS DATA (FETCHING ALL STUDEnT CLASS SUBJECT GRADE DATA) -->
+<script>
+  async function fetchStudentClassSubjectGrade() {
+    if (apiKey) {
+      try {
+        const response = await fetch(`${api_base_url}/class-subject-grade`, {
+          headers: {
+            'X-Api-Key': apiKey,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the admin to resolve the issue.`
+          );
+        }
+
+        const json_class_subject_grade = await response.json();
+        console.log('json_class_subject_grade: ', json_class_subject_grade);
+        displayStudentsGrade(json_class_subject_grade);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  function displayStudentsGrade(json_class_subject_grade) {
+    // Create the grid with filtering
+    var grid = new ej.grids.Grid({
+      dataSource: json_class_subject_grade['ClassSubjectGrade'],
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      // rowData: json_class_subject_grade['ClassSubjectGrade'],
+      columns: [
+        {
+          field: 'StudentNumber',
+          headerText: 'Student Number',
+          width: 150,
+          editType: 'dropdownedit', // Use dropdown filter for this column
+        },
+        { field: 'StudentName', headerText: 'Student Name', width: 150 },
+        {
+          field: 'Class',
+          headerText: 'Section Code',
+          width: 150,
+
+          // filterBarTemplate: classOptions, // Add a dropdown filter
+        },
+        {
+          field: 'SubjectCode',
+          headerText: 'SubjectCode',
+          width: 150,
+        },
+        {
+          field: 'Semester',
+          headerText: 'Semester',
+          width: 120,
+        },
+        {
+          field: 'Grade',
+          headerText: 'Grade',
+          width: 120,
+        },
+        {
+          field: 'Batch',
+          headerText: 'Batch',
+          width: 100,
+        },
+        {
+          headerText: 'Actions',
+          template:
+            '<button class="btn px-4 py-2 bg-primary text-white font-bold">Performance</button>', // Add a button to the cell
+          width: 150,
+        },
+      ],
+      cellClick: function (args) {
+        if (args.column.field === 'Actions') {
+          // Check if the clicked cell is in the 'StudentNumber' column
+          console.log('Student Number:', args.data.StudentNumber);
+        }
+      },
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      excelExportComplete: function (args) {},
+    });
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'Grid_excelexport') {
+        grid.excelExport();
+      }
+    };
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              fetchStudentPerformance(
+                rowData.StudentNumber,
+                rowData.StudentName
+              );
+            }
+          }
+        }
+      }
+    });
+
+    // Render the grid
+    grid.appendTo('#Grid');
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
+  }
+
+  // Example function to show a modal when the "Performance" button is clicked
+
+  fetchStudentClassSubjectGrade();
+</script>
+
+{% endblock script %}

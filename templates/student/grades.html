@@ -1,0 +1,357 @@
+{% extends "student/layout.html" %}
+
+<!----------------- TITLE ----------------->
+{% block title %} Student - Grades {% endblock title %}
+
+<!----------------- STYLES ----------------->
+{% block style %}
+<style>
+  /* Apply bold style to the header cells */
+  .e-headertext {
+    color: white;
+    font-weight: bolder !important;
+    font-size: 16px !important;
+  }
+
+  th.e-headercell {
+    background-color: #6376eb !important;
+    color: white;
+  }
+</style>
+{% endblock %}
+
+<!----------------- CONTENTS ----------------->
+{% block content %}
+<div class="lg:px-40 md:px-16 py-4 w-screen px-8">
+  <h3 class="text-3xl font-bold text-c4 mb-4">Grades</h3>
+
+  <div class="flex lg:flex-nowrap flex-wrap gap-3">
+    <div
+      class="bg-white lg:w-8/12 w-full md:mb-4 mb-1 rounded-lg shadow-md flex p-4"
+    >
+      <div
+        class="hidden md:flex md:w-5/12 w-3/12 h-[100%] bg-no-repeat bg-cover bg-center bg-[20%] rounded-lg ml-4"
+        style="
+          background-image: url('https://img.freepik.com/free-vector/multiracial-group-people-background_23-2148208453.jpg?w=826&t=st=1693380120~exp=1693380720~hmac=282ef2e85c2f7bab4aaa9a0d84f4fe7caae42467ca26befaf572c4c063f215e5');
+        "
+      ></div>
+      <div class="w-full lg:w-9/12 md:w-7/12 pl-4">
+        <p class="font-bold text-2xl text-c1 opacity-90 mt-2">
+          Student Details:
+        </p>
+        <div class="mt-4">
+          <p class="text-c1 font-extrabold">
+            Student Number:
+            <span class="text-c1 opacity-90 font-normal" id="student-number"
+              >2020-00001-CM-0</span
+            >
+          </p>
+          <p class="text-c1 font-extrabold">
+            Name:
+            <span class="text-c1 opacity-90 font-normal" id="student-name"
+              >Jocarl P. Basco</span
+            >
+          </p>
+          <p class="text-c1 font-extrabold">
+            Email:
+            <span class="text-c1 opacity-90 font-normal" id="student-email"
+              >jocarlbasco24@gmail.com</span
+            >
+          </p>
+          <p class="text-c1 font-extrabold">
+            Cellphone Number:
+            <span
+              class="text-c1 opacity-90 font-normal"
+              id="student-mobile-phone"
+              >09764210387</span
+            >
+          </p>
+          <p class="text-c1 font-extrabold">
+            Course Taken:
+            <span
+              class="text-c1 opacity-90 font-normal"
+              id="student-course"
+            ></span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div
+      class="w-screen lg:w-4/12 bg-gradient-to-r from-yellow-600 to-yellow-400 mb-4 rounded-lg p-6 shadow-md"
+    >
+      <div>
+        <p class="font-bold text-2xl text-white opacity-90">
+          Scholarship Qualification:
+        </p>
+        <div class="flex justify-between">
+          <span class="text-white text-base font-semibold"
+            >You are qualified to Free Higher Education Act.</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-row gap-4">
+    <div class="bg-white w-full rounded-lg p-8 shadow-md">
+      <h3 class="text-2xl font-bold text-c4 mb-3" id="name-number">
+        <!-- BASCO, JOCARL PATIÑO (2020-00001-CM-0) -->
+      </h3>
+      <div class="border border-1 px-4" id="contentContainer">
+        <!-- <div class="text-xl font-bold text-c1 mb-2">
+          School Year 2223 (Summer Semester)
+        </div>
+        <div class="flex flex-wrap">
+          <div class="w-3/12">
+            <p class="font-bold text-c1">Admission Status</p>
+            <p class="">Continuing</p>
+          </div>
+          <div class="w-3/12">
+            <p class="font-bold text-c1">Scholastic Status</p>
+            <p class="">Regular (Warning)</p>
+          </div>
+          <div class="w-6/12">
+            <p class="font-bold text-c1">Course Code & Description</p>
+            <p class="">
+              BSIT-CM BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY (QUEZON CITY
+              CAMPUS)
+            </p>
+          </div>
+          <div class="w-6/12 mt-4">
+            <p class="font-bold text-c1">
+              GPA (excludes NSTP and subjects with non-numeric ratings)
+            </p>
+            <p class="">1.58 GPA</p>
+          </div>
+        </div>
+        <div id="grid" class="mt-4"></div> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOR MOBILE VIEW -->
+<!-- <div id="grid"></div> -->
+<!----------------- FOOTER CONTENTS ----------------->
+<div class="bg-white lg:px-40 shadow-md">
+  <footer class="items-center justify-between mx-auto px-8 py-8">
+    <h1 class="text-c1 text-2xl mb-2 font-bold">Contact Information</h1>
+    <div class="flex flex-wrap lg:flex-nowrap gap-4">
+      <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+        <h5 class="text-lg font-semibold md:font-bold">Email:</h5>
+        <p class="text-lg">quezoncity@pup.edu.ph</p>
+      </div>
+      <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+        <h5 class="text-lg font-semibold md:font-bold">Postal Mail:</h5>
+        <p class="text-lg">PUP Quezon City Branch</p>
+        <p class="text-lg">Don Fabian St., Commonwealth</p>
+        <p class="text-lg">Quezon City Philippines</p>
+      </div>
+      <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+        <h5 class="text-lg font-semibold md:font-bold">Telephone:</h5>
+        <p class="text-lg">(632) 8952-7818</p>
+        <p class="text-lg">(632) 8287-8204</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+{% endblock %}
+
+<!----------------- SCRIPTS ----------------->
+{% block script %}
+
+<!-- Detail Template for responsiveness purposes -->
+<!-- <script>
+  // Sample data
+  var data = [
+    {
+      OrderID: 10248,
+      CustomerName: 'John Doe',
+      ShipCountry: 'USA',
+      OrderDate: '2023-08-31T10:30:00.000Z',
+    },
+    {
+      OrderID: 10249,
+      CustomerName: 'Jane Smith',
+      ShipCountry: 'Canada',
+      OrderDate: '2023-08-30T08:15:00.000Z',
+    },
+    // Add more data items here...
+  ];
+
+  // Detail template For Mobiele Biew
+  var detailTemplate = `
+      <div class="detail-template">
+          <p>Customer: \${CustomerName}</p>
+          <p>Order ID: \${OrderID}</p>
+          <p>Shipping Country: \${ShipCountry}</p>
+          <p>Order Date: \${OrderDate}</p>
+      </div>
+  `;
+
+  // Initialize DataGrid
+  var grid = new ej.grids.Grid({
+    dataSource: data,
+    detailTemplate: detailTemplate,
+    columns: [
+      { field: 'OrderID', headerText: 'Order ID', width: 120 },
+      { field: 'CustomerName', headerText: 'Customer Name', width: 150 },
+      { field: 'ShipCountry', headerText: 'Ship Country', width: 150 },
+      { field: 'OrderDate', headerText: 'Order Date', width: 150 },
+    ],
+  });
+
+  // Render DataGrid
+  grid.appendTo('#grid');
+</script> -->
+
+<!-- FETCH STUDENT DATA -->
+<script>
+  async function fetchStudentDetails() {
+    if (apiKey) {
+      const response = await fetch(`${api_base_url}/`, {
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const data_student_details = await response.json();
+      displayDetails(data_student_details);
+    }
+  }
+
+  function displayDetails(data) {
+    const number = document.getElementById('student-number');
+    const name = document.getElementById('student-name');
+    const email = document.getElementById('student-email');
+    const mobile_number = document.getElementById('student-mobile-phone');
+    const student_course = document.getElementById('student-course');
+    const name_number = document.getElementById('name-number');
+
+    number.innerHTML = `${
+      data.StudentNumber ? data.StudentNumber : 'No Data Available'
+    }`;
+    name.innerHTML = `${data.Name ? data.Name : 'No Data Available'}`;
+    email.innerHTML = `${data.Email ? data.Email : 'No Data Available'}`;
+    mobile_number.innerHTML = `${
+      data.MobileNumber ? data.MobileNumber : 'No Mobile Number'
+    }`;
+
+    student_course.innerHTML = `${data.Course ? data.Course : 'No Course'}`;
+
+    name_number.innerHTML = `${
+      data.Name && data.StudentNumber
+        ? `${data.Name} <br class="md:hidden" /> (${data.StudentNumber})`
+        : 'No Data Available'
+    }`;
+  }
+
+  fetchStudentDetails();
+</script>
+
+<!-- FETCHING ALL STUDENT SUBJECTS GRADE -->
+<script>
+  async function fetchStudentSubjectGrade() {
+    if (apiKey) {
+      const response = await fetch(`${api_base_url}/grades`, {
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const data_grades = await response.json();
+      displayGrades(data_grades);
+    }
+  }
+
+  async function displayGrades(data) {
+    var container = document.getElementById('contentContainer');
+
+    for (var entry of data) {
+      var gridDiv = document.createElement('div');
+      gridDiv.id = `grid_${entry.Batch}_${entry.Semester}`;
+      // gridDiv.classList.add('mt-4');
+
+      var contentDiv = document.createElement('div');
+      contentDiv.classList.add('md:border', 'md:border-1', 'p-2', 'md:my-4');
+
+      contentDiv.innerHTML = `
+      
+      <div class="text-xl font-bold text-c1 mb-2 md:mt-0 mt-8">
+        School Year ${entry.Batch} ${
+        entry.Semester === 1
+          ? '(1st Smester)'
+          : entry.Semester === 2
+          ? '(2nd Semester)'
+          : '(Summer Term)'
+      }
+      </div>
+      <div class="flex flex-wrap">
+        <div class="lg:w-3/12 md:w-6/12 mt-4">
+          <p class="font-bold text-c1">Admission Status</p>
+          <p class="">Continuing</p>
+        </div>
+        <div class="lg:w-3/12 md:w-6/12 mt-4">
+          <p class="font-bold text-c1">Scholastic Status</p>
+          <p class="">Continuing</p>
+        </div>
+        <div class="lg:w-6/12 md:w-screen mt-4">
+          <p class="font-bold text-c1">Course Code & Description</p>
+          <p class="">
+            BSIT-CM BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY (QUEZON CITY CAMPUS)
+          </p>
+        </div>
+        <div class="lg:w-6/12 md:w-screen mt-4">
+          <p class="font-bold text-c1">
+            GPA (excludes NSTP and subjects with non-numeric ratings)
+          </p>
+          <p class="">${entry.GPA} GPA</p>
+        </div>
+      </div>
+      
+      <div id="grid_${entry.Batch}_${entry.Semester}" class="mt-4"></div>
+      <hr class="border-b-1 text-c5">
+      `;
+
+      contentDiv.appendChild(gridDiv);
+      container.appendChild(contentDiv);
+
+      var gridData = [...entry.Subject];
+      var grid = new ej.grids.Grid({
+        dataSource: gridData,
+        columns: [
+          { field: 'Code', headerText: 'Code', width: 100 },
+          { field: 'Subject', headerText: 'Subject', width: 150 },
+          // { field: 'Subject', headerText: 'Subject', width: 100 },
+          { field: 'Teacher', headerText: 'Teacher', width: 120 },
+          { field: 'Units', headerText: 'Units', width: 90 },
+          { field: 'SecCode', headerText: 'Sect. Code', width: 100 },
+          { field: 'Grade', headerText: 'Grade', width: 90 },
+          { field: 'Status', headerText: 'Status', width: 90 },
+        ],
+      });
+
+      await grid.appendTo(`#${gridDiv.id}`);
+      console.log('ENTRY SUBJECT', entry.Subject);
+    }
+  }
+
+  fetchStudentSubjectGrade();
+</script>
+
+{% endblock %}

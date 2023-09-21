@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="{{ url_for('static', filename='css/styles.css') }}"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              clifford: '#da373d',
+            },
+          },
+        },
+      };
+    </script>
+    <title>
+      {% block title %}Polytechnic University of the Philippines{% endblock %}
+    </title>
+    <!-- Include CSS and other common resources here -->
+  </head>
+  <body>
+    <div
+      class="h-screen w-screen bg-cover"
+      style="background-image: url('/static/images/pup2.jpg')"
+    >
+      <main class="container text-white">
+        {% block content %} {% endblock %}
+      </main>
+    </div>
+
+    <!-- Include JavaScript and other common resources here -->
+  </body>
+</html>

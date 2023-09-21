@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PUP SPS - ADMIN</title>
+
+    <meta name="description" content="" />
+
+    <!-- TAILWIND -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- SYNCFUSION -->
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+    <!-- Notyf -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
+    />
+    <title>{% block title %} {% endblock title %}</title>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              c1: '#2b2d42', // dark red
+              c2: '#8d99ae', // light red
+              c3: '#edf2f4', // white
+              c4: '#ef233c', // gray
+              c5: '#d90429', // dark black
+              primary: '#6376EB',
+              secondary: '#CDD3D8',
+              info: '#29BAF2',
+              success: '#5EEE82',
+              warning: '#FFA434',
+              danger: '#FFA6A1',
+              dark: '#191D21',
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      .e-toolbar-item,
+      #Grid_toolbarItems,
+      #grid-class_toolbarItems,
+      .e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn.e-btn,
+      .e-toolbar .e-toolbar-items,
+      .e-pager .e-currentitem,
+      .e-pager .e-currentitem:hover {
+        background-color: #9d1d1d;
+        font-weight: bold;
+      }
+
+      .e-input-group:not(.e-float-icon-left):not(.e-float-input)::before,
+      .e-input-group:not(.e-float-icon-left):not(.e-float-input)::after,
+      .e-input-group.e-float-icon-left:not(.e-float-input)
+        .e-input-in-wrap::before,
+      .e-input-group.e-float-icon-left:not(.e-float-input)
+        .e-input-in-wrap::after,
+      .e-input-group.e-control-wrapper:not(.e-float-icon-left):not(
+          .e-float-input
+        )::before,
+      .e-input-group.e-control-wrapper:not(.e-float-icon-left):not(
+          .e-float-input
+        )::after,
+      .e-input-group.e-control-wrapper.e-float-icon-left:not(.e-float-input)
+        .e-input-in-wrap::before,
+      .e-input-group.e-control-wrapper.e-float-icon-left:not(.e-float-input)
+        .e-input-in-wrap::after {
+        background-color: #9d1d1d;
+      }
+
+      .e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn-text,
+      .e-toolbar
+        .e-toolbar-items
+        .e-toolbar-item
+        .e-tbar-btn.e-btn.e-tbtn-txt
+        .e-icons.e-btn-icon {
+        color: white;
+      }
+
+      .e-headertext {
+        font-size: 14px;
+        color: #191d21;
+        font-weight: bolder;
+      }
+
+      .notyf {
+        margin-top: 80px;
+      }
+    </style>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Karla:400,700&display=swap');
+      .font-family-karla {
+        font-family: karla;
+      }
+      .bg-sidebar {
+        background: #3d68ff;
+      }
+      .cta-btn {
+        color: #3d68ff;
+      }
+      .upgrade-btn {
+        background: #1947ee;
+      }
+      .upgrade-btn:hover {
+        background: #0038fd;
+      }
+      .active-nav-link {
+        background: #1947ee;
+      }
+      .nav-item:hover {
+        background: #1947ee;
+      }
+      .account-link:hover {
+        background: #3d68ff;
+      }
+    </style>
+    {% block style %} {% endblock style %}
+  </head>
+  <body class="bg-gray-100 font-family-karla flex">
+    <aside class="relative bg-white h-screen w-72 hidden sm:block shadow-xl">
+      <!-- Add a close (X) icon in the sidebar header -->
+      <div
+        class="flex flex-col justify-between items-center w-full h-screen p-4"
+      >
+        <div class="w-full">
+          <button
+            data-drawer-target="default-sidebar"
+            data-drawer-close="default-sidebar"
+            aria-controls="default-sidebar"
+            type="button"
+            class="text-gray-600 hover:text-gray-800 focus:outline-none float-right md:hidden"
+          >
+            <span class="sr-only">Close sidebar</span>
+            <svg
+              class="w-6 h-6"
+              aria-hidden="true"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M14.293 5.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 11-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 111.414-1.414L10 8.586l4.293-4.293z"
+                fill="currentColor"
+              ></path>
+            </svg>
+          </button>
+
+          <div class="flex items-center md:mt-0 mt-2">
+            <a
+              href="{{ url_for('facultyHome') }}"
+              class="my-2 flex items-center"
+            >
+              <img
+                class="w-auto h-14"
+                src="{{ url_for('static', filename='images/pup.png') }}"
+                alt=""
+              />
+
+              <h4 class="font-extrabold ml-4 text-3xl text-black">PUP SPS</h4>
+            </a>
+          </div>
+          <div class="h-full mt-4 overflow-y-auto flex flex-col">
+            <ul class="text-base">
+              <li>
+                <a
+                  href="{{ url_for('universityAdminHome') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'home' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'home' else 'text-gray-500' }}"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 22 21"
+                  >
+                    <path
+                      d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"
+                    />
+                    <path
+                      d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"
+                    />
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Home</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="{{ url_for('universityClassPerformance') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'class-performance' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'class-performance' else 'text-gray-500' }}"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 18 18"
+                  >
+                    <path
+                      d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z"
+                    />
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap"
+                    >Class Performance</span
+                  >
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="{{ url_for('universityProfile') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'profile' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'profile' else 'text-gray-500' }}"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 18"
+                  >
+                    <path
+                      d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z"
+                    />
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Profile</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="{{ url_for('universityChangePassword') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'change-password' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'change-password' else 'text-gray-500' }}"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
+                    />
+                    <path
+                      d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
+                    />
+                    <path
+                      d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
+                    />
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap"
+                    >Change Password</span
+                  >
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="w-full">
+          <a
+            class="flex items-center px-4 py-4 transition-colors duration-300 transform rounded-lg bg-gradient-to-r from-red-800 to-red-500 hover:from-red-900 hover:to-red-600 text-white font-bold py-2 px-4 rounded shadow-md"
+            href="{{ url_for('logout') }}"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+              />
+            </svg>
+
+            <span class="mx-2 text-sm font-medium">Log Out</span>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <div class="w-full flex flex-col h-screen overflow-y-hidden">
+      <!-- Desktop Header -->
+      <header class="w-full items-center bg-white py-2 px-6 hidden sm:flex">
+        <div class="w-1/2"></div>
+        <div x-data="{ isOpen: false }" class="relative w-1/2 flex justify-end">
+          <button
+            @click="isOpen = !isOpen"
+            class="realtive z-10 w-12 h-12 rounded-full overflow-hidden border-4 border-gray-400 hover:border-gray-300 focus:border-gray-300 focus:outline-none"
+          >
+            <img src="https://source.unsplash.com/uJ8LNVCBjFQ/400x400" />
+          </button>
+          <button
+            x-show="isOpen"
+            @click="isOpen = false"
+            class="h-full w-full fixed inset-0 cursor-default"
+          ></button>
+          <div
+            x-show="isOpen"
+            class="absolute w-32 bg-white rounded-lg shadow-lg py-2 mt-16"
+          >
+            <a href="#" class="block px-4 py-2 account-link hover:text-c1"
+              >Account</a
+            >
+            <a href="#" class="block px-4 py-2 account-link hover:text-c1"
+              >Support</a
+            >
+            <a href="#" class="block px-4 py-2 account-link hover:text-c1"
+              >Sign Out</a
+            >
+          </div>
+        </div>
+      </header>
+
+      <!-- Mobile Header & Nav -->
+      <header
+        x-data="{ isOpen: false }"
+        class="w-full bg-c5 py-5 px-6 sm:hidden"
+      >
+        <div class="flex items-center justify-between">
+          <a
+            href="index.html"
+            class="text-white text-3xl font-semibold uppercase hover:text-c2"
+            >Admin</a
+          >
+          <button
+            @click="isOpen = !isOpen"
+            class="text-white text-3xl focus:outline-none"
+          >
+            <i x-show="!isOpen" class="fas fa-bars"></i>
+            <i x-show="isOpen" class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Dropdown Nav -->
+        <nav :class="isOpen ? 'flex': 'hidden'" class="flex flex-col pt-4">
+          <a
+            href="index.html"
+            class="flex items-center bg-warning hover:bg-yellow-400 text-white py-2 pl-4 nav-item font-bold"
+          >
+            <i class="fas fa-tachometer-alt mr-3"></i>
+            Dashboard
+          </a>
+          <a
+            href="blank.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-sticky-note mr-3"></i>
+            Blank Page
+          </a>
+          <a
+            href="tables.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-table mr-3"></i>
+            Tables
+          </a>
+          <a
+            href="forms.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-align-left mr-3"></i>
+            Forms
+          </a>
+          <a
+            href="tabs.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-tablet-alt mr-3"></i>
+            Tabbed Content
+          </a>
+          <a
+            href="calendar.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-calendar mr-3"></i>
+            Calendar
+          </a>
+          <a
+            href="#"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-cogs mr-3"></i>
+            Support
+          </a>
+          <a
+            href="#"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-user mr-3"></i>
+            My Account
+          </a>
+          <a
+            href="#"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Sign Out
+          </a>
+          <button
+            class="w-full bg-white cta-btn font-semibold py-2 mt-3 rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-300 flex items-center justify-center"
+          >
+            <i class="fas fa-arrow-circle-up mr-3"></i> Log Out
+          </button>
+        </nav>
+        <!-- <button class="w-full bg-white cta-btn font-semibold py-2 mt-5 rounded-br-lg rounded-bl-lg rounded-tr-lg shadow-lg hover:shadow-xl hover:bg-gray-300 flex items-center justify-center">
+                <i class="fas fa-plus mr-3"></i> New Report
+            </button> -->
+      </header>
+
+      {% block content %} {% endblock content %}
+    </div>
+
+    <!-- AlpineJS -->
+    <script
+      src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
+      defer
+    ></script>
+    <!-- Font Awesome -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"
+      integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs="
+      crossorigin="anonymous"
+    ></script>
+    <!-- ChartJS -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+      integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI="
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      const apiKey = '{{ university_admin_api_key | default("") }}';
+      const api_base_url = '{{ university_admin_api_base_url | default("") }}';
+    </script>
+
+    {% block script %} {% endblock script %}
+  </body>
+</html>

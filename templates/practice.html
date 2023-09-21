@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+    <title>{% block title %} {% endblock title %}</title>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              c1: '#2b2d42', // dark red
+              c2: '#8d99ae', // light red
+              c3: '#edf2f4', // white
+              c4: '#ef233c', // gray
+              c5: '#d90429', // dark black
+              primary: '#6376EB',
+              secondary: '#CDD3D8',
+              info: '#29BAF2',
+              success: '#5EEE82',
+              warning: '#FFA434',
+              danger: '#FFA6A1',
+              dark: '#191D21',
+            },
+          },
+        },
+      };
+    </script>
+    {% block styles %} {% endblock styles %}
+  </head>
+  <body class="bg-slate-200">
+    <div
+      id="sidebar-overlay"
+      class="fixed inset-0 bg-gray-800 opacity-50 z-30 hidden md:hidden"
+    ></div>
+    <div class="flex bg-white lg:p-0 p-4 md:ml-72 shadow-md">
+      <div class="flex items-center justify-center md:gap-4 lg:gap-0 lg:ml-2">
+        <div
+          class="rounded-full lg:w-[100px] lg:h-[100px] md:w-[80] md:h-[80px] flex items-center justify-center md:mr-0 mr-4"
+        >
+          <img
+            src="{{ url_for('static', filename='images/faculty/user.jpg') }}"
+            alt=""
+            class="md:h-[60px] md:w-[60px] h-[40px] w-[40px] rounded-full"
+          />
+        </div>
+        <div>
+          <div class="w-full flex items-center">
+            <p class="font-extrabold text-c1 md:text-2xl text-md">
+              Welcome Back, &nbsp;
+            </p>
+            <p class="font-semibold text-c1 flex text-md md:text-2xl">
+              User Name <span class="md:hidden">&nbsp;</span>
+              <img
+                src="{{ url_for('static', filename='images/wave.png') }}"
+                alt=""
+                class="h-[24px] w-[24px] md:h-[30px] md:w-[30px]"
+              />
+            </p>
+          </div>
+          <div>
+            <p class="text-start text-sm text-c2 font-semibold opacity-75">
+              PUPQC Professor
+            </p>
+          </div>
+        </div>
+      </div>
+      <button
+        data-drawer-target="default-sidebar"
+        data-drawer-open="default-sidebar"
+        aria-controls="default-sidebar"
+        type="button"
+        class="text-gray-600 hover:text-gray-800 focus:outline-none ml-auto md:hidden"
+      >
+        <span class="sr-only">Open sidebar</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          stroke="black"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+          class="w-[20px] h-[20px]"
+        >
+          <path d="M3 12h18M3 6h18M3 18h18" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- SIDEBAR -->
+    {% block sidebar %} {% endblock sidebar %}
+
+    <!-- CONTENT -->
+    {% block content %} {% endblock content %}
+
+    <script>
+      // Function to open the sidebar
+      function openSidebar() {
+        const sidebar = document.getElementById('default-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+        overlay.classList.remove('hidden');
+      }
+
+      // Function to close the sidebar
+      function closeSidebar() {
+        const sidebar = document.getElementById('default-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.add('translate-x-full');
+        overlay.classList.add('hidden');
+      }
+
+      // Add event listener to open the sidebar
+      document
+        .querySelector('[data-drawer-open="default-sidebar"]')
+        .addEventListener('click', openSidebar);
+
+      // Add event listener to close the sidebar
+      document
+        .querySelector('[data-drawer-close="default-sidebar"]')
+        .addEventListener('click', closeSidebar);
+    </script>
+
+    <!-- SCRIPTS -->
+    {% block script %} {% endblock script %}
+  </body>
+</html>

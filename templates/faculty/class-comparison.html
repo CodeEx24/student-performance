@@ -1,0 +1,299 @@
+{% extends "faculty/layout.html" %}
+
+<!----------------- TITLE ----------------->
+{% block title %} SPS - Class Comparison {% endblock title %} {% block styles %}
+<style>
+  /* Set the chart container to 100% width */
+  #containerChart {
+    width: 100%;
+  }
+</style>
+{% endblock styles %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+<div class="p-4 md:ml-72">
+  <div class="border-2 border-gray-200 border-dashed rounded-lg">
+    <div class="grid grid-cols-1">
+      <!-- IMPORTING GRADES (FUTURE PURPOSES) -->
+      <!-- <div
+        class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+      >
+        <div class="flex items-end justify-between">
+          <div class="w-full bg-white p-4 mt-4">
+            <div id="Grid"></div>
+          </div>
+        </div>
+      </div> -->
+      <div
+        class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+      >
+        <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+          Class Comparison
+        </h3>
+        <hr class="mx-2" />
+        <div class="flex items-end justify-between">
+          <div class="w-full bg-white p-4 mt-4">
+            <div class="grid gap-6 mb-6 lg:grid-cols-2 md:grid-cols-1">
+              <!-- INPUTS HERE -->
+              <div class="w-full">
+                <label
+                  for="email-input"
+                  class="block mb-2 text-c1 font-extrabold w-full"
+                  >Class 1</label
+                >
+
+                <select
+                  id="classSelect1"
+                  name="class1"
+                  class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+                >
+                  <option disabled selected>Select a class</option>
+
+                  <!-- Add more options as needed -->
+                </select>
+              </div>
+              <div class="w-full">
+                <label
+                  for="number-input"
+                  class="block mb-2 text-c1 font-extrabold w-full"
+                  >Class 2</label
+                >
+                <select
+                  id="classSelect2"
+                  name="class2"
+                  class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+                >
+                  <option disabled selected>Select a class</option>
+
+                  <!-- Add more options as needed -->
+                </select>
+              </div>
+              <div class="w-full">
+                <div id="columnChartContainer1"></div>
+                <div class="flex">
+                  <h3 class="text-c1 font-bold">Dean's Lister:&nbsp;</h3>
+                  <p id="dean1">0</p>
+                </div>
+                <div class="flex">
+                  <h3 class="text-c1 font-bold">President's Lister:&nbsp;</h3>
+                  <p id="president1">0</p>
+                </div>
+              </div>
+              <div class="w-full">
+                <div id="columnChartContainer2"></div>
+                <div class="flex">
+                  <h3 class="text-c1 font-bold">Dean's Lister:&nbsp;</h3>
+                  <p id="dean2">0</p>
+                </div>
+                <div class="flex">
+                  <h3 class="text-c1 font-bold">President's Lister:&nbsp;</h3>
+                  <p id="president2">0</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!----------------- SCRIPTS ----------------->
+{% block script %}
+<!-- PERFORMANCE -->
+<script>
+  async function fetchAllClass() {
+    if (apiKey) {
+      try {
+        const response = await fetch(`${api_base_url}/all-class`, {
+          headers: {
+            'X-Api-Key': apiKey,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the admin to resolve the issue.`
+          );
+        }
+
+        const json_all_class = await response.json();
+
+        if (json_all_class.Classes.length >= 1) {
+          displayAllClass(json_all_class);
+          // Fetch data for the first two classes and render charts
+          const firstClassId = json_all_class.Classes[0].ClassId;
+          const secondClassId = json_all_class.Classes[1].ClassId;
+          fetchClassPerformance(firstClassId, 1);
+          fetchClassPerformance(secondClassId, 2);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  function displayAllClass(json_all_class) {
+    // Get the select element by its id
+    var selectElement1 = document.getElementById('classSelect1');
+    var selectElement2 = document.getElementById('classSelect2');
+
+    // Loop through the JSON data and create option elements
+    for (var i = 0; i < json_all_class.Classes.length; i++) {
+      var option1 = document.createElement('option');
+      var option2 = document.createElement('option');
+      option1.value = json_all_class.Classes[i].ClassId;
+      option1.text = json_all_class.Classes[i].ClassName;
+      option2.value = json_all_class.Classes[i].ClassId;
+      option2.text = json_all_class.Classes[i].ClassName;
+
+      // Set the 'selected' attribute for the first two options
+      if (i == 0) {
+        option1.selected = true;
+      }
+
+      // Set the 'selected' attribute for the first two options
+      if (i == 1) {
+        option2.selected = true;
+      }
+
+      selectElement1.appendChild(option1);
+      selectElement2.appendChild(option2);
+    }
+  }
+
+  fetchAllClass();
+</script>
+
+<script>
+  // Get references to the select elements
+  const selectElement1 = document.getElementById('classSelect1');
+  const selectElement2 = document.getElementById('classSelect2');
+
+  // Function to run when the select option changes for the first select
+  function handleSelectChange1() {
+    // Get the selected option
+    const selectedOption1 =
+      selectElement1.options[selectElement1.selectedIndex].value;
+
+    fetchClassPerformance(selectedOption1, 1);
+  }
+
+  // Function to run when the select option changes for the second select
+  function handleSelectChange2() {
+    const selectedOption2 =
+      selectElement2.options[selectElement2.selectedIndex].value;
+
+    fetchClassPerformance(selectedOption2, 2);
+  }
+
+  // Add event listeners to both select elements
+  selectElement1.addEventListener('change', handleSelectChange1);
+  selectElement2.addEventListener('change', handleSelectChange2);
+
+  async function fetchClassPerformance(id, chart_num) {
+    if (apiKey) {
+      try {
+        const response = await fetch(
+          `${api_base_url}/class-performance/${id}`,
+          {
+            headers: {
+              'X-Api-Key': apiKey,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the admin to resolve the issue.`
+          );
+        }
+
+        const json_class_performance = await response.json();
+
+        displayClassPerformance(json_class_performance, chart_num);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  function displayClassPerformance(json_class_performance, chart_num) {
+    console.log('json_class_performance: ', json_class_performance);
+    // Sample dummy data
+    var chartData = [...json_class_performance['ListGrade']];
+
+    console.log('chartData: ', chartData);
+    // Create the chart
+    var chart = new ej.charts.Chart({
+      primaryXAxis: {
+        title: 'Year',
+        minimum: json_class_performance.Batch - 4,
+        maximum: json_class_performance.Batch + 1,
+        interval: 1,
+      },
+      primaryYAxis: {
+        title: 'Grade',
+        minimum: 0,
+        maximum: 100,
+        interval: 20,
+      },
+      series: [
+        {
+          dataSource: chartData,
+          xName: 'x',
+          yName: 'y',
+          name: 'Average',
+          type: 'Column',
+          fill: '#FFA434',
+        },
+      ],
+      title: `${json_class_performance.Class} - Average Class Grade`,
+      tooltip: {
+        enable: true,
+        format: 'Year: ${point.x}<br>Count: ${point.y}%',
+      },
+    });
+
+    // Render the chart
+    chart.appendTo(`#columnChartContainer${chart_num}`);
+    const dean_element = document.getElementById(`dean${chart_num}`);
+    const president_element = document.getElementById(`president${chart_num}`);
+
+    dean_element.innerText = json_class_performance.DeanLister;
+    president_element.innerText = json_class_performance.PresidentLister;
+  }
+</script>
+
+<!-- =========================================== -->
+
+<!-- PERFORMANCE -->
+<script>
+  async function fetchPassFailRates() {
+    if (apiKey) {
+      try {
+        const response = await fetch(`${api_base_url}/pass-fail`, {
+          headers: {
+            'X-Api-Key': apiKey,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the admin to resolve the issue.`
+          );
+        }
+
+        const json_pass_fail_rates = await response.json();
+
+        displayPassFailRates(json_pass_fail_rates);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+</script>
+{% endblock script %}

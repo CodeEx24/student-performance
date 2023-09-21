@@ -1,0 +1,347 @@
+from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db
+from sqlalchemy import desc
+import re
+from werkzeug.security import check_password_hash, generate_password_hash
+
+
+from static.js.utils import convertGradeToPercentage, checkStatus
+
+
+def getStudentGpa(str_student_number):
+    try:
+        gpa = StudentClassGrade.query.filter_by(
+            StudentNumber=str_student_number).join(Class, StudentClassGrade.ClassId == Class.ClassId).order_by(desc(Class.Batch), desc(StudentClassGrade.Semester)).first()
+
+        if gpa:
+            dict_gpa = gpa.to_dict()
+            return dict_gpa
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+def getStudentPerformance(str_student_number):
+    try:
+        list_student_performance = (
+            db.session.query(StudentClassGrade, Class)
+            .join(Class, StudentClassGrade.ClassId == Class.ClassId)
+            .filter(StudentClassGrade.StudentNumber == str_student_number)
+            .order_by(desc(Class.Batch), desc(StudentClassGrade.Semester))
+            .all()
+        )
+
+        if list_student_performance:
+            list_performance_data = []  # Initialize a list to store dictionary data
+            for gpa in list_student_performance:
+
+                gpa_dict = {
+                    'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
+                    'Semester': gpa.StudentClassGrade.Semester,
+                    'Year': gpa.Class.Batch,
+                }
+                # Append the dictionary to the list
+                list_performance_data.append(gpa_dict)
+
+            # Check for missing entries
+            batch_semester_map = {(gpa_dict["Year"], semester): False for semester in range(
+                1, 4) for gpa_dict in list_performance_data}
+
+            for gpa_dict in list_performance_data:
+                batch_semester_map[(gpa_dict["Year"],
+                                    gpa_dict["Semester"])] = True
+
+            missing_entries = []
+            for (batch, semester), is_present in batch_semester_map.items():
+                if not is_present:
+                    missing_entries.append({
+                        "Year": batch,
+                        "Grade": 0,
+                        "Semester": semester
+                    })
+
+            # Append missing entries to list_performance_data
+            list_performance_data.extend(missing_entries)
+
+            # Sort the combined list based on year descending and semester descending
+            sorted_list_performance_data = sorted(list_performance_data, key=lambda x: (
+                x['Year'], x['Semester']), reverse=True)
+
+            return sorted_list_performance_data
+        else:
+            return None
+
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+def getCoursePerformance(str_student_number):
+    try:
+        data_course_enrolled = (
+            db.session.query(CourseEnrolled)
+            .filter(CourseEnrolled.StudentNumber == str_student_number)
+            .order_by(desc(CourseEnrolled.DateEnrolled))
+            .first()
+        )
+
+        if data_course_enrolled:
+            data_course_performance = (
+                db.session.query(CourseGrade)
+                .filter(CourseGrade.CourseId == data_course_enrolled.CourseId)
+                .order_by(desc(CourseGrade.Year))
+                .limit(10)
+                .all()
+            )
+
+            if data_course_performance:
+                list_course_performance = []
+                data_course = {
+                    "Course": data_course_enrolled.CourseId, "List": []}
+
+                for course_performance in data_course_performance:
+                    dict_course_performance = {
+                        'Grade': convertGradeToPercentage(course_performance.Grade),
+                        'Year': course_performance.Year
+                    }
+
+                    list_course_performance.append(dict_course_performance)
+
+                data_course["List"] = list_course_performance
+                return data_course
+            else:
+                return None
+        else:
+            return None
+
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+def getLatestSubjectGrade(str_student_number):
+    try:
+        data_latest_class_subject = (
+            db.session.query(StudentClassSubjectGrade, ClassSubject, Class)
+            .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+            .join(Class, ClassSubject.ClassId == Class.ClassId)
+            .filter(StudentClassGrade.StudentNumber == str_student_number)
+            .order_by(desc(Class.Batch), desc(ClassSubject.Semester))
+            .first()
+        )
+
+        if data_latest_class_subject:
+
+            data_class_subject_grade = (
+                db.session.query(
+                    ClassSubject, StudentClassSubjectGrade, Subject)
+                .join(StudentClassSubjectGrade, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
+                .join(Subject, ClassSubject.SubjectId == Subject.SubjectId)
+                .filter(StudentClassSubjectGrade.StudentNumber == str_student_number, ClassSubject.ClassId == data_latest_class_subject.Class.ClassId, ClassSubject.Semester == data_latest_class_subject.ClassSubject.Semester)
+                .all()
+            )
+
+            if data_class_subject_grade:
+                list_class_subject_grade = []
+
+                for class_subject_grade in data_class_subject_grade:
+                    dict_class_subject_grade = {
+                        'Code': class_subject_grade.Subject.SubjectId,
+                        'Units': format(class_subject_grade.Subject.Units, '.2f'),
+                        'Grade': class_subject_grade.StudentClassSubjectGrade.Grade,
+                    }
+                    # Append the dictionary to the list
+                    list_class_subject_grade.append(dict_class_subject_grade)
+                if list_class_subject_grade:
+
+                    return (list_class_subject_grade)
+                else:
+                    return None
+            else:
+                return None
+
+    except Exception as e:
+
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+def getOverallGrade(str_student_number):
+    try:
+        data_overall_class_grade = StudentClassGrade.query.filter_by(
+            StudentNumber=str_student_number).all()
+
+        if data_overall_class_grade:
+            total_grade = 0
+            grade_count = 0
+
+            for overall_class_grade in data_overall_class_grade:
+
+                total_grade += overall_class_grade.Grade
+                grade_count += 1
+
+            total_average_grade = total_grade / grade_count
+
+            dict_total_average_grade = {"Grade": total_average_grade}
+
+            return (dict_total_average_grade)
+
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+def getSubjectsGrade(str_student_number):
+    try:
+        data_student_class_subject_grade = (
+            db.session.query(StudentClassSubjectGrade,
+                             ClassSubject, Subject, Class, Faculty)
+            .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+            .join(Class, ClassSubject.ClassId == Class.ClassId)
+            .join(Subject, ClassSubject.SubjectId == Subject.SubjectId)
+            .join(Faculty, ClassSubject.TeacherNumber == Faculty.TeacherNumber)
+            .filter(StudentClassSubjectGrade.StudentNumber == str_student_number)
+            .order_by(desc(Class.Batch), desc(ClassSubject.Semester))
+            .all()
+        )
+
+        if data_student_class_subject_grade:
+            class_combinations = set()
+            dict_class_group = {}
+            list_student_class_subject_grade = []
+
+            for student_class_subject_grade in data_student_class_subject_grade:
+                class_combination = (
+                    student_class_subject_grade.Class.ClassId,
+                    student_class_subject_grade.Class.Batch,
+                    student_class_subject_grade.ClassSubject.Semester
+                )
+
+                if class_combination not in class_combinations:
+                    class_combinations.add(class_combination)
+
+                    # Check if existing in the list table already the ClassId and semester so it wont reiterate the query
+                    data_student_class_grade = (
+                        db.session.query(StudentClassGrade)
+                        .filter(StudentClassGrade.StudentNumber == str_student_number, StudentClassGrade.ClassId == student_class_subject_grade.Class.ClassId, StudentClassGrade.Semester == student_class_subject_grade.ClassSubject.Semester)
+                        .first()
+                    )
+
+                    dict_class_group = {
+                        "Batch": student_class_subject_grade.Class.Batch,
+                        "GPA": format(data_student_class_grade.Grade, '.2f'),
+                        "Semester": student_class_subject_grade.ClassSubject.Semester,
+                        "Subject": []
+                    }
+                    list_student_class_subject_grade.append(dict_class_group)
+
+                # Append the subject details to the existing class group
+                subject_details = {
+                    "Grade": format(student_class_subject_grade.StudentClassSubjectGrade.Grade, ".2f"),
+                    "Subject": student_class_subject_grade.Subject.Name,
+                    "Code": student_class_subject_grade.Subject.SubjectId,
+                    "Teacher": student_class_subject_grade.Faculty.Name,
+                    "SecCode": student_class_subject_grade.Class.CourseId + " " + str(student_class_subject_grade.Class.Year) + "-" + str(student_class_subject_grade.Class.Section),
+                    "Units": format(student_class_subject_grade.Subject.Units, '.2f'),
+                    "Status": checkStatus(student_class_subject_grade.StudentClassSubjectGrade.Grade)
+                }
+                dict_class_group["Subject"].append(subject_details)
+
+            return (list_student_class_subject_grade)
+
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+def getStudentData(str_student_number):
+    try:
+        data_student = (
+            db.session.query(Student).filter(
+                Student.StudentNumber == str_student_number).first()
+        )
+
+        if data_student:
+
+            data_course_enrolled = CourseEnrolled.query.filter_by(
+                StudentNumber=str_student_number).order_by(desc(CourseEnrolled.DateEnrolled)).first()
+
+            dict_student_data = {
+                "StudentNumber": data_student.StudentNumber,
+                "Name": data_student.Name,
+                "PlaceOfBirth": data_student.PlaceOfBirth,
+                "Email": data_student.Email,
+                "MobileNumber": data_student.MobileNumber,
+                "Gender": "Male" if data_student.Gender == 1 else "Female",
+                "Course": data_course_enrolled.CourseId if data_course_enrolled else "None"
+            }
+
+            return (dict_student_data)
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+def updateStudentData(str_student_number, email, number, place_of_birth):
+    try:
+        if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
+            return {"message": "Invalid email format", "status": 400}
+
+        if not re.match(r'^09\d{9}$', number):
+            return {"message": "Invalid mobile number format", "status": 400}
+
+        if place_of_birth is None or place_of_birth.strip() == "":
+            return {"message": "Place of birth cannot be empty", "status": 400}
+
+        # Update the student data in the database
+        data_student = db.session.query(Student).filter(
+            Student.StudentNumber == str_student_number).first()
+        if data_student:
+            data_student.Email = email
+            data_student.MobileNumber = number
+            data_student.PlaceOfBirth = place_of_birth
+            db.session.commit()
+
+            return {"message": "Data updated successfully", "email": email, "number": number, "place_of_birth": place_of_birth, "status": 200}
+        else:
+            return {"message": "Something went wrong", "status": 404}
+
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        db.session.rollback()  # Rollback the transaction in case of an error
+        return {"message": "An error occurred", "status": 500}
+
+
+def updatePassword(str_student_number, password, new_password, confirm_password):
+    try:
+        data_student = db.session.query(Student).filter(
+            Student.StudentNumber == str_student_number).first()
+
+        if data_student:
+            # Assuming 'password' is the hashed password stored in the database
+            hashed_password = data_student.Password
+
+            if check_password_hash(hashed_password, password):
+                # If the current password matches
+                new_hashed_password = generate_password_hash(
+                    new_password)
+                data_student.Password = new_hashed_password
+                db.session.commit()
+                return {"message": "Password changed successfully", "status": 200}
+
+            else:
+                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 400}
+        else:
+            return {"message": "Something went wrong", "status": 404}
+
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        db.session.rollback()  # Rollback the transaction in case of an error
+        return {"message": "An error occurred", "status": 500}

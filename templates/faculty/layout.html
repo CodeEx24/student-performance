@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+    <!-- Notyf -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
+    />
+    <title>{% block title %} {% endblock title %}</title>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              c1: '#2b2d42', // dark red
+              c2: '#8d99ae', // light red
+              c3: '#edf2f4', // white
+              c4: '#ef233c', // gray
+              c5: '#d90429', // dark black
+              primary: '#6376EB',
+              secondary: '#CDD3D8',
+              info: '#29BAF2',
+              success: '#5EEE82',
+              warning: '#FFA434',
+              danger: '#FFA6A1',
+              dark: '#191D21',
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      .e-toolbar-item,
+      #Grid_toolbarItems,
+      .e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn.e-btn,
+      .e-toolbar .e-toolbar-items,
+      .e-pager .e-currentitem,
+      .e-pager .e-currentitem:hover {
+        background-color: #9d1d1d;
+        font-weight: bold;
+      }
+
+      .e-input-group:not(.e-float-icon-left):not(.e-float-input)::before,
+      .e-input-group:not(.e-float-icon-left):not(.e-float-input)::after,
+      .e-input-group.e-float-icon-left:not(.e-float-input)
+        .e-input-in-wrap::before,
+      .e-input-group.e-float-icon-left:not(.e-float-input)
+        .e-input-in-wrap::after,
+      .e-input-group.e-control-wrapper:not(.e-float-icon-left):not(
+          .e-float-input
+        )::before,
+      .e-input-group.e-control-wrapper:not(.e-float-icon-left):not(
+          .e-float-input
+        )::after,
+      .e-input-group.e-control-wrapper.e-float-icon-left:not(.e-float-input)
+        .e-input-in-wrap::before,
+      .e-input-group.e-control-wrapper.e-float-icon-left:not(.e-float-input)
+        .e-input-in-wrap::after {
+        background-color: #9d1d1d;
+      }
+
+      .e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn-text,
+      .e-toolbar
+        .e-toolbar-items
+        .e-toolbar-item
+        .e-tbar-btn.e-btn.e-tbtn-txt
+        .e-icons.e-btn-icon {
+        color: white;
+      }
+
+      .e-headertext {
+        font-size: 14px;
+        color: #191d21;
+        font-weight: bolder;
+      }
+
+      .notyf {
+        margin-top: 80px;
+      }
+    </style>
+    {% block styles %} {% endblock styles %}
+  </head>
+  <body class="bg-slate-200">
+    <div class="h-screen flex flex-col justify-between">
+      <div
+        id="sidebar-overlay"
+        class="fixed inset-0 bg-gray-800 opacity-50 z-30 hidden md:hidden"
+      ></div>
+      <div class="flex bg-white lg:p-0 p-4 md:ml-72 shadow-md">
+        <div class="flex items-center justify-center md:gap-4 lg:gap-0 lg:ml-2">
+          <div
+            class="rounded-full lg:w-[100px] lg:h-[100px] md:w-[80] md:h-[80px] flex items-center justify-center md:mr-0 mr-4"
+          >
+            <img
+              src="{{ url_for('static', filename='images/faculty/user.jpg') }}"
+              alt=""
+              class="md:h-[60px] md:w-[60px] h-[40px] w-[40px] rounded-full"
+            />
+          </div>
+          <div>
+            <div class="w-full flex items-center">
+              <p class="font-extrabold text-c1 md:text-2xl text-md">
+                Welcome Back, &nbsp;
+              </p>
+              <p
+                class="font-semibold text-c1 flex text-md md:text-2xl"
+                id="user-name"
+              >
+                <span class="md:hidden">&nbsp;</span>
+                <!-- <img
+                  src="{{ url_for('static', filename='images/wave.png') }}"
+                  alt=""
+                  class="h-[24px] w-[24px] md:h-[30px] md:w-[30px]"
+                /> -->
+              </p>
+            </div>
+            <div>
+              <p class="text-start text-sm text-c2 font-semibold opacity-75">
+                PUPQC Professor
+              </p>
+            </div>
+          </div>
+        </div>
+        <button
+          data-drawer-target="default-sidebar"
+          data-drawer-open="default-sidebar"
+          aria-controls="default-sidebar"
+          type="button"
+          class="text-gray-600 hover:text-gray-800 focus:outline-none ml-auto md:hidden"
+        >
+          <span class="sr-only">Open sidebar</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="black"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            viewBox="0 0 24 24"
+            class="w-[20px] h-[20px]"
+          >
+            <path d="M3 12h18M3 6h18M3 18h18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- SIDEBAR -->
+      <aside
+        id="default-sidebar"
+        class="fixed top-0 md:left-0 right-0 z-40 w-72 h-screen transition-transform translate-x-full md:translate-x-0 bg-white shadow-md"
+        aria-label="Sidebar"
+      >
+        <!-- Add a close (X) icon in the sidebar header -->
+        <div
+          class="flex flex-col justify-between items-center w-full h-screen p-4"
+        >
+          <div class="w-full">
+            <button
+              data-drawer-target="default-sidebar"
+              data-drawer-close="default-sidebar"
+              aria-controls="default-sidebar"
+              type="button"
+              class="text-gray-600 hover:text-gray-800 focus:outline-none float-right md:hidden"
+            >
+              <span class="sr-only">Close sidebar</span>
+              <svg
+                class="w-6 h-6"
+                aria-hidden="true"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M14.293 5.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 11-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 111.414-1.414L10 8.586l4.293-4.293z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </button>
+
+            <div class="flex items-center md:mt-0 mt-2">
+              <a
+                href="{{ url_for('facultyHome') }}"
+                class="my-2 flex items-center"
+              >
+                <img
+                  class="w-auto h-14"
+                  src="{{ url_for('static', filename='images/pup.png') }}"
+                  alt=""
+                />
+
+                <h4 class="font-extrabold ml-4 text-3xl text-black">PUP SPS</h4>
+              </a>
+            </div>
+            <div class="h-full mt-4 overflow-y-auto flex flex-col">
+              <ul class="text-base">
+                <li>
+                  <a
+                    href="{{ url_for('facultyHome') }}"
+                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'dashboard' else 'hover:bg-gray-100 hover:text-c1' }}"
+                  >
+                    <svg
+                      class="w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'dashboard' else 'text-gray-500' }}"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 22 21"
+                    >
+                      <path
+                        d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"
+                      />
+                      <path
+                        d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"
+                      />
+                    </svg>
+                    <span class="flex-1 ml-3 whitespace-nowrap">Dashboard</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('facultyGrades') }}"
+                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'grades' else 'hover:bg-gray-100 hover:text-c1' }}"
+                  >
+                    <svg
+                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'grades' else 'text-gray-500' }}"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 18 18"
+                    >
+                      <path
+                        d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z"
+                      />
+                    </svg>
+                    <span class="flex-1 ml-3 whitespace-nowrap">Grades</span>
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="{{ url_for('facultyClassComparison') }}"
+                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'class-comparison' else 'hover:bg-gray-100 hover:text-c1' }}"
+                  >
+                    <svg
+                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'class-comparison' else 'text-gray-500' }}"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 18 20"
+                    >
+                      <path
+                        d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z"
+                      />
+                    </svg>
+                    <span class="flex-1 ml-3 whitespace-nowrap"
+                      >Class Comparison</span
+                    >
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="{{ url_for('facultyProfile') }}"
+                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'profile' else 'hover:bg-gray-100 hover:text-c1' }}"
+                  >
+                    <svg
+                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'profile' else 'text-gray-500' }}"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 18"
+                    >
+                      <path
+                        d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z"
+                      />
+                    </svg>
+                    <span class="flex-1 ml-3 whitespace-nowrap">Profile</span>
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="{{ url_for('facultyChangePassword') }}"
+                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'change-password' else 'hover:bg-gray-100 hover:text-c1' }}"
+                  >
+                    <svg
+                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'change-password' else 'text-gray-500' }}"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
+                      />
+                      <path
+                        d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
+                      />
+                      <path
+                        d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
+                      />
+                    </svg>
+                    <span class="flex-1 ml-3 whitespace-nowrap"
+                      >Change Password</span
+                    >
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- NAVIGATION LINKS -->
+          <div class="w-full">
+            <a
+              class="flex items-center px-4 py-4 transition-colors duration-300 transform rounded-lg bg-gradient-to-r from-red-800 to-red-500 hover:from-red-900 hover:to-red-600 text-white font-bold py-2 px-4 rounded shadow-md"
+              href="{{ url_for('logout') }}"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+                />
+              </svg>
+
+              <span class="mx-2 text-sm font-medium">Log Out</span>
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CONTENT -->
+      {% block content %} {% endblock content %}
+
+      <!----------------- FOOTER CONTENTS ----------------->
+      <div class="bg-white lg:px-40 shadow-md md:ml-64 md:px-8 lg:px-0 mt-auto">
+        <footer class="items-center justify-between mx-auto lg:px-0 px-8 py-8">
+          <h1 class="text-c1 text-2xl mb-2 font-bold">Contact Information</h1>
+          <div class="flex flex-wrap lg:flex-nowrap gap-4">
+            <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+              <h5 class="text-lg font-semibold md:font-bold">Email:</h5>
+              <p class="text-lg">quezoncity@pup.edu.ph</p>
+            </div>
+            <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+              <h5 class="text-lg font-semibold md:font-bold">Postal Mail:</h5>
+              <p class="text-lg">PUP Quezon City Branch</p>
+              <p class="text-lg">Don Fabian St., Commonwealth</p>
+              <p class="text-lg">Quezon City Philippines</p>
+            </div>
+            <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
+              <h5 class="text-lg font-semibold md:font-bold">Telephone:</h5>
+              <p class="text-lg">(632) 8952-7818</p>
+              <p class="text-lg">(632) 8287-8204</p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <script>
+      // Function to open the sidebar
+      function openSidebar() {
+        const sidebar = document.getElementById('default-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+        overlay.classList.remove('hidden');
+      }
+
+      // Function to close the sidebar
+      function closeSidebar() {
+        const sidebar = document.getElementById('default-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.add('translate-x-full');
+        overlay.classList.add('hidden');
+      }
+
+      // Add event listener to open the sidebar
+      document
+        .querySelector('[data-drawer-open="default-sidebar"]')
+        .addEventListener('click', openSidebar);
+
+      // Add event listener to close the sidebar
+      document
+        .querySelector('[data-drawer-close="default-sidebar"]')
+        .addEventListener('click', closeSidebar);
+    </script>
+
+    <script>
+      const apiKey = '{{ faculty_api_key | default("") }}';
+      const api_base_url = '{{ faculty_api_base_url | default("") }}';
+
+      async function fetchFacultyDetails2() {
+        if (apiKey) {
+          const response = await fetch(`${api_base_url}/`, {
+            headers: {
+              'X-Api-Key': apiKey,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch data. Try to contact the admin to resolve the issue.`
+            );
+          }
+
+          const data_faculty_details = await response.json();
+          displayDetails(data_faculty_details);
+        }
+      }
+
+      function displayDetails(data) {
+        const text_user_name = document.getElementById('user-name');
+
+        text_user_name.innerHTML = data.Name;
+      }
+
+      fetchFacultyDetails2();
+    </script>
+    <!-- SCRIPTS -->
+    {% block script %} {% endblock script %}
+  </body>
+</html>

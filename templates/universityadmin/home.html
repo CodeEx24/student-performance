@@ -1,0 +1,411 @@
+{% extends "universityadmin/layout.html" %}
+
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
+  <div class="bg-white col-span-4 row-span-5 shadow-md p-4">
+    <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
+      Enrollment Trends
+    </h4>
+    <div id="enrollment"></div>
+  </div>
+
+  <div class="bg-white col-span-2 row-span-4 col-start-5 shadow-md p-4">
+    <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
+      President Lister
+    </h4>
+    <div id="lister"></div>
+  </div>
+
+  <!-- <div class="bg-warning col-span-2 row-span-2 col-start-5 row-start-3 shadow-md p-4">
+    <h4 class="text-3xl font-extrabold text-center my-2 mt-10 text-white">Deans Lister</h4>
+    <p class="font-bold text-xl  text-center  text-white">Bachelor Science of Information Technology</p>
+    <h1 class="lg:text-8xl font-extrabold text-center  mb-10 text-white">325</h1>
+  </div> -->
+
+  <div
+    class="bg-warning col-span-2 row-span-2 col-start-5 row-start-5 shadow-md p-4"
+  >
+    <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
+      Average GPA Given
+    </h4>
+    <p class="font-bold text-xl text-c1 text-center">Overall Count</p>
+    <h1
+      class="lg:text-8xl text-c1 font-extrabold text-center mb-10"
+      id="average-gpa"
+    >
+      325
+    </h1>
+  </div>
+
+  <div
+    class="bg-primary col-span-2 row-span-3 col-start-1 row-start-6 shadow-md p-4 flex flex-col justify-center"
+  >
+    <h4
+      class="text-3xl text-c1 text-white font-extrabold text-center my-2 mt-10"
+    >
+      Popular Courses
+    </h4>
+    <p class="font-bold text-xl text-white text-center" id="highest-course">
+      Bachelor Science of Information Technology
+    </p>
+    <h1
+      class="lg:text-8xl text-white font-extrabold text-center mb-10"
+      id="highest-count"
+    >
+      325
+    </h1>
+  </div>
+  <div
+    class="bg-c1 col-span-2 row-span-3 col-start-3 row-start-6 shadow-md p-4 flex flex-col justify-center"
+  >
+    <h4
+      class="text-3xl text-white font-extrabold text-center my-2 mt-10 text-white"
+    >
+      Low Enrolled Courses
+    </h4>
+    <p
+      class="font-bold text-white text-xl text-center text-white"
+      id="lowest-course"
+    >
+      Bachelor Science of Information Technology
+    </p>
+    <h1
+      class="lg:text-8xl text-white font-extrabold text-center mb-10 text-white"
+      id="lowest-count"
+    >
+      321
+    </h1>
+  </div>
+  <div
+    class="bg-c4 col-span-2 row-span-2 col-start-5 row-start-7 shadow-md p-4"
+  >
+    <h4 class="text-3xl font-extrabold text-center my-2 mt-10 text-white">
+      Student Enrolled
+    </h4>
+    <p class="font-bold text-xl text-center text-white">Overall Count</p>
+    <h1
+      class="lg:text-8xl font-extrabold text-center mb-10 text-white"
+      id="student-enrolled"
+    >
+      323
+    </h1>
+  </div>
+
+  <div class="bg-white p-8 shadow-md col-span-full">
+    <h1 class="text-3xl font-bold text-c1 mb-8">Course Performances</h1>
+    <div id="course-performance"></div>
+  </div>
+</div>
+
+{% endblock content %} {% block script %}
+<!-- ENROLLMENT TRENDS OF COURSES -->
+<script>
+  async function fetchEnrollmentTrends() {
+    if (apiKey) {
+      try {
+        const response = await fetch(`${api_base_url}/enrollment/trends`, {
+          headers: {
+            'X-Api-Key': apiKey,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+          );
+        }
+
+        const json_enrollment_trends = await response.json();
+        displayEnrollmentTrendChart(json_enrollment_trends.CourseDetails);
+        displayedEnrollmentNumbers(json_enrollment_trends);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  async function fetchAverageGPA() {
+    if (apiKey) {
+      try {
+        const response = await fetch(`${api_base_url}/current/gpa`, {
+          headers: {
+            'X-Api-Key': apiKey,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+          );
+        }
+
+        const json_average_gpa = await response.json();
+
+        if (json_average_gpa) {
+          console.log('json_average_gpa: ', json_average_gpa);
+          document.getElementById('average-gpa').innerText =
+            json_average_gpa.AverageGrade;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  function displayEnrollmentTrendChart(json_enrollment_trends) {
+    console.log('json_enrollment_trends: ', json_enrollment_trends);
+    var chartData = [...json_enrollment_trends];
+
+    var chart = new ej.charts.Chart({
+      //Initializing Primary X Axis
+      primaryXAxis: {
+        interval: 1,
+        valueType: 'Category',
+      },
+      //Initializing Primary Y Axis
+      // primaryYAxis: {
+      //   interval: 100,
+      // },
+      // chartArea: { border: { width: 0 } },
+      //Initializing Chart Series
+      series: [
+        {
+          type: 'StackingLine',
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: 'BBA',
+          name: 'BBA',
+        },
+        {
+          type: 'StackingLine',
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: 'BBTE',
+          name: 'BBTE',
+        },
+        {
+          type: 'StackingLine',
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: 'BPAM',
+          name: 'BPAM',
+        },
+        {
+          type: 'StackingLine',
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: 'BSIT',
+          name: 'BSIT',
+        },
+      ],
+      //Initializing User Interaction Tooltip
+      tooltip: {
+        enable: true,
+      },
+    });
+    chart.appendTo('#enrollment');
+    // chart.appendTo('#enrollment2');
+  }
+
+  function displayedEnrollmentNumbers(json_enrollment) {
+    const text_lowest_course = document.getElementById('lowest-course');
+    const text_highest_course = document.getElementById('highest-course');
+
+    const text_lowest_count = document.getElementById('lowest-count');
+    const text_highest_count = document.getElementById('highest-count');
+
+    const text_student_enrolled_count =
+      document.getElementById('student-enrolled');
+
+    text_lowest_course.innerText = json_enrollment.LowestEnrolledCourses[0];
+    text_highest_course.innerText = json_enrollment.HighestEnrolledCourses[1];
+    text_lowest_count.innerText = json_enrollment.LowestEnrolledCount;
+    text_highest_count.innerText = json_enrollment.HighestEnrolledCount;
+
+    text_student_enrolled_count.innerText = json_enrollment.TotalEnrolled;
+  }
+
+  fetchEnrollmentTrends();
+  fetchAverageGPA();
+</script>
+
+<!-- SAMPLE ONLY FOR FUTURE PURPOSES -->
+<script>
+  function columnChart() {
+    var chartData = [
+      { country: '2019', president: 50, dean: 40 },
+      { country: '2020', president: 40, dean: 35 },
+      { country: '2021', president: 70, dean: 65 },
+      { country: '2022', president: 60, dean: 50 },
+    ];
+    var chart = new ej.charts.Chart(
+      {
+        primaryXAxis: {
+          valueType: 'Category',
+          title: 'Countries',
+        },
+        primaryYAxis: {
+          minimum: 0,
+          maximum: 80,
+          interval: 20,
+          title: 'Medals',
+        },
+        series: [
+          {
+            dataSource: chartData,
+            xName: 'country',
+            yName: 'president',
+            name: 'President Lister',
+            // Series type as column series
+            type: 'Column',
+          },
+          {
+            dataSource: chartData,
+            xName: 'country',
+            yName: 'dean',
+            name: 'Dean Lister',
+            columnWidth: 0.75,
+            columnSpacing: 1.5,
+            // Series type as column series
+            type: 'Column',
+          },
+        ],
+        title: 'Lister Count',
+        // Set the background color for the chart area
+        chartArea: {
+          background: '#FFFFFF', // Change this to your desired color
+        },
+      },
+      '#lister'
+    );
+  }
+
+  columnChart();
+</script>
+
+<!-- COURSE PERFORMANCE -->
+<script>
+  async function fetchCoursePerformance() {
+    if (apiKey) {
+      try {
+        const response = await fetch(
+          `${api_base_url}/overall/course/performance`,
+          {
+            headers: {
+              'X-Api-Key': apiKey,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+          );
+        }
+
+        const json_course_performance = await response.json();
+        displayCoursePerformance(json_course_performance);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  function displayCoursePerformance(json_course_performance) {
+    console.log('json_course_performance: ', json_course_performance);
+    var chartData = [...json_course_performance];
+
+    var chart = new ej.charts.Chart({
+      //Initializing Primary X Axis
+      primaryXAxis: {
+        interval: 1,
+        valueType: 'Category',
+      },
+      primaryYAxis: {
+        minimum: 0,
+        maximum: 100,
+        interval: 20,
+      },
+      //Initializing Primary Y Axis
+      // primaryYAxis: {
+      //   interval: 100,
+      // },
+      // chartArea: { border: { width: 0 } },
+      //Initializing Chart Series
+      series: [
+        {
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: 'BBA',
+          name: 'BBA',
+        },
+        {
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: 'BBTE',
+          name: 'BBTE',
+        },
+        {
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: 'BPAM',
+          name: 'BPAM',
+        },
+        {
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: 'BSIT',
+          name: 'BSIT',
+        },
+      ],
+      //Initializing User Interaction Tooltip
+      tooltip: {
+        enable: true,
+      },
+    });
+    chart.appendTo('#course-performance');
+    // chart.appendTo('#enrollment2');
+  }
+
+  fetchCoursePerformance();
+</script>
+
+{% endblock script %}

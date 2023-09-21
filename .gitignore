@@ -1,0 +1,11 @@
+
+
+*.pyc
+.env
+*data
+*data2
+*venv
+__pycache__/
+ZSPS Docs - Cheatsheet/Database 2.drawio
+ZSPS Docs - Cheatsheet/Database.drawio
+ZSPS Docs - Cheatsheet/ZCHEATSHEET.png
