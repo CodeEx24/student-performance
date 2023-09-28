@@ -30,7 +30,8 @@ def create_app():
     cache = Cache(app, config={'CACHE_TYPE': 'simple'})
     # cache.init_app(app)
 
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "https://student-performance-70l3.onrender.com"}})
+
     jwt = JWTManager(app)
     init_db(app)
 
