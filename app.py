@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from models import init_db, Student, Faculty, UniversityAdmin
 from flask_jwt_extended import JWTManager
 from decorators.auth_decorators import studentRequired, facultyRequired, preventAuthenticated, universityAdminRequired
+from datetime import datetime, timedelta
 
 def create_app():
     load_dotenv()  # Load environment variables from .env file
@@ -22,7 +23,8 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-    app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour (in seconds)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     # Replace 'your-secret-key' with an actual secret key
     app.secret_key = os.getenv('SECRET_KEY')
     cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -58,7 +60,7 @@ def create_app():
     @app.route('/')
     @preventAuthenticated
     def home():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('main/index.html')
 
 
@@ -75,35 +77,35 @@ def create_app():
     @app.route('/student')
     @preventAuthenticated
     def studentLogin():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/login.html')
 
 
     @app.route('/student/home')
     @studentRequired
     def studentHome():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/home.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="home")
 
 
     @app.route('/student/grade')
     @studentRequired
     def studentGrade():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/grades.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="grades")
 
 
     @app.route('/student/profile')
     @studentRequired
     def studentProfile():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/profile.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="profile")
 
 
     @app.route('/student/change-password')
     @studentRequired
     def changePassword():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/change_password.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url,  current_page="change-password")
 
 
@@ -120,35 +122,35 @@ def create_app():
     @app.route('/faculty/dashboard')
     @facultyRequired
     def facultyHome():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/dashboard.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="dashboard")
 
 
     @app.route('/faculty/grades')
     @facultyRequired
     def facultyGrades():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/grades.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="grades")
 
 
     @app.route('/faculty/class-comparison')
     @facultyRequired
     def facultyClassComparison():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/class-comparison.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="class-comparison")
 
 
     @app.route('/faculty/profile')
     @facultyRequired
     def facultyProfile():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/profile.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="profile")
 
 
     @app.route('/faculty/change-password')
     @facultyRequired
     def facultyChangePassword():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/change_password.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="change-password")
 
 
@@ -165,28 +167,28 @@ def create_app():
     @app.route('/university-admin/home')
     @universityAdminRequired
     def universityAdminHome():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('universityadmin/home.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="home")
 
 
     @app.route('/university-admin/class-performance')
     @universityAdminRequired
     def universityClassPerformance():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('universityadmin/class-performance.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
 
 
     @app.route('/university-admin/profile')
     @universityAdminRequired
     def universityProfile():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('universityadmin/profile.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="profile")
 
 
     @app.route('/university-admin/change-password')
     @universityAdminRequired
     def universityChangePassword():
-        session.permanent = True
+        session['last_interaction_time'] = datetime.utcnow()
         return render_template('universityadmin/change-password.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
 
 
@@ -207,17 +209,7 @@ def create_app():
     def handle_404_error(e):
         return render_template('404.html'), 404
 
-    # ========================================================================
-    # TESTING
-
-    # ========================================================================
-    #  host='127.0.0.1',
-    #         port=5001,
-
-
-    # if __name__ == '__main__':
-    #     app.run(
-
-    #         debug=True
-    #     )
     return app
+
+
+    

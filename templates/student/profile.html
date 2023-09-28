@@ -58,6 +58,7 @@
                 placeholder="username@gmail.com"
                 class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
               />
+              <p id="error-email" class="text-c4 text-sm"></p>
             </div>
             <div>
               <label
@@ -72,20 +73,22 @@
                 class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                 placeholder="09XXXXXXXXX"
               />
+              <p id="error-mobile" class="text-c4 text-sm"></p>
             </div>
             <div>
               <label
-                for="place-of-birth-input"
+                for="residential-input"
                 class="block mb-2 text-c1 font-extrabold"
-                >Place of Birth</label
+                >Residential Address</label
               >
               <input
                 type="text"
-                id="place-of-birth-input"
-                name="place-of-birth"
+                id="residential-input"
+                name="residentialAddress"
                 class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                 placeholder="Unit No/Brgy/Municipality/City"
               />
+              <p id="error-residential" class="text-c4 text-sm"></p>
             </div>
           </div>
           <button
@@ -159,44 +162,78 @@
     event.preventDefault();
     const email = document.getElementById('email-input').value;
     const number = document.getElementById('number-input').value;
-    const placeOfBirth = document.getElementById('place-of-birth-input').value;
+    const residentialAddress =
+      document.getElementById('residential-input').value;
 
-    // Send data to the API
-    const response = await fetch(`${api_base_url}/details/update`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, number, placeOfBirth }),
-    });
+    if (apiKey) {
+      // Send data to the API
+      const response = await fetch(`${api_base_url}/details/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, number, residentialAddress }),
+      });
 
-    const data_student_details = await response.json();
+      const data_student_details = await response.json();
 
-    if (
-      data_student_details.status === 400 ||
-      data_student_details.status === 404 ||
-      data_student_details.status === 500
-    ) {
-      notyf.error(data_student_details.message);
-    } else if (data_student_details.status === 200) {
-      notyf.success(data_student_details.message);
-      console.log(data_student_details);
-      updateDetails(data_student_details);
-    } else {
-      notyf.error('Something went wrong');
+      const errorDetails = {
+        email: {
+          id: 'error-email',
+          message: 'Please provide a valid email address',
+        },
+        mobile: {
+          id: 'error-mobile',
+          message: 'Mobile must be in "09XXXXXXXXX" format',
+        },
+        residential: {
+          id: 'error-residential',
+          message: 'Residential address must not be empty',
+        },
+      };
+
+      const status = data_student_details.status;
+      const errorType = data_student_details.type;
+
+      if (status === 400 || status === 404 || status === 500) {
+        if (errorDetails[errorType]) {
+          const { id, message } = errorDetails[errorType];
+          const errorElement = document.getElementById(id);
+          errorElement.innerText = message;
+          errorElement.classList.add('mt-2');
+        } else {
+          notyf.error(data_student_details.message);
+        }
+      } else if (status === 200) {
+        for (const key in errorDetails) {
+          const { id } = errorDetails[key];
+          const errorElement = document.getElementById(id);
+          errorElement.innerText = '';
+          errorElement.classList.remove('mt-2');
+        }
+
+        notyf.success(data_student_details.message);
+        updateDetails(data_student_details);
+      } else {
+        notyf.error('Something went wrong');
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
     }
   }
 
   function updateDetails(data_student_details) {
     const input_email = document.getElementById('email-input');
     const input_number = document.getElementById('number-input');
-    const input_place_of_birth = document.getElementById(
-      'place-of-birth-input'
-    );
+    const input_residential = document.getElementById('residential-input');
 
     input_email.value = data_student_details.email;
     input_number.value = data_student_details.number;
-    input_place_of_birth.value = data_student_details.place_of_birth;
+    input_residential.value = data_student_details.residentialAddress;
   }
 </script>
 
@@ -224,9 +261,8 @@
   function displayDetails(data) {
     const input_email = document.getElementById('email-input');
     const input_number = document.getElementById('number-input');
-    const input_place_of_birth = document.getElementById(
-      'place-of-birth-input'
-    );
+    const input_residential_address =
+      document.getElementById('residential-input');
 
     const text_name = document.getElementById('name');
     const text_name2 = document.getElementById('name2');
@@ -238,8 +274,8 @@
 
     input_number.value = `${data.MobileNumber ? data.MobileNumber : ''}`;
 
-    input_place_of_birth.value = `${
-      data.PlaceOfBirth ? data.PlaceOfBirth : ''
+    input_residential_address.value = `${
+      data.ResidentialAddress ? data.ResidentialAddress : ''
     }`;
 
     text_name.innerHTML = data.Name;

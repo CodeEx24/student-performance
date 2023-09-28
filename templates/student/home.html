@@ -95,7 +95,7 @@
   </div>
 
   <div class="bg-white mt-4 p-8 rounded-lg shadow-md">
-    <div id="linechartPerformance"></div>
+    <div id="CourseLineChartPerformance"></div>
   </div>
 </div>
 
@@ -177,7 +177,6 @@
       }
 
       const data_overall_gpa = await response.json();
-      // console.log(data_overall_gpa);
       displayOverallGPA(data_overall_gpa);
     }
   }
@@ -216,7 +215,6 @@
 
   function displayPerformance(data_performance) {
     var chartData = [...data_performance];
-    console.log(data_performance[data_performance.length - 1].Year);
     // Create the chart
     var chart = new ej.charts.Chart({
       primaryXAxis: {
@@ -308,10 +306,23 @@
   fetchCoursePerformanceOvertime();
 
   function displayCoursePerformance(course_performance_data, course_name) {
-    var chartData = [...course_performance_data];
-    console.log('COURSE PERFORMANCE: ', course_performance_data);
-    // Create the chart
+    var data = [...course_performance_data];
+
     var chart = new ej.charts.Chart({
+      target: '#CourseLineChartPerformance',
+      series: [
+        {
+          type: 'Line',
+          dataSource: data,
+          xName: 'Year',
+          yName: 'Grade',
+          marker: {
+            visible: true,
+            width: 10,
+            height: 10,
+          },
+        },
+      ],
       primaryXAxis: {
         title: 'Year',
         minimum:
@@ -326,28 +337,13 @@
         title: 'Grade',
         labelFormat: '{value}%',
       },
-      series: [
-        {
-          dataSource: chartData,
-          xName: 'Year',
-          yName: 'Grade',
-          name: course_name,
-          type: 'Line',
-          marker: {
-            visible: true,
-            width: 10,
-            height: 10,
-          },
-        },
-      ],
       title: 'Course Performance',
       tooltip: {
         enable: true,
       },
     });
 
-    // Render the chart
-    chart.appendTo('#linechartPerformance');
+    chart.appendTo('#CourseLineChartPerformance');
   }
 </script>
 
@@ -374,8 +370,6 @@
   fetchPreviousSubjectGrade();
 
   function displayPreviousSubjectGrade(list_previous_subject_grade) {
-    console.log('PREVIOUS GRADE: ', list_previous_subject_grade);
-
     var data = [...list_previous_subject_grade];
     var grid = new ej.grids.Grid({
       dataSource: data,
