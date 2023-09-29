@@ -77,6 +77,7 @@
                     placeholder="username@gmail.com"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                   />
+                  <p id="error-email" class="text-c4 text-sm"></p>
                 </div>
                 <div>
                   <label
@@ -91,6 +92,7 @@
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     placeholder="09XXXXXXXXX"
                   />
+                  <p id="error-mobile" class="text-c4 text-sm"></p>
                 </div>
                 <div>
                   <label
@@ -105,6 +107,7 @@
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     placeholder="Unit No/Brgy/Municipality/City"
                   />
+                  <p id="error-residential" class="text-c4 text-sm"></p>
                 </div>
               </div>
               <button
@@ -160,29 +163,65 @@
       'residential-address-input'
     ).value;
 
-    // Send data to the API
-    const response = await fetch(`${api_base_url}/details/update`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, number, residential_address }),
-    });
+    if (accessToken) {
+      // Send data to the API
+      const response = await fetch(`${api_base_url}/details/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: authorizationHeader,
+        },
+        body: JSON.stringify({ email, number, residential_address }),
+      });
 
-    const data_faculty_details = await response.json();
+      const data_faculty_details = await response.json();
 
-    if (
-      data_faculty_details.status === 400 ||
-      data_faculty_details.status === 404 ||
-      data_faculty_details.status === 500
-    ) {
-      notyf.error(data_faculty_details.message);
-    } else if (data_faculty_details.status === 200) {
-      notyf.success(data_faculty_details.message);
+      const errorDetails = {
+        email: {
+          id: 'error-email',
+          message: 'Please provide a valid email address',
+        },
+        mobile: {
+          id: 'error-mobile',
+          message: 'Mobile must be in "09XXXXXXXXX" format',
+        },
+        residential: {
+          id: 'error-residential',
+          message: 'Residential address must not be empty',
+        },
+      };
 
-      updateDetails(data_faculty_details);
-    } else {
-      notyf.error('Something went wrong');
+      const status = data_faculty_details.status;
+      const errorType = data_faculty_details.type;
+
+      if (status === 400 || status === 404 || status === 500) {
+        if (errorDetails[errorType]) {
+          const { id, message } = errorDetails[errorType];
+          const errorElement = document.getElementById(id);
+          errorElement.innerText = message;
+          errorElement.classList.add('mt-2');
+        } else {
+          notyf.error(data_faculty_details.message);
+        }
+      } else if (status === 200) {
+        for (const key in errorDetails) {
+          const { id } = errorDetails[key];
+          const errorElement = document.getElementById(id);
+          errorElement.innerText = '';
+          errorElement.classList.remove('mt-2');
+        }
+
+        notyf.success(data_faculty_details.message);
+        updateDetails(data_faculty_details);
+      } else {
+        notyf.error('Something went wrong');
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
     }
   }
 
@@ -205,7 +244,7 @@
     if (apiKey) {
       const response = await fetch(`${api_base_url}/`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 

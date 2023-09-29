@@ -214,7 +214,7 @@
     if (apiKey) {
       const response = await fetch(`${api_base_url}/`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 
@@ -264,7 +264,7 @@
     if (apiKey) {
       const response = await fetch(`${api_base_url}/grades`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 

@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request, redirect, url_for, flash, session
 from models import Faculty
 
 from werkzeug.security import check_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
 from decorators.auth_decorators import facultyRequired
 
 from .utils import getSubjectCount, getHighLowAverageClass, getAllClassAverageWithPreviousYear, getPassFailRates, getTopPerformerStudent, getStudentClassSubjectGrade, getAllClass, getClassPerformance, updateFacultyData, getFacultyData, updatePassword, getStudentPerformance
@@ -43,30 +43,26 @@ def login():
         if teacher and check_password_hash(teacher.Password, password):
             # Successfully authenticated
             access_token = create_access_token(identity=teacher.TeacherId)
+            refresh_token = create_refresh_token(identity=teacher.TeacherId)
             session['access_token'] = access_token
+            session['refresh_token'] = refresh_token
             session['user_role'] = 'faculty'
-            session['teacher_number'] = teacher.TeacherNumber
             return redirect(url_for('facultyHome'))
         else:
             flash('Invalid email or password', 'danger')
-    return redirect(url_for('facultyLogin'))
+            return redirect(url_for('facultyLogin'))
 
 
 # ===================================================
 # TESTING AREA
 @faculty_api.route('/profile', methods=['GET'])
-@facultyRequired
 @jwt_required()
 def profile():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        current_user_id = get_jwt_identity()
-        faculty = Faculty.query.get(current_user_id)
-        if faculty:
-            return jsonify(faculty.to_dict())
-        else:
-            flash('User not found', 'danger')
-            return redirect(url_for('faculty_api.login'))
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
+        return jsonify(faculty.to_dict())
     else:
         return render_template('404.html'), 404
 
@@ -75,13 +71,13 @@ def profile():
 
 # Getting the user (faculty) data
 @faculty_api.route('/', methods=['GET'])
-def studentData():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_teacher_number = session.get('teacher_number')
-        # student = Student.query.get(str_student_number)
-        json_faculty_data = getFacultyData(str_teacher_number)
-
+@jwt_required()
+def facultyData():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
+        json_faculty_data = getFacultyData(current_user_id)
         if json_faculty_data:
             return (json_faculty_data)
         else:
@@ -92,40 +88,43 @@ def studentData():
 
 # Update the details of the faculty
 @faculty_api.route('/details/update', methods=['GET', 'POST'])
+@jwt_required()
 def updateDetails():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
         if request.method == 'POST':
-            str_teacher_number = session.get('teacher_number')
             email = request.json.get('email')
             number = request.json.get('number')
             residential_address = request.json.get('residential_address')
 
             json_result = updateFacultyData(
-                str_teacher_number, email, number, residential_address)
+                current_user_id, email, number, residential_address)
 
             return json_result
 
         else:
             flash('Invalid email or password', 'danger')
-            return redirect(url_for('studentLogin'))
+            return redirect(url_for('facultyLogin'))
     else:
         return render_template('404.html'), 404
 
 
 # Change the password of the user (faculty)
 @faculty_api.route('/change/password', methods=['POST'])
+@jwt_required()
 def changePassword():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
         if request.method == 'POST':
-            str_teacher_number = session.get('teacher_number')
             password = request.json.get('password')
             new_password = request.json.get('new_password')
             confirm_password = request.json.get('confirm_password')
 
-            json_result = updatePassword(
-                str_teacher_number, password, new_password, confirm_password)
+            json_result = updatePassword(current_user_id, password, new_password, confirm_password)
 
             return json_result
 
@@ -138,13 +137,14 @@ def changePassword():
 
 # Getting the Highest and Lowest Class Average
 @faculty_api.route('/class-statistics', methods=['GET'])
+@jwt_required()
 def classAverageAndSubjectCount():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_teacher_number = session.get('teacher_number')
-
-        json_high_low_class = getHighLowAverageClass(str_teacher_number)
-        json_subject_count = getSubjectCount(str_teacher_number)
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
+        json_high_low_class = getHighLowAverageClass(current_user_id)
+        json_subject_count = getSubjectCount(current_user_id)
         if json_high_low_class and json_subject_count is not None:
             return ({**json_high_low_class, **json_subject_count})
         else:
@@ -155,13 +155,13 @@ def classAverageAndSubjectCount():
 
 # All class average per year
 @faculty_api.route('/class-average', methods=['GET'])
+@jwt_required()
 def allClassAverages():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_teacher_number = session.get('teacher_number')
-
-        json_average_class = getAllClassAverageWithPreviousYear(
-            str_teacher_number)
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
+        json_average_class = getAllClassAverageWithPreviousYear(current_user_id)
 
         if json_average_class:
             return (json_average_class)
@@ -173,12 +173,13 @@ def allClassAverages():
 
 # Get the pass and failed counts to the facultys subject
 @faculty_api.route('/pass-fail', methods=['GET'])
+@jwt_required()
 def passFailRates():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_teacher_number = session.get('teacher_number')
-
-        json_average_class = getPassFailRates(str_teacher_number)
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
+        json_average_class = getPassFailRates(current_user_id)
 
         if json_average_class:
             return (json_average_class)
@@ -190,13 +191,14 @@ def passFailRates():
 
 # Getting the top performer student
 @faculty_api.route('/top-student', methods=['GET'])
+@jwt_required()
 def topPerformerStudent():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_teacher_number = session.get('teacher_number')
-
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
         json_top_performer_student = getTopPerformerStudent(
-            str_teacher_number, 10)
+            current_user_id, 10)
 
         if json_top_performer_student:
             return (json_top_performer_student)
@@ -208,13 +210,14 @@ def topPerformerStudent():
 
 # Getting the student subject grade in a class
 @faculty_api.route('/class-subject-grade', methods=['GET'])
+@jwt_required()
 def studentClassSubjectGrade():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_teacher_number = session.get('teacher_number')
-
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
         json_class_subject_grade = getStudentClassSubjectGrade(
-            str_teacher_number)
+            current_user_id)
 
         if json_class_subject_grade:
             return (json_class_subject_grade)
@@ -226,13 +229,14 @@ def studentClassSubjectGrade():
 
 # Fetch all class handle
 @faculty_api.route('/all-class', methods=['GET'])
+@jwt_required()
 def allClass():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_teacher_number = session.get('teacher_number')
-
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
         json_class_subject_grade = getAllClass(
-            str_teacher_number)
+            current_user_id)
 
         if json_class_subject_grade:
             return (json_class_subject_grade)
@@ -244,9 +248,12 @@ def allClass():
 
 # Getting all class performance of the specifc class
 @faculty_api.route('/class-performance/<int:id>', methods=['GET', 'POST'])
+@jwt_required()
 def classPerformance(id):
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
         json_class_performance = getClassPerformance(id)
 
         if json_class_performance:
@@ -259,9 +266,12 @@ def classPerformance(id):
 
 # Getting the specific student performance
 @faculty_api.route('/student/performance/<string:id>', methods=['GET', 'POST'])
+@jwt_required()
 def studentPerformance(id):
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    faculty = Faculty.query.get(current_user_id)
+    if faculty and role=="faculty":
         json_student_performance = getStudentPerformance(id)
 
         if json_student_performance:

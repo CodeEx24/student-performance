@@ -24,14 +24,15 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['SESSION_COOKIE_SECURE'] = True
     # Replace 'your-secret-key' with an actual secret key
     app.secret_key = os.getenv('SECRET_KEY')
-    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+    Cache(app, config={'CACHE_TYPE': 'simple'})
     # cache.init_app(app)
 
-    CORS(app, resources={r"/api/*": {"origins": "https://student-performance-70l3.onrender.com"}})
-
+    CORS(app)
     jwt = JWTManager(app)
     init_db(app)
 
@@ -53,6 +54,13 @@ def create_app():
         if 'user_role' in session:
             authenticated = True
         return {'authenticated': authenticated}
+
+    # @app.after_request
+    # def remove_headers(response):
+    #     for key in response.headers:
+    #         response.headers[key] = None
+
+    #     return response
 
     # ===========================================================================
     # ROUTING FOR THE APPLICATION (http:localhost:3000)
@@ -86,7 +94,7 @@ def create_app():
     @studentRequired
     def studentHome():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('student/home.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="home")
+        return render_template('student/home.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="home", access_token=session['access_token'])
 
 
     @app.route('/student/grade')
@@ -124,13 +132,14 @@ def create_app():
     @facultyRequired
     def facultyHome():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('faculty/dashboard.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="dashboard")
+        return render_template('faculty/dashboard.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="dashboard", access_token=session['access_token'])
 
 
     @app.route('/faculty/grades')
     @facultyRequired
     def facultyGrades():
         session['last_interaction_time'] = datetime.utcnow()
+        print(session['access_token'])
         return render_template('faculty/grades.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="grades")
 
 

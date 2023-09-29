@@ -231,6 +231,9 @@
     <script>
       const apiKey = '{{ student_api_key | default("") }}'; // Access the stored API key
       const api_base_url = '{{ student_api_base_url | default("") }}';
+
+      const accessToken = `{{ session['access_token'] }}`;
+      const authorizationHeader = `Bearer ${accessToken}`;
     </script>
     {% block script %} {% endblock %}
   </body>

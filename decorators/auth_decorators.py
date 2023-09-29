@@ -4,7 +4,6 @@ from flask import redirect, url_for, flash, render_template
 from functools import wraps
 from flask import redirect, url_for, flash, session
 
-
 def studentRequired(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):

@@ -3,7 +3,7 @@ from flask import jsonify
 from flask import Blueprint, jsonify, request, redirect, url_for, flash, session, render_template
 from sqlalchemy import desc
 from werkzeug.security import check_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from models import Student, StudentClassGrade, Class
 import os
 
@@ -48,38 +48,57 @@ def login():
         if student and check_password_hash(student.Password, password):
             # Successfully authenticated
             access_token = create_access_token(identity=student.StudentId)
+            refresh_token = create_refresh_token(identity=student.StudentId)
             session['access_token'] = access_token
+            session['refresh_token'] = refresh_token
             session['user_role'] = 'student'
-            session['student_id'] = student.StudentId
+            # session['student_id'] = student.StudentId
             return redirect(url_for('studentHome'))
         else:
             flash('Invalid email or password', 'danger')
-    return redirect(url_for('studentLogin'))
+            return redirect(url_for('studentLogin'))
+
 
 @student_api.route('/profile', methods=['GET'])
 @jwt_required()
 def profile():
     current_user_id = get_jwt_identity()
-
+    role = session.get('user_role')
     student = Student.query.get(current_user_id)
-    if student:
+    if student and role =="student":
         return jsonify(student.to_dict())
     else:
         flash('User not found', 'danger')
         return redirect(url_for('student_api.login'))
 
-# ============================================================
+# Getting the overall GPA
+@student_api.route('/overall-gpa', methods=['GET'])
+@jwt_required()
+def overallGrade():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
+        json_overall_gpa = getOverallGrade(current_user_id)
 
+        if json_overall_gpa:
+            return (json_overall_gpa)
+        else:
+            return jsonify(message="No data available")
+    else:
+        return render_template('404.html'), 404
+
+# ============================================================
 
 # Getting the user details
 @student_api.route('/', methods=['GET'])
+@jwt_required()
 def studentData():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_student_id = session.get('student_id')
-
-        # student = Student.query.get(str_student_id)
-        json_student_data = getStudentData(str_student_id)
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
+        json_student_data = getStudentData(current_user_id)
         if json_student_data:
             return (json_student_data)
         else:
@@ -90,17 +109,19 @@ def studentData():
 
 # Updating the user details
 @student_api.route('/details/update', methods=['POST'])
+@jwt_required()
 def updateDetails():
-    # api_key = request.headers.get('X-Api-Key')
-    # if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
         if request.method == 'POST':
-            str_student_id = session.get('student_id')
             email = request.json.get('email')
             number = request.json.get('number')
             residentialAddress = request.json.get('residentialAddress')
 
             json_result = updateStudentData(
-                str_student_id, email, number, residentialAddress)
+                current_user_id, email, number, residentialAddress)
 
             return json_result
 
@@ -113,18 +134,19 @@ def updateDetails():
 
 # Changing the password of the user
 @student_api.route('/change/password', methods=['POST'])
+@jwt_required()
 def changePassword():
-    api_key = request.headers.get('X-Api-Key')
-   
-    if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
         if request.method == 'POST':
-            str_student_id = session.get('student_id')
             password = request.json.get('password')
             new_password = request.json.get('new_password')
             confirm_password = request.json.get('confirm_password')
 
             json_result = updatePassword(
-                str_student_id, password, new_password, confirm_password)
+                current_user_id, password, new_password, confirm_password)
 
             return json_result
 
@@ -137,32 +159,16 @@ def changePassword():
 
 # Latest GPA of the Student in Class
 @student_api.route('/gpa', methods=['GET'])
+@jwt_required()
 def studentGpa():
-    # Get the API key from the request header
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_student_id = session.get('student_id')
-
-        json_student_gpa = getStudentGpa(str_student_id)
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
+        json_student_gpa = getStudentGpa(current_user_id)
+        
         if json_student_gpa is not None:
             return jsonify(json_student_gpa)
-        else:
-            return jsonify(message="No data available")
-    else:
-        return render_template('404.html'), 404
-    
-# Getting the overall GPA
-@student_api.route('/overall-gpa', methods=['GET'])
-def overallGrade():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_student_id = session.get('student_id')
-
-        # student = Student.query.get(str_student_id)
-        json_overall_gpa = getOverallGrade(str_student_id)
-
-        if json_overall_gpa:
-            return (json_overall_gpa)
         else:
             return jsonify(message="No data available")
     else:
@@ -171,13 +177,13 @@ def overallGrade():
 
 # Performance of Student Over Time
 @student_api.route('/performance', methods=['GET'])
+@jwt_required()
 def performance():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_student_id = session.get('student_id')
-
-        # student = Student.query.get(studentNumber)
-        json_performance_data = getStudentPerformance(str_student_id)
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
+        json_performance_data = getStudentPerformance(current_user_id)
 
         if json_performance_data:
             return (json_performance_data)
@@ -189,13 +195,14 @@ def performance():
 
 # Getting Previous Subjects Grade
 @student_api.route('/previous-grade', methods=['GET'])
+@jwt_required()
 def previousGrade():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_student_id = session.get('student_id')
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
 
-        # student = Student.query.get(str_student_id)
-        json_previous_grade = getLatestSubjectGrade(str_student_id)
+        json_previous_grade = getLatestSubjectGrade(current_user_id)
 
         if json_previous_grade:
             return (json_previous_grade)
@@ -206,31 +213,30 @@ def previousGrade():
 
 # Current Course Performance
 @student_api.route('/course-performance', methods=['GET'])
+@jwt_required()
 def coursePerformance():
-    # api_key = request.headers.get('X-Api-Key')
-    # if api_key in API_KEYS.values():
-    str_student_id = session.get('student_id')
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
+        json_course_performance = getCoursePerformance(current_user_id)
 
-    # student = Student.query.get(str_student_id)
-    json_course_performance = getCoursePerformance(str_student_id)
+        if json_course_performance:
+            return (json_course_performance)
+        else:
+            return render_template('404.html'), 404
 
-    if json_course_performance:
-        return (json_course_performance)
-    else:
-        return jsonify(message="No data available")
-    # else:
-    #     return render_template('404.html'), 404
 
    
 # Getting the subjects grades
 @student_api.route('/grades', methods=['GET'])
+@jwt_required()
 def subjectsGrade():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-        str_student_id = session.get('student_id')
-
-        # student = Student.query.get(str_student_id)
-        json_subjects_grade = getSubjectsGrade(str_student_id)
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    student = Student.query.get(current_user_id)
+    if student and role =="student":
+        json_subjects_grade = getSubjectsGrade(current_user_id)
 
         if json_subjects_grade:
             return (json_subjects_grade)

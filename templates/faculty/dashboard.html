@@ -129,11 +129,11 @@
 <!-- STATISTICS DATA FETCHING (COUNT) -->
 <script>
   async function fetchStatistics() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/class-statistics`, {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         });
 
@@ -183,11 +183,11 @@
   }
 
   async function fetchClassAverage() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/class-average`, {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         });
 
@@ -259,6 +259,7 @@
         labelFormat: '{value}%',
         lineStyle: { width: 0 },
         maximum: 100,
+        minimum: 0,
         interval: 20,
         majorTickLines: { width: 0 },
         minorTickLines: { width: 0 },
@@ -285,11 +286,11 @@
 <!-- PASS FAIL RATES -->
 <script>
   async function fetchPassFailRates() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/pass-fail`, {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         });
 
@@ -375,11 +376,11 @@
 <!-- TOP PERFORMER STUDENTS (GRID) -->
 <script>
   async function fetchTopPerformerStudent() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/top-student`, {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         });
 

@@ -311,7 +311,6 @@ def updateStudentData(str_student_id, email, number, residentialAddress):
         data_student = db.session.query(Student).filter(
             Student.StudentId == str_student_id).first()
         
-       
         if data_student:
             data_student.Email = email
             data_student.MobileNumber = number

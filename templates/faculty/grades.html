@@ -98,13 +98,18 @@
 <!-- FETCHING SPECIFIC STUDENT PERFORMANCE -->
 <script>
   // JavaScript function to show the modal
-  async function fetchStudentPerformance(student_id, student_name) {
-    if (apiKey) {
+  async function fetchStudentPerformance(
+    student_id,
+    student_name,
+    student_number
+  ) {
+    console.log('fetchStudentPerformance');
+    if (accessToken) {
       const response = await fetch(
         `${api_base_url}/student/performance/${student_id}`,
         {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         }
       );
@@ -114,10 +119,10 @@
           `Failed to fetch data. Try to contact the admin to resolve the issue.`
         );
       }
-
+      console.log('RESPONDING');
       const data_performance = await response.json();
-
-      displayPerformance(data_performance, student_id, student_name);
+      console.log('data_performance: ', data_performance);
+      displayPerformance(data_performance, student_name, student_number);
     }
   }
 
@@ -126,7 +131,7 @@
     document.getElementById('myModal').classList.add('hidden');
   }
 
-  function displayPerformance(data_performance, student_id, student_name) {
+  function displayPerformance(data_performance, student_name, student_number) {
     if (data_performance) {
       var chartData = [...data_performance];
       // console.log(data_performance[data_performance.length - 1].Year);
@@ -193,7 +198,7 @@
     }
 
     document.getElementById('student-name').innerText = student_name;
-    document.getElementById('student-number').innerText = student_id;
+    document.getElementById('student-number').innerText = student_number;
 
     document.getElementById('myModal').classList.remove('hidden');
   }
@@ -202,11 +207,11 @@
 <!-- GRIDS DATA (FETCHING ALL STUDEnT CLASS SUBJECT GRADE DATA) -->
 <script>
   async function fetchStudentClassSubjectGrade() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/class-subject-grade`, {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         });
 
@@ -302,8 +307,9 @@
             const rowData = grid.getRowObjectFromUID(dataUid).data;
             if (rowData) {
               fetchStudentPerformance(
-                rowData.StudentNumber,
-                rowData.StudentName
+                rowData.StudentId,
+                rowData.StudentName,
+                rowData.StudentNumber
               );
             }
           }

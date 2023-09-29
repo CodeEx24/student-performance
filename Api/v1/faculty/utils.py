@@ -8,7 +8,7 @@ import datetime
 from static.js.utils import convertGradeToPercentage, checkStatus
 
 
-def getAllClassAverageWithPreviousYear(str_teacher_number):
+def getAllClassAverageWithPreviousYear(str_teacher_id):
     try:
         # This could be dynamic depending on the needs/whats the best
         current_year = datetime.datetime.now().year
@@ -23,7 +23,7 @@ def getAllClassAverageWithPreviousYear(str_teacher_number):
             .join(Class, ClassSubject.ClassId == Class.ClassId)
             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
             .join(Course, Class.CourseId == Course.CourseId)
-            .filter(ClassSubject.TeacherNumber == str_teacher_number, Class.Batch == current_year-1)
+            .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch == current_year-1)
             .distinct(Class.CourseId, Class.Year, Class.Batch)
             .order_by(desc(Class.Year))
             # I Limit this into 8 because teacher cannot have many classes and the data sets made are distributed almost all of them
@@ -37,7 +37,7 @@ def getAllClassAverageWithPreviousYear(str_teacher_number):
 
             for class_grade_handle in data_class_grade_handle:
                 # Calculate class name
-                class_name = f"{class_grade_handle.Course.CourseId} {class_grade_handle.Class.Year}-{class_grade_handle.Class.Section} ({class_grade_handle.Class.Batch})"
+                class_name = f"{class_grade_handle.Course.CourseCode} {class_grade_handle.Class.Year}-{class_grade_handle.Class.Section} ({class_grade_handle.Class.Batch})"
 
                 num_class_batch = class_grade_handle.Class.Batch
                 num_class_section = class_grade_handle.Class.Section
@@ -91,7 +91,7 @@ def getAllClassAverageWithPreviousYear(str_teacher_number):
         return None
 
 
-def getHighLowAverageClass(str_teacher_number):
+def getHighLowAverageClass(str_teacher_id):
 
     try:
         current_year = datetime.datetime.now().year
@@ -106,7 +106,7 @@ def getHighLowAverageClass(str_teacher_number):
             .join(Class, ClassSubject.ClassId == Class.ClassId)
             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
             .join(Course, Class.CourseId == Course.CourseId)
-            .filter(ClassSubject.TeacherNumber == str_teacher_number, Class.Batch == current_year-1)
+            .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch == current_year-1)
             .order_by(ClassGrade.Grade.desc())
             .first()
         )
@@ -121,29 +121,29 @@ def getHighLowAverageClass(str_teacher_number):
             .join(Class, ClassSubject.ClassId == Class.ClassId)
             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
             .join(Course, Class.CourseId == Course.CourseId)
-            .filter(ClassSubject.TeacherNumber == str_teacher_number, Class.Batch == current_year-1)
+            .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch == current_year-1)
             .order_by(ClassGrade.Grade)
             .first()
         )
 
         # Return the list of class grades and the lowest/highest grades dictionary
         return {"highest": data_highest_grade_class_handle.ClassGrade.Grade,
-                'highestClass': f"{data_highest_grade_class_handle.Course.CourseId} {data_highest_grade_class_handle.Class.Year}-{data_highest_grade_class_handle.Class.Section} ({data_highest_grade_class_handle.Class.Batch})",
+                'highestClass': f"{data_highest_grade_class_handle.Course.CourseCode} {data_highest_grade_class_handle.Class.Year}-{data_highest_grade_class_handle.Class.Section} ({data_highest_grade_class_handle.Class.Batch})",
                 "lowest": data_lowest_grade_class_handle.ClassGrade.Grade,
-                "lowestClass": f"{data_lowest_grade_class_handle.Course.CourseId} {data_lowest_grade_class_handle.Class.Year}-{data_lowest_grade_class_handle.Class.Section} ({data_lowest_grade_class_handle.Class.Batch})"}
+                "lowestClass": f"{data_lowest_grade_class_handle.Course.CourseCode} {data_lowest_grade_class_handle.Class.Year}-{data_lowest_grade_class_handle.Class.Section} ({data_lowest_grade_class_handle.Class.Batch})"}
 
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         return None
 
 
-def getSubjectCount(str_teacher_number):
+def getSubjectCount(str_teacher_id):
     try:
         data_subject_amount = (
             db.session.query(
                 func.count(distinct(ClassSubject.SubjectId))
             )
-            .filter(ClassSubject.TeacherNumber == str_teacher_number)
+            .filter(ClassSubject.TeacherId == str_teacher_id)
             .scalar()
         )
 
@@ -153,7 +153,7 @@ def getSubjectCount(str_teacher_number):
         return None
 
 
-def getPassFailRates(str_teacher_number):
+def getPassFailRates(str_teacher_id):
     try:
 
         data_pass_fail_rates = (
@@ -166,7 +166,7 @@ def getPassFailRates(str_teacher_number):
             .join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .join(Class, Class.ClassId == ClassSubject.ClassId)
             .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
-            .filter(ClassSubject.TeacherNumber == str_teacher_number)
+            .filter(ClassSubject.TeacherId == str_teacher_id)
             .distinct(Class.CourseId, Class.Year, Class.Batch)
             .order_by(desc(Class.Batch))
             .all()
@@ -211,7 +211,7 @@ def getPassFailRates(str_teacher_number):
         return None
 
 
-def getTopPerformerStudent(str_teacher_number, count):
+def getTopPerformerStudent(str_teacher_id, count):
     try:
 
         data_top_performer_student = (
@@ -220,13 +220,15 @@ def getTopPerformerStudent(str_teacher_number, count):
                 StudentClassSubjectGrade,
                 StudentClassGrade,
                 Student,
+                Course,
                 Class,
             )
             .join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .join(Class, Class.ClassId == ClassSubject.ClassId)
-            .join(StudentClassGrade, StudentClassSubjectGrade.StudentNumber == StudentClassGrade.StudentNumber)
-            .join(Student, Student.StudentNumber == StudentClassSubjectGrade.StudentNumber)
-            .filter(ClassSubject.TeacherNumber == str_teacher_number)
+            .join(StudentClassGrade, StudentClassSubjectGrade.StudentId == StudentClassGrade.StudentId)
+            .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+            .join(Course, Course.CourseId == Class.CourseId)
+            .filter(ClassSubject.TeacherId == str_teacher_id)
             .order_by(desc(Class.Batch), (StudentClassGrade.Grade))
             .all()
         )
@@ -241,7 +243,7 @@ def getTopPerformerStudent(str_teacher_number, count):
 
                 # Check if we have already seen this student number
                 if student_number not in seen_student_numbers:
-                    class_name = f"{top_performer_student.Class.CourseId} {top_performer_student.Class.Year}-{top_performer_student.Class.Section}"
+                    class_name = f"{top_performer_student.Course.CourseCode} {top_performer_student.Class.Year}-{top_performer_student.Class.Section}"
 
                     dict_pass_fail_rate = {
                         'StudentNumber': student_number,
@@ -249,7 +251,7 @@ def getTopPerformerStudent(str_teacher_number, count):
                         'Grade': top_performer_student.StudentClassGrade.Grade,
                         'Batch': top_performer_student.Class.Batch,
                         'Class': class_name,
-                        'TeacherNum': top_performer_student.ClassSubject.TeacherNumber
+                        'TeacherNum': top_performer_student.ClassSubject.TeacherId
                     }
 
                     list_data_top_performer_student.append(dict_pass_fail_rate)
@@ -270,7 +272,7 @@ def getTopPerformerStudent(str_teacher_number, count):
         return None
 
 
-def getStudentClassSubjectGrade(str_teacher_number):
+def getStudentClassSubjectGrade(str_teacher_id):
     try:
         current_year = datetime.datetime.now().year
 
@@ -283,14 +285,16 @@ def getStudentClassSubjectGrade(str_teacher_number):
                 StudentClassSubjectGrade,
                 Subject,
                 Class,
+                Course,
                 Student
             )
             .join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
             .join(Class, Class.ClassId == ClassSubject.ClassId)
-            .join(Student, Student.StudentNumber == StudentClassSubjectGrade.StudentNumber)
-            .filter(ClassSubject.TeacherNumber == str_teacher_number, Class.Batch >= current_year-4)
-            .order_by(desc(Class.CourseId), desc(Class.Batch), desc(Class.Year), desc(ClassSubject.Semester))
+            .join(Course, Course.CourseId == Class.CourseId)
+            .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+            .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
+            .order_by(desc(Course.CourseCode), desc(Class.Batch), desc(Class.Year), desc(Class.Semester))
             .all()
         )
 
@@ -300,7 +304,7 @@ def getStudentClassSubjectGrade(str_teacher_number):
 
             for class_subject_grade in data_class_subject_grade_handle:
                 # Get the class name
-                class_name = f"{class_subject_grade.Class.CourseId} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}"
+                class_name = f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}"
 
                 dict_class_subject_grade = {
                     'StudentId': class_subject_grade.Student.StudentId,
@@ -308,9 +312,9 @@ def getStudentClassSubjectGrade(str_teacher_number):
                     'StudentName': class_subject_grade.Student.Name,
                     'Class': class_name,
                     'Batch': class_subject_grade.Class.Batch,
-                    'Semester': class_subject_grade.ClassSubject.Semester,
+                    'Semester': class_subject_grade.Class.Semester,
                     'Grade': class_subject_grade.StudentClassSubjectGrade.Grade,
-                    'SubjectCode': class_subject_grade.Subject.SubjectId
+                    'SubjectCode': class_subject_grade.Subject.SubjectCode
                 }
 
                 list_data_class_subject_grade.append(dict_class_subject_grade)
@@ -330,38 +334,39 @@ def getStudentClassSubjectGrade(str_teacher_number):
 # RENDER THIS IN FRONTEND
 
 
-def getAllClass(str_teacher_number):
+def getAllClass(str_teacher_id):
     try:
         current_year = datetime.datetime.now().year
 
         data_class_subject_grade_handle = (
             db.session.query(
                 ClassSubject,
-                Class
+                Class, Course
             )
             .join(Class, Class.ClassId == ClassSubject.ClassId)
-            .filter(ClassSubject.TeacherNumber == str_teacher_number, Class.Batch == current_year - 1)
+            .join(Course, Course.CourseId == Class.CourseId)
+            .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch == current_year - 1)
             .order_by(desc(Class.CourseId), Class.Year, Class.Section)
             .all()
         )
 
         if data_class_subject_grade_handle:
             list_classes = []
-            seen_class_ids = set()  # Initialize a set to track seen ClassIds
+            seen_class_name = set()  # Initialize a set to track seen ClassIds
 
             for class_subject_grade in data_class_subject_grade_handle:
-                class_id = class_subject_grade.Class.ClassId
+                class_name = f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}"
 
-                # Check if the ClassId is not in the seen_class_ids set
-                if class_id not in seen_class_ids:
+                # Check if the ClassId is not in the seen_class_name set
+                if class_name not in seen_class_name:
                     # Get the class name
                     class_obj = {
-                        'ClassId': class_id,
-                        'ClassName': f"{class_subject_grade.Class.CourseId} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}"
+                        'ClassId': class_subject_grade.Class.ClassId,
+                        'ClassName': class_name
                     }
 
-                    # Add class_id to the seen_class_ids set
-                    seen_class_ids.add(class_id)
+                    # Add class_name to the seen_class_name set
+                    seen_class_name.add(class_name)
 
                     # Add class_obj to the list_classes
                     list_classes.append(class_obj)
@@ -383,16 +388,13 @@ def getClassPerformance(class_id):
                 ClassGrade, Class, Course
             )
             .join(Class, Class.ClassId == ClassGrade.ClassId)
-            .join(Course, Class.CourseId == Course.CourseId)
+            .join(Course, Course.CourseId == Class.CourseId)
             .filter(ClassGrade.ClassId == class_id)
             .first()
         )
-
         if class_grade:
-
-            # Calculate class name
-            class_name = f"{class_grade.Course.CourseId} {class_grade.Class.Year}-{class_grade.Class.Section} ({class_grade.Class.Batch})"
-
+            class_name = f"{class_grade.Course.CourseCode} {class_grade.Class.Year}-{class_grade.Class.Section} ({class_grade.Class.Batch})"
+            
             num_class_batch = class_grade.Class.Batch
             num_class_section = class_grade.Class.Section
 
@@ -400,10 +402,10 @@ def getClassPerformance(class_id):
                 'Class': class_name,
                 'Batch': num_class_batch,
                 'ListGrade': [],
-                'PresidentLister': class_grade.ClassGrade.PresidentLister,
-                'DeanLister': class_grade.ClassGrade.DeanLister
+                'PresidentLister': class_grade.ClassGrade.PresidentsLister,
+                'DeanLister': class_grade.ClassGrade.DeansLister
             }
-
+            
             list_grade = []
             for i in range(1, class_grade.Class.Year+1):
 
@@ -437,8 +439,8 @@ def getStudentPerformance(str_student_id):
         list_student_performance = (
             db.session.query(StudentClassGrade, Class)
             .join(Class, StudentClassGrade.ClassId == Class.ClassId)
-            .filter(StudentClassGrade.StudentNumber == str_student_id)
-            .order_by(desc(Class.Batch), desc(StudentClassGrade.Semester))
+            .filter(StudentClassGrade.StudentId == str_student_id)
+            .order_by(desc(Class.Batch), desc(Class.Semester))
             .all()
         )
 
@@ -448,7 +450,7 @@ def getStudentPerformance(str_student_id):
 
                 gpa_dict = {
                     'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
-                    'Semester': gpa.StudentClassGrade.Semester,
+                    'Semester': gpa.Class.Semester,
                     'Year': gpa.Class.Batch,
                 }
                 # Append the dictionary to the list
@@ -487,16 +489,16 @@ def getStudentPerformance(str_student_id):
         return None
 
 
-def getFacultyData(str_teacher_number):
+def getFacultyData(str_teacher_id):
     try:
         data_faculty = (
             db.session.query(Faculty).filter(
-                Faculty.TeacherNumber == str_teacher_number).first()
+                Faculty.TeacherId == str_teacher_id).first()
         )
 
         if data_faculty:
-
             dict_faculty_data = {
+                "TeacherId": data_faculty.TeacherId,
                 "TeacherNumber": data_faculty.TeacherNumber,
                 "Name": data_faculty.Name,
                 "ResidentialAddress": data_faculty.ResidentialAddress,
@@ -513,20 +515,21 @@ def getFacultyData(str_teacher_number):
         return None
 
 
-def updateFacultyData(str_teacher_number, email, number, residential_address):
+def updateFacultyData(str_teacher_id, email, number, residential_address):
     try:
         if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
-            return {"message": "Invalid email format", "status": 400}
+            return {"type": "email", "status": 400}
 
         if not re.match(r'^09\d{9}$', number):
-            return {"message": "Invalid mobile number format", "status": 400}
+            return {"type": "mobile", "status": 400}
 
         if residential_address is None or residential_address.strip() == "":
-            return {"message": "Residential Address cannot be empty", "status": 400}
-
+            return {"type": "residential", "status": 400}
+        
         # Update the student data in the database
         data_faculty = db.session.query(Faculty).filter(
-            Faculty.TeacherNumber == str_teacher_number).first()
+            Faculty.TeacherId == str_teacher_id).first()
+        
         if data_faculty:
             data_faculty.Email = email
             data_faculty.MobileNumber = number
@@ -543,10 +546,10 @@ def updateFacultyData(str_teacher_number, email, number, residential_address):
         return {"message": "An error occurred", "status": 500}
 
 
-def updatePassword(str_teacher_number, password, new_password, confirm_password):
+def updatePassword(str_teacher_id, password, new_password, confirm_password):
     try:
         data_faculty = db.session.query(Faculty).filter(
-            Faculty.TeacherNumber == str_teacher_number).first()
+            Faculty.TeacherId == str_teacher_id).first()
 
         if data_faculty:
             # Assuming 'password' is the hashed password stored in the database
@@ -571,7 +574,7 @@ def updatePassword(str_teacher_number, password, new_password, confirm_password)
         return {"message": "An error occurred", "status": 500}
 
 
-# def getAllClassAverage(str_teacher_number):
+# def getAllClassAverage(str_teacher_id):
 #     try:
 #         current_year = datetime.datetime.now().year
 
@@ -585,7 +588,7 @@ def updatePassword(str_teacher_number, password, new_password, confirm_password)
 #             .join(Class, ClassSubject.ClassId == Class.ClassId)
 #             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
 #             .join(Course, Class.CourseId == Course.CourseId)
-#             .filter(ClassSubject.TeacherNumber == str_teacher_number, Class.Batch == current_year-1)
+#             .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch == current_year-1)
 #             .distinct(Class.CourseId, Class.Year, Class.Batch)
 #             # I Limit this into 8 because teacher cannot have many classes and the data sets made are distributed almost all of them
 #             .limit(6)

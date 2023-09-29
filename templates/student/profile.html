@@ -165,12 +165,13 @@
     const residentialAddress =
       document.getElementById('residential-input').value;
 
-    if (apiKey) {
+    if (accessToken) {
       // Send data to the API
       const response = await fetch(`${api_base_url}/details/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: authorizationHeader,
         },
         body: JSON.stringify({ email, number, residentialAddress }),
       });
@@ -243,7 +244,7 @@
     if (apiKey) {
       const response = await fetch(`${api_base_url}/`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 

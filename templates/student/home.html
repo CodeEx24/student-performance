@@ -134,7 +134,7 @@
     if (apiKey) {
       const response = await fetch(`${api_base_url}/gpa`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 
@@ -162,11 +162,12 @@
 
 <!-- FETCH STUDENT OVERALL GPA -->
 <script>
+  console.log('accessToken: ', accessToken);
   async function fetchStudentOverallGpa() {
-    if (apiKey) {
+    if (accessToken) {
       const response = await fetch(`${api_base_url}/overall-gpa`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 
@@ -177,6 +178,7 @@
       }
 
       const data_overall_gpa = await response.json();
+      // console.log(data_overall_gpa);
       displayOverallGPA(data_overall_gpa);
     }
   }
@@ -198,7 +200,7 @@
     if (apiKey) {
       const response = await fetch(`${api_base_url}/performance`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 
@@ -215,6 +217,7 @@
 
   function displayPerformance(data_performance) {
     var chartData = [...data_performance];
+    console.log(data_performance[data_performance.length - 1].Year);
     // Create the chart
     var chart = new ej.charts.Chart({
       primaryXAxis: {
@@ -285,7 +288,7 @@
     if (apiKey) {
       const response = await fetch(`${api_base_url}/course-performance`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 
@@ -309,7 +312,7 @@
     var data = [...course_performance_data];
 
     var chart = new ej.charts.Chart({
-      target: '#CourseLineChartPerformance',
+      target: '#lineChart',
       series: [
         {
           type: 'Line',
@@ -353,7 +356,7 @@
     if (apiKey) {
       const response = await fetch(`${api_base_url}/previous-grade`, {
         headers: {
-          'X-Api-Key': apiKey,
+          Authorization: authorizationHeader,
         },
       });
 
@@ -370,6 +373,8 @@
   fetchPreviousSubjectGrade();
 
   function displayPreviousSubjectGrade(list_previous_subject_grade) {
+    console.log('PREVIOUS GRADE: ', list_previous_subject_grade);
+
     var data = [...list_previous_subject_grade];
     var grid = new ej.grids.Grid({
       dataSource: data,
