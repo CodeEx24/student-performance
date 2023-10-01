@@ -106,7 +106,7 @@
 <!-- PERFORMANCE -->
 <script>
   async function fetchAllClass() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/all-class`, {
           headers: {
@@ -195,7 +195,7 @@
   selectElement2.addEventListener('change', handleSelectChange2);
 
   async function fetchClassPerformance(id, chart_num) {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(
           `${api_base_url}/class-performance/${id}`,
@@ -273,11 +273,11 @@
 <!-- PERFORMANCE -->
 <script>
   async function fetchPassFailRates() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/pass-fail`, {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         });
 

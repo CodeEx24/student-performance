@@ -9,21 +9,21 @@ from static.js.utils import convertGradeToPercentage, checkStatus
 
 from collections import defaultdict
 
-
 def getEnrollmentTrends():
     try:
+        # Query data with required fields
         data_course_enrolled = db.session.query(
-            CourseEnrolled, Course).join(Course, Course.CourseId == CourseEnrolled.CourseId).order_by(CourseEnrolled.DateEnrolled).all()
+            Course.CourseCode, CourseEnrolled.DateEnrolled
+        ).join(Course, Course.CourseId == CourseEnrolled.CourseId).order_by(CourseEnrolled.DateEnrolled).all()
 
         if data_course_enrolled:
+            # Create a dictionary to store year-wise course counts
             course_year_counts = defaultdict(lambda: defaultdict(int))
 
-            for course_enrolled in data_course_enrolled:
-                course_id = course_enrolled.Course.CourseId
-                year_enrolled = course_enrolled.CourseEnrolled.DateEnrolled.year
-
-                # Update the count for the specific CourseId and Year combination
-                course_year_counts[year_enrolled][course_id] += 1
+            # Iterate through the data to calculate counts
+            for course_code, date_enrolled in data_course_enrolled:
+                year_enrolled = date_enrolled.year
+                course_year_counts[year_enrolled][course_code] += 1
 
             # Convert the counts to a list of dictionaries with the desired format
             trend_data = {
@@ -35,32 +35,33 @@ def getEnrollmentTrends():
                 "TotalEnrolled": None
             }
 
+            # Find lowest, highest, and total enrollment counts
             for year, course_counts in course_year_counts.items():
-                trend_item = {"x": year}
-                trend_item.update(course_counts)
+                trend_item = {"x": year, **course_counts}
                 trend_data["CourseDetails"].append(trend_item)
 
-                if year == max(course_year_counts.keys()):
-                    total_enrolled = sum(course_counts.values())
-                    trend_data["TotalEnrolled"] = total_enrolled
+            if trend_data["CourseDetails"]:
+                total_enrolled = sum(course for year_counts in course_year_counts.values() for course in year_counts.values())
+                trend_data["TotalEnrolled"] = total_enrolled
 
-                    # Find the lowest and highest enrolled counts and their corresponding courses
-                    lowest_enrolled_count = min(course_counts.values())
-                    highest_enrolled_count = max(course_counts.values())
+                # Find the lowest and highest enrolled counts and their corresponding courses
+                lowest_enrolled_count = min(course for year_counts in course_year_counts.values() for course in year_counts.values())
+                highest_enrolled_count = max(course for year_counts in course_year_counts.values() for course in year_counts.values())
 
-                    for course_id, count in course_counts.items():
+                for year_counts in course_year_counts.values():
+                    for course_code, count in year_counts.items():
                         course_name = db.session.query(Course.Name).filter_by(
-                            CourseId=course_id).first()[0]
+                            CourseCode=course_code).first()
 
                         if count == lowest_enrolled_count:
                             trend_data["LowestEnrolledCount"] = count
                             trend_data["LowestEnrolledCourses"].append(
-                                course_name)
+                                course_name[0] if course_name else course_code)
 
                         if count == highest_enrolled_count:
                             trend_data["HighestEnrolledCount"] = count
                             trend_data["HighestEnrolledCourses"].append(
-                                course_name)
+                                course_name[0] if course_name else course_code)
 
             return trend_data
         else:
@@ -68,6 +69,7 @@ def getEnrollmentTrends():
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         return None
+
 
 
 def getCurrentGpaGiven():
@@ -108,15 +110,15 @@ def getCurrentGpaGiven():
 def getOverallCoursePerformance():
     try:
         data_course_grade = db.session.query(
-            CourseGrade).order_by(CourseGrade.Year, CourseGrade.CourseId).all()
-
+            CourseGrade, Course).join(Course, Course.CourseId == CourseGrade.CourseId).order_by(CourseGrade.Year, CourseGrade.CourseId).all()
         if data_course_grade:
             course_year_grades = defaultdict(dict)
 
             for course_grade in data_course_grade:
-                year = course_grade.Year
-                course_id = course_grade.CourseId
-                grade = convertGradeToPercentage(course_grade.Grade)
+                year = course_grade.CourseGrade.Year
+                course_id = course_grade.Course.CourseCode
+                
+                grade = convertGradeToPercentage(course_grade.CourseGrade.Grade)
 
                 if year not in course_year_grades:
                     course_year_grades[year] = {"x": year}
@@ -125,7 +127,6 @@ def getOverallCoursePerformance():
 
             # Convert the data into a list of dictionaries
             formatted_data = list(course_year_grades.values())
-
             return formatted_data
         else:
             return None
@@ -162,7 +163,7 @@ def getAllClassData():
                     # Get the class name
                     class_obj = {
                         'ClassId': class_id,
-                        'ClassName': f"{class_subject_grade.Class.CourseId} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}",
+                        'ClassName': f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}",
                         "Course": class_subject_grade.Course.Name
                     }
 

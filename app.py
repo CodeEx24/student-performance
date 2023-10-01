@@ -37,10 +37,10 @@ def create_app():
     init_db(app)
 
     # The Api Key is static for development mode. The Api key in future must refresh in order to secure the api endpoint of the application
-    student_api_key = os.getenv('STUDENT_API_KEY')
-    faculty_api_key = os.getenv('FACULTY_API_KEY')
+    # student_api_key = os.getenv('STUDENT_API_KEY')
+    # faculty_api_key = os.getenv('FACULTY_API_KEY')
     university_admin_api_key = os.getenv('UNIVERSITY_ADMIN_API_KEY')
-    system_admin_api_key = os.getenv('SYSTEM_ADMIN_API_KEY')
+    # system_admin_api_key = os.getenv('SYSTEM_ADMIN_API_KEY')
 
     # The api base url for api endpoints
     student_api_base_url = os.getenv("STUDENT_API_BASE_URL")
@@ -94,28 +94,28 @@ def create_app():
     @studentRequired
     def studentHome():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('student/home.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="home", access_token=session['access_token'])
+        return render_template('student/home.html', student_api_base_url=student_api_base_url, current_page="home", access_token=session['access_token'])
 
 
     @app.route('/student/grade')
     @studentRequired
     def studentGrade():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('student/grades.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="grades")
+        return render_template('student/grades.html', student_api_base_url=student_api_base_url, current_page="grades")
 
 
     @app.route('/student/profile')
     @studentRequired
     def studentProfile():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('student/profile.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url, current_page="profile")
+        return render_template('student/profile.html', student_api_base_url=student_api_base_url, current_page="profile")
 
 
     @app.route('/student/change-password')
     @studentRequired
     def changePassword():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('student/change_password.html', student_api_key=student_api_key, student_api_base_url=student_api_base_url,  current_page="change-password")
+        return render_template('student/change_password.html', student_api_base_url=student_api_base_url,  current_page="change-password")
 
 
     # ========================================================================
@@ -132,7 +132,7 @@ def create_app():
     @facultyRequired
     def facultyHome():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('faculty/dashboard.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="dashboard", access_token=session['access_token'])
+        return render_template('faculty/dashboard.html', faculty_api_base_url=faculty_api_base_url, current_page="dashboard", access_token=session['access_token'])
 
 
     @app.route('/faculty/grades')
@@ -140,28 +140,28 @@ def create_app():
     def facultyGrades():
         session['last_interaction_time'] = datetime.utcnow()
         print(session['access_token'])
-        return render_template('faculty/grades.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="grades")
+        return render_template('faculty/grades.html', faculty_api_base_url=faculty_api_base_url, current_page="grades")
 
 
     @app.route('/faculty/class-comparison')
     @facultyRequired
     def facultyClassComparison():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('faculty/class-comparison.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="class-comparison")
+        return render_template('faculty/class-comparison.html', faculty_api_base_url=faculty_api_base_url, current_page="class-comparison")
 
 
     @app.route('/faculty/profile')
     @facultyRequired
     def facultyProfile():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('faculty/profile.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="profile")
+        return render_template('faculty/profile.html', faculty_api_base_url=faculty_api_base_url, current_page="profile")
 
 
     @app.route('/faculty/change-password')
     @facultyRequired
     def facultyChangePassword():
         session['last_interaction_time'] = datetime.utcnow()
-        return render_template('faculty/change_password.html', faculty_api_key=faculty_api_key, faculty_api_base_url=faculty_api_base_url, current_page="change-password")
+        return render_template('faculty/change_password.html', faculty_api_base_url=faculty_api_base_url, current_page="change-password")
 
 
     # ========================================================================
@@ -204,10 +204,10 @@ def create_app():
 
     # ========================================================================
     # Register the API blueprint
-    app.register_blueprint(university_admin_api,
-                        url_prefix='/api/v1/university-admin')
+    app.register_blueprint(university_admin_api, url_prefix='/api/v1/university-admin')
     app.register_blueprint(faculty_api, url_prefix='/api/v1/faculty')
     app.register_blueprint(student_api, url_prefix='/api/v1/student')
+    
 
 
     @app.route('/page_not_found')  # Define an actual route

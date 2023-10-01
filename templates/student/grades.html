@@ -211,7 +211,7 @@
 <!-- FETCH STUDENT DATA -->
 <script>
   async function fetchStudentDetails() {
-    if (apiKey) {
+    if (accessToken) {
       const response = await fetch(`${api_base_url}/`, {
         headers: {
           Authorization: authorizationHeader,
@@ -261,7 +261,7 @@
 <!-- FETCHING ALL STUDENT SUBJECTS GRADE -->
 <script>
   async function fetchStudentSubjectGrade() {
-    if (apiKey) {
+    if (accessToken) {
       const response = await fetch(`${api_base_url}/grades`, {
         headers: {
           Authorization: authorizationHeader,

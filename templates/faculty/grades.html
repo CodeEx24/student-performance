@@ -103,7 +103,6 @@
     student_name,
     student_number
   ) {
-    console.log('fetchStudentPerformance');
     if (accessToken) {
       const response = await fetch(
         `${api_base_url}/student/performance/${student_id}`,
@@ -119,9 +118,7 @@
           `Failed to fetch data. Try to contact the admin to resolve the issue.`
         );
       }
-      console.log('RESPONDING');
       const data_performance = await response.json();
-      console.log('data_performance: ', data_performance);
       displayPerformance(data_performance, student_name, student_number);
     }
   }
@@ -134,9 +131,7 @@
   function displayPerformance(data_performance, student_name, student_number) {
     if (data_performance) {
       var chartData = [...data_performance];
-      // console.log(data_performance[data_performance.length - 1].Year);
-      // // Create the chart
-      // console.log('chartData: ', chartData);
+
       var chart = new ej.charts.Chart({
         primaryXAxis: {
           title: 'Year',
@@ -222,7 +217,6 @@
         }
 
         const json_class_subject_grade = await response.json();
-        console.log('json_class_subject_grade: ', json_class_subject_grade);
         displayStudentsGrade(json_class_subject_grade);
       } catch (error) {
         console.error(error);
@@ -281,12 +275,12 @@
           width: 150,
         },
       ],
-      cellClick: function (args) {
-        if (args.column.field === 'Actions') {
-          // Check if the clicked cell is in the 'StudentNumber' column
-          console.log('Student Number:', args.data.StudentNumber);
-        }
-      },
+      // cellClick: function (args) {
+      //   if (args.column.field === 'Actions') {
+      //     // Check if the clicked cell is in the 'StudentNumber' column
+      //     console.log('Student Number:', args.data.StudentNumber);
+      //   }
+      // },
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
       excelExportComplete: function (args) {},

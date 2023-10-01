@@ -241,7 +241,7 @@
 <!-- FETCHING USER DETAILS -->
 <script>
   async function fetchFacultyDetails() {
-    if (apiKey) {
+    if (accessToken) {
       const response = await fetch(`${api_base_url}/`, {
         headers: {
           Authorization: authorizationHeader,

@@ -126,11 +126,19 @@ def getHighLowAverageClass(str_teacher_id):
             .first()
         )
 
+        highest_grade = round(data_highest_grade_class_handle.ClassGrade.Grade, 2)
+        lowest_grade = round(data_lowest_grade_class_handle.ClassGrade.Grade, 2)
+
+        highest_class = f"{data_highest_grade_class_handle.Course.CourseCode} {data_highest_grade_class_handle.Class.Year}-{data_highest_grade_class_handle.Class.Section} ({data_highest_grade_class_handle.Class.Batch})"
+        lowest_class = f"{data_lowest_grade_class_handle.Course.CourseCode} {data_lowest_grade_class_handle.Class.Year}-{data_lowest_grade_class_handle.Class.Section} ({data_lowest_grade_class_handle.Class.Batch})"
+
         # Return the list of class grades and the lowest/highest grades dictionary
-        return {"highest": data_highest_grade_class_handle.ClassGrade.Grade,
-                'highestClass': f"{data_highest_grade_class_handle.Course.CourseCode} {data_highest_grade_class_handle.Class.Year}-{data_highest_grade_class_handle.Class.Section} ({data_highest_grade_class_handle.Class.Batch})",
-                "lowest": data_lowest_grade_class_handle.ClassGrade.Grade,
-                "lowestClass": f"{data_lowest_grade_class_handle.Course.CourseCode} {data_lowest_grade_class_handle.Class.Year}-{data_lowest_grade_class_handle.Class.Section} ({data_lowest_grade_class_handle.Class.Batch})"}
+        return {
+            "highest": highest_grade,
+            "highestClass": highest_class,
+            "lowest": lowest_grade,
+            "lowestClass": lowest_class
+        }
 
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response

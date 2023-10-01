@@ -94,7 +94,7 @@ class UniversityAdmin(db.Model, UserMixin):
     __tablename__ = 'UniversityAdmins'
 
     UnivAdminId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    UnivAdminNumber = db.Column(db.String(30), primary_key=True)  # UserID
+    UnivAdminNumber = db.Column(db.String(30), unique=True)  # UserID
     Name = db.Column(db.String(50), nullable=False)  # Name
     Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
     Password = db.Column(db.String(128), nullable=False)  # Password
@@ -129,7 +129,7 @@ class SystemAdmin(db.Model, UserMixin):
     __tablename__ = 'SystemAdmins'
 
     SysAdminId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    SysAdminNumber = db.Column(db.String(30), primary_key=True)  # UserID
+    SysAdminNumber = db.Column(db.String(30), unique=True)  # UserID
     Name = db.Column(db.String(50), nullable=False)  # Name
     Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
     Password = db.Column(db.String(128), nullable=False)  # Password

@@ -115,11 +115,11 @@
 <!-- ENROLLMENT TRENDS OF COURSES -->
 <script>
   async function fetchEnrollmentTrends() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/enrollment/trends`, {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         });
 
@@ -139,11 +139,11 @@
   }
 
   async function fetchAverageGPA() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(`${api_base_url}/current/gpa`, {
           headers: {
-            'X-Api-Key': apiKey,
+            Authorization: authorizationHeader,
           },
         });
 
@@ -312,13 +312,13 @@
 <!-- COURSE PERFORMANCE -->
 <script>
   async function fetchCoursePerformance() {
-    if (apiKey) {
+    if (accessToken) {
       try {
         const response = await fetch(
           `${api_base_url}/overall/course/performance`,
           {
             headers: {
-              'X-Api-Key': apiKey,
+              Authorization: authorizationHeader,
             },
           }
         );

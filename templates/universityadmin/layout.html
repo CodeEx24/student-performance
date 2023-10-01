@@ -442,6 +442,11 @@
     <script>
       const apiKey = '{{ university_admin_api_key | default("") }}';
       const api_base_url = '{{ university_admin_api_base_url | default("") }}';
+
+      const accessToken = `{{ session['access_token'] }}`;
+      const authorizationHeader = `Bearer ${accessToken}`;
+
+      console.log('accessToken: ', accessToken);
     </script>
 
     {% block script %} {% endblock script %}

@@ -131,7 +131,7 @@
 <!-- FETCHING CURRENT GPA -->
 <script>
   async function fetchStudentGpa() {
-    if (apiKey) {
+    if (accessToken) {
       const response = await fetch(`${api_base_url}/gpa`, {
         headers: {
           Authorization: authorizationHeader,
@@ -197,7 +197,7 @@
 <!-- STUDENT PERFORMANCE OVER TIME -->
 <script>
   async function fetchStudentPerformanceOvertime() {
-    if (apiKey) {
+    if (accessToken) {
       const response = await fetch(`${api_base_url}/performance`, {
         headers: {
           Authorization: authorizationHeader,
@@ -285,7 +285,7 @@
 <!-- COURSE PERFORMANCE OVER TIME -->
 <script>
   async function fetchCoursePerformanceOvertime() {
-    if (apiKey) {
+    if (accessToken) {
       const response = await fetch(`${api_base_url}/course-performance`, {
         headers: {
           Authorization: authorizationHeader,
@@ -353,7 +353,7 @@
 <!-- SUBJECT PREVIOUS GRADE TABLE -->
 <script>
   async function fetchPreviousSubjectGrade() {
-    if (apiKey) {
+    if (accessToken) {
       const response = await fetch(`${api_base_url}/previous-grade`, {
         headers: {
           Authorization: authorizationHeader,

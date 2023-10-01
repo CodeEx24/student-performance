@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request, redirect, url_for, flash, session
 from models import UniversityAdmin
 
 from werkzeug.security import check_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
 from decorators.auth_decorators import universityAdminRequired
 
 # FUNCTIONS IMPORT
@@ -42,14 +42,15 @@ def login():
         if admin and check_password_hash(admin.Password, password):
             # Successfully authenticated
             access_token = create_access_token(identity=admin.UnivAdminId)
+            refresh_token = create_refresh_token(identity=admin.UnivAdminId)
             session['access_token'] = access_token
             session['user_role'] = 'universityAdmin'
-            session['admin_number'] = admin.UnivAdminNumber
+            # session['admin_number'] = admin.UnivAdminNumber
             return redirect(url_for('universityAdminHome'))
         else:
             flash('Invalid email or password', 'danger')
+            return redirect(url_for('universityAdminLogin'))
     return redirect(url_for('universityAdminLogin'))
-
 
 # ===================================================
 # TESTING AREA
@@ -70,10 +71,13 @@ def profile():
 
 # Getting the enrollment trends of different courses
 @university_admin_api.route('/enrollment/trends', methods=['GET'])
+@jwt_required()
 def enrollmentTrends():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
-
+    
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    universityAdmin = UniversityAdmin.query.get(current_user_id)
+    if universityAdmin and role =="universityAdmin":
         json_performance_data = getEnrollmentTrends()
 
         if json_performance_data:
@@ -86,9 +90,12 @@ def enrollmentTrends():
 
 # Getting the Average GPA given
 @university_admin_api.route('/current/gpa', methods=['GET'])
+@jwt_required()
 def currentGpaGiven():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    universityAdmin = UniversityAdmin.query.get(current_user_id)
+    if universityAdmin and role =="universityAdmin":
         json_current_gpa = getCurrentGpaGiven()
 
         if json_current_gpa:
@@ -101,9 +108,16 @@ def currentGpaGiven():
 
 # Getting the overall course performance
 @university_admin_api.route('/overall/course/performance', methods=['GET'])
+@jwt_required()
 def overallCoursePerformance():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
+    print("INSIDE PERFORMANCE")
+    current_user_id = get_jwt_identity()
+    print("CURRENT USER ID: ", current_user_id)
+    role = session.get('user_role')
+    print("ROLE: ", role)
+    universityAdmin = UniversityAdmin.query.get(current_user_id)
+    print("UNIV ADMING: ", universityAdmin)
+    if universityAdmin and role =="universityAdmin":
         json_performance_data = getOverallCoursePerformance()
 
         if json_performance_data:
@@ -116,9 +130,12 @@ def overallCoursePerformance():
 
 # Getting all the class data in current year
 @university_admin_api.route('/class/data', methods=['GET'])
+@jwt_required()
 def classData():
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    universityAdmin = UniversityAdmin.query.get(current_user_id)
+    if universityAdmin and role =="universityAdmin":
         json_class_data = getAllClassData()
 
         if json_class_data:
@@ -131,9 +148,12 @@ def classData():
 
 # Getting the specific class performance
 @university_admin_api.route('/class/performance/<int:id>', methods=['GET', 'POST'])
+@jwt_required()
 def classPerformance(id):
-    api_key = request.headers.get('X-Api-Key')
-    if api_key in API_KEYS.values():
+    current_user_id = get_jwt_identity()
+    role = session.get('user_role')
+    universityAdmin = UniversityAdmin.query.get(current_user_id)
+    if universityAdmin and role =="universityAdmin":
         json_class_performance = getClassPerformance(id)
 
         if json_class_performance:
