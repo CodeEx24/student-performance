@@ -1,13 +1,18 @@
-from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db
+from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db, UniversityAdmin
 from sqlalchemy import desc
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
 from collections import defaultdict
 import datetime
 
+from flask import session
 from static.js.utils import convertGradeToPercentage, checkStatus
 
 from collections import defaultdict
+
+def getCurrentUser():
+    current_user_id = session.get('user_id')
+    return UniversityAdmin.query.get(current_user_id)
 
 def getEnrollmentTrends():
     try:

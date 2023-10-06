@@ -2,9 +2,14 @@ from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, Studen
 from sqlalchemy import desc
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from flask import session
 
 from static.js.utils import convertGradeToPercentage, checkStatus
+
+
+def getCurrentUser():
+    current_user_id = session.get('user_id')
+    return Student.query.get(current_user_id)
 
 
 def getStudentGpa(studentId):
@@ -136,7 +141,7 @@ def getCoursePerformance(str_student_id):
                 .filter(CourseGrade.CourseId == data_course_enrolled.CourseId)
                 .order_by(desc(CourseGrade.Year))
                 .limit(10)
-                .all()
+                # .all()
             )
 
             if data_course_performance:

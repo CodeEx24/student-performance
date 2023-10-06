@@ -7,13 +7,15 @@ from Api.v1.student.api_routes import student_api
 from Api.v1.faculty.api_routes import faculty_api
 from Api.v1.universityadmin.api_routes import university_admin_api
 
+
 import os
 from dotenv import load_dotenv
 
-from models import init_db, Student, Faculty, UniversityAdmin
+from models import init_db
 from flask_jwt_extended import JWTManager
-from decorators.auth_decorators import studentRequired, facultyRequired, preventAuthenticated, universityAdminRequired
-from datetime import datetime, timedelta
+
+from decorators.auth_decorators import preventAuthenticated, role_required
+from datetime import  timedelta
 
 def create_app():
     load_dotenv()  # Load environment variables from .env file
@@ -24,15 +26,17 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.config['SESSION_COOKIE_SECURE'] = True
+    
     # Replace 'your-secret-key' with an actual secret key
     app.secret_key = os.getenv('SECRET_KEY')
     Cache(app, config={'CACHE_TYPE': 'simple'})
     # cache.init_app(app)
 
-    CORS(app)
+    # Allowed third party apps
+    allowed_origins = ["https://example1.com", "https://example2.com"]
+    CORS(app, origins=allowed_origins, allow_headers=["Authorization", "X-API-Key"])
+
     jwt = JWTManager(app)
     init_db(app)
 
@@ -47,21 +51,18 @@ def create_app():
     faculty_api_base_url = os.getenv("FACULTY_API_BASE_URL")
     university_admin_api_base_url = os.getenv("UNIVERSITY_ADMIN_API_BASE_URL")
 
-
     @app.context_processor
     def custom_context_processor():
         authenticated = False
         if 'user_role' in session:
             authenticated = True
         return {'authenticated': authenticated}
-
-    # @app.after_request
-    # def remove_headers(response):
-    #     for key in response.headers:
-    #         response.headers[key] = None
-
-    #     return response
-
+    
+    @app.before_request
+    def before_request():
+        session.permanent=True
+        pass
+    
     # ===========================================================================
     # ROUTING FOR THE APPLICATION (http:localhost:3000)
 
@@ -69,13 +70,13 @@ def create_app():
     @app.route('/')
     @preventAuthenticated
     def home():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('main/index.html')
 
 
     @app.route('/logout')
     def logout():
-        # Clear session data including JWT token and user role
+        # session.removeItem('access_token')
+        
         session.clear()
         return redirect(url_for('home'))  # Redirect to home or appropriate route
 
@@ -86,35 +87,30 @@ def create_app():
     @app.route('/student')
     @preventAuthenticated
     def studentLogin():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/login.html')
 
 
     @app.route('/student/home')
-    @studentRequired
+    @role_required('student')
     def studentHome():
-        session['last_interaction_time'] = datetime.utcnow()
-        return render_template('student/home.html', student_api_base_url=student_api_base_url, current_page="home", access_token=session['access_token'])
+        return render_template('student/home.html', student_api_base_url=student_api_base_url, current_page="home")
 
 
     @app.route('/student/grade')
-    @studentRequired
+    @role_required('student')
     def studentGrade():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/grades.html', student_api_base_url=student_api_base_url, current_page="grades")
 
 
     @app.route('/student/profile')
-    @studentRequired
+    @role_required('student')
     def studentProfile():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/profile.html', student_api_base_url=student_api_base_url, current_page="profile")
 
 
     @app.route('/student/change-password')
-    @studentRequired
+    @role_required('student')
     def changePassword():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('student/change_password.html', student_api_base_url=student_api_base_url,  current_page="change-password")
 
 
@@ -129,38 +125,33 @@ def create_app():
 
 
     @app.route('/faculty/dashboard')
-    @facultyRequired
+    @role_required('faculty')
     def facultyHome():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/dashboard.html', faculty_api_base_url=faculty_api_base_url, current_page="dashboard", access_token=session['access_token'])
 
 
     @app.route('/faculty/grades')
-    @facultyRequired
+    @role_required('faculty')
     def facultyGrades():
-        session['last_interaction_time'] = datetime.utcnow()
         print(session['access_token'])
         return render_template('faculty/grades.html', faculty_api_base_url=faculty_api_base_url, current_page="grades")
 
 
     @app.route('/faculty/class-comparison')
-    @facultyRequired
+    @role_required('faculty')
     def facultyClassComparison():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/class-comparison.html', faculty_api_base_url=faculty_api_base_url, current_page="class-comparison")
 
 
     @app.route('/faculty/profile')
-    @facultyRequired
+    @role_required('faculty')
     def facultyProfile():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/profile.html', faculty_api_base_url=faculty_api_base_url, current_page="profile")
 
 
     @app.route('/faculty/change-password')
-    @facultyRequired
+    @role_required('faculty')
     def facultyChangePassword():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('faculty/change_password.html', faculty_api_base_url=faculty_api_base_url, current_page="change-password")
 
 
@@ -175,39 +166,34 @@ def create_app():
 
 
     @app.route('/university-admin/home')
-    @universityAdminRequired
+    @role_required('universityAdmin')
     def universityAdminHome():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('universityadmin/home.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="home")
 
 
     @app.route('/university-admin/class-performance')
-    @universityAdminRequired
+    @role_required('universityAdmin')
     def universityClassPerformance():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('universityadmin/class-performance.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
 
 
     @app.route('/university-admin/profile')
-    @universityAdminRequired
+    @role_required('universityAdmin')
     def universityProfile():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('universityadmin/profile.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="profile")
 
 
     @app.route('/university-admin/change-password')
-    @universityAdminRequired
+    @role_required('universityAdmin')
     def universityChangePassword():
-        session['last_interaction_time'] = datetime.utcnow()
         return render_template('universityadmin/change-password.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
 
 
     # ========================================================================
     # Register the API blueprint
-    app.register_blueprint(university_admin_api, url_prefix='/api/v1/university-admin')
-    app.register_blueprint(faculty_api, url_prefix='/api/v1/faculty')
-    app.register_blueprint(student_api, url_prefix='/api/v1/student')
-    
+    app.register_blueprint(university_admin_api, url_prefix=university_admin_api_base_url)
+    app.register_blueprint(faculty_api, url_prefix=faculty_api_base_url)
+    app.register_blueprint(student_api, url_prefix=student_api_base_url)
 
 
     @app.route('/page_not_found')  # Define an actual route

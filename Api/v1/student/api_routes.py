@@ -3,32 +3,13 @@ from flask import jsonify
 from flask import Blueprint, jsonify, request, redirect, url_for, flash, session, render_template
 from sqlalchemy import desc
 from werkzeug.security import check_password_hash
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
-from models import Student, StudentClassGrade, Class
+from models import Student
 import os
 
+from decorators.auth_decorators import role_required
+
 # FUNCTIONS IMPORT
-from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, getStudentData, updateStudentData, updatePassword
-
-
-# Access API keys from environment variables
-WEBSITE1_API_KEY = os.getenv('WEBSITE1_API_KEY')
-WEBSITE2_API_KEY = os.getenv('WEBSITE2_API_KEY')
-WEBSITE3_API_KEY = os.getenv('WEBSITE3_API_KEY')
-WEBSITE4_API_KEY = os.getenv('WEBSITE4_API_KEY')
-WEBSITE5_API_KEY = os.getenv('WEBSITE5_API_KEY')
-student_api_key = os.getenv('STUDENT_API_KEY')
-
-
-API_KEYS = {
-    'website1': WEBSITE1_API_KEY,
-    'website2': WEBSITE2_API_KEY,
-    'website3': WEBSITE3_API_KEY,
-    'website4': WEBSITE4_API_KEY,
-    'website5': WEBSITE5_API_KEY,
-    'student_key': student_api_key
-    # Add more websites and keys as needed
-}
+from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, getStudentData, updateStudentData, updatePassword, getCurrentUser
 
 student_api = Blueprint('student_api', __name__)
 
@@ -38,7 +19,7 @@ student_api = Blueprint('student_api', __name__)
 # TESTING AREA
 
 # Student User Log in
-@student_api.route('/login', methods=['GET', 'POST'])
+@student_api.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -47,25 +28,24 @@ def login():
         student = Student.query.filter_by(Email=email).first()
         if student and check_password_hash(student.Password, password):
             # Successfully authenticated
-            access_token = create_access_token(identity=student.StudentId)
-            refresh_token = create_refresh_token(identity=student.StudentId)
-            session['access_token'] = access_token
-            session['refresh_token'] = refresh_token
+            # access_token = create_access_token(identity=student.StudentId)
+            # refresh_token = create_refresh_token(identity=student.StudentId)
+            session['user_id'] = student.StudentId
             session['user_role'] = 'student'
+            
             # session['student_id'] = student.StudentId
-            return redirect(url_for('studentHome'))
+            return jsonify({"message": "Login successful"}), 200
         else:
-            flash('Invalid email or password', 'danger')
-            return redirect(url_for('studentLogin'))
+            return jsonify({"message": "Invalid email or password"}), 401
+    return jsonify({"message": "Method not allowed"}), 405
+
 
 
 @student_api.route('/profile', methods=['GET'])
-@jwt_required()
+@role_required('student')
 def profile():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
+    student = getCurrentUser()
+    if student:
         return jsonify(student.to_dict())
     else:
         flash('User not found', 'danger')
@@ -73,13 +53,11 @@ def profile():
 
 # Getting the overall GPA
 @student_api.route('/overall-gpa', methods=['GET'])
-@jwt_required()
+@role_required('student')
 def overallGrade():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
-        json_overall_gpa = getOverallGrade(current_user_id)
+    student = getCurrentUser()
+    if student:
+        json_overall_gpa = getOverallGrade(student.StudentId)
 
         if json_overall_gpa:
             return (json_overall_gpa)
@@ -92,13 +70,11 @@ def overallGrade():
 
 # Getting the user details
 @student_api.route('/', methods=['GET'])
-@jwt_required()
+@role_required('student')
 def studentData():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
-        json_student_data = getStudentData(current_user_id)
+    student = getCurrentUser()
+    if student:
+        json_student_data = getStudentData(student.StudentId)
         if json_student_data:
             return (json_student_data)
         else:
@@ -109,19 +85,17 @@ def studentData():
 
 # Updating the user details
 @student_api.route('/details/update', methods=['POST'])
-@jwt_required()
+@role_required('student')
 def updateDetails():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
+    student = getCurrentUser()
+    if student:
         if request.method == 'POST':
             email = request.json.get('email')
             number = request.json.get('number')
             residentialAddress = request.json.get('residentialAddress')
 
             json_result = updateStudentData(
-                current_user_id, email, number, residentialAddress)
+                student.StudentId, email, number, residentialAddress)
 
             return json_result
 
@@ -134,19 +108,17 @@ def updateDetails():
 
 # Changing the password of the user
 @student_api.route('/change/password', methods=['POST'])
-@jwt_required()
+@role_required('student')
 def changePassword():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
+    student = getCurrentUser()
+    if student:
         if request.method == 'POST':
             password = request.json.get('password')
             new_password = request.json.get('new_password')
             confirm_password = request.json.get('confirm_password')
 
             json_result = updatePassword(
-                current_user_id, password, new_password, confirm_password)
+                student.StudentId, password, new_password, confirm_password)
 
             return json_result
 
@@ -159,13 +131,11 @@ def changePassword():
 
 # Latest GPA of the Student in Class
 @student_api.route('/gpa', methods=['GET'])
-@jwt_required()
+@role_required('student')
 def studentGpa():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
-        json_student_gpa = getStudentGpa(current_user_id)
+    student = getCurrentUser()
+    if student:
+        json_student_gpa = getStudentGpa(student.StudentId)
         
         if json_student_gpa is not None:
             return jsonify(json_student_gpa)
@@ -177,13 +147,11 @@ def studentGpa():
 
 # Performance of Student Over Time
 @student_api.route('/performance', methods=['GET'])
-@jwt_required()
+@role_required('student')
 def performance():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
-        json_performance_data = getStudentPerformance(current_user_id)
+    student = getCurrentUser()
+    if student:
+        json_performance_data = getStudentPerformance(student.StudentId)
 
         if json_performance_data:
             return (json_performance_data)
@@ -195,14 +163,12 @@ def performance():
 
 # Getting Previous Subjects Grade
 @student_api.route('/previous-grade', methods=['GET'])
-@jwt_required()
+@role_required('student')
 def previousGrade():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
+    student = getCurrentUser()
+    if student:
 
-        json_previous_grade = getLatestSubjectGrade(current_user_id)
+        json_previous_grade = getLatestSubjectGrade(student.StudentId)
 
         if json_previous_grade:
             return (json_previous_grade)
@@ -213,13 +179,11 @@ def previousGrade():
 
 # Current Course Performance
 @student_api.route('/course-performance', methods=['GET'])
-@jwt_required()
+@role_required('student')
 def coursePerformance():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
-        json_course_performance = getCoursePerformance(current_user_id)
+    student = getCurrentUser()
+    if student:
+        json_course_performance = getCoursePerformance(student.StudentId)
 
         if json_course_performance:
             return (json_course_performance)
@@ -230,13 +194,11 @@ def coursePerformance():
    
 # Getting the subjects grades
 @student_api.route('/grades', methods=['GET'])
-@jwt_required()
+@role_required('student')
 def subjectsGrade():
-    current_user_id = get_jwt_identity()
-    role = session.get('user_role')
-    student = Student.query.get(current_user_id)
-    if student and role =="student":
-        json_subjects_grade = getSubjectsGrade(current_user_id)
+    student = getCurrentUser()
+    if student:
+        json_subjects_grade = getSubjectsGrade(student.StudentId)
 
         if json_subjects_grade:
             return (json_subjects_grade)

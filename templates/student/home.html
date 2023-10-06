@@ -134,7 +134,7 @@
     if (accessToken) {
       const response = await fetch(`${api_base_url}/gpa`, {
         headers: {
-          Authorization: authorizationHeader,
+          Authorization: `Bearer {{ access_token }}`,
         },
       });
 
@@ -162,12 +162,11 @@
 
 <!-- FETCH STUDENT OVERALL GPA -->
 <script>
-  console.log('accessToken: ', accessToken);
   async function fetchStudentOverallGpa() {
     if (accessToken) {
       const response = await fetch(`${api_base_url}/overall-gpa`, {
         headers: {
-          Authorization: authorizationHeader,
+          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
         },
       });
 
@@ -200,7 +199,7 @@
     if (accessToken) {
       const response = await fetch(`${api_base_url}/performance`, {
         headers: {
-          Authorization: authorizationHeader,
+          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
         },
       });
 
@@ -288,7 +287,7 @@
     if (accessToken) {
       const response = await fetch(`${api_base_url}/course-performance`, {
         headers: {
-          Authorization: authorizationHeader,
+          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
         },
       });
 
@@ -356,7 +355,7 @@
     if (accessToken) {
       const response = await fetch(`${api_base_url}/previous-grade`, {
         headers: {
-          Authorization: authorizationHeader,
+          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
         },
       });
 
