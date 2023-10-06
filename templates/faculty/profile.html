@@ -163,65 +163,62 @@
       'residential-address-input'
     ).value;
 
-    if (accessToken) {
-      // Send data to the API
-      const response = await fetch(`${api_base_url}/details/update`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: authorizationHeader,
-        },
-        body: JSON.stringify({ email, number, residential_address }),
-      });
+    // Send data to the API
+    const response = await fetch(`${api_base_url}/details/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, number, residential_address }),
+    });
 
-      const data_faculty_details = await response.json();
+    const data_faculty_details = await response.json();
 
-      const errorDetails = {
-        email: {
-          id: 'error-email',
-          message: 'Please provide a valid email address',
-        },
-        mobile: {
-          id: 'error-mobile',
-          message: 'Mobile must be in "09XXXXXXXXX" format',
-        },
-        residential: {
-          id: 'error-residential',
-          message: 'Residential address must not be empty',
-        },
-      };
+    const errorDetails = {
+      email: {
+        id: 'error-email',
+        message: 'Please provide a valid email address',
+      },
+      mobile: {
+        id: 'error-mobile',
+        message: 'Mobile must be in "09XXXXXXXXX" format',
+      },
+      residential: {
+        id: 'error-residential',
+        message: 'Residential address must not be empty',
+      },
+    };
 
-      const status = data_faculty_details.status;
-      const errorType = data_faculty_details.type;
+    const status = data_faculty_details.status;
+    const errorType = data_faculty_details.type;
 
-      if (status === 400 || status === 404 || status === 500) {
-        if (errorDetails[errorType]) {
-          const { id, message } = errorDetails[errorType];
-          const errorElement = document.getElementById(id);
-          errorElement.innerText = message;
-          errorElement.classList.add('mt-2');
-        } else {
-          notyf.error(data_faculty_details.message);
-        }
-      } else if (status === 200) {
-        for (const key in errorDetails) {
-          const { id } = errorDetails[key];
-          const errorElement = document.getElementById(id);
-          errorElement.innerText = '';
-          errorElement.classList.remove('mt-2');
-        }
-
-        notyf.success(data_faculty_details.message);
-        updateDetails(data_faculty_details);
+    if (status === 400 || status === 404 || status === 500) {
+      if (errorDetails[errorType]) {
+        const { id, message } = errorDetails[errorType];
+        const errorElement = document.getElementById(id);
+        errorElement.innerText = message;
+        errorElement.classList.add('mt-2');
       } else {
-        notyf.error('Something went wrong');
+        notyf.error(data_faculty_details.message);
+      }
+    } else if (status === 200) {
+      for (const key in errorDetails) {
+        const { id } = errorDetails[key];
+        const errorElement = document.getElementById(id);
+        errorElement.innerText = '';
+        errorElement.classList.remove('mt-2');
       }
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
+      notyf.success(data_faculty_details.message);
+      updateDetails(data_faculty_details);
+    } else {
+      notyf.error('Something went wrong');
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
     }
   }
 
@@ -241,25 +238,19 @@
 <!-- FETCHING USER DETAILS -->
 <script>
   async function fetchFacultyDetails() {
-    if (accessToken) {
-      const response = await fetch(`${api_base_url}/`, {
-        headers: {
-          Authorization: authorizationHeader,
-        },
-      });
+    const response = await fetch(`${api_base_url}/`);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const data_faculty_details = await response.json();
-      displayDetails(data_faculty_details);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
     }
+
+    const data_faculty_details = await response.json();
+    displayDetails2(data_faculty_details);
   }
 
-  function displayDetails(data) {
+  function displayDetails2(data) {
     const input_email = document.getElementById('email-input');
     const input_number = document.getElementById('number-input');
     const input_residential_address = document.getElementById(

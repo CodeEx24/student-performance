@@ -53,7 +53,7 @@ def profile():
 def facultyData():
     faculty = getCurrentUser()
     if faculty:
-        json_faculty_data = getFacultyData(faculty.TeaccherId)
+        json_faculty_data = getFacultyData(faculty.TeacherId)
         if json_faculty_data:
             return (json_faculty_data)
         else:
@@ -74,7 +74,7 @@ def updateDetails():
             residential_address = request.json.get('residential_address')
 
             json_result = updateFacultyData(
-                faculty.TeaccherId, email, number, residential_address)
+                faculty.TeacherId, email, number, residential_address)
 
             return json_result
 
@@ -96,7 +96,7 @@ def changePassword():
             new_password = request.json.get('new_password')
             confirm_password = request.json.get('confirm_password')
 
-            json_result = updatePassword(faculty.TeaccherId, password, new_password, confirm_password)
+            json_result = updatePassword(faculty.TeacherId, password, new_password, confirm_password)
 
             return json_result
 
@@ -113,8 +113,8 @@ def changePassword():
 def classAverageAndSubjectCount():
     faculty = getCurrentUser()
     if faculty:
-        json_high_low_class = getHighLowAverageClass(faculty.TeaccherId)
-        json_subject_count = getSubjectCount(faculty.TeaccherId)
+        json_high_low_class = getHighLowAverageClass(faculty.TeacherId)
+        json_subject_count = getSubjectCount(faculty.TeacherId)
         if json_high_low_class and json_subject_count is not None:
             return ({**json_high_low_class, **json_subject_count})
         else:
@@ -129,7 +129,7 @@ def classAverageAndSubjectCount():
 def allClassAverages():
     faculty = getCurrentUser()
     if faculty:
-        json_average_class = getAllClassAverageWithPreviousYear(faculty.TeaccherId)
+        json_average_class = getAllClassAverageWithPreviousYear(faculty.TeacherId)
 
         if json_average_class:
             return (json_average_class)
@@ -145,7 +145,7 @@ def allClassAverages():
 def passFailRates():
     faculty = getCurrentUser()
     if faculty:
-        json_average_class = getPassFailRates(faculty.TeaccherId)
+        json_average_class = getPassFailRates(faculty.TeacherId)
 
         if json_average_class:
             return (json_average_class)
@@ -162,7 +162,7 @@ def topPerformerStudent():
     faculty = getCurrentUser()
     if faculty:
         json_top_performer_student = getTopPerformerStudent(
-            faculty.TeaccherId, 10)
+            faculty.TeacherId, 10)
 
         if json_top_performer_student:
             return (json_top_performer_student)
@@ -179,7 +179,7 @@ def studentClassSubjectGrade():
     faculty = getCurrentUser()
     if faculty:
         json_class_subject_grade = getStudentClassSubjectGrade(
-            faculty.TeaccherId)
+            faculty.TeacherId)
 
         if json_class_subject_grade:
             return (json_class_subject_grade)
@@ -196,7 +196,7 @@ def allClass():
     faculty = getCurrentUser()
     if faculty:
         json_class_subject_grade = getAllClass(
-            faculty.TeaccherId)
+            faculty.TeacherId)
 
         if json_class_subject_grade:
             return (json_class_subject_grade)

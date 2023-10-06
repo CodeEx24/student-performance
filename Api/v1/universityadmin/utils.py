@@ -14,6 +14,93 @@ def getCurrentUser():
     current_user_id = session.get('user_id')
     return UniversityAdmin.query.get(current_user_id)
 
+def getUniversityAdminData(str_univ_admin_id):
+    try:
+        data_university_admin = (
+            db.session.query(UniversityAdmin).filter(
+                UniversityAdmin.UnivAdminId == str_univ_admin_id).first()
+        )
+
+        if data_university_admin:
+          
+
+            dict_student_data = {
+                "UnivAdminNumber": data_university_admin.UnivAdminNumber,
+                "Name": data_university_admin.Name,
+                "PlaceOfBirth": data_university_admin.PlaceOfBirth,
+                "ResidentialAddress": data_university_admin.ResidentialAddress,
+                "Email": data_university_admin.Email,
+                "MobileNumber": data_university_admin.MobileNumber,
+                "Gender": "Male" if data_university_admin.Gender == 1 else "Female",
+            }
+
+            return (dict_student_data)
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+def updateUniversityAdminData(str_univ_admin_id, email, number, residentialAddress):
+    try:
+        if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
+            return {"type": "email", "status": 400}
+
+        if not re.match(r'^09\d{9}$', number):
+            return {"type": "mobile", "status": 400}
+
+        if residentialAddress is None or residentialAddress.strip() == "":
+            return {"type": "residential", "status": 400}
+
+        # Update the student data in the database
+        data_student = db.session.query(UniversityAdmin).filter(
+            UniversityAdmin.UnivAdminId == str_univ_admin_id).first()
+        
+        if data_student:
+            data_student.Email = email
+            data_student.MobileNumber = number
+            data_student.ResidentialAddress = residentialAddress
+            db.session.commit()
+                        
+            return {"message": "Data updated successfully", "email": email, "number": number, "residentialAddress": residentialAddress, "status": 200}
+        else:
+            return {"message": "Something went wrong", "status": 404}
+
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        db.session.rollback()  # Rollback the transaction in case of an error
+        return {"message": "An error occurred", "status": 500}
+
+def updatePassword(str_university_admin_id, password, new_password, confirm_password):
+    try:
+        data_student = db.session.query(UniversityAdmin).filter(
+            UniversityAdmin.UnivAdminId == str_university_admin_id).first()
+
+        if data_student:
+            # Assuming 'password' is the hashed password stored in the database
+            hashed_password = data_student.Password
+
+            if check_password_hash(hashed_password, password):
+                # If the current password matches
+                new_hashed_password = generate_password_hash(
+                    new_password)
+                data_student.Password = new_hashed_password
+                db.session.commit()
+                return {"message": "Password changed successfully", "status": 200}
+
+            else:
+                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 400}
+        else:
+            return {"message": "Something went wrong", "status": 404}
+
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        db.session.rollback()  # Rollback the transaction in case of an error
+        return {"message": "An error occurred", "status": 500}
+
+
+
 def getEnrollmentTrends():
     try:
         # Query data with required fields

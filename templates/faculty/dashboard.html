@@ -129,25 +129,19 @@
 <!-- STATISTICS DATA FETCHING (COUNT) -->
 <script>
   async function fetchStatistics() {
-    if (accessToken) {
-      try {
-        const response = await fetch(`${api_base_url}/class-statistics`, {
-          headers: {
-            Authorization: authorizationHeader,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/class-statistics`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the admin to resolve the issue.`
-          );
-        }
-
-        const json_statistics = await response.json();
-        displayStatistics(json_statistics);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
       }
+
+      const json_statistics = await response.json();
+      displayStatistics(json_statistics);
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -183,26 +177,20 @@
   }
 
   async function fetchClassAverage() {
-    if (accessToken) {
-      try {
-        const response = await fetch(`${api_base_url}/class-average`, {
-          headers: {
-            Authorization: authorizationHeader,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/class-average`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the admin to resolve the issue.`
-          );
-        }
-
-        const json_class_grade = await response.json();
-
-        displayClassGradeSpline(json_class_grade);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
       }
+
+      const json_class_grade = await response.json();
+
+      displayClassGradeSpline(json_class_grade);
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -286,26 +274,20 @@
 <!-- PASS FAIL RATES -->
 <script>
   async function fetchPassFailRates() {
-    if (accessToken) {
-      try {
-        const response = await fetch(`${api_base_url}/pass-fail`, {
-          headers: {
-            Authorization: authorizationHeader,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/pass-fail`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the admin to resolve the issue.`
-          );
-        }
-
-        const json_pass_fail_rates = await response.json();
-
-        displayPassFailRates(json_pass_fail_rates);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
       }
+
+      const json_pass_fail_rates = await response.json();
+
+      displayPassFailRates(json_pass_fail_rates);
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -376,25 +358,19 @@
 <!-- TOP PERFORMER STUDENTS (GRID) -->
 <script>
   async function fetchTopPerformerStudent() {
-    if (accessToken) {
-      try {
-        const response = await fetch(`${api_base_url}/top-student`, {
-          headers: {
-            Authorization: authorizationHeader,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/top-student`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the admin to resolve the issue.`
-          );
-        }
-
-        const json_top_performer_student = await response.json();
-        displayTopPerformerStudent(json_top_performer_student);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
       }
+
+      const json_top_performer_student = await response.json();
+      displayTopPerformerStudent(json_top_performer_student);
+    } catch (error) {
+      console.error(error);
     }
   }
 

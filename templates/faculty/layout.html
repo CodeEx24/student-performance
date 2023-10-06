@@ -374,26 +374,17 @@
     <script>
       const api_base_url = '{{ faculty_api_base_url | default("") }}';
 
-      const accessToken = `{{ session['access_token'] }}`;
-      const authorizationHeader = `Bearer ${accessToken}`;
-
       async function fetchFacultyDetails2() {
-        if (accessToken) {
-          const response = await fetch(`${api_base_url}/`, {
-            headers: {
-              Authorization: authorizationHeader,
-            },
-          });
+        const response = await fetch(`${api_base_url}/`);
 
-          if (!response.ok) {
-            throw new Error(
-              `Failed to fetch data. Try to contact the admin to resolve the issue.`
-            );
-          }
-
-          const data_faculty_details = await response.json();
-          displayDetails(data_faculty_details);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the admin to resolve the issue.`
+          );
         }
+
+        const data_faculty_details = await response.json();
+        displayDetails(data_faculty_details);
       }
 
       function displayDetails(data) {

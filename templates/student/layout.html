@@ -234,15 +234,10 @@
     </main>
     <script>
       const api_base_url = '{{ student_api_base_url | default("") }}';
-
-      const accessToken = `HELLO`;
-      const authorizationHeader = `Bearer ${accessToken}`;
     </script>
 
     <script>
       function logout() {
-        localStorage.removeItem('jwt');
-
         window.location.href = "{{ url_for('logout') }}";
       }
     </script>

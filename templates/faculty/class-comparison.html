@@ -106,33 +106,27 @@
 <!-- PERFORMANCE -->
 <script>
   async function fetchAllClass() {
-    if (accessToken) {
-      try {
-        const response = await fetch(`${api_base_url}/all-class`, {
-          headers: {
-            Authorization: authorizationHeader,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/all-class`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the admin to resolve the issue.`
-          );
-        }
-
-        const json_all_class = await response.json();
-
-        if (json_all_class.Classes.length >= 1) {
-          displayAllClass(json_all_class);
-          // Fetch data for the first two classes and render charts
-          const firstClassId = json_all_class.Classes[0].ClassId;
-          const secondClassId = json_all_class.Classes[1].ClassId;
-          fetchClassPerformance(firstClassId, 1);
-          fetchClassPerformance(secondClassId, 2);
-        }
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
       }
+
+      const json_all_class = await response.json();
+
+      if (json_all_class.Classes.length >= 1) {
+        displayAllClass(json_all_class);
+        // Fetch data for the first two classes and render charts
+        const firstClassId = json_all_class.Classes[0].ClassId;
+        const secondClassId = json_all_class.Classes[1].ClassId;
+        fetchClassPerformance(firstClassId, 1);
+        fetchClassPerformance(secondClassId, 2);
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -195,39 +189,26 @@
   selectElement2.addEventListener('change', handleSelectChange2);
 
   async function fetchClassPerformance(id, chart_num) {
-    if (accessToken) {
-      try {
-        const response = await fetch(
-          `${api_base_url}/class-performance/${id}`,
-          {
-            headers: {
-              Authorization: authorizationHeader,
-            },
-          }
+    try {
+      const response = await fetch(`${api_base_url}/class-performance/${id}`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
         );
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the admin to resolve the issue.`
-          );
-        }
-
-        const json_class_performance = await response.json();
-
-        displayClassPerformance(json_class_performance, chart_num);
-      } catch (error) {
-        console.error(error);
       }
+
+      const json_class_performance = await response.json();
+
+      displayClassPerformance(json_class_performance, chart_num);
+    } catch (error) {
+      console.error(error);
     }
   }
 
   function displayClassPerformance(json_class_performance, chart_num) {
-    console.log('json_class_performance: ', json_class_performance);
-    // Sample dummy data
     var chartData = [...json_class_performance['ListGrade']];
 
-    console.log('chartData: ', chartData);
-    // Create the chart
     var chart = new ej.charts.Chart({
       primaryXAxis: {
         title: 'Year',
@@ -273,26 +254,20 @@
 <!-- PERFORMANCE -->
 <script>
   async function fetchPassFailRates() {
-    if (accessToken) {
-      try {
-        const response = await fetch(`${api_base_url}/pass-fail`, {
-          headers: {
-            Authorization: authorizationHeader,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/pass-fail`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the admin to resolve the issue.`
-          );
-        }
-
-        const json_pass_fail_rates = await response.json();
-
-        displayPassFailRates(json_pass_fail_rates);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
       }
+
+      const json_pass_fail_rates = await response.json();
+
+      displayPassFailRates(json_pass_fail_rates);
+    } catch (error) {
+      console.error(error);
     }
   }
 </script>

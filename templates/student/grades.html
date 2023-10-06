@@ -211,22 +211,16 @@
 <!-- FETCH STUDENT DATA -->
 <script>
   async function fetchStudentDetails() {
-    if (accessToken) {
-      const response = await fetch(`${api_base_url}/`, {
-        headers: {
-          Authorization: authorizationHeader,
-        },
-      });
+    const response = await fetch(`${api_base_url}/`);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const data_student_details = await response.json();
-      displayDetails(data_student_details);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
     }
+
+    const data_student_details = await response.json();
+    displayDetails(data_student_details);
   }
 
   function displayDetails(data) {
@@ -261,22 +255,16 @@
 <!-- FETCHING ALL STUDENT SUBJECTS GRADE -->
 <script>
   async function fetchStudentSubjectGrade() {
-    if (accessToken) {
-      const response = await fetch(`${api_base_url}/grades`, {
-        headers: {
-          Authorization: authorizationHeader,
-        },
-      });
+    const response = await fetch(`${api_base_url}/grades`);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const data_grades = await response.json();
-      displayGrades(data_grades);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
     }
+
+    const data_grades = await response.json();
+    displayGrades(data_grades);
   }
 
   async function displayGrades(data) {

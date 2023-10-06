@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword
 import os
 
 university_admin_api = Blueprint('university_admin_api', __name__)
@@ -40,6 +40,65 @@ def profile():
         return redirect(url_for('university_admin_api.login'))
 
 # ===================================================
+
+# Getting the user details
+@university_admin_api.route('/', methods=['GET'])
+@role_required('universityAdmin')
+def universityAdminData():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_university_admin_data = getUniversityAdminData(universityAdmin.UnivAdminId)
+        if json_university_admin_data:
+            return (json_university_admin_data)
+        else:
+            return jsonify(message="No data available")
+    else:
+        return render_template('404.html'), 404
+
+# Updating the user details
+@university_admin_api.route('/details/update', methods=['POST'])
+@role_required('universityAdmin')
+def updateDetails():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        if request.method == 'POST':
+            print("HERE POSTING")
+            email = request.json.get('email')
+            number = request.json.get('number')
+            residentialAddress = request.json.get('residentialAddress')
+
+            json_result = updateUniversityAdminData(
+                universityAdmin.UnivAdminId, email, number, residentialAddress)
+
+            return json_result
+
+        else:
+            flash('Invalid email or password', 'danger')
+            return redirect(url_for('studentLogin'))
+
+
+
+# Changing the password of the user
+@university_admin_api.route('/change/password', methods=['POST'])
+@role_required('universityAdmin')
+def changePassword():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        if request.method == 'POST':
+            password = request.json.get('password')
+            new_password = request.json.get('new_password')
+            confirm_password = request.json.get('confirm_password')
+
+            json_result = updatePassword(
+                universityAdmin.UnivAdminId, password, new_password, confirm_password)
+
+            return json_result
+
+        else:
+            flash('Invalid email or password', 'danger')
+            return redirect(url_for('studentLogin'))
+    else:
+        return render_template('404.html'), 404
 
 # Getting the enrollment trends of different courses
 @university_admin_api.route('/enrollment/trends', methods=['GET'])

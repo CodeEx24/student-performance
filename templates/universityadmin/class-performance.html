@@ -82,33 +82,24 @@
 <script>
   // JavaScript function to show the modal
   async function fetchClassPerformance(class_id, course, class_name) {
-    if (apiKey) {
-      const response = await fetch(
-        `${api_base_url}/class/performance/${class_id}`,
-        {
-          headers: {
-            'X-Api-Key': apiKey,
-          },
-        }
+    const response = await fetch(
+      `${api_base_url}/class/performance/${class_id}`
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
       );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const data_performance = await response.json();
-      displayClassPerformance(data_performance, course, class_name);
     }
+
+    const data_performance = await response.json();
+    displayClassPerformance(data_performance, course, class_name);
   }
 
   function displayClassPerformance(json_class_performance, course, class_name) {
-    console.log('json_class_performance: ', json_class_performance);
     // Sample dummy data
     var chartData = [...json_class_performance['ListGrade']];
 
-    console.log('chartData: ', chartData);
     // Create the chart
     var chart = new ej.charts.Chart({
       primaryXAxis: {
@@ -158,26 +149,20 @@
 <!-- FETCH ALL CLASS DATA (GRIDS)-->
 <script>
   async function fetchAllClass() {
-    if (apiKey) {
-      try {
-        const response = await fetch(`${api_base_url}/class/data`, {
-          headers: {
-            'X-Api-Key': apiKey,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/class/data`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the admin to resolve the issue.`
-          );
-        }
-
-        const json_class = await response.json();
-
-        displayGridClass(json_class.Classes);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
       }
+
+      const json_class = await response.json();
+
+      displayGridClass(json_class.Classes);
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -229,8 +214,6 @@
           if (dataUid) {
             const rowData = grid.getRowObjectFromUID(dataUid).data;
             if (rowData) {
-              console.log('rowData.ClassId: ', rowData.ClassId);
-              console.log('rowData.CourseName: ', rowData.CourseName);
               fetchClassPerformance(
                 rowData.ClassId,
                 rowData.Course,

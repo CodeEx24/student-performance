@@ -127,13 +127,12 @@ def create_app():
     @app.route('/faculty/dashboard')
     @role_required('faculty')
     def facultyHome():
-        return render_template('faculty/dashboard.html', faculty_api_base_url=faculty_api_base_url, current_page="dashboard", access_token=session['access_token'])
+        return render_template('faculty/dashboard.html', faculty_api_base_url=faculty_api_base_url, current_page="dashboard")
 
 
     @app.route('/faculty/grades')
     @role_required('faculty')
     def facultyGrades():
-        print(session['access_token'])
         return render_template('faculty/grades.html', faculty_api_base_url=faculty_api_base_url, current_page="grades")
 
 

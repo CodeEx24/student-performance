@@ -98,7 +98,6 @@
         credentials: 'include', // Include credentials (cookies) in the request
       })
         .then((response) => {
-          console.log(response);
           if (response.status == 401) {
             throw new Error('Invalid email or password');
           }

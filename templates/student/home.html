@@ -131,22 +131,16 @@
 <!-- FETCHING CURRENT GPA -->
 <script>
   async function fetchStudentGpa() {
-    if (accessToken) {
-      const response = await fetch(`${api_base_url}/gpa`, {
-        headers: {
-          Authorization: `Bearer {{ access_token }}`,
-        },
-      });
+    const response = await fetch(`${api_base_url}/gpa`);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const responseData = await response.json();
-      displayGPA(responseData);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
     }
+
+    const responseData = await response.json();
+    displayGPA(responseData);
   }
 
   function displayGPA(data) {
@@ -163,23 +157,16 @@
 <!-- FETCH STUDENT OVERALL GPA -->
 <script>
   async function fetchStudentOverallGpa() {
-    if (accessToken) {
-      const response = await fetch(`${api_base_url}/overall-gpa`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-        },
-      });
+    const response = await fetch(`${api_base_url}/overall-gpa`);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const data_overall_gpa = await response.json();
-      // console.log(data_overall_gpa);
-      displayOverallGPA(data_overall_gpa);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
     }
+
+    const data_overall_gpa = await response.json();
+    displayOverallGPA(data_overall_gpa);
   }
 
   function displayOverallGPA(data) {
@@ -196,27 +183,20 @@
 <!-- STUDENT PERFORMANCE OVER TIME -->
 <script>
   async function fetchStudentPerformanceOvertime() {
-    if (accessToken) {
-      const response = await fetch(`${api_base_url}/performance`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-        },
-      });
+    const response = await fetch(`${api_base_url}/performance`);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const data_performance = await response.json();
-      displayPerformance(data_performance);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
     }
+
+    const data_performance = await response.json();
+    displayPerformance(data_performance);
   }
 
   function displayPerformance(data_performance) {
     var chartData = [...data_performance];
-    console.log(data_performance[data_performance.length - 1].Year);
     // Create the chart
     var chart = new ej.charts.Chart({
       primaryXAxis: {
@@ -284,27 +264,22 @@
 <!-- COURSE PERFORMANCE OVER TIME -->
 <script>
   async function fetchCoursePerformanceOvertime() {
-    if (accessToken) {
-      const response = await fetch(`${api_base_url}/course-performance`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-        },
-      });
+    const response = await fetch(`${api_base_url}/course-performance`);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const course_performance_data = await response.json();
-
-      displayCoursePerformance(
-        course_performance_data.List,
-        course_performance_data.Course
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
       );
     }
+
+    const course_performance_data = await response.json();
+
+    displayCoursePerformance(
+      course_performance_data.List,
+      course_performance_data.Course
+    );
   }
+
   fetchCoursePerformanceOvertime();
 
   function displayCoursePerformance(course_performance_data, course_name) {
@@ -352,28 +327,21 @@
 <!-- SUBJECT PREVIOUS GRADE TABLE -->
 <script>
   async function fetchPreviousSubjectGrade() {
-    if (accessToken) {
-      const response = await fetch(`${api_base_url}/previous-grade`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-        },
-      });
+    const response = await fetch(`${api_base_url}/previous-grade`);
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const list_previous_subject_grade = await response.json();
-      displayPreviousSubjectGrade(list_previous_subject_grade);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
     }
+
+    const list_previous_subject_grade = await response.json();
+    displayPreviousSubjectGrade(list_previous_subject_grade);
   }
+
   fetchPreviousSubjectGrade();
 
   function displayPreviousSubjectGrade(list_previous_subject_grade) {
-    console.log('PREVIOUS GRADE: ', list_previous_subject_grade);
-
     var data = [...list_previous_subject_grade];
     var grid = new ej.grids.Grid({
       dataSource: data,

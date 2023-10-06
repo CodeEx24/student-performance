@@ -115,59 +115,45 @@
 <!-- ENROLLMENT TRENDS OF COURSES -->
 <script>
   async function fetchEnrollmentTrends() {
-    if (accessToken) {
-      try {
-        const response = await fetch(`${api_base_url}/enrollment/trends`, {
-          headers: {
-            Authorization: authorizationHeader,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/enrollment/trends`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the system admin to resolve the issue.`
-          );
-        }
-
-        const json_enrollment_trends = await response.json();
-        displayEnrollmentTrendChart(json_enrollment_trends.CourseDetails);
-        displayedEnrollmentNumbers(json_enrollment_trends);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
       }
+
+      const json_enrollment_trends = await response.json();
+      displayEnrollmentTrendChart(json_enrollment_trends.CourseDetails);
+      displayedEnrollmentNumbers(json_enrollment_trends);
+    } catch (error) {
+      console.error(error);
     }
   }
 
   async function fetchAverageGPA() {
-    if (accessToken) {
-      try {
-        const response = await fetch(`${api_base_url}/current/gpa`, {
-          headers: {
-            Authorization: authorizationHeader,
-          },
-        });
+    try {
+      const response = await fetch(`${api_base_url}/current/gpa`);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the system admin to resolve the issue.`
-          );
-        }
-
-        const json_average_gpa = await response.json();
-
-        if (json_average_gpa) {
-          console.log('json_average_gpa: ', json_average_gpa);
-          document.getElementById('average-gpa').innerText =
-            json_average_gpa.AverageGrade;
-        }
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
       }
+
+      const json_average_gpa = await response.json();
+
+      if (json_average_gpa) {
+        document.getElementById('average-gpa').innerText =
+          json_average_gpa.AverageGrade;
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 
   function displayEnrollmentTrendChart(json_enrollment_trends) {
-    console.log('json_enrollment_trends: ', json_enrollment_trends);
     var chartData = [...json_enrollment_trends];
 
     var chart = new ej.charts.Chart({
@@ -312,33 +298,25 @@
 <!-- COURSE PERFORMANCE -->
 <script>
   async function fetchCoursePerformance() {
-    if (accessToken) {
-      try {
-        const response = await fetch(
-          `${api_base_url}/overall/course/performance`,
-          {
-            headers: {
-              Authorization: authorizationHeader,
-            },
-          }
+    try {
+      const response = await fetch(
+        `${api_base_url}/overall/course/performance`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
         );
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch data. Try to contact the system admin to resolve the issue.`
-          );
-        }
-
-        const json_course_performance = await response.json();
-        displayCoursePerformance(json_course_performance);
-      } catch (error) {
-        console.error(error);
       }
+
+      const json_course_performance = await response.json();
+      displayCoursePerformance(json_course_performance);
+    } catch (error) {
+      console.error(error);
     }
   }
 
   function displayCoursePerformance(json_course_performance) {
-    console.log('json_course_performance: ', json_course_performance);
     var chartData = [...json_course_performance];
 
     var chart = new ej.charts.Chart({
