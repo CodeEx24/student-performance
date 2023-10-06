@@ -261,7 +261,6 @@
 
     const text_student_number = document.getElementById('admin-number');
     const text_gender = document.getElementById('gender');
-    const text_course = document.getElementById('course');
 
     input_email.value = `${data.Email ? data.Email : ''}`;
 
@@ -274,7 +273,6 @@
     text_name.innerHTML = data.Name;
     text_student_number.innerHTML = data.UnivAdminNumber;
     text_gender.innerHTML = data.Gender;
-    text_course.innerHTML = data.Course;
   }
 
   fetchStudentDetails();

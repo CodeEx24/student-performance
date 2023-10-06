@@ -43,7 +43,7 @@ def create_app():
     # The Api Key is static for development mode. The Api key in future must refresh in order to secure the api endpoint of the application
     # student_api_key = os.getenv('STUDENT_API_KEY')
     # faculty_api_key = os.getenv('FACULTY_API_KEY')
-    university_admin_api_key = os.getenv('UNIVERSITY_ADMIN_API_KEY')
+    # university_admin_api_key = os.getenv('UNIVERSITY_ADMIN_API_KEY')
     # system_admin_api_key = os.getenv('SYSTEM_ADMIN_API_KEY')
 
     # The api base url for api endpoints
@@ -161,31 +161,31 @@ def create_app():
     @app.route('/university-admin')
     @preventAuthenticated
     def universityAdminLogin():
-        return render_template('universityadmin/login.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url)
+        return render_template('universityadmin/login.html', university_admin_api_base_url=university_admin_api_base_url)
 
 
     @app.route('/university-admin/home')
     @role_required('universityAdmin')
     def universityAdminHome():
-        return render_template('universityadmin/home.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="home")
+        return render_template('universityadmin/home.html', university_admin_api_base_url=university_admin_api_base_url, current_page="home")
 
 
     @app.route('/university-admin/class-performance')
     @role_required('universityAdmin')
     def universityClassPerformance():
-        return render_template('universityadmin/class-performance.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
+        return render_template('universityadmin/class-performance.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
 
 
     @app.route('/university-admin/profile')
     @role_required('universityAdmin')
     def universityProfile():
-        return render_template('universityadmin/profile.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="profile")
+        return render_template('universityadmin/profile.html', university_admin_api_base_url=university_admin_api_base_url, current_page="profile")
 
 
     @app.route('/university-admin/change-password')
     @role_required('universityAdmin')
     def universityChangePassword():
-        return render_template('universityadmin/change-password.html', university_admin_api_key=university_admin_api_key, university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
+        return render_template('universityadmin/change-password.html', university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
 
 
     # ========================================================================
