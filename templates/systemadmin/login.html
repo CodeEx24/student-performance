@@ -14,14 +14,18 @@
       <h1
         class="text-white font-poppins text-2xl font-extrabold mt-3 md:text-4xl md:mt-8"
       >
-        SPS Student Module
+        System Admin Module
       </h1>
       <p class="text-white text-md font-poppins mt-3 mb-3 md:text-lg">
         Sign in to start your session
       </p>
     </div>
 
-    <form class="flex flex-col gap-3" method="POST" id="login-form">
+    <form
+      class="flex flex-col gap-3"
+      method="POST"
+      action="{{ url_for('system_admin_api.login2') }}"
+    >
       <div class="">
         <label
           htmlFor="email"
@@ -32,6 +36,7 @@
         <input
           id="email"
           name="email"
+          type="email"
           placeholder="username@gmail.com"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
         />
@@ -59,14 +64,13 @@
       >
         Sign In
       </button>
-      <a
-        href="{{ url_for('studentResetRequest') }}"
-        class="text-c5 font-semibold"
-        >Forgot Password?</a
-      >
+      {% with messages = get_flashed_messages() %} {% if messages %}
       <ul class="messages text-red-500">
-        <li id="message-container"></li>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
       </ul>
+      {% endif %} {% endwith %}
     </form>
 
     <div>
@@ -79,42 +83,3 @@
 </div>
 
 {% endblock content %}
-
-<!-- SCRIPTS -->
-{% block script %}
-<script>
-  // Add event listener to the form submission
-  document
-    .getElementById('login-form')
-    .addEventListener('submit', function (event) {
-      event.preventDefault(); // Prevent the default form submission
-
-      // Get the form data
-      const formData = new FormData(event.target);
-
-      // Define the API URL for the login endpoint
-      const apiUrl = "{{ url_for('student_api.login') }}";
-
-      // Make a POST request to the login API
-      fetch(apiUrl, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include', // Include credentials (cookies) in the request
-      })
-        .then((response) => {
-          if (response.status == 401) {
-            throw new Error('Invalid email or password');
-          }
-          return response.json(); // Parse the JSON response
-        })
-        .then((data) => {
-          window.location.href = "{{ url_for('studentHome') }}";
-        })
-        .catch((error) => {
-          // Handle errors
-          const messageContainer = document.getElementById('message-container');
-          messageContainer.innerHTML = `<div class="text-red-500">Login failed: ${error.message}</div>`;
-        });
-    });
-</script>
-{% endblock script %}

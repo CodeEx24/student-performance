@@ -14,12 +14,41 @@
         theme: {
           extend: {
             colors: {
-              clifford: '#da373d',
+              c1: '#2b2d42', // dark red
+              c2: '#8d99ae', // light red
+              c3: '#edf2f4', // white
+              c4: '#ef233c', // gray
+              c5: '#d90429', // dark black
+              primary: '#6376EB',
+              secondary: '#CDD3D8',
+              info: '#29BAF2',
+              success: '#5EEE82',
+              warning: '#FFA434',
+              danger: '#FFA6A1',
+              dark: '#191D21',
             },
           },
         },
       };
     </script>
+
+    <!-- Notyf -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
+    />
+    <style>
+      /* html,
+     body {
+       max-width: 100%;
+       overflow-x: hidden;
+     } */
+
+      .notyf {
+        margin-top: 20px;
+      }
+    </style>
+
     <title>
       {% block title %}Polytechnic University of the Philippines{% endblock %}
     </title>
@@ -35,6 +64,31 @@
       </main>
     </div>
 
+    <!-- NOTYF -->
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+      const notyf = new Notyf({
+        duration: 5000,
+        position: {
+          x: 'right',
+          y: 'top',
+        },
+        types: [
+          {
+            type: 'success',
+            background: '#5EEE82', // Custom background color for success notifications (e.g., green)
+            duration: 5000,
+            dismissible: true,
+          },
+          {
+            type: 'error',
+            background: '#ef233c', // Custom background color for error notifications (e.g., orange)
+            duration: 5000,
+            dismissible: true,
+          },
+        ],
+      });
+    </script>
     <!-- Include JavaScript and other common resources here -->
     {% block script %} {% endblock script %}
   </body>

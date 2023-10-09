@@ -102,7 +102,7 @@ def changePassword():
 
         else:
             flash('Invalid email or password', 'danger')
-            return redirect(url_for('studentLogin'))
+            return redirect(url_for('facultyLogin'))
     else:
         return render_template('404.html'), 404
 

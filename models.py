@@ -35,7 +35,9 @@ class Student(db.Model, UserMixin):
     MobileNumber = db.Column(db.String(11))  # MobileNumber
     Dropout = db.Column(db.Boolean)  # Dropout
     IsGraduated = db.Column(db.Boolean, default=True)
-
+    Token = db.Column(db.String(128))  # This field will store the reset token
+    TokenExpiration = db.Column(db.DateTime)
+    
     def to_dict(self):
         return {
             'StudentId': self.StudentId,

@@ -16,7 +16,6 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-
         admin = UniversityAdmin.query.filter_by(Email=email).first()
         if admin and check_password_hash(admin.Password, password):
             session['user_id'] = admin.UnivAdminId
