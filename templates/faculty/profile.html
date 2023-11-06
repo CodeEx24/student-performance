@@ -128,33 +128,9 @@
 
 <!----------------- SCRIPTS ----------------->
 {% block script %}
-<!-- Include Notyf script -->
-<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
 <!-- UPDATING USER DETAILS -->
 <script>
-  const notyf = new Notyf({
-    duration: 5000,
-    position: {
-      x: 'right',
-      y: 'top',
-    },
-    types: [
-      {
-        type: 'success',
-        background: '#5EEE82', // Custom background color for success notifications (e.g., green)
-        duration: 5000,
-        dismissible: true,
-      },
-      {
-        type: 'error',
-        background: '#ef233c', // Custom background color for error notifications (e.g., orange)
-        duration: 5000,
-        dismissible: true,
-      },
-    ],
-  });
-
   async function submitForm(event) {
     event.preventDefault();
     const email = document.getElementById('email-input').value;

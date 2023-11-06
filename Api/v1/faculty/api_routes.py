@@ -5,7 +5,7 @@ from models import Faculty
 from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
-from .utils import getSubjectCount, getHighLowAverageClass, getAllClassAverageWithPreviousYear, getPassFailRates, getTopPerformerStudent, getStudentClassSubjectGrade, getAllClass, getClassPerformance, updateFacultyData, getFacultyData, updatePassword, getStudentPerformance, getCurrentUser
+from .utils import getSubjectCount, getHighLowAverageClass, getAllClassAverageWithPreviousYear, getPassFailRates, getTopPerformerStudent, getStudentClassSubjectGrade, getAllClass, getClassPerformance, updateFacultyData, getFacultyData, updatePassword, getStudentPerformance, getCurrentUser, processGradeSubmission
 
 import os
 
@@ -236,3 +236,32 @@ def studentPerformance(id):
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return render_template('404.html'), 404
+
+# api_routes.py
+@faculty_api.route('/submit-grades', methods=['POST'])
+@role_required('faculty')
+def submitGrades():
+    # Check if the request contains a file named 'excelFile'
+    if 'excelFile' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['excelFile']
+
+    # Call the utility function to process the file
+    return processGradeSubmission(file)
+
+
+    # You can also perform additional processing on the uploaded file here.
+
+    # return jsonify({'success': 'File uploaded and processed successfully'}), 200
+    
+    # faculty = getCurrentUser()
+    # if faculty:
+    #     json_student_performance = getStudentPerformance(id)
+
+    #     if json_student_performance:
+    #         return (json_student_performance)
+    #     else:
+    #         return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    # else:
+    #     return render_template('404.html'), 404

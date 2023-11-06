@@ -4,7 +4,8 @@ import re
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
 
-from flask import session
+from flask import session,  jsonify
+import pandas as pd
 
 from static.js.utils import convertGradeToPercentage, checkStatus
 
@@ -307,7 +308,7 @@ def getStudentClassSubjectGrade(str_teacher_id):
             .join(Course, Course.CourseId == Class.CourseId)
             .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
             .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
-            .order_by(desc(Course.CourseCode), desc(Class.Batch), desc(Class.Year), desc(Class.Semester))
+            .order_by(desc(Course.CourseCode), desc(Class.Batch), desc(Class.Year), desc(Class.Semester), Student.Name)
             .all()
         )
 
@@ -585,6 +586,76 @@ def updatePassword(str_teacher_id, password, new_password, confirm_password):
         # Handle the exception here, e.g., log it or return an error response
         db.session.rollback()  # Rollback the transaction in case of an error
         return {"message": "An error occurred", "status": 500}
+
+
+
+
+def processGradeSubmission(file):
+    try:
+        # Check if the file is empty
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        # Check file extension
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+
+        # Read the Excel file into a DataFrame
+        df = pd.read_excel(file)
+        
+        # Now you can access and manipulate the data in the DataFrame
+        # For example, you can iterate through rows and access columns like this:
+        for index, row in df.iterrows():
+            # Extract the values from the DataFrame
+            student_number = row['Student Number'] # OK
+            student_name = row['Student Name']
+            section_code = row['Section Code']
+            subject_code = row['SubjectCode'] # OK
+            semester = row['Semester'] # OK
+            grade = row['Grade']
+            batch = row['Batch'] # OK
+            
+            # Split the section_code by the last space and keep the first part
+            course_code = section_code.rsplit(' ', 1)[0] 
+            
+            # Split the section_code by space, get the last part, and split it by hyphen '-' to extract year and section
+            year, section = section_code.split(' ')[-1].split('-')
+
+            # Now you can use the modified_section_code as needed in your code
+            student_data = (
+                db.session.query(Student,  StudentClassSubjectGrade, ClassSubject, Class, Subject, Course)
+                .join(StudentClassSubjectGrade, StudentClassSubjectGrade.StudentId == Student.StudentId)
+                .join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
+                .join(Class, Class.ClassId == ClassSubject.ClassId)
+                .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+                .join(Course, Course.CourseId == Class.CourseId)
+                .filter(Student.StudentNumber == student_number, Class.Year == year, Class.Section == section, Class.Batch == batch, Class.Semester == semester,  Subject.SubjectCode == subject_code)
+                .order_by(desc(Student.Name), desc(Class.Year), desc(Class.Section), desc(Class.Batch))
+                .first()
+            )
+            
+            print("INDEX NAME: ", index + 1, student_data.Student.StudentNumber, student_data.Student.Name)
+            print("Subject Code: ", student_data.Subject.SubjectCode)  # Assuming SubjectName is the attribute for the subject's name
+            print("Section Code: ",  student_data.Course.CourseCode, student_data.Class.Year ,  "-", student_data.Class.Section)
+            print("Semester: ", student_data.Class.Semester)
+            print("Batch: ", student_data.Class.Batch)
+            print("Batch: ", student_data.Class.IsGradeFinalized)
+            print("===========================================================")
+            
+            if(student_data.Class.IsGradeFinalized==False):
+                # Update the Class isGradeFinalized to False
+                student_data.StudentClassSubjectGrade.Grade = grade
+                
+                # Save only but dont commit in database
+                db.session.add(student_data.StudentClassSubjectGrade)
+            else:
+                return jsonify({'error': 'The grade has been finalized. Contact admin if there is an issue exist'}), 500
+        # If all data is updated successfully then commit the data
+        db.session.commit()
+        return jsonify({'success': 'File uploaded and data processed successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while processing the file'}), 500
 
 
 # def getAllClassAverage(str_teacher_id):

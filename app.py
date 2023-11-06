@@ -40,7 +40,7 @@ def create_app():
     # cache.init_app(app)
 
     # Allowed third party apps
-    allowed_origins = ["https://example1.com", "https://example2.com"]
+    allowed_origins = ["*"]
     CORS(app, origins=allowed_origins, allow_headers=["Authorization", "X-API-Key"])
 
     jwt = JWTManager(app)
@@ -54,7 +54,6 @@ def create_app():
     app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
     app.config['MAIL_USE_TLS'] = False
     app.config['MAIL_USE_SSL'] = True
-    print(os.getenv("MAIL_PASSWORD"))
     # app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
     mail.init_app(app)
     # The Api Key is static for development mode. The Api key in future must refresh in order to secure the api endpoint of the application
@@ -68,11 +67,6 @@ def create_app():
     faculty_api_base_url = os.getenv("FACULTY_API_BASE_URL")
     university_admin_api_base_url = os.getenv("UNIVERSITY_ADMIN_API_BASE_URL")
     system_admin_api_base_url = os.getenv("SYSTEM_ADMIN_API_BASE_URL")
-
-
-    def sayHello():
-        print("HELLO GHERE CALLED FUNCTIONS")
-    
 
     @app.context_processor
     def custom_context_processor():
@@ -88,6 +82,11 @@ def create_app():
     
     # ===========================================================================
     # ROUTING FOR THE APPLICATION (http:localhost:3000)
+
+    @app.route('/practice')
+    def practice():
+        return render_template('practice.html')
+
 
 
     @app.route('/')

@@ -33,6 +33,43 @@
         <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
           Grades
         </h3>
+
+        <div>
+          <form
+            class="bg-white p-4 rounded-lg"
+            enctype="multipart/form-data"
+            onsubmit="submitGrades(event)"
+            method="POST"
+            id="reset-form-email"
+          >
+            <div class="mb-4">
+              <label
+                for="excelFile"
+                class="block text-gray-700 font-bold text-lg mb-2"
+              >
+                Submit Grades:
+              </label>
+            </div>
+            <div class="mb-4 flex gap-4">
+              <input
+                type="file"
+                name="excelFile"
+                id="excelFile"
+                accept=".xlsx, .xls"
+                class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+              />
+
+              <button
+                type="submit"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+              >
+                Upload Excel File
+              </button>
+            </div>
+            <p id="grade-file-error" class="text-c4 text-sm"></p>
+          </form>
+        </div>
+
         <hr class="mx-2" />
         <div class="flex items-end justify-between">
           <div class="w-full bg-white p-4 mt-4">
@@ -232,7 +269,6 @@
           field: 'Class',
           headerText: 'Section Code',
           width: 150,
-
           // filterBarTemplate: classOptions, // Add a dropdown filter
         },
         {
@@ -275,6 +311,7 @@
 
     grid.toolbarClick = function (args) {
       if (args['item'].id === 'Grid_excelexport') {
+        grid.columns[7].visible = false;
         grid.excelExport();
       }
     };
@@ -315,4 +352,101 @@
   fetchStudentClassSubjectGrade();
 </script>
 
+<!-- SCRIPTS -->
+
+<script>
+  async function submitGrades(event) {
+    event.preventDefault();
+    console.log('INSIDE SUBMIT GRADES');
+
+    const fileErrorElement = document.getElementById('grade-file-error');
+    const fileInput = document.getElementById('excelFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+      fileErrorElement.innerText = 'Please choose a file.';
+      return;
+    }
+
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      fileErrorElement.innerText =
+        'Invalid file type. Please select an Excel file.';
+      return;
+    } else {
+      fileErrorElement.innerText = '';
+    }
+
+    // If file type is valid, proceed with the API request
+    const formData = new FormData();
+    formData.append('excelFile', file);
+
+    fetch(`${api_base_url}/submit-grades`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle API response here
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+
+    // const emailInput = document.getElementById('email');
+    // const emailError = document.getElementById('email-error');
+    // const emailValue = emailInput.value.trim();
+    // console.log('GET THE ELEMENT');
+    // // Regular expression for validating email format
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // if (!emailValue) {
+    //   emailError.classList.add('mt-2'); // Corrected the method name from 'addclassList' to 'classList.add'
+    //   emailError.textContent = 'Input your email';
+    //   return false;
+    // } else if (!emailValue.match(emailRegex)) {
+    //   emailError.classList.add('mt-2');
+    //   emailError.textContent = 'Input a valid email format';
+    //   return false; // Prevent form submission
+    // }
+
+    // try {
+    //   // Make a POST request to the login API
+    //   fetch(`${api_base_url}/reset_password`, {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({
+    //       email: emailValue,
+    //     }),
+    //     credentials: 'include', // Include credentials (cookies) in the request
+    //   })
+    //     .then((response) => {
+    //       if (response.status != 200) {
+    //         notyf.error(data.message);
+    //       }
+    //       return response.json(); // Parse the JSON response
+    //     })
+    //     .then((data) => {
+    //       notyf.success(data.message);
+    //       const formElement = document.getElementById('reset-form-email');
+    //       const submitElement = document.getElementById('submit-link');
+    //       const subDescriptionElement = document.getElementById('sub-desc');
+
+    //       formElement.classList.add('hidden');
+    //       submitElement.classList.remove('hidden');
+    //       subDescriptionElement.classList.add('px-20');
+    //       subDescriptionElement.innerText =
+    //         'Open gmail and read the instruction to reset your password';
+    //       // window.location.href = "{{ url_for('studentLogin') }}";
+    //     })
+    //     .catch((error) => {
+    //       const messageContainer = document.getElementById('message-container');
+    //       messageContainer.innerHTML = `<div class="text-red-500">Login failed: ${error.message}</div>`;
+    //     });
+    // } catch (error) {
+    //   console.error('Error:', error);
+    // }
+  }
+</script>
 {% endblock script %}
