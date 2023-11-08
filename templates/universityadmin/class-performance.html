@@ -82,6 +82,7 @@
 <script>
   // JavaScript function to show the modal
   async function fetchClassPerformance(class_id, course, class_name) {
+    console.log('class_id, course, class_name: ', class_id, course, class_name);
     const response = await fetch(
       `${api_base_url}/class/performance/${class_id}`
     );
@@ -97,6 +98,7 @@
   }
 
   function displayClassPerformance(json_class_performance, course, class_name) {
+    console.log('json_class_performance: ', json_class_performance);
     // Sample dummy data
     var chartData = [...json_class_performance['ListGrade']];
 
@@ -186,11 +188,21 @@
           headerText: 'Section Code',
           width: 150,
         },
+        {
+          field: 'Batch',
+          headerText: 'Year',
+          width: 150,
+        },
+        {
+          field: 'Grade',
+          headerText: 'Grade',
+          width: 150,
+        },
 
         {
           headerText: 'Actions',
           template:
-            '<button class="btn px-4 py-2 bg-primary text-white font-bold">Performance</button>', // Add a button to the cell
+            '<button class="btn px-4 py-2 bg-primary text-white font-bold" onclick="sayHello()">Performance</button>', // Add a button to the cell
           width: 150,
         },
       ],
@@ -242,4 +254,9 @@
   fetchAllClass();
 </script>
 
+<script>
+  function sayHello() {
+    console.log('HELLOT THERE');
+  }
+</script>
 {% endblock script %}

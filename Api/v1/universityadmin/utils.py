@@ -234,10 +234,11 @@ def getAllClassData():
         data_class_subject_grade_handle = (
             db.session.query(
                 ClassSubject,
-                Class, Course
+                Class, Course, ClassGrade
             )
             .join(Class, Class.ClassId == ClassSubject.ClassId)
             .join(Course, Course.CourseId == Class.CourseId)
+            .join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
             .filter(Class.Batch == current_year - 1)
             .order_by(desc(Class.CourseId), Class.Year, Class.Section)
             .all()
@@ -256,7 +257,9 @@ def getAllClassData():
                     class_obj = {
                         'ClassId': class_id,
                         'ClassName': f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}",
-                        "Course": class_subject_grade.Course.Name
+                        "Course": class_subject_grade.Course.Name,
+                        "Batch": class_subject_grade.Class.Batch,
+                        "Grade": f"{class_subject_grade.ClassGrade.Grade:.2f}"
                     }
 
                     # Add class_id to the seen_class_ids set
@@ -287,26 +290,32 @@ def getClassPerformance(class_id):
             .first()
         )
 
+        
         if class_grade:
 
             # Calculate class name
-            class_name = f"{class_grade.Course.CourseId} {class_grade.Class.Year}-{class_grade.Class.Section} ({class_grade.Class.Batch})"
+            class_name = f"{class_grade.Course.CourseCode} {class_grade.Class.Year}-{class_grade.Class.Section} ({class_grade.Class.Batch})"
             num_class_batch = class_grade.Class.Batch
             num_class_section = class_grade.Class.Section
 
+            print("class_name: ", class_name)
+            print("num_class_batch: ", num_class_batch)
+            print("num_class_section: ", num_class_section)
+            print('class_grade.Class.Year: ', class_grade.Class.Year)
             dict_class_grade = {
                 'Class': class_name,
                 'Batch': num_class_batch,
                 'ListGrade': [],
-                'PresidentLister': class_grade.ClassGrade.PresidentLister,
-                'DeanLister': class_grade.ClassGrade.DeanLister
+                'PresidentLister': class_grade.ClassGrade.PresidentsLister,
+                'DeanLister': class_grade.ClassGrade.DeansLister
             }
-
+            print('dict_class_grade: ', dict_class_grade)
+            
             list_grade = []
             for i in range(1, class_grade.Class.Year+1):
-
+                print("i: ", i)
                 batch = class_grade.Class.Batch - class_grade.Class.Year + i
-
+                print("batch: ", batch)
                 class_grade_result = (
                     db.session.query(
                         Class,
@@ -320,7 +329,7 @@ def getClassPerformance(class_id):
 
                 list_grade.append(
                     {'x': class_grade_result.Class.Batch, 'y': convertGradeToPercentage(class_grade_result.ClassGrade.Grade)})
-
+                
             dict_class_grade['ListGrade'].extend(list_grade)
 
             return (dict_class_grade)

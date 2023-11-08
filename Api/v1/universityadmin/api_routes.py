@@ -168,9 +168,11 @@ def classData():
 @university_admin_api.route('/class/performance/<int:id>', methods=['GET', 'POST'])
 @role_required('universityAdmin')
 def classPerformance(id):
+    print("THE ID: ", id)
     universityAdmin = getCurrentUser()
     if universityAdmin:
         json_class_performance = getClassPerformance(id)
+        print("json_class_performance: ", json_class_performance)
 
         if json_class_performance:
             return (json_class_performance)
