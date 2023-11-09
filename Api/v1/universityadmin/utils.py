@@ -5,14 +5,25 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from collections import defaultdict
 import datetime
 
-from flask import session
+from flask import session, jsonify
 from static.js.utils import convertGradeToPercentage, checkStatus
+from flask_mail import Message
+from mail import mail
+import pandas as pd
+import random
+import string
 
 from collections import defaultdict
 
 def getCurrentUser():
     current_user_id = session.get('user_id')
     return UniversityAdmin.query.get(current_user_id)
+
+def generate_password(length=12):
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.choice(characters) for i in range(length))
+    return password
+    
 
 def getUniversityAdminData(str_univ_admin_id):
     try:
@@ -338,3 +349,202 @@ def getClassPerformance(class_id):
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         return None
+
+
+
+def processAddingStudents(file):
+    print("PROCESSING STUDENT")
+    try:
+        # Check if the file is empty
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        # Check file extension
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+
+
+        # Read the Excel file into a DataFrame
+        df = pd.read_excel(file)
+        
+        # dict data list
+        list_student_data = []
+        # Add a dict of already existing students
+        list_existing_data = []
+        # Add a dict of already existing students emai
+        
+        # For example, you can iterate through rows and access columns like this:
+        for index, row in df.iterrows():
+            # Extract the values from the DataFrame
+            student_number = row['Student Number'] # OK
+            student_name = row['Name']
+            student_email = row['Email']
+            student_mobile =  str(row['Phone Number'])
+            student_address = row['Address'] # OK
+            # Check if Gender is Male it is 1 else it is 2
+            
+            student_gender = row['Gender'] # OK
+            student_course = row['Course Code']
+            student_date_enrolled = row['Date Enrolled'] # OK
+            
+          
+            
+            # Check if the student is already exist in the database based on StudentNumber or Email
+            student_number_data = db.session.query(Student).filter(
+                (Student.StudentNumber == student_number) 
+            ).first()
+            student_email_data = db.session.query(Student).filter(
+                (Student.Email == student_email) 
+            ).first()
+
+            if not student_number_data and not student_email_data:
+                password = generate_password()
+                gender = 1 if student_gender == 'Male' else 2
+                
+                # print(password)
+                
+                course = db.session.query(Course).filter_by(CourseCode=student_course).first()
+
+              # Add the new student in the database
+
+                # Ensure the mobile number has a leading zero
+                if not student_mobile.startswith('0'):
+                    student_mobile = '0' + student_mobile
+
+                new_student = Student(
+                    StudentNumber=student_number,
+                    Name=student_name,
+                    Email=student_email,
+                    MobileNumber=str(student_mobile),
+                    ResidentialAddress=student_address,
+                    Gender=gender,
+                    Password=generate_password_hash(password)
+                )
+
+
+                db.session.add(new_student)
+                db.session.flush()
+                
+                # Using the course above generate a CourseEnrolled for students
+                new_course_enrolled = CourseEnrolled(
+                    CourseId=course.CourseId,
+                    StudentId=new_student.StudentId,
+                    DateEnrolled=student_date_enrolled
+                )
+                
+                # # Add the new course enrolled to the session
+                db.session.add(new_course_enrolled)
+                db.session.commit()
+                
+                msg = Message('Your current PUP Account has been granted.', sender='your_email@example.com',
+                            recipients=[str(new_student.Email)])
+                # The message body should be the credentials details
+                msg.body = f"Your current PUP Account has been granted. \n\n Email: {str(new_student.Email)} \n Password: {str(new_student.Password)} \n\n Please change your password after you log in. \n\n Thank you."
+                
+                mail.send(msg)
+                
+                # Append the student data in list data in format of dict
+                list_student_data.append({
+                    "Student Number": str(student_number),
+                    'Name': str(student_name),
+                    "Email": str(student_email),
+                    "Mobile Number": str(student_mobile),
+                    "Gender": gender,
+                })
+             
+            else:
+                # Append the student nummber
+                list_existing_data.append({'StudentNumber':student_number, 'StudentEmail': student_email})
+                # Remove all existing db.session
+                db.session.rollback()
+
+        if list_existing_data:
+            return jsonify({'error': 'The following student number or email already exist in the database ', 'existing_data': (list_existing_data)}), 500
+        else:        
+            return jsonify(list_student_data)
+            
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while processing the file'}), 500
+    
+
+
+def getStudentData():
+    try:
+        data_student = (
+            db.session.query(Student).all()
+        )
+
+        
+        if data_student:
+             # For loop the data_student and put it in dictionary
+            list_student_data = []
+            for student in data_student:
+                dict_student = {
+                    "Student Number": student.StudentNumber,
+                    "Name": student.Name,
+                    "Email": student.Email,
+                    "Mobile Number": student.MobileNumber,
+                    "Gender": "Male" if student.Gender == 1 else "Female",
+                }
+                # Append the data
+                list_student_data.append(dict_student)
+            print('list_student_data: ', list_student_data)
+            return (list_student_data)
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    #     # Now you can access and manipulate the data in the DataFrame
+    #     # For example, you can iterate through rows and access columns like this:
+    #     for index, row in df.iterrows():
+    #         # Extract the values from the DataFrame
+    #         student_number = row['Student Number'] # OK
+    #         student_name = row['Student Name']
+    #         section_code = row['Section Code']
+    #         subject_code = row['SubjectCode'] # OK
+    #         semester = row['Semester'] # OK
+    #         grade = row['Grade']
+    #         batch = row['Batch'] # OK
+            
+    #         # Split the section_code by the last space and keep the first part
+    #         course_code = section_code.rsplit(' ', 1)[0] 
+            
+    #         # Split the section_code by space, get the last part, and split it by hyphen '-' to extract year and section
+    #         year, section = section_code.split(' ')[-1].split('-')
+
+    #         # Now you can use the modified_section_code as needed in your code
+    #         student_data = (
+    #             db.session.query(Student,  StudentClassSubjectGrade, ClassSubject, Class, Subject, Course)
+    #             .join(StudentClassSubjectGrade, StudentClassSubjectGrade.StudentId == Student.StudentId)
+    #             .join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
+    #             .join(Class, Class.ClassId == ClassSubject.ClassId)
+    #             .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+    #             .join(Course, Course.CourseId == Class.CourseId)
+    #             .filter(Student.StudentNumber == student_number, Class.Year == year, Class.Section == section, Class.Batch == batch, Class.Semester == semester,  Subject.SubjectCode == subject_code)
+    #             .order_by(desc(Student.Name), desc(Class.Year), desc(Class.Section), desc(Class.Batch))
+    #             .first()
+    #         )
+            
+    #         print("INDEX NAME: ", index + 1, student_data.Student.StudentNumber, student_data.Student.Name)
+    #         print("Subject Code: ", student_data.Subject.SubjectCode)  # Assuming SubjectName is the attribute for the subject's name
+    #         print("Section Code: ",  student_data.Course.CourseCode, student_data.Class.Year ,  "-", student_data.Class.Section)
+    #         print("Semester: ", student_data.Class.Semester)
+    #         print("Batch: ", student_data.Class.Batch)
+    #         print("Batch: ", student_data.Class.IsGradeFinalized)
+    #         print("===========================================================")
+            
+    #         if(student_data.Class.IsGradeFinalized==False):
+    #             # Update the Class isGradeFinalized to False
+    #             student_data.StudentClassSubjectGrade.Grade = grade
+                
+    #             # Save only but dont commit in database
+    #             db.session.add(student_data.StudentClassSubjectGrade)
+    #         else:
+    #             return jsonify({'error': 'The grade has been finalized. Contact admin if there is an issue exist'}), 500
+    #     # If all data is updated successfully then commit the data
+    #     db.session.commit()
+    #     return jsonify({'success': 'File uploaded and data processed successfully'}), 200
+
+    # except Exception as e:
+    #     return jsonify({'error': 'An error occurred while processing the file'}), 500

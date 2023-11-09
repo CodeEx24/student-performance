@@ -1,0 +1,203 @@
+{% extends "universityadmin/layout.html" %}
+
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
+  <div class="bg-white p-8 shadow-md col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Students
+      </h3>
+
+      <div>
+        <form
+          class="bg-white p-4 rounded-lg"
+          enctype="multipart/form-data"
+          onsubmit="submitStudents(event)"
+          method="POST"
+          id="reset-form-email"
+        >
+          <div class="mb-4">
+            <label
+              for="excelFile"
+              class="block text-gray-700 font-bold text-lg mb-2"
+            >
+              Add Students:
+            </label>
+          </div>
+          <div class="mb-4 flex gap-4">
+            <input
+              type="file"
+              name="excelFile"
+              id="excelFile"
+              accept=".xlsx, .xls"
+              class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+            />
+
+            <button
+              type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+            >
+              Upload Excel File
+            </button>
+          </div>
+          <p id="students-file-error" class="text-c4 text-sm"></p>
+          <div id="exist" class="hidden">
+            <p class="text-c1 text-xl font-semibold">
+              Student number or email already exist:
+            </p>
+            <div id="students-exist-error" class="text-c1 text-sm"></div>
+          </div>
+        </form>
+      </div>
+
+      <hr class="mx-2" />
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <div id="grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+{% block script %}
+
+<!-- ADDING STUDENTS -->
+<script>
+  async function submitStudents(event) {
+    event.preventDefault();
+    console.log('INSIDE SUBMIT STUDENTS');
+
+    const fileErrorElement = document.getElementById('students-file-error');
+    const fileInput = document.getElementById('excelFile');
+    const file = fileInput.files[0];
+    const existElement = document.getElementById('exist');
+
+    existElement.classList.add('hidden');
+    const listElement = document.getElementById('students-exist-error');
+
+    while (listElement.firstChild) {
+      listElement.removeChild(listElement.firstChild);
+    }
+
+    if (!file) {
+      fileErrorElement.innerText = 'Please choose a file.';
+      return;
+    }
+
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      fileErrorElement.innerText =
+        'Invalid file type. Please select an Excel file.';
+      return;
+    } else {
+      fileErrorElement.innerText = '';
+    }
+
+    // If file type is valid, proceed with the API request
+    const formData = new FormData();
+    formData.append('excelFile', file);
+
+    fetch(`${api_base_url}/submit-students`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle API response here
+        console.log(data);
+        if (data.error) {
+          // Get students-exist-error and remove content
+
+          if (data.existing_data) {
+            data.existing_data.forEach((element) => {
+              const p = document.createElement('p');
+              p.innerText = `${element.StudentNumber} - ${element.StudentEmail}`;
+              listElement.appendChild(p);
+            });
+            existElement.appendChild(listElement);
+            // Remove hidden
+            existElement.classList.remove('hidden');
+          }
+          return;
+        }
+        // Append the data in the data source of grid
+        const grid = document.getElementById('grid').ej2_instances[0];
+        grid.dataSource = grid.dataSource.concat(data);
+        grid.refresh();
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
+</script>
+
+<!-- FETCHING STUDENT DETAILS -->
+<script>
+  // JavaScript function to show the modal
+  async function fetchStudents() {
+    const response = await fetch(`${api_base_url}/students`);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
+    }
+
+    const data = await response.json();
+    console.log('data: ', data);
+    displayStudent(data, 10);
+  }
+
+  // Function to initialize and display the Syncfusion Grid
+  function displayStudent(data, recordsPerPage) {
+    // Create an instance of the Syncfusion Grid
+    const grid = new ej.grids.Grid({
+      dataSource: data, // Paginated data
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      columns: [
+        // Define your columns based on your data structure
+        { field: 'Student Number', headerText: 'Student Number' },
+        { field: 'Name', headerText: 'Name' },
+        { field: 'Email', headerText: 'Email' },
+        { field: 'Mobile Number', headerText: 'Mobile Number' },
+        { field: 'Gender', headerText: 'Gender' },
+        // Add other fields as needed
+      ],
+      pageSettings: {
+        pageSize: 10, // Records per page
+        // pageCount: Math.ceil(data.length / recordsPerPage), // Calculate total number of pages
+        pageSizes: [10, 20, 50, 100], // Custom page size options
+        showPageCount: true, // Display page count
+        showPager: true, // Display pager
+      },
+    });
+
+    // Render the Syncfusion Grid in the specified element
+    grid.appendTo('#grid');
+  }
+
+  fetchStudents();
+</script>
+{% endblock script %}

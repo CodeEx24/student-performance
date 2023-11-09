@@ -194,6 +194,11 @@ def create_app():
     @role_required('universityAdmin')
     def universityAdminHome():
         return render_template('universityadmin/home.html', university_admin_api_base_url=university_admin_api_base_url, current_page="home")
+    
+    @app.route('/university-admin/students')
+    @role_required('universityAdmin')
+    def universityAdminStudents():
+        return render_template('universityadmin/students.html', university_admin_api_base_url=university_admin_api_base_url, current_page="students")
 
 
     @app.route('/university-admin/class-performance')

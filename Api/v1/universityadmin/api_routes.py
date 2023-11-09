@@ -6,8 +6,9 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData
 import os
+
 
 university_admin_api = Blueprint('university_admin_api', __name__)
 
@@ -180,3 +181,37 @@ def classPerformance(id):
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return render_template('404.html'), 404
+
+# api_routes.py
+@university_admin_api.route('/submit-students', methods=['POST'])
+@role_required('universityAdmin')
+def submitStudents():
+    # print("IN UNIVERSITY ADMIN STUDENTS SERVER")
+    # print("REQUEST FILES: ", request.files)
+    # Check if the request contains a file named 'excelFile'
+    if 'excelFile' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['excelFile']
+
+    # Call the utility function to process the file
+    return processAddingStudents(file)
+
+
+# api_routes.py
+@university_admin_api.route('/students', methods=['GET'])
+@role_required('universityAdmin')
+def fetchStudents():
+    university_admin = getCurrentUser()
+    if university_admin:
+        json_student_data = getStudentData()
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+
+    # # Call the utility function to process the file
+    # return processAddingStudents(file)
