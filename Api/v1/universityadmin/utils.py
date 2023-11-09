@@ -387,8 +387,6 @@ def processAddingStudents(file):
             student_course = row['Course Code']
             student_date_enrolled = row['Date Enrolled'] # OK
             
-          
-            
             # Check if the student is already exist in the database based on StudentNumber or Email
             student_number_data = db.session.query(Student).filter(
                 (Student.StudentNumber == student_number) 
@@ -463,6 +461,95 @@ def processAddingStudents(file):
         else:        
             return jsonify(list_student_data)
             
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while processing the file'}), 500
+    
+def processAddingClass(file):
+    print("PROCESSING CLASS")
+    try:
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+
+        df = pd.read_excel(file)
+        
+        list_class_data = []
+        list_existing_class_data = []
+        list_missing_courses = []
+        # For example, you can iterate through rows and access columns like this:
+        for index, row in df.iterrows():
+            # print(row)
+            course_code = row['Course Code']
+            section = int(row['Section'])
+            year = int(row['Year'])
+            semester = int(row['Semester'])
+            batch = int(row['Batch'])      
+            
+            # Query the course code in course model
+            course =  db.session.query(Course).filter(Course.CourseCode == course_code).first()
+
+            if course:
+                # Check if year is current year or + 1 only
+                current_year = datetime.datetime.now().year
+        
+                if batch != current_year and batch != current_year + 1:
+                    return jsonify({'error': 'Invalid year. Please select the current year or the next year.'}), 400
+                
+                # Check if course.id, year, section, semester and batch already existing in class
+                class_data = db.session.query(Class).filter(
+                    Class.CourseId == course.CourseId, Class.Year == year, Class.Section == section, Class.Semester == semester, Class.Batch == batch).first()
+          
+                # If existing throw an error
+                if not class_data:
+                    print("HEY NEW CLASS")
+                    print("course.CourseId: ", course.CourseId)
+                    print("year: ", year)
+                    print("section: ", section)
+                    print("batch: ", batch)
+                    print("semester: ", semester)
+                    
+                    new_class = Class(
+                        CourseId=course.CourseId,
+                        Year=year,
+                        Section=section,
+                        Semester=semester,
+                        Batch=batch, 
+                        IsGradeFinalized=False
+                    )
+                    # Just add in session
+                    db.session.add(new_class)
+                    db.session.flush()
+                    print('new_class: ', new_class)
+                    
+                    
+                    # Combine the course_code, year, section to class_name variable
+                    class_name = f"{course_code} {year}-{section}"
+                    print('class_name: ', class_name)
+                    list_class_data.append({'ClassId':new_class.ClassId,'ClassName':class_name,'Batch':batch, 'Course': course.Name, 'Grade': 'N/A'})
+                    print('list_class_data: ', list_class_data)
+                else:
+                    print("CLASS DATA")
+                    list_existing_class_data.append({
+                        'CourseCode': course_code,
+                        "Year": year,
+                        "Section": section,
+                        "Batch": batch,
+                        "Semester": semester
+                    })
+            else:
+                # check if course_code not existing in list_missing_course
+                if course_code not in list_missing_courses:
+                    list_missing_courses.append(course_code)
+                
+        if list_existing_class_data:
+            return jsonify({'error': 'The class already exist in the database', 'existing_data': list_existing_class_data}), 500
+        elif list_missing_courses:
+            return jsonify({'error': 'Course Code does not exist in the database', 'missing_course': list_missing_courses}), 400  
+        else:
+            db.session.commit()
+            return jsonify({'result': "Data added successfully", 'data':list_class_data })   
     except Exception as e:
         return jsonify({'error': 'An error occurred while processing the file'}), 500
     

@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass
 import os
 
 
@@ -196,6 +196,21 @@ def submitStudents():
 
     # Call the utility function to process the file
     return processAddingStudents(file)
+
+# api_routes.py
+@university_admin_api.route('/submit-class', methods=['POST'])
+@role_required('universityAdmin')
+def submitClass():
+    print("IN UNIVERSITY ADMIN STUDENTS SERVER")
+    print("REQUEST FILES: ", request.files)
+    # Check if the request contains a file named 'excelFile'
+    if 'excelFile' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['excelFile']
+
+    # Call the utility function to process the file
+    return processAddingClass(file)
 
 
 # api_routes.py

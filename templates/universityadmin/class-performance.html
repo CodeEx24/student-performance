@@ -17,8 +17,62 @@
 
 <div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
   <div class="bg-white p-8 shadow-md col-span-full">
-    <h1 class="text-3xl font-bold text-c1 mb-8">Class Data</h1>
-    <div id="grid-class"></div>
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Classes
+      </h3>
+
+      <div>
+        <form
+          class="bg-white p-4 rounded-lg"
+          enctype="multipart/form-data"
+          onsubmit="submitClass(event)"
+          method="POST"
+          id="reset-form-email"
+        >
+          <div class="mb-4">
+            <label
+              for="excelFile"
+              class="block text-gray-700 font-bold text-lg mb-2"
+            >
+              Add Class:
+            </label>
+          </div>
+          <div class="mb-4 flex gap-4">
+            <input
+              type="file"
+              name="excelFile"
+              id="excelFile"
+              accept=".xlsx, .xls"
+              class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+            />
+
+            <button
+              type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+            >
+              Upload Excel File
+            </button>
+          </div>
+          <p id="class-file-error" class="text-c4 text-sm"></p>
+          <div id="errors" class="hidden">
+            <p id="class-header-error" class="text-c1 text-xl font-semibold">
+              Student number or email already exist:
+            </p>
+            <div id="class-error" class="text-c1 text-sm"></div>
+          </div>
+        </form>
+      </div>
+
+      <hr class="mx-2" />
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <div id="grid-class"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -169,6 +223,7 @@
   }
 
   function displayGridClass(json_class) {
+    console.log('json_class: ', json_class);
     // Create the grid with filtering
     var grid = new ej.grids.Grid({
       dataSource: json_class,
@@ -254,9 +309,107 @@
   fetchAllClass();
 </script>
 
+<!-- ADDING STUDENTS -->
 <script>
-  function sayHello() {
-    console.log('HELLOT THERE');
+  async function submitClass(event) {
+    event.preventDefault();
+    console.log('INSIDE SUBMIT STUDENTS');
+
+    const fileErrorElement = document.getElementById('class-file-error');
+    const fileInput = document.getElementById('excelFile');
+    const file = fileInput.files[0];
+    // Get the exist
+    const errorContainer = document.getElementById('errors');
+    // Get class-header-error
+    const headerErrorElement = document.getElementById('class-header-error');
+    errorContainer.classList.add('hidden');
+
+    if (!file) {
+      fileErrorElement.innerText = 'Please choose a file.';
+      return;
+    }
+
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      fileErrorElement.innerText =
+        'Invalid file type. Please select an Excel file.';
+      return;
+    } else {
+      fileErrorElement.innerText = '';
+    }
+
+    // If file type is valid, proceed with the API request
+    const formData = new FormData();
+    formData.append('excelFile', file);
+
+    fetch(`${api_base_url}/submit-class`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle API response here
+        if (data.result) {
+          notyf.success(data.result);
+          // Get the grid datasource and concat the data.data
+          const grid = document.getElementById('grid-class').ej2_instances[0];
+          const dataSource = grid.dataSource;
+          grid.dataSource = dataSource.concat(data.data);
+          return;
+        } else {
+          // Make a p element in class-exist-error for all, ClassName, Year, Section, Semester, Batch
+          const listElement = document.getElementById('class-error');
+          // Remove all child elements
+          while (listElement.firstChild) {
+            listElement.removeChild(listElement.firstChild);
+          }
+
+          if (data.existing_data) {
+            headerErrorElement.innerText = 'Class already exist:';
+            data.existing_data.forEach((element) => {
+              let errorP = document.createElement('p');
+              const semesterOrdinal = getOrdinal(element.Semester);
+              errorP.innerText = `${element.CourseCode} ${element.Year} - ${element.Section} - (${element.Batch} - ${semesterOrdinal} Semester)`;
+              listElement.appendChild(errorP);
+            });
+            // Append the listElement to existElement
+            errorContainer.appendChild(listElement);
+            // Remove hidden
+            errorContainer.classList.remove('hidden');
+          }
+
+          if (data.missing_course) {
+            data.missing_course.forEach((course) => {
+              headerErrorElement.innerText = 'Course not exist:';
+              let errorP = document.createElement('p');
+              errorP.innerText = `${course}`;
+              listElement.appendChild(errorP);
+            });
+            // Append the listElement to errorContainer
+            errorContainer.appendChild(listElement);
+            // Remove hidden
+            errorContainer.classList.remove('hidden');
+          }
+          notyf.error(data.error);
+          return;
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
+
+  function getOrdinal(semester) {
+    const suffixes = ['st', 'nd', 'rd'];
+    const remainder = semester % 10;
+    const suffix =
+      remainder >= 1 &&
+      remainder <= 3 &&
+      semester !== 11 &&
+      semester !== 12 &&
+      semester !== 13
+        ? suffixes[remainder - 1]
+        : 'th';
+    return `${semester}${suffix}`;
   }
 </script>
 {% endblock script %}
