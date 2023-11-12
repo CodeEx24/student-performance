@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData
 import os
 
 
@@ -228,5 +228,83 @@ def fetchStudents():
     else:
         return render_template('404.html'), 404
 
+
+# Getting all the class data in current year
+@university_admin_api.route('/class/subject', methods=['GET'])
+@role_required('universityAdmin')
+def classSubjectData():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_class_subject_data = getAllClassSubjectData()
+
+        if json_class_subject_data:
+            return (json_class_subject_data)
+        else:
+            return jsonify(message="No class subject data available")
+    else:
+        return render_template('404.html'), 404
+    
+
+# Getting all the class data in current year
+@university_admin_api.route('/class/<int:class_id>', methods=['GET'])
+@role_required('universityAdmin')
+def fetchClassData(class_id):
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_class_subject_data = getClassSubject(class_id)
+
+        if json_class_subject_data:
+            return (json_class_subject_data)
+        else:
+            return jsonify(message="No class subject data available")
+    else:
+        return render_template('404.html'), 404
+    
+    
+@university_admin_api.route('/class/details/<int:class_id>', methods=['GET'])
+@role_required('universityAdmin')
+def fetchClassDetails(class_id):
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_class_details = getClassDetails(class_id)
+
+        if json_class_details:
+            return (json_class_details)
+        else:
+            return jsonify(message="No class subject data available")
+    else:
+        return render_template('404.html'), 404
+    
+
+@university_admin_api.route('/class/subject/<int:class_subject_id>', methods=['GET'])
+@role_required('universityAdmin')
+def fetchStudentClassSubjectData(class_subject_id):
+    print("HERE IN CLASS SUBJECT")
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_class_subject_data = getStudentClassSubjectData(class_subject_id)
+
+        if json_class_subject_data:
+            return (json_class_subject_data)
+        else:
+            return jsonify(message="No class subject data available"), 400
+    else:
+        return render_template('404.html'), 404
+    
+    
+# api_routes.py
+@university_admin_api.route('/submit-students-subjects', methods=['POST'])
+@role_required('universityAdmin')
+def submitStudentsSubject():
+    print("IN UNIVERSITY ADMIN SUBMIT STUDENTS")
+    print("REQUEST FILES: ", request.files)
+    # Check if the request contains a file named 'excelFile'
+    if 'excelFile' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['excelFile']
+
+    # Call the utility function to process the file
+    return jsonify({"hello": "HELLo"})
     # # Call the utility function to process the file
     # return processAddingStudents(file)

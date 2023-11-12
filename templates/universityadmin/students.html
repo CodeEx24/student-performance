@@ -76,6 +76,33 @@
   </div>
 </div>
 
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}
 
 <!-- SCRIPTS DATA -->
@@ -85,6 +112,10 @@
 <script>
   async function submitStudents(event) {
     event.preventDefault();
+    // get loadingModal
+    const loadingModal = document.getElementById('loadingModal');
+    loadingModal.classList.remove('hidden');
+
     console.log('INSIDE SUBMIT STUDENTS');
 
     const fileErrorElement = document.getElementById('students-file-error');
@@ -123,10 +154,15 @@
       .then((response) => response.json())
       .then((data) => {
         // Handle API response here
-        console.log(data);
-        if (data.error) {
+        if (data.result) {
+          notyf.success(data.result);
+          const grid = document.getElementById('grid').ej2_instances[0];
+          data.data.forEach((student) => {
+            grid.dataSource = grid.dataSource.concat(student);
+          });
+          grid.refresh();
+        } else {
           // Get students-exist-error and remove content
-
           if (data.existing_data) {
             data.existing_data.forEach((element) => {
               const p = document.createElement('p');
@@ -134,15 +170,12 @@
               listElement.appendChild(p);
             });
             existElement.appendChild(listElement);
-            // Remove hidden
-            existElement.classList.remove('hidden');
           }
-          return;
+          notyf.error(data.error);
+          existElement.classList.remove('hidden');
         }
-        // Append the data in the data source of grid
-        const grid = document.getElementById('grid').ej2_instances[0];
-        grid.dataSource = grid.dataSource.concat(data);
-        grid.refresh();
+        // hide loadingModal
+        loadingModal.classList.add('hidden');
       })
       .catch((error) => {
         console.error('Error:', error);

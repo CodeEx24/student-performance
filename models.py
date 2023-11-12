@@ -37,6 +37,7 @@ class Student(db.Model, UserMixin):
     IsGraduated = db.Column(db.Boolean, default=True)
     Token = db.Column(db.String(128))  # This field will store the reset token
     TokenExpiration = db.Column(db.DateTime)
+    # IsBridging
     
     def to_dict(self):
         return {
@@ -229,6 +230,7 @@ class Subject(db.Model):
     Description = db.Column(db.String(200))
     Units = db.Column(db.Float)
     IsNSTP = db.Column(db.Boolean, default=False)
+    # ForBridging
 
     def to_dict(self):
         return {

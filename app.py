@@ -205,6 +205,18 @@ def create_app():
     @role_required('universityAdmin')
     def universityClassPerformance():
         return render_template('universityadmin/class-performance.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
+    
+    
+    @app.route('/university-admin/class/<int:class_id>')
+    @role_required('universityAdmin')
+    def universityClass(class_id):
+        return render_template('universityadmin/class.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance", class_id=class_id)
+    
+            
+    @app.route('/university-admin/class-subject')
+    @role_required('universityAdmin')
+    def universityClassSubject():
+        return render_template('universityadmin/class-subject.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-subject")
 
 
     @app.route('/university-admin/profile')

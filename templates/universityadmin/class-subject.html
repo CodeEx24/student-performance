@@ -21,7 +21,7 @@
       class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
     >
       <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
-        Classes
+        Class Subject
       </h3>
 
       <div>
@@ -37,7 +37,7 @@
               for="excelFile"
               class="block text-gray-700 font-bold text-lg mb-2"
             >
-              Add Class:
+              Add Class Subject:
             </label>
           </div>
           <div class="mb-4 flex gap-4">
@@ -127,34 +127,6 @@
   </div>
 </div>
 
-<div
-  id="loadingModal"
-  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
->
-  <!-- Modal Overlay -->
-  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
-
-  <!-- Modal Content -->
-  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
-    <!-- Modal Header -->
-
-    <!-- Modal Body -->
-    <div class="modal-body w-full relative">
-      <div class="flex flex-row gap-2">
-        <div
-          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
-        ></div>
-        <div
-          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
-        ></div>
-        <div
-          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
-        ></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 {% endblock content %}
 
 <!-- SCRIPTS DATA -->
@@ -232,9 +204,9 @@
 
 <!-- FETCH ALL CLASS DATA (GRIDS)-->
 <script>
-  async function fetchAllClass() {
+  async function fetchClassSubjectGrade() {
     try {
-      const response = await fetch(`${api_base_url}/class/data`);
+      const response = await fetch(`${api_base_url}/class/subject`);
 
       if (!response.ok) {
         throw new Error(
@@ -242,15 +214,15 @@
         );
       }
 
-      const json_class = await response.json();
+      const data = await response.json();
 
-      displayGridClass(json_class.Classes);
+      displayGridClassSubject(data.result);
     } catch (error) {
       console.error(error);
     }
   }
 
-  function displayGridClass(json_class) {
+  function displayGridClassSubject(json_class) {
     console.log('json_class: ', json_class);
     // Create the grid with filtering
     var grid = new ej.grids.Grid({
@@ -262,43 +234,42 @@
       // rowData: json_class['ClassSubjectGrade'],
       columns: [
         {
-          field: 'Course',
-          headerText: 'Course Name',
+          field: 'Section Code',
+          headerText: 'Section Code',
           width: 250,
         },
         {
-          field: 'ClassName',
-          headerText: 'Section Code',
+          field: 'Subject',
+          headerText: 'Subject',
+          width: 250,
+        },
+        {
+          field: 'Teacher',
+          headerText: 'Teacher',
           width: 150,
         },
         {
-          field: 'Batch',
-          headerText: 'Year',
-          width: 100,
+          field: 'Schedule',
+          headerText: 'Schedule',
+          width: 150,
         },
         {
           field: 'Semester',
           headerText: 'Semester',
-          width: 100,
+          width: 150,
         },
         {
-          field: 'Grade',
-          headerText: 'Grade',
-          width: 100,
+          field: 'Batch',
+          headerText: 'Batch',
+          width: 150,
         },
 
-        {
-          headerText: 'Actions',
-          template:
-            '<button class="btn px-4 py-2 bg-primary text-white font-bold" >Performance</button>', // Add a button to the cell
-          width: 150,
-        },
-        {
-          headerText: 'Link',
-          template:
-            '<a href="#" onclick="redirectToClass(${ClassId})" class="underline">Class Details</a>',
-          width: 150,
-        },
+        // {
+        //   headerText: 'Actions',
+        //   template:
+        //     '<button class="btn px-4 py-2 bg-primary text-white font-bold" onclick="sayHello()">Performance</button>', // Add a button to the cell
+        //   width: 150,
+        // },
       ],
 
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
@@ -345,24 +316,13 @@
 
   // Example function to show a modal when the "Performance" button is clicked
 
-  fetchAllClass();
+  fetchClassSubjectGrade();
 </script>
 
 <!-- ADDING STUDENTS -->
 <script>
-  function redirectToClass(id) {
-    console.log('ID REDIRECT: ', id);
-
-    // Open link in a new tab
-    window.open(`/university-admin/class/${id}`, '_blank');
-  }
-
   async function submitClass(event) {
     event.preventDefault();
-    // get loadingModal
-    const loadingModal = document.getElementById('loadingModal');
-    loadingModal.classList.remove('hidden');
-
     console.log('INSIDE SUBMIT STUDENTS');
 
     const fileErrorElement = document.getElementById('class-file-error');
@@ -391,9 +351,7 @@
     const formData = new FormData();
     formData.append('excelFile', file);
 
-    const apiUrl = "{{ url_for('university_admin_api.submitClass') }}";
-
-    fetch(apiUrl, {
+    fetch(`${api_base_url}/submit-class`, {
       method: 'POST',
       body: formData,
     })
@@ -405,12 +363,9 @@
           // Get the grid datasource and concat the data.data
           const grid = document.getElementById('grid-class').ej2_instances[0];
           const dataSource = grid.dataSource;
-          grid.dataSource = data.data.concat(dataSource);
-          // add hidden in loadingModal
-          loadingModal.classList.add('hidden');
+          grid.dataSource = dataSource.concat(data.data);
           return;
         } else {
-          console.log(data);
           // Make a p element in class-exist-error for all, ClassName, Year, Section, Semester, Batch
           const listElement = document.getElementById('class-error');
           // Remove all child elements
@@ -445,13 +400,11 @@
             errorContainer.classList.remove('hidden');
           }
           notyf.error(data.error);
-          loadingModal.classList.add('hidden');
           return;
         }
       })
       .catch((error) => {
         console.error('Error:', error);
-        loadingModal.classList.add('hidden');
       });
   }
 

@@ -1,4 +1,4 @@
-from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db, UniversityAdmin
+from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db, UniversityAdmin, ClassSubjectGrade
 from sqlalchemy import desc
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -243,15 +243,13 @@ def getAllClassData():
         current_year = datetime.datetime.now().year
 
         data_class_subject_grade_handle = (
-            db.session.query(
-                ClassSubject,
+            db.session.query(   
                 Class, Course, ClassGrade
             )
-            .join(Class, Class.ClassId == ClassSubject.ClassId)
             .join(Course, Course.CourseId == Class.CourseId)
             .join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
-            .filter(Class.Batch == current_year - 1)
-            .order_by(desc(Class.CourseId), Class.Year, Class.Section)
+            # .filter(Class.Batch == current_year - 1)
+            .order_by(desc(Class.Batch), desc(Class.CourseId), Class.Year, Class.Section)
             .all()
         )
 
@@ -265,12 +263,21 @@ def getAllClassData():
                 # Check if the ClassId is not in the seen_class_ids set
                 if class_id not in seen_class_ids:
                     # Get the class name
+                    # Check if Grade exists
+                    if class_subject_grade.ClassGrade.Grade is not None:
+                        # If Grade exists, format it with two decimal places
+                        grade_value = f"{class_subject_grade.ClassGrade.Grade:.2f}"
+                    else:
+                        # If Grade does not exist, set it to 'N/A'
+                        grade_value = "N/A"
+                        
                     class_obj = {
                         'ClassId': class_id,
                         'ClassName': f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}",
+                        'Semester': class_subject_grade.Class.Semester,
                         "Course": class_subject_grade.Course.Name,
                         "Batch": class_subject_grade.Class.Batch,
-                        "Grade": f"{class_subject_grade.ClassGrade.Grade:.2f}"
+                        "Grade": grade_value
                     }
 
                     # Add class_id to the seen_class_ids set
@@ -309,10 +316,6 @@ def getClassPerformance(class_id):
             num_class_batch = class_grade.Class.Batch
             num_class_section = class_grade.Class.Section
 
-            print("class_name: ", class_name)
-            print("num_class_batch: ", num_class_batch)
-            print("num_class_section: ", num_class_section)
-            print('class_grade.Class.Year: ', class_grade.Class.Year)
             dict_class_grade = {
                 'Class': class_name,
                 'Batch': num_class_batch,
@@ -320,13 +323,10 @@ def getClassPerformance(class_id):
                 'PresidentLister': class_grade.ClassGrade.PresidentsLister,
                 'DeanLister': class_grade.ClassGrade.DeansLister
             }
-            print('dict_class_grade: ', dict_class_grade)
             
             list_grade = []
             for i in range(1, class_grade.Class.Year+1):
-                print("i: ", i)
                 batch = class_grade.Class.Batch - class_grade.Class.Year + i
-                print("batch: ", batch)
                 class_grade_result = (
                     db.session.query(
                         Class,
@@ -353,7 +353,6 @@ def getClassPerformance(class_id):
 
 
 def processAddingStudents(file):
-    print("PROCESSING STUDENT")
     try:
         # Check if the file is empty
         if file.filename == '':
@@ -399,7 +398,6 @@ def processAddingStudents(file):
                 password = generate_password()
                 gender = 1 if student_gender == 'Male' else 2
                 
-                # print(password)
                 
                 course = db.session.query(Course).filter_by(CourseCode=student_course).first()
 
@@ -432,7 +430,7 @@ def processAddingStudents(file):
                 
                 # # Add the new course enrolled to the session
                 db.session.add(new_course_enrolled)
-                db.session.commit()
+                # db.session.commit()
                 
                 msg = Message('Your current PUP Account has been granted.', sender='your_email@example.com',
                             recipients=[str(new_student.Email)])
@@ -447,25 +445,25 @@ def processAddingStudents(file):
                     'Name': str(student_name),
                     "Email": str(student_email),
                     "Mobile Number": str(student_mobile),
-                    "Gender": gender,
+                    "Gender": gender
                 })
              
             else:
                 # Append the student nummber
                 list_existing_data.append({'StudentNumber':student_number, 'StudentEmail': student_email})
                 # Remove all existing db.session
-                db.session.rollback()
-
+                
         if list_existing_data:
+            db.session.rollback()
             return jsonify({'error': 'The following student number or email already exist in the database ', 'existing_data': (list_existing_data)}), 500
         else:        
-            return jsonify(list_student_data)
+            db.session.commit()
+            return  jsonify({'result': 'Data added successfully', 'data': (list_student_data)}), 200
             
     except Exception as e:
         return jsonify({'error': 'An error occurred while processing the file'}), 500
     
 def processAddingClass(file):
-    print("PROCESSING CLASS")
     try:
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
@@ -480,7 +478,6 @@ def processAddingClass(file):
         list_missing_courses = []
         # For example, you can iterate through rows and access columns like this:
         for index, row in df.iterrows():
-            # print(row)
             course_code = row['Course Code']
             section = int(row['Section'])
             year = int(row['Year'])
@@ -502,14 +499,7 @@ def processAddingClass(file):
                     Class.CourseId == course.CourseId, Class.Year == year, Class.Section == section, Class.Semester == semester, Class.Batch == batch).first()
           
                 # If existing throw an error
-                if not class_data:
-                    print("HEY NEW CLASS")
-                    print("course.CourseId: ", course.CourseId)
-                    print("year: ", year)
-                    print("section: ", section)
-                    print("batch: ", batch)
-                    print("semester: ", semester)
-                    
+                if not class_data:             
                     new_class = Class(
                         CourseId=course.CourseId,
                         Year=year,
@@ -518,19 +508,26 @@ def processAddingClass(file):
                         Batch=batch, 
                         IsGradeFinalized=False
                     )
+                    
                     # Just add in session
                     db.session.add(new_class)
                     db.session.flush()
-                    print('new_class: ', new_class)
                     
+                    
+                    
+                    # Make a ClassGrade
+                    new_class_grade = ClassGrade(
+                        ClassId=new_class.ClassId,
+                        PresidentsLister=0,
+                        DeansLister=0,
+                        Grade= 5.00
+                    )
+                    db.session.add(new_class_grade)
                     
                     # Combine the course_code, year, section to class_name variable
                     class_name = f"{course_code} {year}-{section}"
-                    print('class_name: ', class_name)
                     list_class_data.append({'ClassId':new_class.ClassId,'ClassName':class_name,'Batch':batch, 'Course': course.Name, 'Grade': 'N/A'})
-                    print('list_class_data: ', list_class_data)
                 else:
-                    print("CLASS DATA")
                     list_existing_class_data.append({
                         'CourseCode': course_code,
                         "Year": year,
@@ -544,13 +541,16 @@ def processAddingClass(file):
                     list_missing_courses.append(course_code)
                 
         if list_existing_class_data:
+            db.session.rollback()
             return jsonify({'error': 'The class already exist in the database', 'existing_data': list_existing_class_data}), 500
         elif list_missing_courses:
+            db.session.rollback()
             return jsonify({'error': 'Course Code does not exist in the database', 'missing_course': list_missing_courses}), 400  
         else:
             db.session.commit()
-            return jsonify({'result': "Data added successfully", 'data':list_class_data })   
+            return jsonify({'result': "Data added successfully", 'data':list_class_data }), 200   
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': 'An error occurred while processing the file'}), 500
     
 
@@ -575,13 +575,132 @@ def getStudentData():
                 }
                 # Append the data
                 list_student_data.append(dict_student)
-            print('list_student_data: ', list_student_data)
             return (list_student_data)
         else:
             return None
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         return None
+    
+    
+    
+def getAllClassSubjectData():
+    try:
+        data_class_subject = (
+            db.session.query(ClassSubject, Subject, Class, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Course, Course.CourseId == Class.CourseId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).order_by(desc(Class.Batch),desc(Class.Semester), (Subject.Name)).all()
+        )
+        
+
+        
+        if data_class_subject:
+                # For loop the data_student and put it in dictionary
+            list_class_subject = []
+            for class_subject in data_class_subject:
+                # Combine the course_code, year, section to class_name variable
+                class_name = f"{class_subject.Course.CourseCode} {class_subject.Class.Year}-{class_subject.Class.Section}"
+                
+                dict_class_subject = {
+                    "Section Code": class_name,
+                    "Subject": class_subject.Subject.Name,
+                    "Teacher": class_subject.Faculty.Name,
+                    "Schedule": class_subject.ClassSubject.Schedule,
+                    'Batch': class_subject.Class.Batch,
+                    'Semester': class_subject.Class.Semester
+                }
+                # # Append the data
+                list_class_subject.append(dict_class_subject)
+            return jsonify({'result': list_class_subject})
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    
+
+def getClassSubject(class_id):
+    try:
+        data_class_subject = db.session.query(ClassSubject, ClassSubjectGrade, Subject, Class, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Course, Course.CourseId == Class.CourseId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).filter(ClassSubject.ClassId == class_id).all()
+        
+        if data_class_subject:
+                # For loop the data_student and put it in dictionary
+            list_class_subject = []
+            for class_subject in data_class_subject:
+                # Combine the course_code, year, section to class_name variable
+                class_name = f"{class_subject.Course.CourseCode} {class_subject.Class.Year}-{class_subject.Class.Section}"
+                
+                dict_class_subject = {
+                    "ClassSubjectId": class_subject.ClassSubject.ClassSubjectId,
+                    "SubjectCode": class_subject.Subject.SubjectCode,
+                    "Section Code": class_name,
+                    "Grade": round(class_subject.ClassSubjectGrade.Grade, 2),  # Round to 2 decimal places
+                    "Subject": class_subject.Subject.Name,
+                    "Teacher": class_subject.Faculty.Name,
+                    "Schedule": class_subject.ClassSubject.Schedule,
+                    'Batch': class_subject.Class.Batch,
+                    
+                }
+                # # Append the data
+                list_class_subject.append(dict_class_subject)
+            return jsonify({'data': list_class_subject})
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    
+def getClassDetails(class_id):
+    try:
+        data_class_details = db.session.query(Class, Course).join(Course, Course.CourseId == Class.CourseId).filter(Class.ClassId == class_id).all()
+        
+        if data_class_details:
+                # For loop the data_student and put it in dictionary
+            for class_details in data_class_details:
+                # Combine the course_code, year, section to class_name variable
+                class_name = f"{class_details.Course.CourseCode} {class_details.Class.Year}-{class_details.Class.Section}"
+
+                dict_class_details = {
+                    "Course": class_details.Course.Name,
+                    "Section Code": class_name,
+                    'Batch': class_details.Class.Batch,
+                    "Semester": class_details.Class.Semester
+                }
+                return jsonify({'data': dict_class_details})
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    
+    
+def getStudentClassSubjectData(classSubjectId):
+    try:
+        data_class_details = db.session.query(ClassSubject).filter(ClassSubject.ClassSubjectId == classSubjectId).first()
+        
+        # Get the StudentClassSubjectGrade
+        if data_class_details:
+            data_student_subject_grade = db.session.query(StudentClassSubjectGrade, Student).join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId).filter(StudentClassSubjectGrade.ClassSubjectId == data_class_details.ClassSubjectId).all()
+                        
+            if data_student_subject_grade:
+                list_student_data = []
+                    # For loop the data_student and put it in dictionary
+                for student_subject_grade in data_student_subject_grade:
+                    dict_student_subject_grade = {
+                        "StudentNumber": student_subject_grade.Student.StudentNumber,
+                        "Name": student_subject_grade.Student.Name,
+                        "Email": student_subject_grade.Student.Email,
+                        "Grade": round(student_subject_grade.StudentClassSubjectGrade.Grade, 2)
+                    }
+                    list_student_data.append(dict_student_subject_grade)
+                return  jsonify({'data': list_student_data})
+            else:
+                return None
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    
+    
     #     # Now you can access and manipulate the data in the DataFrame
     #     # For example, you can iterate through rows and access columns like this:
     #     for index, row in df.iterrows():
@@ -613,13 +732,6 @@ def getStudentData():
     #             .first()
     #         )
             
-    #         print("INDEX NAME: ", index + 1, student_data.Student.StudentNumber, student_data.Student.Name)
-    #         print("Subject Code: ", student_data.Subject.SubjectCode)  # Assuming SubjectName is the attribute for the subject's name
-    #         print("Section Code: ",  student_data.Course.CourseCode, student_data.Class.Year ,  "-", student_data.Class.Section)
-    #         print("Semester: ", student_data.Class.Semester)
-    #         print("Batch: ", student_data.Class.Batch)
-    #         print("Batch: ", student_data.Class.IsGradeFinalized)
-    #         print("===========================================================")
             
     #         if(student_data.Class.IsGradeFinalized==False):
     #             # Update the Class isGradeFinalized to False
