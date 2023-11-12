@@ -201,10 +201,10 @@ def create_app():
         return render_template('universityadmin/students.html', university_admin_api_base_url=university_admin_api_base_url, current_page="students")
 
 
-    @app.route('/university-admin/class-performance')
+    @app.route('/university-admin/all/class')
     @role_required('universityAdmin')
-    def universityClassPerformance():
-        return render_template('universityadmin/class-performance.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
+    def universityAllClass():
+        return render_template('universityadmin/all-class.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
     
     
     @app.route('/university-admin/class/<int:class_id>')
@@ -217,6 +217,12 @@ def create_app():
     @role_required('universityAdmin')
     def universityClassSubject():
         return render_template('universityadmin/class-subject.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-subject")
+    
+    
+    @app.route('/university-admin/curriculum')
+    @role_required('universityAdmin')
+    def universityCurriculum():
+        return render_template('universityadmin/curriculum.html', university_admin_api_base_url=university_admin_api_base_url, current_page="curriculum")
 
 
     @app.route('/university-admin/profile')

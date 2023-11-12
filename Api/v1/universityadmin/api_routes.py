@@ -6,13 +6,13 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject
 import os
 
 
 university_admin_api = Blueprint('university_admin_api', __name__)
 
-@university_admin_api.route('/login', methods=['GET', 'POST'])
+@university_admin_api.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -292,6 +292,36 @@ def fetchStudentClassSubjectData(class_subject_id):
         return render_template('404.html'), 404
     
     
+@university_admin_api.route('/curriculum', methods=['GET'])
+@role_required('universityAdmin')
+def fetchCurriculum():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_curriculum_data = getCurriculumData()
+
+        if json_curriculum_data:
+            return (json_curriculum_data)
+        else:
+            return jsonify(message="No class subject data available"), 400
+    else:
+        return render_template('404.html'), 404
+    
+
+@university_admin_api.route('/curriculum/subjects/<int:metadata_id>', methods=['GET'])
+@role_required('universityAdmin')
+def fetchCurriculumSubjects(metadata_id):
+    print("HERE IN CURRICULUM SUBJECTS")
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_class_subject_data = getCurriculumSubject(metadata_id)
+
+        if json_class_subject_data:
+            return (json_class_subject_data)
+        else:
+            return jsonify(message="No class subject data available"), 400
+    else:
+        return render_template('404.html'), 404    
+
 # api_routes.py
 @university_admin_api.route('/submit-students-subjects', methods=['POST'])
 @role_required('universityAdmin')

@@ -1,4 +1,4 @@
-from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db, UniversityAdmin, ClassSubjectGrade
+from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db, UniversityAdmin, ClassSubjectGrade, Metadata, Curriculum
 from sqlalchemy import desc
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -700,6 +700,57 @@ def getStudentClassSubjectData(classSubjectId):
         # Handle the exception here, e.g., log it or return an error response
         return None
     
+    getCurriculumSubject
+def getCurriculumData():
+    try:
+        metadata = db.session.query(Curriculum, Metadata, Course, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).all()
+        
+        # Get the StudentClassSubjectGrade
+        if metadata:
+            list_metadata = []
+                # For loop the data_student and put it in dictionary
+            for data in metadata:
+                # Convert the YearLevel to 1st, 2nd, 3rd, 4th
+                
+                
+                dict_metadata = {
+                    "MetadataId": data.Metadata.MetadataId,
+                    "Year": data.Metadata.YearLevel,
+                    "Semester": data.Metadata.Semester,
+                    "Batch": data.Metadata.Batch,
+                    "Course": data.Course.CourseCode,
+                    "Subject": data.Subject.Name,
+                    "Subject Code": data.Subject.SubjectCode
+                }
+                list_metadata.append(dict_metadata)
+            return  jsonify({'data': list_metadata})
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    
+
+def getCurriculumSubject(metadata_id):
+    try:
+        curriculum_subjects = db.session.query(Curriculum, Subject).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Curriculum.MetadataId == metadata_id).all()
+        # Get the StudentClassSubjectGrade
+        if curriculum_subjects:
+            list_curriculum_subjects = []
+                # For loop the data_student and put it in dictionary
+            for data in curriculum_subjects:
+                dict_curriculum_subjects = {
+                    "Subject Code": data.Subject.SubjectCode,
+                    "Name": data.Subject.Name,
+                    "Units": "{:.2f}".format(round(data.Subject.Units, 2))
+                }
+                list_curriculum_subjects.append(dict_curriculum_subjects)
+            return  jsonify({'data': list_curriculum_subjects})
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
     
     #     # Now you can access and manipulate the data in the DataFrame
     #     # For example, you can iterate through rows and access columns like this:

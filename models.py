@@ -16,6 +16,9 @@ from flask_login import UserMixin
 # from data2.classSubjectGrade import class_subject_grade_data
 # from data2.classGrade import class_grade_data
 # from data2.courseGrade import course_grade_data
+# from data2.curriculum import curriculum_data
+# from data2.metadata import metadata_data
+
 
 db = SQLAlchemy()
 
@@ -376,6 +379,32 @@ class CourseGrade(db.Model):
         }
 
 
+class Curriculum(db.Model):
+    __tablename__ = 'Curriculum'
+
+    CurriculumId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    SubjectId = db.Column(db.Integer, db.ForeignKey('Subject.SubjectId', ondelete="CASCADE"))
+    MetadataId = db.Column(db.Integer, db.ForeignKey('Metadata.MetadataId'), nullable=False)
+
+
+class Metadata(db.Model):
+    __tablename__ = 'Metadata'
+
+    MetadataId = db.Column(db.Integer, primary_key=True)
+    CourseId = db.Column(db.Integer, db.ForeignKey('Course.CourseId', ondelete="CASCADE"))
+    YearLevel = db.Column(db.Integer, nullable=False)
+    Semester = db.Column(db.Integer, nullable=False)
+    Batch = db.Column(db.Integer, nullable=False)
+
+    def to_dict(self):
+        return {
+            'MetadataId': self.MetadataId,
+            'CourseId': self.CourseId,
+            'YearLevel': self.YearLevel,
+            'Semester': self.Semester,
+            'Batch': self.Batch
+        }
+
 def init_db(app):
     db.init_app(app)
     # with app.app_context():
@@ -453,6 +482,16 @@ def init_db(app):
 #     for data in course_grade_data:
 #         course_grade = CourseGrade(**data)
 #         db.session.add(course_grade)
+#         db.session.flush()
+    
+#     for data in metadata_data:
+#         metadata = Metadata(**data)
+#         db.session.add(metadata)
+#         db.session.flush()
+    
+#     for data in curriculum_data:
+#         curriculum = Curriculum(**data)
+#         db.session.add(curriculum)
 #         db.session.flush()
 
 #     db.session.commit()
