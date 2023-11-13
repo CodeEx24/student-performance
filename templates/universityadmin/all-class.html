@@ -240,6 +240,7 @@
         throw new Error(
           `Failed to fetch data. Try to contact the admin to resolve the issue.`
         );
+        return;
       }
 
       const json_class = await response.json();

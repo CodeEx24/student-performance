@@ -28,7 +28,7 @@
         <form
           class="bg-white p-4 rounded-lg"
           enctype="multipart/form-data"
-          onsubmit="submitClass(event)"
+          onsubmit="submitCurriculumSubjects(event)"
           method="POST"
           id="reset-form-email"
         >
@@ -132,7 +132,7 @@
           <form
             class="bg-white rounded-lg mt-4 px-4 mb-8"
             enctype="multipart/form-data"
-            onsubmit="submitCurriculumSubjects(event, classSubjectId)"
+            onsubmit="submitClass(event)"
             method="POST"
             id="reset-form-email"
           >
@@ -308,11 +308,11 @@
           headerText: 'Subject Code',
           width: 100,
         },
-        {
-          field: 'Subject',
-          headerText: 'Subject',
-          width: 250,
-        },
+        // {
+        //   field: 'Subject',
+        //   headerText: 'Subject',
+        //   width: 250,
+        // },
         {
           field: 'Year',
           headerText: 'Year',
@@ -339,7 +339,13 @@
 
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {},
+      excelExportComplete: function (args) {
+        // Exclude the 'Subject Code' column from the exported Excel file
+        args.xlsxExportOptions.sheets[0].columns =
+          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
+            return column.field !== 'Subject';
+          });
+      },
     });
 
     grid.toolbarClick = function (args) {
@@ -491,7 +497,7 @@
     const loadingModal = document.getElementById('loadingModal');
     loadingModal.classList.remove('hidden');
 
-    console.log('INSIDE SUBMIT STUDENTS');
+    console.log('INSIDE SUBMIT CURRICULUM');
 
     const fileErrorElement = document.getElementById('class-file-error');
     const fileInput = document.getElementById('excelFile');
@@ -519,68 +525,70 @@
     const formData = new FormData();
     formData.append('excelFile', file);
 
-    // const apiUrl = "{{ url_for('university_admin_api.submitClass') }}";
+    const apiUrl =
+      "{{ url_for('university_admin_api.submitCurriculumSubjects') }}";
 
-    // fetch(apiUrl, {
-    //   method: 'POST',
-    //   body: formData,
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     // Handle API response here
-    //     if (data.result) {
-    //       notyf.success(data.result);
-    //       // Get the grid datasource and concat the data.data
-    //       const grid = document.getElementById('grid-curriculum').ej2_instances[0];
-    //       const dataSource = grid.dataSource;
-    //       grid.dataSource = data.data.concat(dataSource);
-    //       // add hidden in loadingModal
-    //       loadingModal.classList.add('hidden');
-    //       return;
-    //     } else {
-    //       console.log(data);
-    //       // Make a p element in class-exist-error for all, ClassName, Year, Section, Semester, Batch
-    //       const listElement = document.getElementById('class-error');
-    //       // Remove all child elements
-    //       while (listElement.firstChild) {
-    //         listElement.removeChild(listElement.firstChild);
-    //       }
+    fetch(apiUrl, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data.result) {
+          notyf.success(data.result);
+          // Get the grid datasource and concat the data.data
+          const grid =
+            document.getElementById('grid-curriculum').ej2_instances[0];
+          const dataSource = grid.dataSource;
+          grid.dataSource = data.data.concat(dataSource);
+          // add hidden in loadingModal
+          loadingModal.classList.add('hidden');
+          return;
+        } else {
+          console.log(data);
+          // Make a p element in class-exist-error for all, ClassName, Year, Section, Semester, Batch
+          const listElement = document.getElementById('class-error');
+          // Remove all child elements
+          while (listElement.firstChild) {
+            listElement.removeChild(listElement.firstChild);
+          }
 
-    //       if (data.existing_data) {
-    //         headerErrorElement.innerText = 'Class already exist:';
-    //         data.existing_data.forEach((element) => {
-    //           let errorP = document.createElement('p');
-    //           const semesterOrdinal = getOrdinal(element.Semester);
-    //           errorP.innerText = `${element.CourseCode} ${element.Year} - ${element.Section} - (${element.Batch} - ${semesterOrdinal} Semester)`;
-    //           listElement.appendChild(errorP);
-    //         });
-    //         // Append the listElement to existElement
-    //         errorContainer.appendChild(listElement);
-    //         // Remove hidden
-    //         errorContainer.classList.remove('hidden');
-    //       }
+          if (data.existing_data) {
+            headerErrorElement.innerText = 'Class already exist:';
+            data.existing_data.forEach((element) => {
+              let errorP = document.createElement('p');
+              const semesterOrdinal = getOrdinal(element.Semester);
+              errorP.innerText = `${element.CourseCode} ${element.Year} - ${element.Section} - (${element.Batch} - ${semesterOrdinal} Semester)`;
+              listElement.appendChild(errorP);
+            });
+            // Append the listElement to existElement
+            errorContainer.appendChild(listElement);
+            // Remove hidden
+            errorContainer.classList.remove('hidden');
+          }
 
-    //       if (data.missing_course) {
-    //         data.missing_course.forEach((course) => {
-    //           headerErrorElement.innerText = 'Course not exist:';
-    //           let errorP = document.createElement('p');
-    //           errorP.innerText = `${course}`;
-    //           listElement.appendChild(errorP);
-    //         });
-    //         // Append the listElement to errorContainer
-    //         errorContainer.appendChild(listElement);
-    //         // Remove hidden
-    //         errorContainer.classList.remove('hidden');
-    //       }
-    //       notyf.error(data.error);
-    //       loadingModal.classList.add('hidden');
-    //       return;
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error:', error);
-    //     loadingModal.classList.add('hidden');
-    //   });
+          if (data.missing_course) {
+            data.missing_course.forEach((course) => {
+              headerErrorElement.innerText = 'Course not exist:';
+              let errorP = document.createElement('p');
+              errorP.innerText = `${course}`;
+              listElement.appendChild(errorP);
+            });
+            // Append the listElement to errorContainer
+            errorContainer.appendChild(listElement);
+            // Remove hidden
+            errorContainer.classList.remove('hidden');
+          }
+          notyf.error(data.error);
+          loadingModal.classList.add('hidden');
+          return;
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        loadingModal.classList.add('hidden');
+      });
   }
 </script>
 {% endblock script %}

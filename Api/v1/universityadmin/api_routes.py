@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects
 import os
 
 
@@ -160,7 +160,7 @@ def classData():
         if json_class_data:
             return (json_class_data)
         else:
-            return jsonify(message="No Performance data available")
+            return jsonify(message="No Class data available")
     else:
         return render_template('404.html'), 404
 
@@ -321,6 +321,25 @@ def fetchCurriculumSubjects(metadata_id):
             return jsonify(message="No class subject data available"), 400
     else:
         return render_template('404.html'), 404    
+    
+
+@university_admin_api.route('/submit-curriculum-subjects', methods=['POST'])
+@role_required('universityAdmin')
+def submitCurriculumSubjects():
+    print("HERE IN CURRICULUM SUBJECTS")
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        if 'excelFile' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+
+        file = request.files['excelFile']
+        # print(processAddingCurriculumSubjects(file))
+        # Call the utility function to process the file
+        return processAddingCurriculumSubjects(file)
+    else:
+        return render_template('404.html'), 404    
+    
+    
 
 # api_routes.py
 @university_admin_api.route('/submit-students-subjects', methods=['POST'])
