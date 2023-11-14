@@ -461,6 +461,7 @@ def processAddingStudents(file):
             return  jsonify({'result': 'Data added successfully', 'data': list_student_data}), 200
             
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': 'An error occurred while processing the file'}), 500
     
 def processAddingClass(file):
@@ -764,7 +765,6 @@ def processAddingCurriculumSubjects(file):
         if not file.filename.endswith(('.xlsx', '.xls')):
             return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
 
-
         # Read the Excel file into a DataFrame
         df = pd.read_excel(file)
 
@@ -775,7 +775,6 @@ def processAddingCurriculumSubjects(file):
         list_subject_code_not_exist = []
         not_existing_course = []
         # Add a dict of already existing students emai
-        print("HELLO")
         # For example, you can iterate through rows and access columns like this:
         for index, row in df.iterrows():
             # Extract the values from the DataFrame
@@ -797,7 +796,6 @@ def processAddingCurriculumSubjects(file):
                 metadata = db.session.query(Metadata).filter_by(YearLevel = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
                
                 if metadata:
-                    print("HELLO2")
                     # Check if subject is existing
                     subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()
                    
@@ -844,25 +842,23 @@ def processAddingCurriculumSubjects(file):
                             "Batch": batch
                         })
                 else: # NO META DATA FIELD
-                    print("HELLO3")
                     # Check if subject is existing
                     subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()   
-                    print('subject: ', subject)              
+            
+                    new_metadata = Metadata(
+                        CourseId=course.CourseId,
+                        YearLevel=year_level,
+                        Semester=semester,
+                        Batch=batch
+                    )
+                        
+                    db.session.add(new_metadata)
+                    db.session.flush()
+                                                        
                     if subject:                       
                         curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
-                        print("curriculum_subject_exist: ", curriculum_subject_exist)
+                            
                         if not curriculum_subject_exist:
-                            
-                            new_metadata = Metadata(
-                                CourseId=course.CourseId,
-                                YearLevel=year_level,
-                                Semester=semester,
-                                Batch=batch,
-                            )
-                            
-                            db.session.add(new_metadata)
-                            db.session.flush()
-                        
                             # Create a curriculum
                             new_curriculum = Curriculum(
                                 MetadataId=new_metadata.MetadataId,
@@ -893,19 +889,12 @@ def processAddingCurriculumSubjects(file):
                             })
                     else:
                         # Append the subject_code that does not exist
-                        list_subject_code_not_exist.append({
-                            "MetadataId": new_metadata.MetadataId,
-                            "Course": course_code,
-                            "Subject Code": subject_code,
-                            "Year": year_level,
-                            "Semester": semester,
-                            "Batch": batch
-                        })
+                        list_subject_code_not_exist.append(subject_code)
           
         # Check if any of this is existing list_curriculum_subjects_exist,list_subject_code_not_exist, not_existing_course then trown an error
         if not_existing_course or list_subject_code_not_exist or list_curriculum_subjects_exist:
             db.session.rollback()
-            return jsonify({'error': 'The following data already exist in the database', 'existing_data': {'course': not_existing_course, 'subject': list_subject_code_not_exist, 'curriculum': list_curriculum_subjects_exist}}), 500
+            return jsonify({'error': 'Something went wrong. The data could not be processed successfully.', 'error_data': {'course_not_exist': not_existing_course, 'subject_not_exist': list_subject_code_not_exist, 'curriculum_subject_exist': list_curriculum_subjects_exist}}), 500
         else:
             db.session.commit()
             # db.session.rollback()

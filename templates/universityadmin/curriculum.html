@@ -62,10 +62,32 @@
           </div>
           <p id="class-file-error" class="text-c4 text-sm"></p>
           <div id="errors" class="hidden">
-            <p id="class-header-error" class="text-c1 text-xl font-semibold">
-              Student number or email already exist:
-            </p>
-            <div id="class-error" class="text-c1 text-sm"></div>
+            <div>
+              <p
+                id="subject-error"
+                class="text-c1 text-xl font-semibold hidden"
+              >
+                Subject not exist:
+              </p>
+              <ul id="subject-list-error" class="text-c1 text-sm"></ul>
+            </div>
+
+            <div>
+              <p
+                id="curriculum-error"
+                class="text-c1 text-xl font-semibold hidden"
+              >
+                Curriculum already exist:
+              </p>
+              <ul id="curriculum-list-error" class="text-c1 text-sm"></ul>
+            </div>
+
+            <div>
+              <p id="course-error" class="text-c1 text-xl font-semibold hidden">
+                Course not exist:
+              </p>
+              <ul id="course-list-error" class="text-c1 text-sm"></ul>
+            </div>
           </div>
         </form>
       </div>
@@ -81,6 +103,34 @@
 </div>
 
 <!-- The Modal -->
+<div
+  id="loadingModal"
+  class="hidden modal fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div
   id="curriculum-subjects-modal"
   class="modal hidden fixed inset-0 flex items-center justify-center z-50"
@@ -186,91 +236,163 @@
       </div>
     </div>
   </div>
-  <div
-    id="loadingModal"
-    class="modal hidden fixed inset-0 flex items-center justify-center z-50"
-  >
-    <!-- Modal Overlay -->
-    <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
-    <!-- Modal Content -->
-    <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
-      <!-- Modal Header -->
-      <!-- Modal Body -->
-      <div class="modal-body w-full relative">
-        <div class="flex flex-row gap-2">
-          <div
-            class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
-          ></div>
-          <div
-            class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
-          ></div>
-          <div
-            class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
-          ></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div
-  id="loadingModal"
-  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
->
-  <!-- Modal Overlay -->
-  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+  {% endblock content %}
 
-  <!-- Modal Content -->
-  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
-    <!-- Modal Header -->
+  <!-- SCRIPTS DATA -->
+  {% block script %}
 
-    <!-- Modal Body -->
-    <div class="modal-body w-full relative">
-      <div class="flex flex-row gap-2">
-        <div
-          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
-        ></div>
-        <div
-          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
-        ></div>
-        <div
-          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
-        ></div>
-      </div>
-    </div>
-  </div>
-</div>
+  <!-- FETCH CLASS PERFORMANCE (CHART) -->
+  <script>
+    let isDisplaySubjects = false;
+    // JavaScript function to close the modal
+    function closeModal() {
+      isDisplaySubjects = false;
+      // Get the #grid-student-list element
+      var gridStudentList = document.getElementById('grid-subjects');
 
-{% endblock content %}
+      // Remove all child nodes (content) inside #grid-student-list
+      while (gridStudentList.firstChild) {
+        gridStudentList.removeChild(gridStudentList.firstChild);
+      }
 
-<!-- SCRIPTS DATA -->
-{% block script %}
+      document
+        .getElementById('curriculum-subjects-modal')
+        .classList.add('hidden');
+    }
+  </script>
 
-<!-- FETCH CLASS PERFORMANCE (CHART) -->
-<script>
-  let isDisplaySubjects = false;
-  // JavaScript function to close the modal
-  function closeModal() {
-    isDisplaySubjects = false;
-    // Get the #grid-student-list element
-    var gridStudentList = document.getElementById('grid-subjects');
+  <!-- FETCH ALL CLASS DATA (GRIDS)-->
+  <script>
+    async function fetchCurriculum() {
+      try {
+        const response = await fetch(`${api_base_url}/curriculum`);
 
-    // Remove all child nodes (content) inside #grid-student-list
-    while (gridStudentList.firstChild) {
-      gridStudentList.removeChild(gridStudentList.firstChild);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch data. Try to contact the admin to resolve the issue.`
+          );
+        }
+
+        const result = await response.json();
+        console.log(result);
+        displayGridCurriculum(result.data);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
-    document
-      .getElementById('curriculum-subjects-modal')
-      .classList.add('hidden');
-  }
-</script>
+    function displayGridCurriculum(curriculum) {
+      console.log('curriculum: ', curriculum);
+      // Create the grid with filtering
+      var grid = new ej.grids.Grid({
+        dataSource: curriculum,
+        allowPaging: true,
+        allowFiltering: true,
+        allowSorting: true, // Enable sorting
+        allowExcelExport: true,
+        // rowData: json_class['ClassSubjectGrade'],
+        columns: [
+          {
+            field: 'Course',
+            headerText: 'Course',
+            width: 100,
+          },
 
-<!-- FETCH ALL CLASS DATA (GRIDS)-->
-<script>
-  async function fetchCurriculum() {
-    try {
-      const response = await fetch(`${api_base_url}/curriculum`);
+          {
+            field: 'Subject Code',
+            headerText: 'Subject Code',
+            width: 100,
+          },
+          // {
+          //   field: 'Subject',
+          //   headerText: 'Subject',
+          //   width: 250,
+          // },
+          {
+            field: 'Year',
+            headerText: 'Year',
+            width: 100,
+          },
+          {
+            field: 'Semester',
+            headerText: 'Semester',
+            width: 100,
+          },
+          {
+            field: 'Batch',
+            headerText: 'Batch',
+            width: 100,
+          },
+
+          // {
+          //   headerText: 'Actions',
+          //   template:
+          //     '<button class="btn-subjects px-4 py-2 bg-primary text-white font-bold" >Subjects</button>', // Add a button to the cell
+          //   width: 150,
+          // },
+        ],
+
+        toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+        allowExcelExport: true, // Enable Excel export feature
+        excelExportComplete: function (args) {
+          // Exclude the 'Subject Code' column from the exported Excel file
+          args.xlsxExportOptions.sheets[0].columns =
+            args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
+              return column.field !== 'Subject';
+            });
+        },
+      });
+
+      grid.toolbarClick = function (args) {
+        if (args['item'].id === 'grid-curriculum_excelexport') {
+          console.log('INSIDDE');
+          grid.excelExport();
+        }
+      };
+      // Add a click event handler for all buttons with the "btn" class
+      document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('btn-subjects')) {
+          const cellElement = event.target.closest('.e-rowcell');
+          if (cellElement) {
+            const dataUid = cellElement.parentElement.getAttribute('data-uid');
+            if (dataUid) {
+              const rowData = grid.getRowObjectFromUID(dataUid).data;
+              if (rowData && isDisplaySubjects == false) {
+                fetchCurriculumSubjects({
+                  MetadataId: rowData.MetadataId,
+                  Course: rowData.Course,
+                  Year: rowData.Year,
+                  Semester: rowData.Semester,
+                  Batch: rowData.Batch,
+                });
+              }
+            }
+          }
+        }
+      });
+
+      // Render the grid
+      grid.appendTo('#grid-curriculum');
+
+      const filterbarOperator = new ej.buttons.CheckBox();
+      filterbarOperator.appendTo('#filterBarOperator');
+
+      filterbarOperator.addEventListener('change', function (args) {
+        grid.filterSettings.showFilterBarOperator = args.checked;
+        grid.clearFiltering();
+      });
+    }
+
+    // Example function to show a modal when the "Performance" button is clicked
+
+    // JavaScript function to show the modal
+    async function fetchCurriculumSubjects(data) {
+      isDisplaySubjects = true;
+
+      const response = await fetch(
+        `${api_base_url}/curriculum/subjects/${data.MetadataId}`
+      );
 
       if (!response.ok) {
         throw new Error(
@@ -279,316 +401,271 @@
       }
 
       const result = await response.json();
-      console.log(result);
-      displayGridCurriculum(result.data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  function displayGridCurriculum(curriculum) {
-    console.log('curriculum: ', curriculum);
-    // Create the grid with filtering
-    var grid = new ej.grids.Grid({
-      dataSource: curriculum,
-      allowPaging: true,
-      allowFiltering: true,
-      allowSorting: true, // Enable sorting
-      allowExcelExport: true,
-      // rowData: json_class['ClassSubjectGrade'],
-      columns: [
-        {
-          field: 'Course',
-          headerText: 'Course',
-          width: 100,
-        },
-
-        {
-          field: 'Subject Code',
-          headerText: 'Subject Code',
-          width: 100,
-        },
-        // {
-        //   field: 'Subject',
-        //   headerText: 'Subject',
-        //   width: 250,
-        // },
-        {
-          field: 'Year',
-          headerText: 'Year',
-          width: 100,
-        },
-        {
-          field: 'Semester',
-          headerText: 'Semester',
-          width: 100,
-        },
-        {
-          field: 'Batch',
-          headerText: 'Batch',
-          width: 100,
-        },
-
-        // {
-        //   headerText: 'Actions',
-        //   template:
-        //     '<button class="btn-subjects px-4 py-2 bg-primary text-white font-bold" >Subjects</button>', // Add a button to the cell
-        //   width: 150,
-        // },
-      ],
-
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
-      allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {
-        // Exclude the 'Subject Code' column from the exported Excel file
-        args.xlsxExportOptions.sheets[0].columns =
-          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
-            return column.field !== 'Subject';
-          });
-      },
-    });
-
-    grid.toolbarClick = function (args) {
-      if (args['item'].id === 'grid-curriculum_excelexport') {
-        console.log('INSIDDE');
-        grid.excelExport();
-      }
-    };
-    // Add a click event handler for all buttons with the "btn" class
-    document.addEventListener('click', function (event) {
-      if (event.target.classList.contains('btn-subjects')) {
-        const cellElement = event.target.closest('.e-rowcell');
-        if (cellElement) {
-          const dataUid = cellElement.parentElement.getAttribute('data-uid');
-          if (dataUid) {
-            const rowData = grid.getRowObjectFromUID(dataUid).data;
-            if (rowData && isDisplaySubjects == false) {
-              fetchCurriculumSubjects({
-                MetadataId: rowData.MetadataId,
-                Course: rowData.Course,
-                Year: rowData.Year,
-                Semester: rowData.Semester,
-                Batch: rowData.Batch,
-              });
-            }
-          }
-        }
-      }
-    });
-
-    // Render the grid
-    grid.appendTo('#grid-curriculum');
-
-    const filterbarOperator = new ej.buttons.CheckBox();
-    filterbarOperator.appendTo('#filterBarOperator');
-
-    filterbarOperator.addEventListener('change', function (args) {
-      grid.filterSettings.showFilterBarOperator = args.checked;
-      grid.clearFiltering();
-    });
-  }
-
-  // Example function to show a modal when the "Performance" button is clicked
-
-  // JavaScript function to show the modal
-  async function fetchCurriculumSubjects(data) {
-    isDisplaySubjects = true;
-
-    const response = await fetch(
-      `${api_base_url}/curriculum/subjects/${data.MetadataId}`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch data. Try to contact the admin to resolve the issue.`
-      );
-    }
-
-    const result = await response.json();
-    displayCurriculumSubjects({
-      Subject: result.data,
-      Course: data.Course,
-      Year: data.Year,
-      Semester: data.Semester,
-      Batch: data.Batch,
-    });
-  }
-
-  function displayCurriculumSubjects(data) {
-    // Get all text modal
-    const textCourseModal = document.getElementById('text-course-modal');
-    const textBatchModal = document.getElementById('text-batch-modal');
-    const textYearModal = document.getElementById('text-year-modal');
-    const textSemesterModal = document.getElementById('text-semester-modal');
-
-    // Update the text
-    textCourseModal.innerText = data.Course;
-    textBatchModal.innerText = data.Batch;
-    textYearModal.innerText = data.Year;
-    textSemesterModal.innerText = data.Semester;
-
-    displayGridSubjects(data.Subject);
-
-    document
-      .getElementById('curriculum-subjects-modal')
-      .classList.remove('hidden');
-  }
-
-  function displayGridSubjects(subjects) {
-    console.log('subjects: ', subjects);
-    // Create the grid with filtering
-    var grid = new ej.grids.Grid({
-      dataSource: subjects,
-      allowPaging: true,
-      allowFiltering: true,
-      allowSorting: true, // Enable sorting
-      allowExcelExport: true,
-      // rowData: json_class['ClassSubjectGrade'],
-      columns: [
-        {
-          field: 'Subject Code',
-          headerText: 'Course Name',
-          width: 100,
-        },
-        {
-          field: 'Name',
-          headerText: 'Name',
-          width: 250,
-        },
-        {
-          field: 'Units',
-          headerText: 'Units',
-          width: 100,
-        },
-      ],
-
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
-      allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {},
-    });
-
-    grid.toolbarClick = function (args) {
-      if (args['item'].id === 'Grid_excelexport') {
-        grid.excelExport();
-      }
-    };
-    // Add a click event handler for all buttons with the "btn" class
-
-    // Render the grid
-    grid.appendTo('#grid-subjects');
-
-    const filterbarOperator = new ej.buttons.CheckBox();
-    filterbarOperator.appendTo('#filterBarOperator');
-
-    filterbarOperator.addEventListener('change', function (args) {
-      grid.filterSettings.showFilterBarOperator = args.checked;
-      grid.clearFiltering();
-    });
-  }
-
-  fetchCurriculum();
-</script>
-
-<!-- ADDING STUDENTS -->
-<script>
-  async function submitCurriculumSubjects(event) {
-    event.preventDefault();
-    // get loadingModal
-    const loadingModal = document.getElementById('loadingModal');
-    loadingModal.classList.remove('hidden');
-
-    console.log('INSIDE SUBMIT CURRICULUM');
-
-    const fileErrorElement = document.getElementById('class-file-error');
-    const fileInput = document.getElementById('excelFile');
-    const file = fileInput.files[0];
-    // Get the exist
-    const errorContainer = document.getElementById('errors');
-    // Get class-header-error
-    const headerErrorElement = document.getElementById('class-header-error');
-    errorContainer.classList.add('hidden');
-
-    if (!file) {
-      fileErrorElement.innerText = 'Please choose a file.';
-      return;
-    }
-
-    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-      fileErrorElement.innerText =
-        'Invalid file type. Please select an Excel file.';
-      return;
-    } else {
-      fileErrorElement.innerText = '';
-    }
-
-    // If file type is valid, proceed with the API request
-    const formData = new FormData();
-    formData.append('excelFile', file);
-
-    const apiUrl =
-      "{{ url_for('university_admin_api.submitCurriculumSubjects') }}";
-
-    fetch(apiUrl, {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if (data.result) {
-          notyf.success(data.result);
-          // Get the grid datasource and concat the data.data
-          const grid =
-            document.getElementById('grid-curriculum').ej2_instances[0];
-          const dataSource = grid.dataSource;
-          grid.dataSource = data.data.concat(dataSource);
-          // add hidden in loadingModal
-          loadingModal.classList.add('hidden');
-          return;
-        } else {
-          console.log(data);
-          // Make a p element in class-exist-error for all, ClassName, Year, Section, Semester, Batch
-          const listElement = document.getElementById('class-error');
-          // Remove all child elements
-          while (listElement.firstChild) {
-            listElement.removeChild(listElement.firstChild);
-          }
-
-          if (data.existing_data) {
-            headerErrorElement.innerText = 'Class already exist:';
-            data.existing_data.forEach((element) => {
-              let errorP = document.createElement('p');
-              const semesterOrdinal = getOrdinal(element.Semester);
-              errorP.innerText = `${element.CourseCode} ${element.Year} - ${element.Section} - (${element.Batch} - ${semesterOrdinal} Semester)`;
-              listElement.appendChild(errorP);
-            });
-            // Append the listElement to existElement
-            errorContainer.appendChild(listElement);
-            // Remove hidden
-            errorContainer.classList.remove('hidden');
-          }
-
-          if (data.missing_course) {
-            data.missing_course.forEach((course) => {
-              headerErrorElement.innerText = 'Course not exist:';
-              let errorP = document.createElement('p');
-              errorP.innerText = `${course}`;
-              listElement.appendChild(errorP);
-            });
-            // Append the listElement to errorContainer
-            errorContainer.appendChild(listElement);
-            // Remove hidden
-            errorContainer.classList.remove('hidden');
-          }
-          notyf.error(data.error);
-          loadingModal.classList.add('hidden');
-          return;
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        loadingModal.classList.add('hidden');
+      displayCurriculumSubjects({
+        Subject: result.data,
+        Course: data.Course,
+        Year: data.Year,
+        Semester: data.Semester,
+        Batch: data.Batch,
       });
-  }
-</script>
-{% endblock script %}
+    }
+
+    function displayCurriculumSubjects(data) {
+      // Get all text modal
+      const textCourseModal = document.getElementById('text-course-modal');
+      const textBatchModal = document.getElementById('text-batch-modal');
+      const textYearModal = document.getElementById('text-year-modal');
+      const textSemesterModal = document.getElementById('text-semester-modal');
+
+      // Update the text
+      textCourseModal.innerText = data.Course;
+      textBatchModal.innerText = data.Batch;
+      textYearModal.innerText = data.Year;
+      textSemesterModal.innerText = data.Semester;
+
+      displayGridSubjects(data.Subject);
+
+      document
+        .getElementById('curriculum-subjects-modal')
+        .classList.remove('hidden');
+    }
+
+    function displayGridSubjects(subjects) {
+      console.log('subjects: ', subjects);
+      // Create the grid with filtering
+      var grid = new ej.grids.Grid({
+        dataSource: subjects,
+        allowPaging: true,
+        allowFiltering: true,
+        allowSorting: true, // Enable sorting
+        allowExcelExport: true,
+        // rowData: json_class['ClassSubjectGrade'],
+        columns: [
+          {
+            field: 'Subject Code',
+            headerText: 'Course Name',
+            width: 100,
+          },
+          {
+            field: 'Name',
+            headerText: 'Name',
+            width: 250,
+          },
+          {
+            field: 'Units',
+            headerText: 'Units',
+            width: 100,
+          },
+        ],
+
+        toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+        allowExcelExport: true, // Enable Excel export feature
+        excelExportComplete: function (args) {},
+      });
+
+      grid.toolbarClick = function (args) {
+        if (args['item'].id === 'Grid_excelexport') {
+          grid.excelExport();
+        }
+      };
+      // Add a click event handler for all buttons with the "btn" class
+
+      // Render the grid
+      grid.appendTo('#grid-subjects');
+
+      const filterbarOperator = new ej.buttons.CheckBox();
+      filterbarOperator.appendTo('#filterBarOperator');
+
+      filterbarOperator.addEventListener('change', function (args) {
+        grid.filterSettings.showFilterBarOperator = args.checked;
+        grid.clearFiltering();
+      });
+    }
+
+    fetchCurriculum();
+  </script>
+
+  <!-- ADDING STUDENTS -->
+  <script>
+    async function submitCurriculumSubjects(event) {
+      event.preventDefault();
+      // get loadingModal
+      const loadingModal = document.getElementById('loadingModal');
+      loadingModal.classList.remove('hidden');
+
+      console.log('INSIDE SUBMIT CURRICULUM');
+
+      const fileErrorElement = document.getElementById('class-file-error');
+      const fileInput = document.getElementById('excelFile');
+      const file = fileInput.files[0];
+      // Get the exist
+      const errorContainer = document.getElementById('errors');
+      errorContainer.classList.add('hidden');
+
+      // Remove all errors message in those element if not exist in curriculum, subject and course
+      const curriculumListElement = document.getElementById(
+        'curriculum-list-error'
+      );
+      clearChildElements(curriculumListElement);
+      // do for subject
+      const subjectListElement = document.getElementById('subject-list-error');
+      clearChildElements(subjectListElement);
+      // do for course
+      const courseListElement = document.getElementById('course-list-error');
+      clearChildElements(courseListElement);
+
+      if (!file) {
+        fileErrorElement.innerText = 'Please choose a file.';
+        return;
+      }
+
+      if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+        fileErrorElement.innerText =
+          'Invalid file type. Please select an Excel file.';
+        return;
+      } else {
+        fileErrorElement.innerText = '';
+      }
+
+      // If file type is valid, proceed with the API request
+      const formData = new FormData();
+      formData.append('excelFile', file);
+
+      const apiUrl =
+        "{{ url_for('university_admin_api.submitCurriculumSubjects') }}";
+
+      postCurriculum(apiUrl, formData);
+    }
+
+    async function postCurriculum(apiUrl, formData) {
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.result) {
+          handleSuccess(data);
+        } else {
+          handleErrors(data);
+        }
+      } catch (error) {
+        console.log('Error:', error);
+      } finally {
+        const loadingModal = document.getElementById('loadingModal');
+        loadingModal.classList.add('hidden');
+      }
+    }
+
+    function handleSuccess(data) {
+      notyf.success(data.result);
+      const grid = document.getElementById('grid-curriculum').ej2_instances[0];
+      const dataSource = grid.dataSource;
+      grid.dataSource = data.data.concat(dataSource);
+    }
+
+    function handleErrors(data) {
+      const listElement = document.getElementById('class-error');
+      clearChildElements(listElement);
+
+      const courseNotExistingHeader = document.getElementById('course-error');
+      const curriculumSubjectExistHeader =
+        document.getElementById('curriculum-error');
+      const subjectNotExistHeader = document.getElementById('subject-error');
+
+      if (data.error_data.curriculum_subject_exist.length > 0) {
+        curriculumSubjectExistHeader.classList.remove('hidden');
+        handleCurriculumSubjectExistError(
+          data.error_data.curriculum_subject_exist
+        );
+      } else {
+        curriculumSubjectExistHeader.classList.add('hidden');
+      }
+
+      // Do the if else for course_not_exist
+      if (data.error_data.course_not_exist.length > 0) {
+        courseNotExistingHeader.classList.remove('hidden');
+        handleCourseNotExistError(data.error_data.course_not_exist);
+      } else {
+        courseNotExistingHeader.classList.add('hidden');
+      }
+
+      // Do the if else for subject_not_exist
+      if (data.error_data.subject_not_exist.length > 0) {
+        subjectNotExistHeader.classList.remove('hidden');
+        handleSubjectNotExistError(data.error_data.subject_not_exist);
+      } else {
+        subjectNotExistHeader.classList.add('hidden');
+      }
+      const errorContainer = document.getElementById('errors');
+      errorContainer.classList.remove('hidden');
+
+      notyf.error(data.error);
+    }
+
+    function handleCurriculumSubjectExistError(errors) {
+      const listElement = document.getElementById('curriculum-list-error');
+      // const curriculumSubjectExistHeader =
+      //   document.getElementById('curriculum-error');
+      // curriculumSubjectExistHeader.innerText = 'Curriculum already exist:';
+      errors.forEach((element) => {
+        const semesterOrdinal = getOrdinal(element.Semester);
+        const yearOrdinal = getOrdinal(element.Year);
+        const errorP = createErrorList(
+          `${element.Course} ${yearOrdinal} Year - (${element.Batch} - ${semesterOrdinal} Semester)`
+        );
+        listElement.appendChild(errorP);
+      });
+    }
+
+    function handleCourseNotExistError(errors) {
+      const listElement = document.getElementById('course-list-error');
+      // const courseNotExistingHeader = document.getElementById('course-error');
+      // courseNotExistingHeader.innerText = 'Course not exist:';
+      errors.forEach((course) => {
+        const errorP = createErrorList(course);
+        listElement.appendChild(errorP);
+      });
+    }
+
+    function handleSubjectNotExistError(errors) {
+      const listElement = document.getElementById('subject-list-error');
+      // const subjectNotExistHeader = document.getElementById('subject-error');
+      // subjectNotExistHeader.innerText = 'Subject not exist:';
+      errors.forEach((subject) => {
+        console.log(subject);
+        const errorP = createErrorList(subject);
+        listElement.appendChild(errorP);
+      });
+    }
+
+    function createErrorList(text) {
+      const errorP = document.createElement('li');
+      errorP.innerText = text;
+      return errorP;
+    }
+
+    function clearChildElements(element) {
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
+    }
+
+    function getOrdinal(semester) {
+      const suffixes = ['st', 'nd', 'rd'];
+      const remainder = semester % 10;
+      const suffix =
+        remainder >= 1 &&
+        remainder <= 3 &&
+        semester !== 11 &&
+        semester !== 12 &&
+        semester !== 13
+          ? suffixes[remainder - 1]
+          : 'th';
+      return `${semester}${suffix}`;
+    }
+  </script>
+  {% endblock script %}
+</div>
