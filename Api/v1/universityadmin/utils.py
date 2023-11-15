@@ -12,6 +12,7 @@ from mail import mail
 import pandas as pd
 import random
 import string
+from sqlalchemy.orm import Session
 
 from collections import defaultdict
 
@@ -468,91 +469,202 @@ def processAddingClass(file):
     try:
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
-
         if not file.filename.endswith(('.xlsx', '.xls')):
             return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
 
         df = pd.read_excel(file)
         
-        list_class_data = []
-        list_existing_class_data = []
-        list_missing_courses = []
-        # For example, you can iterate through rows and access columns like this:
-        for index, row in df.iterrows():
-            course_code = row['Course Code']
-            section = int(row['Section'])
-            year = int(row['Year'])
-            semester = int(row['Semester'])
-            batch = int(row['Batch'])      
-            
-            # Query the course code in course model
-            course =  db.session.query(Course).filter(Course.CourseCode == course_code).first()
+        list_new_class_data = []
+        list_course_not_exist = []
+        curriculum_not_exist = []
+        class_data_exist = []
 
-            if course:
-                # Check if year is current year or + 1 only
-                current_year = datetime.datetime.now().year
-        
-                if batch != current_year and batch != current_year + 1:
-                    return jsonify({'error': 'Invalid year. Please select the current year or the next year.'}), 400
-                
-                # Check if course.id, year, section, semester and batch already existing in class
-                class_data = db.session.query(Class).filter(
-                    Class.CourseId == course.CourseId, Class.Year == year, Class.Section == section, Class.Semester == semester, Class.Batch == batch).first()
-          
-                # If existing throw an error
-                if not class_data:             
-                    new_class = Class(
-                        CourseId=course.CourseId,
-                        Year=year,
-                        Section=section,
-                        Semester=semester,
-                        Batch=batch, 
-                        IsGradeFinalized=False
-                    )
-                    
-                    # Just add in session
-                    db.session.add(new_class)
-                    db.session.flush()
-                    
-                    
-                    
-                    # Make a ClassGrade
-                    new_class_grade = ClassGrade(
-                        ClassId=new_class.ClassId,
-                        PresidentsLister=0,
-                        DeansLister=0,
-                        Grade= 5.00
-                    )
-                    db.session.add(new_class_grade)
-                    
-                    # Combine the course_code, year, section to class_name variable
-                    class_name = f"{course_code} {year}-{section}"
-                    list_class_data.append({'ClassId':new_class.ClassId,'ClassName':class_name,'Batch':batch, 'Course': course.Name, 'Grade': 'N/A'})
-                else:
-                    list_existing_class_data.append({
-                        'CourseCode': course_code,
+        with db.session.begin():
+            for index, row in df.iterrows():
+                course_code = row['Course Code']
+                section = int(row['Section'])
+                year = int(row['Year Level'])
+                semester = int(row['Semester'])
+                batch = int(row['Batch'])
+
+                course = db.session.query(Course).filter_by(CourseCode=course_code).first()
+
+                if not course:
+                    if course_code not in list_course_not_exist:
+                        list_course_not_exist.append(course_code)
+
+                metadata = db.session.query(Metadata).filter_by(CourseId=course.CourseId, YearLevel=year, Semester=semester, Batch=batch).first()
+
+                if not metadata:
+                    curriculum_not_exist.append({
+                        "CourseCode": course_code,
                         "Year": year,
-                        "Section": section,
-                        "Batch": batch,
-                        "Semester": semester
+                        "Semester": semester,
+                        "Batch": batch
                     })
-            else:
-                # check if course_code not existing in list_missing_course
-                if course_code not in list_missing_courses:
-                    list_missing_courses.append(course_code)
+
+                if course and metadata:
+                    curriculum = db.session.query(Curriculum).filter_by(MetadataId=metadata.MetadataId).all()
+                    if curriculum:
+                        class_data = db.session.query(Class).filter_by(
+                            CourseId=course.CourseId, Year=year, Section=section, Semester=semester, Batch=batch).first()
+
+                        if not class_data:
+                            class_name = f"{course_code} {year}-{section}"
+                            course_name = course.Name
+                            new_class = Class(
+                                CourseId=course.CourseId,
+                                Year=year,
+                                Section=section,
+                                Semester=semester,
+                                Batch=batch,
+                                IsGradeFinalized=False
+                            )
+
+                            db.session.add(new_class)
+                            db.session.flush()
+                            new_class_grade = ClassGrade(
+                                ClassId=new_class.ClassId,
+                                DeansLister=0,
+                                PresidentsLister=0,
+                                Grade=0
+                            )
+
+                            db.session.add(new_class_grade)
+                            
+                            # list_new_class_data add the new class data
+                            list_new_class_data.append({
+                                "ClassId": new_class.ClassId,
+                                "ClassName": class_name,
+                                "Course": course_name,
+                                "Grade": 'N/A',
+                                "Semester": new_class.Semester,
+                                "Batch": new_class.Batch
+                            })
+                            
+                            for cur in curriculum:
+                                print(cur)
+                                new_class_subject = ClassSubject(
+                                    ClassId=new_class.ClassId,
+                                    SubjectId=cur.SubjectId
+                                )
+                                db.session.add(new_class_subject)
+                                db.session.flush()
+                                new_class_subject_grade = ClassSubjectGrade(
+                                    ClassSubjectId=new_class_subject.ClassSubjectId,
+                                    Grade=0,
+                                    Passed=0,
+                                    Failed=0,
+                                    Incomplete=0,
+                                    Dropout=0
+                                )
+
+                                db.session.add(new_class_subject_grade)
+                        else:
+                            # class_data_exist append it
+                            class_data_exist.append({
+                                "CourseCode": course_code,
+                                "Year": year,
+                                "Section": section,
+                                "Batch": batch,
+                                "Semester": semester
+                            })
+                    else:
+                        print("NOT EXIST")
+                        curriculum_not_exist.append({
+                            "CourseCode": course_code,
+                            "Year": year,
+                            "Section": section,
+                            "Batch": batch,
+                            "Semester": semester
+                        })
+
+            if list_course_not_exist or curriculum_not_exist or class_data_exist:
+                db.session.rollback()
+                error_message = 'Something went wrong in processing the files'
                 
-        if list_existing_class_data:
-            db.session.rollback()
-            return jsonify({'error': 'The class already exist in the database', 'existing_data': list_existing_class_data}), 500
-        elif list_missing_courses:
-            db.session.rollback()
-            return jsonify({'error': 'Course Code does not exist in the database', 'missing_course': list_missing_courses}), 400  
-        else:
-            db.session.commit()
-            return jsonify({'result': "Data added successfully", 'data':list_class_data }), 200   
+                errors = {
+                    'list_course_not_exist': list_course_not_exist,
+                    'curriculum_not_exist': curriculum_not_exist,
+                    'class_data_exist': class_data_exist
+                }
+                
+                return jsonify({'error': error_message, 'errors': errors}), 400
+            else:
+                db.session.commit()
+                return jsonify({'result': 'Data added successfully', 'data': list_new_class_data}), 200
+
     except Exception as e:
         db.session.rollback()
+        print("Error details:", str(e))
         return jsonify({'error': 'An error occurred while processing the file'}), 500
+
+    #         if course:
+    #             # Check if year is current year or + 1 only
+    #             current_year = datetime.datetime.now().year
+        
+    #             if batch != current_year and batch != current_year + 1:
+    #                 return jsonify({'error': 'Invalid year. Please select the current year or the next year.'}), 400
+                
+    #             # Check if course.id, year, section, semester and batch already existing in class
+    #             class_data = db.session.query(Class).filter(
+    #                 Class.CourseId == course.CourseId, Class.Year == year, Class.Section == section, Class.Semester == semester, Class.Batch == batch).first()
+          
+    #             # If existing throw an error
+    #             if not class_data:             
+    #                 new_class = Class(
+    #                     CourseId=course.CourseId,
+    #                     Year=year,
+    #                     Section=section,
+    #                     Semester=semester,
+    #                     Batch=batch, 
+    #                     IsGradeFinalized=False
+    #                 )
+                    
+    #                 # Just add in session
+    #                 db.session.add(new_class)
+    #                 db.session.flush()
+                    
+                    
+                    
+    #                 # Make a ClassGrade
+    #                 new_class_grade = ClassGrade(
+    #                     ClassId=new_class.ClassId,
+    #                     PresidentsLister=0,
+    #                     DeansLister=0,
+    #                     Grade= 5.00
+    #                 )
+    #                 db.session.add(new_class_grade)
+                    
+    #                 # Combine the course_code, year, section to class_name variable
+    #                 class_name = f"{course_code} {year}-{section}"
+    #                 list_class_data.append({'ClassId':new_class.ClassId,'ClassName':class_name,'Batch':batch, 'Course': course.Name, 'Grade': 'N/A'})
+    #             else:
+    #                 list_existing_class_data.append({
+    #                     'CourseCode': course_code,
+    #                     "Year": year,
+    #                     "Section": section,
+    #                     "Batch": batch,
+    #                     "Semester": semester
+    #                 })
+    #         else:
+    #             # check if course_code not existing in list_missing_course
+    #             if course_code not in list_missing_courses:
+    #                 list_missing_courses.append(course_code)
+                
+    #     if list_existing_class_data:
+    #         db.session.rollback()
+    #         return jsonify({'error': 'The class already exist in the database', 'existing_data': list_existing_class_data}), 500
+    #     elif list_missing_courses:
+    #         db.session.rollback()
+    #         return jsonify({'error': 'Course Code does not exist in the database', 'missing_course': list_missing_courses}), 400  
+    #     else:
+    #         db.session.rollback()
+    #         # db.session.commit()
+    #         return jsonify({'result': "Data added successfully", 'data':list_class_data }), 200   
+    # except Exception as e:
+    #     db.session.rollback()
+    #     return jsonify({'error': 'An error occurred while processing the file'}), 500
     
 
 
@@ -620,28 +732,51 @@ def getAllClassSubjectData():
 
 def getClassSubject(class_id):
     try:
-        data_class_subject = db.session.query(ClassSubject, ClassSubjectGrade, Subject, Class, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Course, Course.CourseId == Class.CourseId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).filter(ClassSubject.ClassId == class_id).all()
+        print('class_id: ', class_id)
+        data_class_subject = db.session.query(Class, ClassSubject, Subject, ClassSubjectGrade, Course).join(ClassSubject, ClassSubject.ClassId == Class.ClassId).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Course, Course.CourseId == Class.CourseId).join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId).filter(ClassSubject.ClassId == class_id).all()
         
+        # data_class_subject = db.session.query(ClassSubject, ClassSubjectGrade, Subject, Class, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Course, Course.CourseId == Class.CourseId).filter(ClassSubject.ClassId == class_id).all()
+
+        print('Number of records fetched:', len(data_class_subject))
         if data_class_subject:
                 # For loop the data_student and put it in dictionary
             list_class_subject = []
             for class_subject in data_class_subject:
                 # Combine the course_code, year, section to class_name variable
                 class_name = f"{class_subject.Course.CourseCode} {class_subject.Class.Year}-{class_subject.Class.Section}"
+                # Check if the class_subject.TeacherId exist if yes make a query for it
+                if class_subject.ClassSubject.TeacherId:
+                    teacher = db.session.query(Faculty).filter(Faculty.TeacherId == class_subject.ClassSubject.TeacherId).first()
+                    teacher_name = teacher.Name
+                    schedule = class_subject.ClassSubject.Schedule if class_subject.ClassSubject.Schedule else "N/A"
+                    dict_class_subject = {
+                        "ClassSubjectId": class_subject.ClassSubject.ClassSubjectId,
+                        "SubjectCode": class_subject.Subject.SubjectCode,
+                        "Section Code": class_name,
+                        "Grade": round(class_subject.ClassSubjectGrade.Grade, 2),  # Round to 2 decimal places
+                        "Subject": class_subject.Subject.Name,
+                        "Teacher": teacher_name,
+                        "Schedule": schedule,
+                        'Batch': class_subject.Class.Batch,
+                    }
+                    # # Append the data
+                    list_class_subject.append(dict_class_subject)
+                else:
+                    dict_class_subject = {
+                        "ClassSubjectId": class_subject.ClassSubject.ClassSubjectId,
+                        "SubjectCode": class_subject.Subject.SubjectCode,
+                        "Section Code": class_name,
+                        "Grade": round(class_subject.ClassSubjectGrade.Grade, 2),  # Round to 2 decimal places
+                        "Subject": class_subject.Subject.Name,
+                        "Teacher": "N/A",
+                        "Schedule": "N/A",
+                        'Batch': class_subject.Class.Batch,
+                        
+                    }
+                    # Append the data
+                    list_class_subject.append(dict_class_subject)
                 
-                dict_class_subject = {
-                    "ClassSubjectId": class_subject.ClassSubject.ClassSubjectId,
-                    "SubjectCode": class_subject.Subject.SubjectCode,
-                    "Section Code": class_name,
-                    "Grade": round(class_subject.ClassSubjectGrade.Grade, 2),  # Round to 2 decimal places
-                    "Subject": class_subject.Subject.Name,
-                    "Teacher": class_subject.Faculty.Name,
-                    "Schedule": class_subject.ClassSubject.Schedule,
-                    'Batch': class_subject.Class.Batch,
-                    
-                }
-                # # Append the data
-                list_class_subject.append(dict_class_subject)
+            # print('list_class_subject: ', list_class_subject)
             return jsonify({'data': list_class_subject})
         else:
             return None
@@ -675,12 +810,13 @@ def getClassDetails(class_id):
     
 def getStudentClassSubjectData(classSubjectId):
     try:
-        data_class_details = db.session.query(ClassSubject).filter(ClassSubject.ClassSubjectId == classSubjectId).first()
-        
+        print(classSubjectId)
+        data_class_details = db.session.query(ClassSubject).filter_by(ClassSubjectId = classSubjectId).first()
+        print('data_class_details: ', data_class_details)
         # Get the StudentClassSubjectGrade
         if data_class_details:
             data_student_subject_grade = db.session.query(StudentClassSubjectGrade, Student).join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId).filter(StudentClassSubjectGrade.ClassSubjectId == data_class_details.ClassSubjectId).all()
-                        
+            print('data_student_subject_grade: ', data_student_subject_grade)     
             if data_student_subject_grade:
                 list_student_data = []
                     # For loop the data_student and put it in dictionary
@@ -694,7 +830,7 @@ def getStudentClassSubjectData(classSubjectId):
                     list_student_data.append(dict_student_subject_grade)
                 return  jsonify({'data': list_student_data})
             else:
-                return None
+                return jsonify({'data': [], 'message': "No students"})
         else:
             return None
     except Exception as e:
@@ -756,84 +892,64 @@ def getCurriculumSubject(metadata_id):
 
 
 def processAddingCurriculumSubjects(file):
-    try:
-        # Check if the file is empty
-        if file.filename == '':
-            return jsonify({'error': 'No selected file'}), 400
 
-        # Check file extension
-        if not file.filename.endswith(('.xlsx', '.xls')):
-            return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+    # Check if the file is empty
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
 
-        # Read the Excel file into a DataFrame
-        df = pd.read_excel(file)
+    # Check file extension
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
 
-        # dict data list
-        list_curriculum_subjects = []
-        # Add a dict of already existing students
-        list_curriculum_subjects_exist = []
-        list_subject_code_not_exist = []
-        not_existing_course = []
-        # Add a dict of already existing students emai
-        # For example, you can iterate through rows and access columns like this:
-        for index, row in df.iterrows():
-            # Extract the values from the DataFrame
-            course_code = row['Course']
-            subject_code = row['Subject Code']
-            year_level = row['Year']
-            semester = row['Semester']
-            batch = row['Batch']
+    # Read the Excel file into a DataFrame
+    df = pd.read_excel(file)
+
+    # dict data list
+    list_curriculum_subjects = []
+    # Add a dict of already existing students
+    list_curriculum_subjects_exist = []
+    list_subject_code_not_exist = []
+    not_existing_course = []
+    # Add a dict of already existing students emai
+    # For example, you can iterate through rows and access columns like this:
+    for index, row in df.iterrows():
+        # Extract the values from the DataFrame
+        course_code = row['Course']
+        subject_code = row['Subject Code']
+        year_level = row['Year']
+        semester = row['Semester']
+        batch = row['Batch']
+    
+        course = db.session.query(Course).filter_by(CourseCode = course_code).first()
+            
+        # Check if course existing
+        if not course:
+            # Check if course_code existing in the not_existing_course
+            if course_code not in not_existing_course:
+                not_existing_course.append(course_code)
+        else:
         
-            course = db.session.query(Course).filter_by(CourseCode = course_code).first()
+            metadata = db.session.query(Metadata).filter_by(YearLevel = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+            
+            if metadata:
+                # Check if subject is existing
+                subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()
                 
-            # Check if course existing
-            if not course:
-                # Check if course_code existing in the not_existing_course
-                if course_code not in not_existing_course:
-                    not_existing_course.append(course_code)
-            else:
-           
-                metadata = db.session.query(Metadata).filter_by(YearLevel = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
-               
-                if metadata:
-                    # Check if subject is existing
-                    subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()
-                   
-                    if subject:
-                        # Check if Curriculum is existing
-                        curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
-                        if not curriculum_subject_exist:
-                            # Create a curriculum
-                            new_curriculum = Curriculum(
-                                MetadataId=metadata.MetadataId,
-                                SubjectId=subject.SubjectId
-                            )
+                if subject:
+                    # Check if Curriculum is existing
+                    curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                    if not curriculum_subject_exist:
+                        # Create a curriculum
+                        new_curriculum = Curriculum(
+                            MetadataId=metadata.MetadataId,
+                            SubjectId=subject.SubjectId
+                        )
+                    
+                        db.session.add(new_curriculum)
+                        # db.session.commit()
                         
-                            db.session.add(new_curriculum)
-                            # db.session.commit()
-                            
-                            # Append the list_curriculum_subjects
-                            list_curriculum_subjects.append({
-                                "MetadataId": metadata.MetadataId,
-                                "Course": course_code,
-                                "Subject Code": subject_code,
-                                "Year": year_level,
-                                "Semester": semester,
-                                "Batch": batch
-                            })
-                        else:
-                            # Append the list_curriculum_subjects_exist
-                            list_curriculum_subjects_exist.append({
-                                "MetadataId": metadata.MetadataId,
-                                "Course": course_code,
-                                "Subject Code": subject_code,
-                                "Year": year_level,
-                                "Semester": semester,
-                                "Batch": batch
-                            })
-                    else:
-                        # Append the subject_code that does not exist
-                        list_subject_code_not_exist.append({
+                        # Append the list_curriculum_subjects
+                        list_curriculum_subjects.append({
                             "MetadataId": metadata.MetadataId,
                             "Course": course_code,
                             "Subject Code": subject_code,
@@ -841,68 +957,87 @@ def processAddingCurriculumSubjects(file):
                             "Semester": semester,
                             "Batch": batch
                         })
-                else: # NO META DATA FIELD
-                    # Check if subject is existing
-                    subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()   
-            
-                    new_metadata = Metadata(
-                        CourseId=course.CourseId,
-                        YearLevel=year_level,
-                        Semester=semester,
-                        Batch=batch
-                    )
-                        
-                    db.session.add(new_metadata)
-                    db.session.flush()
-                                                        
-                    if subject:                       
-                        curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
-                            
-                        if not curriculum_subject_exist:
-                            # Create a curriculum
-                            new_curriculum = Curriculum(
-                                MetadataId=new_metadata.MetadataId,
-                                SubjectId=subject.SubjectId
-                            )
-                    
-                            db.session.add(new_curriculum)
-                            # db.session.commit()
-                            
-                            # Append the list_curriculum_subjects
-                            list_curriculum_subjects.append({
-                                "MetadataId": new_metadata.MetadataId,
-                                "Course": course_code,
-                                "Subject Code": subject_code,
-                                "Year": year_level,
-                                "Semester": semester,
-                                "Batch": batch
-                            })
-                        else:
-                            # Append the list_curriculum_subjects_exist
-                            list_curriculum_subjects_exist.append({
-                                "MetadataId": new_metadata.MetadataId,
-                                "Course": course_code,
-                                "Subject Code": subject_code,
-                                "Year": year_level,
-                                "Semester": semester,
-                                "Batch": batch
-                            })
                     else:
-                        # Append the subject_code that does not exist
-                        list_subject_code_not_exist.append(subject_code)
-          
-        # Check if any of this is existing list_curriculum_subjects_exist,list_subject_code_not_exist, not_existing_course then trown an error
-        if not_existing_course or list_subject_code_not_exist or list_curriculum_subjects_exist:
-            db.session.rollback()
-            return jsonify({'error': 'Something went wrong. The data could not be processed successfully.', 'error_data': {'course_not_exist': not_existing_course, 'subject_not_exist': list_subject_code_not_exist, 'curriculum_subject_exist': list_curriculum_subjects_exist}}), 500
-        else:
-            db.session.commit()
-            # db.session.rollback()
-            return  jsonify({'result': 'Data added successfully', 'data': (list_curriculum_subjects)}), 200
+                        # Append the list_curriculum_subjects_exist
+                        list_curriculum_subjects_exist.append({
+                            "MetadataId": metadata.MetadataId,
+                            "Course": course_code,
+                            "Subject Code": subject_code,
+                            "Year": year_level,
+                            "Semester": semester,
+                            "Batch": batch
+                        })
+                else:
+                    # Append the subject_code that does not exist
+                    list_subject_code_not_exist.append({
+                        "MetadataId": metadata.MetadataId,
+                        "Course": course_code,
+                        "Subject Code": subject_code,
+                        "Year": year_level,
+                        "Semester": semester,
+                        "Batch": batch
+                    })
+            else: # NO META DATA FIELD
+                # Check if subject is existing
+                subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()   
         
+                new_metadata = Metadata(
+                    CourseId=course.CourseId,
+                    YearLevel=year_level,
+                    Semester=semester,
+                    Batch=batch
+                )
+                    
+                db.session.add(new_metadata)
+                db.session.flush()
+                                                    
+                if subject:                       
+                    curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                        
+                    if not curriculum_subject_exist:
+                        # Create a curriculum
+                        new_curriculum = Curriculum(
+                            MetadataId=new_metadata.MetadataId,
+                            SubjectId=subject.SubjectId
+                        )
+                
+                        db.session.add(new_curriculum)
+                        # db.session.commit()
+                        
+                        # Append the list_curriculum_subjects
+                        list_curriculum_subjects.append({
+                            "MetadataId": new_metadata.MetadataId,
+                            "Course": course_code,
+                            "Subject Code": subject_code,
+                            "Year": year_level,
+                            "Semester": semester,
+                            "Batch": batch
+                        })
+                    else:
+                        # Append the list_curriculum_subjects_exist
+                        list_curriculum_subjects_exist.append({
+                            "MetadataId": new_metadata.MetadataId,
+                            "Course": course_code,
+                            "Subject Code": subject_code,
+                            "Year": year_level,
+                            "Semester": semester,
+                            "Batch": batch
+                        })
+                else:
+                    # Append the subject_code that does not exist
+                    list_subject_code_not_exist.append(subject_code)
+        
+    # Check if any of this is existing list_curriculum_subjects_exist,list_subject_code_not_exist, not_existing_course then trown an error
+    if not_existing_course or list_subject_code_not_exist or list_curriculum_subjects_exist:
+        db.session.rollback()
+        return jsonify({'error': 'Something went wrong. The data could not be processed successfully.', 'error_data': {'course_not_exist': not_existing_course, 'subject_not_exist': list_subject_code_not_exist, 'curriculum_subject_exist': list_curriculum_subjects_exist}}), 500
+    else:
+        db.session.commit()
+        # db.session.rollback()
+        return  jsonify({'result': 'Data added successfully', 'data': (list_curriculum_subjects)}), 200
+    
             
-    except Exception as e:
-        return jsonify({'error': 'An error occurred while processing the file'}), 500
+
     
     #     # Now you can access and manipulate the data in the DataFrame
     #     # For example, you can iterate through rows and access columns like this:

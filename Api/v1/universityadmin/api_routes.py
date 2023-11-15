@@ -250,6 +250,7 @@ def classSubjectData():
 @role_required('universityAdmin')
 def fetchClassData(class_id):
     universityAdmin = getCurrentUser()
+    print("GETTING THE CLASS SUBJECT")
     if universityAdmin:
         json_class_subject_data = getClassSubject(class_id)
 

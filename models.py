@@ -256,8 +256,8 @@ class ClassSubject(db.Model):
     SubjectId = db.Column(db.Integer, db.ForeignKey(
         'Subject.SubjectId', ondelete="CASCADE"))
     TeacherId = db.Column(db.Integer, db.ForeignKey(
-        'Faculties.TeacherId', ondelete="CASCADE"))
-    Schedule = db.Column(db.String(100))
+        'Faculties.TeacherId', ondelete="CASCADE"), nullable=True)
+    Schedule = db.Column(db.String(100), nullable=True)
 
     # Adding a unique constraint on the combination of ClassId, SubjectId, and TeacherId
     __table_args__ = (db.UniqueConstraint(

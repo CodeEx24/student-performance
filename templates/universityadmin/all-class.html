@@ -39,6 +39,12 @@
             >
               Add Class:
             </label>
+            <p class="font-semibold text-gray-700">
+              Column Required:
+              <span class="font-normal"
+                >Course Code (BSBA), Year Level, Section, Semester, Batch</span
+              >
+            </p>
           </div>
           <div class="mb-4 flex gap-4">
             <input
@@ -274,7 +280,7 @@
         },
         {
           field: 'Batch',
-          headerText: 'Year',
+          headerText: 'Batch',
           width: 100,
         },
         {
@@ -392,15 +398,17 @@
     const formData = new FormData();
     formData.append('excelFile', file);
 
-    const apiUrl = "{{ url_for('university_admin_api.submitClass') }}";
+    const apiUrlSubmitClass =
+      "{{ url_for('university_admin_api.submitClass') }}";
 
-    fetch(apiUrl, {
+    await fetch(apiUrlSubmitClass, {
       method: 'POST',
       body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
         // Handle API response here
+        console.log(data);
         if (data.result) {
           notyf.success(data.result);
           // Get the grid datasource and concat the data.data
@@ -419,33 +427,33 @@
             listElement.removeChild(listElement.firstChild);
           }
 
-          if (data.existing_data) {
-            headerErrorElement.innerText = 'Class already exist:';
-            data.existing_data.forEach((element) => {
-              let errorP = document.createElement('p');
-              const semesterOrdinal = getOrdinal(element.Semester);
-              errorP.innerText = `${element.CourseCode} ${element.Year} - ${element.Section} - (${element.Batch} - ${semesterOrdinal} Semester)`;
-              listElement.appendChild(errorP);
-            });
-            // Append the listElement to existElement
-            errorContainer.appendChild(listElement);
-            // Remove hidden
-            errorContainer.classList.remove('hidden');
-          }
+          // if (data.existing_data) {
+          //   headerErrorElement.innerText = 'Class already exist:';
+          //   data.existing_data.forEach((element) => {
+          //     let errorP = document.createElement('p');
+          //     const semesterOrdinal = getOrdinal(element.Semester);
+          //     errorP.innerText = `${element.CourseCode} ${element.Year} - ${element.Section} - (${element.Batch} - ${semesterOrdinal} Semester)`;
+          //     listElement.appendChild(errorP);
+          //   });
+          //   // Append the listElement to existElement
+          //   errorContainer.appendChild(listElement);
+          //   // Remove hidden
+          //   errorContainer.classList.remove('hidden');
+          // }
 
-          if (data.missing_course) {
-            data.missing_course.forEach((course) => {
-              headerErrorElement.innerText = 'Course not exist:';
-              let errorP = document.createElement('p');
-              errorP.innerText = `${course}`;
-              listElement.appendChild(errorP);
-            });
-            // Append the listElement to errorContainer
-            errorContainer.appendChild(listElement);
-            // Remove hidden
-            errorContainer.classList.remove('hidden');
-          }
-          notyf.error(data.error);
+          // if (data.missing_course) {
+          //   data.missing_course.forEach((course) => {
+          //     headerErrorElement.innerText = 'Course not exist:';
+          //     let errorP = document.createElement('p');
+          //     errorP.innerText = `${course}`;
+          //     listElement.appendChild(errorP);
+          //   });
+          //   // Append the listElement to errorContainer
+          //   errorContainer.appendChild(listElement);
+          //   // Remove hidden
+          //   errorContainer.classList.remove('hidden');
+          // }
+          // notyf.error(data.error);
           loadingModal.classList.add('hidden');
           return;
         }

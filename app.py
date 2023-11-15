@@ -221,7 +221,7 @@ def create_app():
     
     @app.route('/university-admin/curriculum')
     @role_required('universityAdmin')
-    def universityCurriculum():
+    def universityAdminCurriculum():
         return render_template('universityadmin/curriculum.html', university_admin_api_base_url=university_admin_api_base_url, current_page="curriculum")
 
 

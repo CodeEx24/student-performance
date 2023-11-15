@@ -293,7 +293,14 @@
       }
 
       const json_class = await response.json();
-      displayGridClassSubject(json_class.data);
+      var teacherData = [
+        { TeacherId: 1, TeacherName: 'John Doe' },
+        { TeacherId: 2, TeacherName: 'Jane Smith' },
+        { TeacherId: 3, TeacherName: 'Bob Johnson' },
+        // Add more teachers as needed
+      ];
+
+      displayGridClassSubject(json_class.data, teacherData);
     } catch (error) {
     }
   }
@@ -301,7 +308,7 @@
   async function fetchSubjectDetails(classSubjectId) {
     try {
       const response = await fetch(
-        `${api_base_url}/class-subject/${classSubjectId}`
+        `${api_base_url}/class/subject/${classSubjectId}`
       );
 
       if (!response.ok) {
@@ -375,91 +382,145 @@
 
   fetchClassDetails();
   fetchClassSubject();
-
-  function displayGridClassSubject(json_class) {
-    // Create the grid with filtering
-    var grid = new ej.grids.Grid({
-      dataSource: json_class,
-      allowPaging: true,
-      allowFiltering: true,
-      allowSorting: true, // Enable sorting
+  function displayGridClassSubject(json_class, teacherData) {
+  // Create the grid with filtering
+  var grid = new ej.grids.Grid({
+    dataSource: json_class,
+    allowPaging: true,
+    allowFiltering: true,
+    allowSorting: true, // Enable sorting
+    allowExcelExport: true,
+    editSettings: {
+      allowEditing: true,
+      allowAdding: false,
+      allowDeleting: false,
       allowExcelExport: true,
-      // rowData: json_class['ClassSubjectGrade'],
-      columns: [
-        {
-          field: 'SubjectCode',
-          headerText: 'Subject Code',
-          width: 100,
-        },
-        {
-          field: 'Subject',
-          headerText: 'Code',
-          width: 250,
-        },
-        {
-          field: 'Teacher',
-          headerText: 'Teacher',
-          width: 150,
-        },
-        {
-          field: 'Grade',
-          headerText: 'Class Grade',
-          width: 100,
-        },
-        {
-          headerText: 'Actions',
-          template:
-            '<button class="btn px-4 py-2 bg-primary text-white font-bold" >View Students</button>', // Add a button to the cell
-          width: 150,
-        },
-      ],
+      mode: 'Normal', // Set the edit mode to 'Normal'
+    },
+    
+    // rowData: json_class['ClassSubjectGrade'],
+    columns: [
+      {
+        field: 'SubjectCode',
+        headerText: 'Subject Code',
+        width: 100,
+        isPrimaryKey: true, // Make this column a primary key
+      },
+      {
+        field: 'Subject',
+        headerText: 'Code',
+        width: 250,
+        // isPrimaryKey: true, // Make this column a primary key
+      },
+      {
+        field: 'TeacherId', // Assuming 'TeacherId' is the property in your data for the Teacher
+        headerText: 'Teacher',
+        width: 150,
+        editType: 'dropdownedit', // Set the edit type to 'dropdownedit'
+        dataSource: teacherData, // Provide the dataSource for the dropdown
+        foreignKeyField: 'TeacherId', // The field to be mapped from the dataSource
+        foreignKeyValue: 'TeacherName', // The field to be displayed in the dropdown
+      },
+      {
+        field: 'Schedule',
+        headerText: 'Schedule',
+        width: 150,
+        editType: 'stringedit', // Set the edit type to 'stringedit'
+      },
+      {
+        field: 'Grade',
+        headerText: 'Class Grade',
+        width: 100,
+        allowEditing: false
+      },
+      {
+        headerText: 'Actions',
+        template:
+          '<button class="btn px-4 py-2 bg-primary text-white font-bold" >View Students</button>', // Add a button to the cell
+        width: 150,
+        allowEditing: false
+      },
+    ],
 
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
-      allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {},
-    });
-
-    grid.toolbarClick = function (args) {
-      if (args['item'].id === 'Grid_excelexport') {
-        grid.excelExport();
+    toolbar: ['ExcelExport', 'Update', 'Cancel'],
+    excelExportComplete: function (args) {},
+    actionComplete: function (args) {
+      if (args.requestType === 'save') {
+        saveChangesToServer(args.data);
       }
-    };
-    // Add a click event handler for all buttons with the "btn" class
-    document.addEventListener('click', function (event) {
-      if (event.target.classList.contains('btn')) {
-        const cellElement = event.target.closest('.e-rowcell');
-        if (cellElement) {
-          const dataUid = cellElement.parentElement.getAttribute('data-uid');
-          if (dataUid) {
-            const rowData = grid.getRowObjectFromUID(dataUid).data;
-            if (rowData) {
-              fetchStudents({
-                classSubjectId: rowData.ClassSubjectId,
-                subject: rowData.Subject,
-                teacher: rowData.Teacher,
-              });
-            }
+
+      console.log(args);
+    },
+  });
+
+  grid.toolbarClick = function (args) {
+    if (args['item'].id === 'grid-class-subject_excelexport') {
+      grid.excelExport();
+    }
+  };
+
+  // Add a click event handler for all buttons with the "btn" class
+  document.addEventListener('click', function (event) {
+    if (event.target.classList.contains('btn')) {
+      const cellElement = event.target.closest('.e-rowcell');
+      if (cellElement) {
+        const dataUid = cellElement.parentElement.getAttribute('data-uid');
+        if (dataUid) {
+          const rowData = grid.getRowObjectFromUID(dataUid).data;
+          if (rowData) {
+            fetchStudents({
+              classSubjectId: rowData.ClassSubjectId,
+              subject: rowData.Subject,
+              teacher: rowData.Teacher,
+            });
           }
         }
       }
-    });
+    }
+  });
 
-    // Render the grid
-    grid.appendTo('#grid-class-subject');
+  // Render the grid
+  grid.appendTo('#grid-class-subject');
 
-    const filterbarOperator = new ej.buttons.CheckBox();
-    filterbarOperator.appendTo('#filterBarOperator');
+  const filterbarOperator = new ej.buttons.CheckBox();
+  filterbarOperator.appendTo('#filterBarOperator');
 
-    filterbarOperator.addEventListener('change', function (args) {
-      grid.filterSettings.showFilterBarOperator = args.checked;
-      grid.clearFiltering();
-    });
+  filterbarOperator.addEventListener('change', function (args) {
+    grid.filterSettings.showFilterBarOperator = args.checked;
+    grid.clearFiltering();
+  });
+}
+
+// Function to save changes to the server
+  function saveChangesToServer(updatedRecords) {
+    console.log("UPDATE RECORDS: ");
+    console.log("UPDATE RECORDS: ", updatedRecords);
+      // // Send the updatedRecords to your server using AJAX or another method
+      // // Example using fetch:
+      // fetch('your-server-endpoint', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(updatedRecords),
+      // })
+      // .then(response => response.json())
+      // .then(data => {
+      //   // Handle the response from the server
+      //   console.log('Data saved successfully:', data);
+      // })
+      // .catch(error => {
+      //   // Handle any errors that occur during the fetch
+      //   console.error('Error saving data:', error);
+      // });
   }
 
   function displayGridStudentList(json_student_list) {
-    // Create the grid with filtering
+    // Check the length of json_student_list if 0 assign an empty array else put the json_student_list in dataSource of grid
+    var data = json_student_list.length === 0 ? [] : json_student_list;
+
     var grid = new ej.grids.Grid({
-      dataSource: json_student_list,
+      dataSource: data,
       allowPaging: true,
       allowFiltering: true,
       allowSorting: true, // Enable sorting
