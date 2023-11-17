@@ -78,7 +78,6 @@ def create_app():
     @app.before_request
     def before_request():
         session.permanent=True
-        print(os.getenv("DATABASE_URI"))
         pass
     
     # ===========================================================================

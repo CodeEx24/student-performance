@@ -202,9 +202,10 @@ def getSubjectsGrade(str_student_id):
 
         data_student_class_subject_grade = (
             db.session.query(StudentClassSubjectGrade,
-                             ClassSubject, Subject, Class, Faculty)
+                             ClassSubject, Subject, Class, Faculty, Course)
             .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .join(Class, ClassSubject.ClassId == Class.ClassId)
+            .join(Course, Course.CourseId == Class.CourseId)
             .join(Subject, ClassSubject.SubjectId == Subject.SubjectId)
             .join(Faculty, ClassSubject.TeacherId == Faculty.TeacherId)
             .filter(StudentClassSubjectGrade.StudentId == str_student_id)
@@ -252,12 +253,11 @@ def getSubjectsGrade(str_student_id):
                     "Subject": student_class_subject_grade.Subject.Name,
                     "Code": student_class_subject_grade.Subject.SubjectId,
                     "Teacher": student_class_subject_grade.Faculty.Name,
-                    "SecCode": str(student_class_subject_grade.Class.CourseCode) + " " + str(student_class_subject_grade.Class.Year) + "-" + str(student_class_subject_grade.Class.Section),
+                    "SecCode": str(student_class_subject_grade.Course.CourseCode) + " " + str(student_class_subject_grade.Class.Year) + "-" + str(student_class_subject_grade.Class.Section),
                     "Units": format(student_class_subject_grade.Subject.Units, '.2f'),
                     "Status": checkStatus(student_class_subject_grade.StudentClassSubjectGrade.Grade)
                 }
                 dict_class_group["Subject"].append(subject_details)
-
             return (list_student_class_subject_grade)
 
         else:
