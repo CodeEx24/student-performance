@@ -543,7 +543,6 @@ def processAddingClass(file):
                             })
                             
                             for cur in curriculum:
-                                print(cur)
                                 new_class_subject = ClassSubject(
                                     ClassId=new_class.ClassId,
                                     SubjectId=cur.SubjectId
@@ -570,7 +569,6 @@ def processAddingClass(file):
                                 "Semester": semester
                             })
                     else:
-                        print("NOT EXIST")
                         curriculum_not_exist.append({
                             "CourseCode": course_code,
                             "Year": year,
@@ -596,7 +594,6 @@ def processAddingClass(file):
 
     except Exception as e:
         db.session.rollback()
-        print("Error details:", str(e))
         return jsonify({'error': 'An error occurred while processing the file'}), 500
 
     #         if course:
@@ -729,54 +726,52 @@ def getAllClassSubjectData():
         # Handle the exception here, e.g., log it or return an error response
         return None
     
-
 def getClassSubject(class_id):
     try:
-        print('class_id: ', class_id)
-        data_class_subject = db.session.query(Class, ClassSubject, Subject, ClassSubjectGrade, Course).join(ClassSubject, ClassSubject.ClassId == Class.ClassId).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Course, Course.CourseId == Class.CourseId).join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId).filter(ClassSubject.ClassId == class_id).all()
-        
-        # data_class_subject = db.session.query(ClassSubject, ClassSubjectGrade, Subject, Class, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Course, Course.CourseId == Class.CourseId).filter(ClassSubject.ClassId == class_id).all()
+        data_class_subject = (
+            db.session.query(Class, ClassSubject, Subject, ClassSubjectGrade, Course)
+            .join(ClassSubject, ClassSubject.ClassId == Class.ClassId)
+            .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+            .join(Course, Course.CourseId == Class.CourseId)
+            .join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+            .filter(ClassSubject.ClassId == class_id)
+            .all()
+        )
 
-        print('Number of records fetched:', len(data_class_subject))
         if data_class_subject:
-                # For loop the data_student and put it in dictionary
+            # For loop the data_student and put it in dictionary
             list_class_subject = []
             for class_subject in data_class_subject:
                 # Combine the course_code, year, section to class_name variable
                 class_name = f"{class_subject.Course.CourseCode} {class_subject.Class.Year}-{class_subject.Class.Section}"
-                # Check if the class_subject.TeacherId exist if yes make a query for it
-                if class_subject.ClassSubject.TeacherId:
-                    teacher = db.session.query(Faculty).filter(Faculty.TeacherId == class_subject.ClassSubject.TeacherId).first()
-                    teacher_name = teacher.Name
-                    schedule = class_subject.ClassSubject.Schedule if class_subject.ClassSubject.Schedule else "N/A"
-                    dict_class_subject = {
-                        "ClassSubjectId": class_subject.ClassSubject.ClassSubjectId,
-                        "SubjectCode": class_subject.Subject.SubjectCode,
-                        "Section Code": class_name,
-                        "Grade": round(class_subject.ClassSubjectGrade.Grade, 2),  # Round to 2 decimal places
-                        "Subject": class_subject.Subject.Name,
-                        "Teacher": teacher_name,
-                        "Schedule": schedule,
-                        'Batch': class_subject.Class.Batch,
-                    }
-                    # # Append the data
-                    list_class_subject.append(dict_class_subject)
+
+                # Check if the class_subject.TeacherId exists, if yes, make a query for it
+                if class_subject.ClassSubject.TeacherId or class_subject.ClassSubject.Schedule:
+                    teacher_id = 0
+                    if class_subject.ClassSubject.TeacherId:
+                        teacher = db.session.query(Faculty).filter(Faculty.TeacherId == class_subject.ClassSubject.TeacherId).first()
+                        if teacher:
+                            teacher_id = teacher.TeacherId
+
+                    schedule = class_subject.ClassSubject.Schedule if class_subject.ClassSubject.Schedule else None
                 else:
-                    dict_class_subject = {
-                        "ClassSubjectId": class_subject.ClassSubject.ClassSubjectId,
-                        "SubjectCode": class_subject.Subject.SubjectCode,
-                        "Section Code": class_name,
-                        "Grade": round(class_subject.ClassSubjectGrade.Grade, 2),  # Round to 2 decimal places
-                        "Subject": class_subject.Subject.Name,
-                        "Teacher": "N/A",
-                        "Schedule": "N/A",
-                        'Batch': class_subject.Class.Batch,
-                        
-                    }
-                    # Append the data
-                    list_class_subject.append(dict_class_subject)
-                
-            # print('list_class_subject: ', list_class_subject)
+                    teacher_id = None
+                    schedule = None
+
+                dict_class_subject = {
+                    "ClassSubjectId": class_subject.ClassSubject.ClassSubjectId,
+                    "SubjectCode": class_subject.Subject.SubjectCode,
+                    "Section Code": class_name,
+                    "Grade": round(class_subject.ClassSubjectGrade.Grade, 2) if class_subject.ClassSubjectGrade else None,
+                    "Subject": class_subject.Subject.Name,
+                    "TeacherId": teacher_id,
+                    "Schedule": schedule,
+                    'Batch': class_subject.Class.Batch if class_subject.Class else None,
+                }
+
+                # Append the data
+                list_class_subject.append(dict_class_subject)
+
             return jsonify({'data': list_class_subject})
         else:
             return None
@@ -810,13 +805,10 @@ def getClassDetails(class_id):
     
 def getStudentClassSubjectData(classSubjectId):
     try:
-        print(classSubjectId)
         data_class_details = db.session.query(ClassSubject).filter_by(ClassSubjectId = classSubjectId).first()
-        print('data_class_details: ', data_class_details)
         # Get the StudentClassSubjectGrade
         if data_class_details:
             data_student_subject_grade = db.session.query(StudentClassSubjectGrade, Student).join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId).filter(StudentClassSubjectGrade.ClassSubjectId == data_class_details.ClassSubjectId).all()
-            print('data_student_subject_grade: ', data_student_subject_grade)     
             if data_student_subject_grade:
                 list_student_data = []
                     # For loop the data_student and put it in dictionary
@@ -838,6 +830,7 @@ def getStudentClassSubjectData(classSubjectId):
         return None
     
     # getCurriculumSubject
+
 def getCurriculumData():
     try:
         metadata = db.session.query(Curriculum, Metadata, Course, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).order_by(desc(Metadata.Batch), desc(Metadata.YearLevel)).all()
@@ -890,7 +883,27 @@ def getCurriculumSubject(metadata_id):
         return None
     
 
-
+def getActiveTeacher():
+    try:
+        active_teacher = db.session.query(Faculty).filter_by(IsActive = True).all()
+        # Get the StudentClassSubjectGrade
+        if active_teacher:
+            list_active_teacher = []
+                # For loop the active_teacher and put it in dictionary
+            for data in active_teacher:
+                dict_active_teacher = {
+                    "TeacherId": data.TeacherId,
+                    "TeacherName": data.Name,
+                }
+                list_active_teacher.append(dict_active_teacher)
+            return  jsonify({'data': list_active_teacher})
+        else:
+            return None
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    
+    
 def processAddingCurriculumSubjects(file):
 
     # Check if the file is empty
@@ -1036,52 +1049,46 @@ def processAddingCurriculumSubjects(file):
         # db.session.rollback()
         return  jsonify({'result': 'Data added successfully', 'data': (list_curriculum_subjects)}), 200
     
-            
 
-    
-    #     # Now you can access and manipulate the data in the DataFrame
-    #     # For example, you can iterate through rows and access columns like this:
-    #     for index, row in df.iterrows():
-    #         # Extract the values from the DataFrame
-    #         student_number = row['Student Number'] # OK
-    #         student_name = row['Student Name']
-    #         section_code = row['Section Code']
-    #         subject_code = row['SubjectCode'] # OK
-    #         semester = row['Semester'] # OK
-    #         grade = row['Grade']
-    #         batch = row['Batch'] # OK
-            
-    #         # Split the section_code by the last space and keep the first part
-    #         course_code = section_code.rsplit(' ', 1)[0] 
-            
-    #         # Split the section_code by space, get the last part, and split it by hyphen '-' to extract year and section
-    #         year, section = section_code.split(' ')[-1].split('-')
+def processUpdatingClassSubjectDetails(data):
+    try:
+        if data:
+            # Update all data in the database
+            for class_subject in data:
 
-    #         # Now you can use the modified_section_code as needed in your code
-    #         student_data = (
-    #             db.session.query(Student,  StudentClassSubjectGrade, ClassSubject, Class, Subject, Course)
-    #             .join(StudentClassSubjectGrade, StudentClassSubjectGrade.StudentId == Student.StudentId)
-    #             .join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
-    #             .join(Class, Class.ClassId == ClassSubject.ClassId)
-    #             .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
-    #             .join(Course, Course.CourseId == Class.CourseId)
-    #             .filter(Student.StudentNumber == student_number, Class.Year == year, Class.Section == section, Class.Batch == batch, Class.Semester == semester,  Subject.SubjectCode == subject_code)
-    #             .order_by(desc(Student.Name), desc(Class.Year), desc(Class.Section), desc(Class.Batch))
-    #             .first()
-    #         )
-            
-            
-    #         if(student_data.Class.IsGradeFinalized==False):
-    #             # Update the Class isGradeFinalized to False
-    #             student_data.StudentClassSubjectGrade.Grade = grade
+                class_subject_id = class_subject['ClassSubjectId']
                 
-    #             # Save only but dont commit in database
-    #             db.session.add(student_data.StudentClassSubjectGrade)
-    #         else:
-    #             return jsonify({'error': 'The grade has been finalized. Contact admin if there is an issue exist'}), 500
-    #     # If all data is updated successfully then commit the data
-    #     db.session.commit()
-    #     return jsonify({'success': 'File uploaded and data processed successfully'}), 200
+                # Get the teacher_name, set it to None if 'TeacherName' is not present
+                teacher_id = class_subject['TeacherId']
+                schedule = class_subject['Schedule']
+                
+                # If teacher_id update teacher_id only:
+                if teacher_id:
+                    db.session.query(ClassSubject).filter_by(ClassSubjectId=class_subject_id).update({
+                        'TeacherId': teacher_id
+                    })
+                
+                if schedule:
+                    db.session.query(ClassSubject).filter_by(ClassSubjectId=class_subject_id).update({
+                        'Schedule': schedule
+                    })
+                    
+                if teacher_id and schedule:
+                    db.session.query(ClassSubject).filter_by(ClassSubjectId=class_subject_id).update({
+                        'TeacherId': teacher_id,
+                        'Schedule': schedule
+                    })
 
-    # except Exception as e:
-    #     return jsonify({'error': 'An error occurred while processing the file'}), 500
+            # Commit the changes to the database
+            db.session.commit()
+
+            # Return success
+            return jsonify({'result': 'Data updated successfully'}), 200
+        else:
+            # Return updating details failed
+            return jsonify({'error': 'Updating details failed. No data provided'}), 500
+    except Exception as e:
+        # Rollback the changes in case of an error
+        db.session.rollback()
+        # Return an error response
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500

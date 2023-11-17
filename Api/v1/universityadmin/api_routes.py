@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails
 import os
 
 
@@ -307,6 +307,22 @@ def fetchCurriculum():
     else:
         return render_template('404.html'), 404
     
+    
+@university_admin_api.route('/active/teacher', methods=['GET'])
+@role_required('universityAdmin')
+def fetchActiveTeacher():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_active_teacher_data = getActiveTeacher()
+
+        if json_active_teacher_data:
+            return (json_active_teacher_data)
+        else:
+            return jsonify(message="No active teacher data available"), 400
+    else:
+        return render_template('404.html'), 404
+        
+
 
 @university_admin_api.route('/curriculum/subjects/<int:metadata_id>', methods=['GET'])
 @role_required('universityAdmin')
@@ -341,6 +357,18 @@ def submitCurriculumSubjects():
         return render_template('404.html'), 404    
     
     
+@university_admin_api.route('/update/class-subject', methods=['POST'])
+@role_required('universityAdmin')
+def updateClassSubject():
+    universityAdmin = getCurrentUser()
+    data = request.json  # assuming the data is sent as JSON
+
+    if universityAdmin:
+        return processUpdatingClassSubjectDetails(data)
+    else:
+        return render_template('404.html'), 404    
+
+
 
 # api_routes.py
 @university_admin_api.route('/submit-students-subjects', methods=['POST'])

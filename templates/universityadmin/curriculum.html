@@ -616,7 +616,7 @@
         const semesterOrdinal = getOrdinal(element.Semester);
         const yearOrdinal = getOrdinal(element.Year);
         const errorP = createErrorList(
-          `${element.Course} ${yearOrdinal} Year - (${element.Batch} - ${semesterOrdinal} Semester)`
+          `${element['Subject Code']} - ${element.Course} ${yearOrdinal} Year - (${element.Batch} - ${semesterOrdinal} Semester)`
         );
         listElement.appendChild(errorP);
       });
@@ -638,7 +638,7 @@
       // subjectNotExistHeader.innerText = 'Subject not exist:';
       errors.forEach((subject) => {
         console.log(subject);
-        const errorP = createErrorList(subject);
+        const errorP = createErrorList(subject['Subject Code']);
         listElement.appendChild(errorP);
       });
     }
