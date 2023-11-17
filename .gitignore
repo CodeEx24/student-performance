@@ -9,3 +9,9 @@ __pycache__/
 ZSPS Docs - Cheatsheet/Database 2.drawio
 ZSPS Docs - Cheatsheet/Database.drawio
 ZSPS Docs - Cheatsheet/ZCHEATSHEET.png
+/node_modules/
+package.json
+package-lock.json
+tailwind.config.js
+/static/dist
+/static/src

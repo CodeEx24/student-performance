@@ -6,7 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %} {% endblock title %}</title>
     <!-- TAILWIND -->
+    <!-- CDN TAILWIND -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- LOCAL TAILWIND -->
+    <!-- <link
+       rel="stylesheet"
+       href="{{url_for('static',filename='dist/css/output.css')}}"
+     /> -->
+
     <script>
       tailwind.config = {
         theme: {

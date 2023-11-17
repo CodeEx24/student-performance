@@ -252,7 +252,7 @@ def getSubjectsGrade(str_student_id):
                     "Subject": student_class_subject_grade.Subject.Name,
                     "Code": student_class_subject_grade.Subject.SubjectId,
                     "Teacher": student_class_subject_grade.Faculty.Name,
-                    "SecCode": str(student_class_subject_grade.Class.CourseId) + " " + str(student_class_subject_grade.Class.Year) + "-" + str(student_class_subject_grade.Class.Section),
+                    "SecCode": str(student_class_subject_grade.Class.CourseCode) + " " + str(student_class_subject_grade.Class.Year) + "-" + str(student_class_subject_grade.Class.Section),
                     "Units": format(student_class_subject_grade.Subject.Units, '.2f'),
                     "Status": checkStatus(student_class_subject_grade.StudentClassSubjectGrade.Grade)
                 }
