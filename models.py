@@ -191,7 +191,8 @@ class CourseEnrolled(db.Model):
     StudentId = db.Column(db.Integer, db.ForeignKey(
         'Students.StudentId', ondelete="CASCADE"), primary_key=True)
     DateEnrolled = db.Column(db.Date)
-    Status = db.Column(db.Integer, nullable=False)
+    Status = db.Column(db.Integer, nullable=False) 
+    # 1 - Not Graduated, 2 - Graduated, 3 - Drop, 4 - Transfer Course, 5 - Transfer School
     CurriculumYear = db.Column(db.Integer, nullable=False)  
 
 

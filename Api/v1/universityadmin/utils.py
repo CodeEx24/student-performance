@@ -1115,11 +1115,7 @@ def processUpdatingClassSubjectDetails(data):
 
 
 def processAddingStudentInSubject(file, class_subject_id):
-    
     try:
-           
-        print("HELLO")
-        
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
@@ -1144,6 +1140,7 @@ def processAddingStudentInSubject(file, class_subject_id):
                 print('class_subject: ', class_subject)
                 if class_subject:
                     student_number = row['Student Number']
+                    date_enrolled = row['Date Enrolled'].date()
                 
                     student = db.session.query(Student).filter_by(StudentNumber = student_number).first()
                 
@@ -1163,7 +1160,7 @@ def processAddingStudentInSubject(file, class_subject_id):
                             )
                             
                             db.session.add(new_student_class_subject_grade)
-                            # db.commit()
+                            db.session.commit()
                             
                             dict_student_class_subject_grade = {
                                 "StudentNumber": student.StudentNumber,
@@ -1180,7 +1177,7 @@ def processAddingStudentInSubject(file, class_subject_id):
                     
             if (list_student_number_not_exist or list_student_subject_exist) and len(list_students_added) > 0:
                 db.session.rollback()
-                return jsonify({'warning': 'Some data added successfully', 'error_data': {'student_not_exist': list_student_number_not_exist, 'student_subject_exist': list_student_subject_exist, 'added': list_students_added}}), 500
+                return jsonify({'warning': 'Some data added successfully', 'error_data': {'student_not_exist': list_student_number_not_exist, 'student_subject_exist': list_student_subject_exist}, 'added': list_students_added}), 500
             elif (list_student_number_not_exist or list_student_subject_exist) and len(list_students_added) == 0:
                 db.session.rollback()
                 return jsonify({'error': 'Adding the data failed', 'error_data': {'student_not_exist': list_student_number_not_exist, 'student_subject_exist': list_student_subject_exist}}), 500

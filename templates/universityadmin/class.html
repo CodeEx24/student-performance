@@ -56,7 +56,7 @@
  
  <div
     id="myModal"
-    class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+    class="modal hidden fixed inset-0 items-center justify-center z-50"
     >
  <!-- Modal Overlay -->
  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
@@ -133,20 +133,27 @@
                    </button>
                 </div>
                 <p id="students-file-error" class="text-c4 text-sm"></p>
-                <div id="errors">
-                  <div id="student-not-exist-container" class="hidden">
-                    <p class="text-c1 text-xl font-semibold">
-                        Student number not existing in student list:
+                <div id="errors" class="hidden">
+                  <div>
+                    <p id="student-num-error" class="text-c1 text-xl font-semibold hidden">
+                      Student Number not exist:
                     </p>
-                    <div id="student-not-exist-error" class="text-c1 text-sm"></div>
+                    <ul id="student-num-list-error" class="text-c1 text-sm"></ul>
                   </div>
-                  
-                  <div id="student-subject-exist-container" class="hidden">
-                    <p class="text-c1 text-xl font-semibold">
-                        Student already exist in current subject:
+      
+                  <div>
+                    <p
+                      id="student-subject-error"
+                      class="text-c1 text-xl font-semibold hidden"
+                    >
+                      Student already exist in subject:
                     </p>
-                    <div id="student-subject-exist-error" class="text-c1 text-sm"></div>
+                    <ul
+                      id="student-subject-list-error"
+                      class="text-c1 text-sm"
+                    ></ul>
                   </div>
+      
                 </div>
              </form>
           </div>
@@ -160,7 +167,7 @@
  </div>
  <div
     id="loadingModal"
-    class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+    class="modal hidden fixed inset-0 items-center justify-center z-50"
     >
     <!-- Modal Overlay -->
     <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
@@ -200,17 +207,13 @@
   async function submitStudents(event) {
     event.preventDefault();
     console.log('classSubjectId: ', classSubjectId);
-    // get loadingModal/submit/students-subject
-    // const loadingModal = document.getElementById('loadingModal');
-    // loadingModal.classList.remove('hidden');
-
 
     const fileErrorElement = document.getElementById('students-file-error');
     const fileInput = document.getElementById('excelFile');
     const file = fileInput.files[0];
     // // Get the exist
-    // const errorContainer = document.getElementById('errors');
-    // errorContainer.classList.add('hidden');
+    const errorContainer = document.getElementById('errors');
+    errorContainer.classList.add('hidden');
 
     // Get class-header-error
     const headerErrorElement = document.getElementById('students-header-error');
@@ -232,6 +235,13 @@
     const formData = new FormData();
     formData.append('excelFile', file);
 
+    // Clear student-not-exist-error and student-subject-exist-error lists
+    clearErrorList('student-num-list-error');
+    clearErrorList('student-subject-list-error');
+
+    // Hide student-num-error and student-subject-error elements
+    hideElement('student-num-error');
+    hideElement('student-subject-error');
 
     fetch(`${api_base_url}/submit/students-subject/${classSubjectId}`, {
       method: 'POST',
@@ -241,75 +251,95 @@
       .then((data) => {
         // Handle API response here
         console.log('RESULT: ', data);
+        
+
+        if(data.error){
+          errorContainer.classList.remove('hidden');
+          notyf.error(data.error)
+        
+          if(data.error_data.student_not_exist.length != 0){
+            handleError(data.error_data.student_not_exist, 'student-num-error', 'student-num-list-error')
+          }
+
+          if(data.error_data.student_subject_exist.length != 0){
+            handleError(data.error_data.student_subject_exist, 'student-subject-error', 'student-subject-list-error')
+          }
+        }
 
         if(data.warning){
-          // Select errors and remove hidden
-          // errorContainer.classList.remove('hidden');
-
+          errorContainer.classList.remove('hidden');
           notyf.open({
             type: 'warning',
             message: data.warning
           });
 
-          if(data.error_data.student_not_exist){
-            // For each error make a p element that will have a text of data.student_not_exist
-            console.log('data.error_data.student_not_exist: ', data.error_data.student_not_exist);
-            // student-not-exist-container
-            const studentNotExistContainer = document.getElementById('student-not-exist-container');
-            studentNotExistContainer.classList.remove('hidden');
-            // student-not-exist-error
-            console.log('studentNotExistContainer: ', studentNotExistContainer);
-            const studentNotExistError = document.getElementById('student-not-exist-error');
-            // Remove all child nodes (content) inside #student-not-exist-error
-            while (studentNotExistError.firstChild) {
-              studentNotExistError.removeChild(studentNotExistError.firstChild);
-            }
-            console.log('studentNotExistError: ', studentNotExistError);
-            // For each error make a p element that will have a text of data.error_data.student_not_exist
-            data.error_data.student_not_exist.forEach((studentNumber) => {
-              console.log('studentNumber: ', studentNumber);
-              const p = document.createElement('p');
-              p.innerText = `${studentNumber}`;
-              studentNotExistError.appendChild(p);
-              console.log('studentNotExistError: ', studentNotExistError);
-            });
+          if(data.error_data.student_not_exist.length != 0){
+            handleError(data.error_data.student_not_exist, 'student-num-error', 'student-num-list-error')
           }
 
-          if(data.error_data.student_subject_exist){
-            console.log('data.error_data.student_subject_exist: ', data.error_data.student_subject_exist);
-            // student-subject-exist-container
-            const studentSubjectExistContainer = document.getElementById('student-subject-exist-container');
-            studentSubjectExistContainer.classList.remove('hidden');
-            // student-subject-exist-error
-            const studentSubjectExistError = document.getElementById('student-subject-exist-error');
-            // Remove all child nodes (content) inside #student-subject-exist-error
-            while (studentSubjectExistError.firstChild) {
-              studentSubjectExistError.removeChild(studentSubjectExistError.firstChild);
-            }
-            // For each error make a p element that will have a text of data.error_data.student_subject_exist
-            data.error_data.student_subject_exist.forEach((studentNumber) => {
-              const p = document.createElement('p');
-              p.innerText = `${studentNumber}`;
-              studentSubjectExistError.appendChild(p);
-            });
+          if(data.error_data.student_subject_exist.length != 0){
+            handleError(data.error_data.student_subject_exist, 'student-subject-error', 'student-subject-list-error')
           }
-        } else if(data.success){
+
+          if(data.added){
+            // Nothing to do
+            gridAddData(data.added, classSubjectId)
+          }
+        } 
+        
+        if (data.success){
           notyf.success(data.success)
-          const grid = document.getElementById('grid-student-list').ej2_instances[0];
-          data.data.forEach((student) => {
-            grid.dataSource = grid.dataSource.concat(student);
-          });
-          grid.refresh();
-        }else{
-          console.log('data.error: ', data.error);
-          notyf.error(data.error)
+          gridAddData(data.data, classSubjectId)
         }
+
+       
+
         
       })
       .catch((error) => {
         console.log("DATA ON ERROR: ", error);
+        notyf.error(error)
       });
   }
+
+  function gridAddData(data){
+    const grid = document.getElementById(`grid-${classSubjectId}`).ej2_instances[0];
+          data.forEach((student) => {
+            grid.dataSource = grid.dataSource.concat(student);
+          });
+          grid.refresh();
+  }
+
+  function handleError(error, pElement, listElement){
+      const pTextElement = document.getElementById(pElement);
+      pTextElement.classList.remove('hidden')
+
+      const listErrorElement = document.getElementById(listElement);
+      // Remove all child nodes (content) inside #student-not-exist-error
+      while (listErrorElement.firstChild) {
+        listErrorElement.removeChild(listErrorElement.firstChild);
+      }
+      // For each error make a p element that will have a text of data.error_data.student_not_exist
+      error.forEach((studentNumber) => {
+        const p = document.createElement('p');
+        p.innerText = `${studentNumber}`;
+        listErrorElement.appendChild(p);
+      });
+    }
+
+    function clearErrorList(listId) {
+  const listElement = document.getElementById(listId);
+  // Remove all child nodes (content) inside the list
+  while (listElement.firstChild) {
+    listElement.removeChild(listElement.firstChild);
+  }
+}
+
+function hideElement(elementId) {
+  const element = document.getElementById(elementId);
+  element.classList.add('hidden');
+}
+
 </script>
 
 <!-- FETCH CLASS PERFORMANCE (CHART) -->
@@ -420,11 +450,21 @@
       const json_class = await response.json();
       if (json_class) {
         // Get myModal
+        // Clear student-not-exist-error and student-subject-exist-error lists
+        clearErrorList('student-num-list-error');
+        clearErrorList('student-subject-list-error');
+
+        // Hide student-num-error and student-subject-error elements
+        hideElement('student-num-error');
+        hideElement('student-subject-error');
+        document.getElementById('excelFile').value = '';
+        
         const modal = document.getElementById('myModal');
         // Remove hidden
+        modal.classList.add('flex');
         modal.classList.remove('hidden');
         classSubjectId = data.classSubjectId;
-        displayGridStudentList(json_class.data);
+        displayGridStudentList(json_class.data, classSubjectId);
       }
     } catch (error) {
     }
@@ -581,7 +621,7 @@
     
   }
 
-  function displayGridStudentList(json_student_list) {
+  function displayGridStudentList(json_student_list, classSubjectId) {
     // Check the length of json_student_list if 0 assign an empty array else put the json_student_list in dataSource of grid
     var data = json_student_list.length === 0 ? [] : json_student_list;
 
@@ -626,8 +666,12 @@
       }
     };
 
-    // Render the grid
-    grid.appendTo('#grid-student-list');
+    const gridStudentList = document.getElementById('grid-student-list');
+    const newDivElement = document.createElement('div');
+    newDivElement.id = `grid-${classSubjectId}`;
+    // append
+    gridStudentList.appendChild(newDivElement);
+    grid.appendTo(`#grid-${classSubjectId}`);
 
     const filterbarOperator = new ej.buttons.CheckBox();
     filterbarOperator.appendTo('#filterBarOperator');
@@ -642,14 +686,23 @@
   function closeModal() {
     // Get the #grid-student-list element
     var gridStudentList = document.getElementById('grid-student-list');
-
-    // Remove all child nodes (content) inside #grid-student-list
+    // remove the child of gridStudentList
     while (gridStudentList.firstChild) {
       gridStudentList.removeChild(gridStudentList.firstChild);
     }
 
     // Hide the modal
     document.getElementById('myModal').classList.add('hidden');
+  }
+
+
+
+  function hideElement(elementId) {
+    document.getElementById(elementId).classList.add('hidden');
+  }
+
+  function showELement(elementId) {
+    document.getElementById(elementId).classList.remove('hidden');
   }
 </script>
 
