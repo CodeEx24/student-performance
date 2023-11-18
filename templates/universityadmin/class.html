@@ -105,7 +105,7 @@
              <form
                 class="bg-white rounded-lg mt-4 px-4 mb-8"
                 enctype="multipart/form-data"
-                onsubmit="submitStudents(event, classSubjectId)"
+                onsubmit="submitStudents(event)"
                 method="POST"
                 id="reset-form-email"
                 >
@@ -133,11 +133,20 @@
                    </button>
                 </div>
                 <p id="students-file-error" class="text-c4 text-sm"></p>
-                <div id="errors" class="hidden">
-                   <p id="students-header-error" class="text-c1 text-xl font-semibold">
-                      Student number or email already exist:
-                   </p>
-                   <div id="class-error" class="text-c1 text-sm"></div>
+                <div id="errors">
+                  <div id="student-not-exist-container" class="hidden">
+                    <p class="text-c1 text-xl font-semibold">
+                        Student number not existing in student list:
+                    </p>
+                    <div id="student-not-exist-error" class="text-c1 text-sm"></div>
+                  </div>
+                  
+                  <div id="student-subject-exist-container" class="hidden">
+                    <p class="text-c1 text-xl font-semibold">
+                        Student already exist in current subject:
+                    </p>
+                    <div id="student-subject-exist-error" class="text-c1 text-sm"></div>
+                  </div>
                 </div>
              </form>
           </div>
@@ -181,10 +190,17 @@
 <!-- SCRIPTS DATA -->
 {% block script %}
 
+<script>  
+  var classSubjectId;
+  var classId = '{{ class_id }}';
+</script>
+
+<!-- SUBMIT STUDENTS -->
 <script>
-  async function submitStudents(event, classSubjectId) {
+  async function submitStudents(event) {
     event.preventDefault();
-    // get loadingModal
+    console.log('classSubjectId: ', classSubjectId);
+    // get loadingModal/submit/students-subject
     // const loadingModal = document.getElementById('loadingModal');
     // loadingModal.classList.remove('hidden');
 
@@ -192,11 +208,12 @@
     const fileErrorElement = document.getElementById('students-file-error');
     const fileInput = document.getElementById('excelFile');
     const file = fileInput.files[0];
-    // Get the exist
-    const errorContainer = document.getElementById('errors');
+    // // Get the exist
+    // const errorContainer = document.getElementById('errors');
+    // errorContainer.classList.add('hidden');
+
     // Get class-header-error
     const headerErrorElement = document.getElementById('students-header-error');
-    errorContainer.classList.add('hidden');
 
     if (!file) {
       fileErrorElement.innerText = 'Please choose a file.';
@@ -215,73 +232,89 @@
     const formData = new FormData();
     formData.append('excelFile', file);
 
-    // const apiUrl =
-    //   "{{ url_for('university_admin_api.submitStudentsSubject') }}";
 
-    // fetch(apiUrl, {
-    //   method: 'POST',
-    //   body: formData,
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    // Handle API response here
-    // if (data.result) {
-    //   notyf.success(data.result);
-    //   // Get the grid datasource and concat the data.data
-    //   const grid = document.getElementById('grid-class').ej2_instances[0];
-    //   const dataSource = grid.dataSource;
-    //   grid.dataSource = data.data.concat(dataSource);
-    //   // add hidden in loadingModal
-    //   loadingModal.classList.add('hidden');
-    //   return;
-    // } else {
-    //   // Make a p element in class-exist-error for all, ClassName, Year, Section, Semester, Batch
-    //   const listElement = document.getElementById('class-error');
-    //   // Remove all child elements
-    //   while (listElement.firstChild) {
-    //     listElement.removeChild(listElement.firstChild);
-    //   }
-    //   if (data.existing_data) {
-    //     headerErrorElement.innerText = 'Class already exist:';
-    //     data.existing_data.forEach((element) => {
-    //       let errorP = document.createElement('p');
-    //       const semesterOrdinal = getOrdinal(element.Semester);
-    //       errorP.innerText = `${element.CourseCode} ${element.Year} - ${element.Section} - (${element.Batch} - ${semesterOrdinal} Semester)`;
-    //       listElement.appendChild(errorP);
-    //     });
-    //     // Append the listElement to existElement
-    //     errorContainer.appendChild(listElement);
-    //     // Remove hidden
-    //     errorContainer.classList.remove('hidden');
-    //   }
-    //   if (data.missing_course) {
-    //     data.missing_course.forEach((course) => {
-    //       headerErrorElement.innerText = 'Course not exist:';
-    //       let errorP = document.createElement('p');
-    //       errorP.innerText = `${course}`;
-    //       listElement.appendChild(errorP);
-    //     });
-    //     // Append the listElement to errorContainer
-    //     errorContainer.appendChild(listElement);
-    //     // Remove hidden
-    //     errorContainer.classList.remove('hidden');
-    //   }
-    //   notyf.error(data.error);
-    //   loadingModal.classList.add('hidden');
-    //   return;
-    // }
-    //   })
-    //   .catch((error) => {
-    //     loadingModal.classList.add('hidden');
-    //   });
+    fetch(`${api_base_url}/submit/students-subject/${classSubjectId}`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle API response here
+        console.log('RESULT: ', data);
+
+        if(data.warning){
+          // Select errors and remove hidden
+          // errorContainer.classList.remove('hidden');
+
+          notyf.open({
+            type: 'warning',
+            message: data.warning
+          });
+
+          if(data.error_data.student_not_exist){
+            // For each error make a p element that will have a text of data.student_not_exist
+            console.log('data.error_data.student_not_exist: ', data.error_data.student_not_exist);
+            // student-not-exist-container
+            const studentNotExistContainer = document.getElementById('student-not-exist-container');
+            studentNotExistContainer.classList.remove('hidden');
+            // student-not-exist-error
+            console.log('studentNotExistContainer: ', studentNotExistContainer);
+            const studentNotExistError = document.getElementById('student-not-exist-error');
+            // Remove all child nodes (content) inside #student-not-exist-error
+            while (studentNotExistError.firstChild) {
+              studentNotExistError.removeChild(studentNotExistError.firstChild);
+            }
+            console.log('studentNotExistError: ', studentNotExistError);
+            // For each error make a p element that will have a text of data.error_data.student_not_exist
+            data.error_data.student_not_exist.forEach((studentNumber) => {
+              console.log('studentNumber: ', studentNumber);
+              const p = document.createElement('p');
+              p.innerText = `${studentNumber}`;
+              studentNotExistError.appendChild(p);
+              console.log('studentNotExistError: ', studentNotExistError);
+            });
+          }
+
+          if(data.error_data.student_subject_exist){
+            console.log('data.error_data.student_subject_exist: ', data.error_data.student_subject_exist);
+            // student-subject-exist-container
+            const studentSubjectExistContainer = document.getElementById('student-subject-exist-container');
+            studentSubjectExistContainer.classList.remove('hidden');
+            // student-subject-exist-error
+            const studentSubjectExistError = document.getElementById('student-subject-exist-error');
+            // Remove all child nodes (content) inside #student-subject-exist-error
+            while (studentSubjectExistError.firstChild) {
+              studentSubjectExistError.removeChild(studentSubjectExistError.firstChild);
+            }
+            // For each error make a p element that will have a text of data.error_data.student_subject_exist
+            data.error_data.student_subject_exist.forEach((studentNumber) => {
+              const p = document.createElement('p');
+              p.innerText = `${studentNumber}`;
+              studentSubjectExistError.appendChild(p);
+            });
+          }
+        } else if(data.success){
+          notyf.success(data.success)
+          const grid = document.getElementById('grid-student-list').ej2_instances[0];
+          data.data.forEach((student) => {
+            grid.dataSource = grid.dataSource.concat(student);
+          });
+          grid.refresh();
+        }else{
+          console.log('data.error: ', data.error);
+          notyf.error(data.error)
+        }
+        
+      })
+      .catch((error) => {
+        console.log("DATA ON ERROR: ", error);
+      });
   }
 </script>
 
 <!-- FETCH CLASS PERFORMANCE (CHART) -->
 <script>
 
-  // Access class_id in your script
-  var classId = '{{ class_id }}';
   fetchClassDetails();
   fetchClassSubject();
 
@@ -297,7 +330,6 @@
 
       const json_class = await response.json();
       const teacher_data = await fetchActiveTeacher();
-      console.log('teacher_data: ', teacher_data);
       displayGridClassSubject(json_class.data, teacher_data);
     } catch (error) {
       console.log(error);
@@ -369,9 +401,9 @@
   }
 
   async function fetchStudents(data) {
-
+    console.log(data);
     // Get teacher, subject, semester and update its value
-    document.getElementById('teacher-modal').innerHTML = data.teacher;
+    document.getElementById('teacher-modal').innerHTML = data.teacher ? data.teacher : "No assigned teacher yet";
     document.getElementById('subject-modal').innerHTML = data.subject;
     
     try {
@@ -391,7 +423,7 @@
         const modal = document.getElementById('myModal');
         // Remove hidden
         modal.classList.remove('hidden');
-
+        classSubjectId = data.classSubjectId;
         displayGridStudentList(json_class.data);
       }
     } catch (error) {
@@ -447,7 +479,7 @@
         },
         {
           field: 'Grade',
-          headerText: 'Class Grade',
+          headerText: 'GWA (Class)',
           width: 100,
           allowEditing: false
         },
@@ -492,10 +524,17 @@
           if (dataUid) {
             const rowData = grid.getRowObjectFromUID(dataUid).data;
             if (rowData) {
+              // Find TeacherName in teacherData using rowData.TeacherId
+              const teacherName = rowData
+                ? (teacherData.find(teacher => teacher.TeacherId === rowData.TeacherId) || {}).TeacherName
+                : null;
+
+                console.log(teacherName);
+
               fetchStudents({
                 classSubjectId: rowData.ClassSubjectId,
                 subject: rowData.Subject,
-                teacher: rowData.Teacher,
+                teacher: teacherName,
               });
             }
           }

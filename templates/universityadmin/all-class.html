@@ -64,10 +64,32 @@
           </div>
           <p id="class-file-error" class="text-c4 text-sm"></p>
           <div id="errors" class="hidden">
-            <p id="class-header-error" class="text-c1 text-xl font-semibold">
-              Student number or email already exist:
-            </p>
-            <div id="class-error" class="text-c1 text-sm"></div>
+            <div>
+              <p id="course-error" class="text-c1 text-xl font-semibold hidden">
+                Course not existing:
+              </p>
+              <ul id="course-not-exist-list-error" class="text-c1 text-sm"></ul>
+            </div>
+
+            <div>
+              <p
+                id="curriculum-error"
+                class="text-c1 text-xl font-semibold hidden"
+              >
+                Curriculum not exist for:
+              </p>
+              <ul
+                id="curriculum-not-exist-list-error"
+                class="text-c1 text-sm"
+              ></ul>
+            </div>
+
+            <div>
+              <p id="class-error" class="text-c1 text-xl font-semibold hidden">
+                Class already exist:
+              </p>
+              <ul id="class-exist-list-error" class="text-c1 text-sm"></ul>
+            </div>
           </div>
         </form>
       </div>
@@ -85,7 +107,7 @@
 <!-- The Modal -->
 <div
   id="myModal"
-  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+  class="modal hidden fixed inset-0 items-center justify-center z-50"
 >
   <!-- Modal Overlay -->
   <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
@@ -135,7 +157,7 @@
 
 <div
   id="loadingModal"
-  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+  class="modal hidden fixed inset-0 items-center justify-center z-50"
 >
   <!-- Modal Overlay -->
   <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
@@ -366,20 +388,47 @@
 
   async function submitClass(event) {
     event.preventDefault();
-    // get loadingModal
-    const loadingModal = document.getElementById('loadingModal');
-    loadingModal.classList.remove('hidden');
-
-    console.log('INSIDE SUBMIT STUDENTS');
+    showLoadingModal();
 
     const fileErrorElement = document.getElementById('class-file-error');
     const fileInput = document.getElementById('excelFile');
     const file = fileInput.files[0];
     // Get the exist
     const errorContainer = document.getElementById('errors');
-    // Get class-header-error
-    const headerErrorElement = document.getElementById('class-header-error');
     errorContainer.classList.add('hidden');
+
+    // Remove all errors message in those element if not exist in curriculum, subject and course
+
+    // Define the clearChildElements function
+    function clearChildElements(element) {
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
+    }
+
+    // Now you can use the function in your code
+    const courseNotExistElement = document.getElementById(
+      'course-not-exist-list-error'
+    );
+    if (courseNotExistElement) {
+      clearChildElements(courseNotExistElement);
+    }
+
+    const curriculumNotExistElement = document.getElementById(
+      'curriculum-not-exist-list-error'
+    );
+    if (curriculumNotExistElement) {
+      clearChildElements(curriculumNotExistElement);
+    }
+
+    const classExistElement = document.getElementById('class-exist-list-error');
+    if (classExistElement) {
+      clearChildElements(classExistElement);
+    }
+
+    hideElement('class-error');
+    hideElement('course-error');
+    hideElement('curriculum-error');
 
     if (!file) {
       fileErrorElement.innerText = 'Please choose a file.';
@@ -407,7 +456,7 @@
     })
       .then((response) => response.json())
       .then((data) => {
-        // Handle API response here
+        closeLoadingModal();
         console.log(data);
         if (data.result) {
           notyf.success(data.result);
@@ -418,50 +467,62 @@
           // add hidden in loadingModal
           loadingModal.classList.add('hidden');
           return;
-        } else {
-          console.log(data);
-          // Make a p element in class-exist-error for all, ClassName, Year, Section, Semester, Batch
-          const listElement = document.getElementById('class-error');
-          // Remove all child elements
-          while (listElement.firstChild) {
-            listElement.removeChild(listElement.firstChild);
+        }
+
+        if (data.error) {
+          errorContainer.classList.remove('hidden');
+          console.log('DATAIN ERROR: ', data);
+
+          if (data.errors.class_data_exist.length > 0) {
+            showELement('class-error');
+
+            handleListErrors(
+              data.errors.class_data_exist,
+              'class-exist-list-error'
+            );
           }
 
-          // if (data.existing_data) {
-          //   headerErrorElement.innerText = 'Class already exist:';
-          //   data.existing_data.forEach((element) => {
-          //     let errorP = document.createElement('p');
-          //     const semesterOrdinal = getOrdinal(element.Semester);
-          //     errorP.innerText = `${element.CourseCode} ${element.Year} - ${element.Section} - (${element.Batch} - ${semesterOrdinal} Semester)`;
-          //     listElement.appendChild(errorP);
-          //   });
-          //   // Append the listElement to existElement
-          //   errorContainer.appendChild(listElement);
-          //   // Remove hidden
-          //   errorContainer.classList.remove('hidden');
-          // }
+          if (data.errors.curriculum_not_exist.length > 0) {
+            showELement('curriculum-error');
 
-          // if (data.missing_course) {
-          //   data.missing_course.forEach((course) => {
-          //     headerErrorElement.innerText = 'Course not exist:';
-          //     let errorP = document.createElement('p');
-          //     errorP.innerText = `${course}`;
-          //     listElement.appendChild(errorP);
-          //   });
-          //   // Append the listElement to errorContainer
-          //   errorContainer.appendChild(listElement);
-          //   // Remove hidden
-          //   errorContainer.classList.remove('hidden');
-          // }
-          // notyf.error(data.error);
-          loadingModal.classList.add('hidden');
-          return;
+            handleListErrors(
+              data.errors.curriculum_not_exist,
+              'curriculum-not-exist-list-error'
+            );
+          }
+
+          if (data.errors.list_course_not_exist.length > 0) {
+            showELement('course-error');
+            // ccreate an error list
+            data.errors.list_course_not_exist.forEach((error) => {
+              const errorP = document.createElement('li');
+              errorP.innerText = error;
+              // create list in error
+              courseNotExistElement.appendChild(errorP);
+            });
+          }
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
-        loadingModal.classList.add('hidden');
+        closeLoadingModal();
       });
+  }
+
+  function handleListErrors(errors, elementId) {
+    const element = document.getElementById(elementId);
+
+    if (!element) {
+      console.error(`Element with ID '${elementId}' not found.`);
+      return;
+    }
+
+    errors.forEach((error) => {
+      const semesterOrdinal = getOrdinal(error.Semester);
+      const errorP = createErrorList(
+        `${error.CourseCode} ${error.Year}-${error.Semester} (${error.Batch} - ${semesterOrdinal} Semester)`
+      );
+      element.appendChild(errorP);
+    });
   }
 
   function getOrdinal(semester) {
@@ -476,6 +537,20 @@
         ? suffixes[remainder - 1]
         : 'th';
     return `${semester}${suffix}`;
+  }
+
+  function createErrorList(text, type) {
+    const errorP = document.createElement('li');
+    errorP.innerText = text;
+    return errorP;
+  }
+
+  function hideElement(elementId) {
+    document.getElementById(elementId).classList.add('hidden');
+  }
+
+  function showELement(elementId) {
+    document.getElementById(elementId).classList.remove('hidden');
   }
 </script>
 {% endblock script %}

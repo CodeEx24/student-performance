@@ -37,8 +37,19 @@
               for="excelFile"
               class="block text-gray-700 font-bold text-lg mb-2"
             >
-              Add Students:
+              Add Students
             </label>
+            <p class="block text-gray-700 font-bold text-md mb-2">
+              Column Required:
+              <span class="font-normal"
+                >Student Number, Name, Email, Course Code, Date Enrolled, and
+                Batch</span
+              >
+            </p>
+            <p class="block text-gray-700 font-bold text-md mb-2">
+              Optional:
+              <span class="font-normal">Phone Number, Address and Gender</span>
+            </p>
           </div>
           <div class="mb-4 flex gap-4">
             <input
@@ -154,6 +165,8 @@
       .then((response) => response.json())
       .then((data) => {
         // Handle API response here
+        console.log('RESULT: ', data);
+
         if (data.result) {
           notyf.success(data.result);
           const grid = document.getElementById('grid').ej2_instances[0];

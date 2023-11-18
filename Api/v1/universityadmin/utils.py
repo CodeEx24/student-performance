@@ -385,7 +385,9 @@ def processAddingStudents(file):
             
             student_gender = row['Gender'] # OK
             student_course = row['Course Code']
-            student_date_enrolled = row['Date Enrolled'] # OK
+            student_date_enrolled = row['Date Enrolled'].date()
+            student_batch = row['Batch'] # OK
+        
             
             # Check if the student is already exist in the database based on StudentNumber or Email
             student_number_data = db.session.query(Student).filter(
@@ -397,9 +399,9 @@ def processAddingStudents(file):
 
             if not student_number_data and not student_email_data:
                 password = generate_password()
-                gender = 1 if student_gender == 'Male' else 2
-                
-                
+                gender = 1 if student_gender == 'Male' else (2 if student_gender == 'Female' else None)
+
+                print(gender)
                 course = db.session.query(Course).filter_by(CourseCode=student_course).first()
 
               # Add the new student in the database
@@ -422,11 +424,14 @@ def processAddingStudents(file):
                 db.session.add(new_student)
                 db.session.flush()
                 
+                print('new_student: ', new_student)
                 # Using the course above generate a CourseEnrolled for students
                 new_course_enrolled = CourseEnrolled(
                     CourseId=course.CourseId,
                     StudentId=new_student.StudentId,
-                    DateEnrolled=student_date_enrolled
+                    DateEnrolled=student_date_enrolled,
+                    Status=1,
+                    CurriculumYear=student_batch
                 )
                 
                 # # Add the new course enrolled to the session
@@ -440,14 +445,24 @@ def processAddingStudents(file):
                 
                 mail.send(msg)
                 
+                print('student_gender: ', student_gender)
                 # Append the student data in list data in format of dict
-                list_student_data.append({
-                    "Student Number": str(student_number),
-                    'Name': str(student_name),
-                    "Email": str(student_email),
-                    "Mobile Number": str(student_mobile),
-                    "Gender": gender
-                })
+                if not gender:
+                    list_student_data.append({
+                        "Email": str(student_email),
+                        "Gender": "N/A",
+                        "Mobile Number": str(student_mobile),
+                        "Name": str(student_name),
+                        "Student Number": str(student_number)
+                    })
+                else:
+                    list_student_data.append({
+                        "Email": str(student_email),
+                        "Gender": student_gender,
+                        "Mobile Number": str(student_mobile),
+                        "Name": str(student_name),
+                        "Student Number": str(student_number)
+                    })
              
             else:
                 # Append the student nummber
@@ -456,12 +471,14 @@ def processAddingStudents(file):
                 
         if list_existing_data:
             db.session.rollback()
-            return jsonify({'error': 'The following student number or email already exist in the database ', 'existing_data': (list_existing_data)}), 500
+            return jsonify({'error': 'The following student number or email already exist in the database ', 'existing_data': list_existing_data}), 500
         else:        
             db.session.commit()
             return  jsonify({'result': 'Data added successfully', 'data': list_student_data}), 200
             
     except Exception as e:
+        # print the error
+        print(e)
         db.session.rollback()
         return jsonify({'error': 'An error occurred while processing the file'}), 500
     
@@ -488,11 +505,12 @@ def processAddingClass(file):
                 batch = int(row['Batch'])
 
                 course = db.session.query(Course).filter_by(CourseCode=course_code).first()
-
+                
                 if not course:
                     if course_code not in list_course_not_exist:
                         list_course_not_exist.append(course_code)
-
+                    continue
+                        
                 metadata = db.session.query(Metadata).filter_by(CourseId=course.CourseId, YearLevel=year, Semester=semester, Batch=batch).first()
 
                 if not metadata:
@@ -576,7 +594,9 @@ def processAddingClass(file):
                             "Batch": batch,
                             "Semester": semester
                         })
-
+                else:   
+                    print('list_course_not_exist: ')
+                    
             if list_course_not_exist or curriculum_not_exist or class_data_exist:
                 db.session.rollback()
                 error_message = 'Something went wrong in processing the files'
@@ -591,7 +611,7 @@ def processAddingClass(file):
             else:
                 db.session.commit()
                 return jsonify({'result': 'Data added successfully', 'data': list_new_class_data}), 200
-
+ 
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'An error occurred while processing the file'}), 500
@@ -1092,3 +1112,89 @@ def processUpdatingClassSubjectDetails(data):
         db.session.rollback()
         # Return an error response
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
+def processAddingStudentInSubject(file, class_subject_id):
+    
+    try:
+           
+        print("HELLO")
+        
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+
+        df = pd.read_excel(file)
+        list_students_added = []
+        list_student_number_not_exist = []
+        list_student_subject_exist = []
+        list_class_subject_not_exist = []
+        # list_student_graduate = []
+
+        class_subject = db.session.query(ClassSubject).filter_by(ClassSubjectId = class_subject_id)
+        
+        if class_subject:
+
+            for index, row in df.iterrows():
+                # find class_subject_id
+                
+                
+                print('class_subject: ', class_subject)
+                if class_subject:
+                    student_number = row['Student Number']
+                
+                    student = db.session.query(Student).filter_by(StudentNumber = student_number).first()
+                
+                    if student:
+                        student_class_subject_grade = db.session.query(StudentClassSubjectGrade).filter_by(StudentId = student.StudentId, ClassSubjectId = class_subject_id).first()
+                        
+                        if student_class_subject_grade:
+                            # list_student_subject_exist
+                            list_student_subject_exist.append(student_number)
+                        else:
+                            # Create StudentClassSubjectGrade
+                            new_student_class_subject_grade = StudentClassSubjectGrade(
+                                StudentId=student.StudentId,
+                                ClassSubjectId=class_subject_id,
+                                Grade=0,
+                                AcademicStatus=1
+                            )
+                            
+                            db.session.add(new_student_class_subject_grade)
+                            # db.commit()
+                            
+                            dict_student_class_subject_grade = {
+                                "StudentNumber": student.StudentNumber,
+                                "Name": student.Name,
+                                "Email": student.Email,
+                                "Grade": new_student_class_subject_grade.Grade
+                            }
+
+                            # append the list_students_added
+                            list_students_added.append(dict_student_class_subject_grade)
+                    else:
+                        # list_student_number_not_exist
+                        list_student_number_not_exist.append(student_number)
+                    
+            if (list_student_number_not_exist or list_student_subject_exist) and len(list_students_added) > 0:
+                db.session.rollback()
+                return jsonify({'warning': 'Some data added successfully', 'error_data': {'student_not_exist': list_student_number_not_exist, 'student_subject_exist': list_student_subject_exist, 'added': list_students_added}}), 500
+            elif (list_student_number_not_exist or list_student_subject_exist) and len(list_students_added) == 0:
+                db.session.rollback()
+                return jsonify({'error': 'Adding the data failed', 'error_data': {'student_not_exist': list_student_number_not_exist, 'student_subject_exist': list_student_subject_exist}}), 500
+            else:
+                return jsonify({'success': 'Data added successfully', 'data': list_students_added}), 200
+        else:
+            return jsonify({'error': 'Class Subject does not exist'}), 400
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f'An error occurred: {str(e)}')
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+    
+ 
+   
+        
+    

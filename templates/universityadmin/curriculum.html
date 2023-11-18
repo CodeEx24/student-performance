@@ -271,14 +271,17 @@
         const response = await fetch(`${api_base_url}/curriculum`);
 
         if (!response.ok) {
+          const empty = [];
+          displayGridCurriculum(empty);
           throw new Error(
             `Failed to fetch data. Try to contact the admin to resolve the issue.`
           );
         }
 
         const result = await response.json();
-        console.log(result);
-        displayGridCurriculum(result.data);
+        if (result.data) {
+          displayGridCurriculum(result.data);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -492,8 +495,7 @@
     async function submitCurriculumSubjects(event) {
       event.preventDefault();
       // get loadingModal
-      const loadingModal = document.getElementById('loadingModal');
-      loadingModal.classList.remove('hidden');
+      showLoadingModal();
 
       console.log('INSIDE SUBMIT CURRICULUM');
 
@@ -556,8 +558,7 @@
       } catch (error) {
         console.log('Error:', error);
       } finally {
-        const loadingModal = document.getElementById('loadingModal');
-        loadingModal.classList.add('hidden');
+        closeLoadingModal();
       }
     }
 

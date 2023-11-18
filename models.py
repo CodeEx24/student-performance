@@ -27,17 +27,17 @@ class Student(db.Model, UserMixin):
     __tablename__ = 'Students'
 
     StudentId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    StudentNumber = db.Column(db.String(30), unique=True)  # UserID
+    StudentNumber = db.Column(db.String(30), unique=True, nullable=False)  # UserID
     Name = db.Column(db.String(50), nullable=False)  # Name
     Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
     Password = db.Column(db.String(128), nullable=False)  # Password
-    Gender = db.Column(db.Integer)  # Gender
+    Gender = db.Column(db.Integer, nullable=True)  # Gender
     DateOfBirth = db.Column(db.Date)  # DateOfBirth
     PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
     ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
     MobileNumber = db.Column(db.String(11))  # MobileNumber
-    Dropout = db.Column(db.Boolean)  # Dropout
-    IsGraduated = db.Column(db.Boolean, default=True)
+    # Dropout = db.Column(db.Boolean)  # Dropout
+    # IsGraduated = db.Column(db.Boolean, default=True)
     Token = db.Column(db.String(128))  # This field will store the reset token
     TokenExpiration = db.Column(db.DateTime)
     # IsBridging
@@ -191,6 +191,9 @@ class CourseEnrolled(db.Model):
     StudentId = db.Column(db.Integer, db.ForeignKey(
         'Students.StudentId', ondelete="CASCADE"), primary_key=True)
     DateEnrolled = db.Column(db.Date)
+    Status = db.Column(db.Integer, nullable=False)
+    CurriculumYear = db.Column(db.Integer, nullable=False)  
+
 
     def to_dict(self):
         return {
@@ -434,17 +437,28 @@ def init_db(app):
 #         course = Course(**data)
 #         db.session.add(course)
 #         db.session.flush()
-
-#     for data in course_enrolled_data:
-#         course_enrolled = CourseEnrolled(**data)
-#         db.session.add(course_enrolled)
-#         db.session.flush()
-
+        
 #     for data in subject_data:
 #         subject = Subject(**data)
 #         db.session.add(subject)
 #         db.session.flush()
 
+#     for data in metadata_data:
+#         metadata = Metadata(**data)
+#         db.session.add(metadata)
+#         db.session.flush()
+
+#     for data in curriculum_data:
+#         curriculum = Curriculum(**data)
+#         db.session.add(curriculum)
+#         db.session.flush()
+        
+#     for data in course_enrolled_data:
+#         course_enrolled = CourseEnrolled(**data)
+#         db.session.add(course_enrolled)
+#         db.session.flush()
+
+    
 #     for data in class_data:
 #         class_ = Class(**data)
 #         db.session.add(class_)
@@ -480,14 +494,7 @@ def init_db(app):
 #         db.session.add(course_grade)
 #         db.session.flush()
     
-#     for data in metadata_data:
-#         metadata = Metadata(**data)
-#         db.session.add(metadata)
-#         db.session.flush()
     
-#     for data in curriculum_data:
-#         curriculum = Curriculum(**data)
-#         db.session.add(curriculum)
-#         db.session.flush()
+   
 
 #     db.session.commit()

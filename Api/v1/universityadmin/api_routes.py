@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject
 import os
 
 
@@ -371,18 +371,23 @@ def updateClassSubject():
 
 
 # api_routes.py
-@university_admin_api.route('/submit-students-subjects', methods=['POST'])
+@university_admin_api.route('/submit/students-subject/<int:class_subject_id>', methods=['POST'])
 @role_required('universityAdmin')
-def submitStudentsSubject():
-    print("IN UNIVERSITY ADMIN SUBMIT STUDENTS")
+def submitStudentsClassSubject(class_subject_id):
+    print("class_subject_id: ", class_subject_id)
     print("REQUEST FILES: ", request.files)
-    # Check if the request contains a file named 'excelFile'
-    if 'excelFile' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        if 'excelFile' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
 
-    file = request.files['excelFile']
-
-    # Call the utility function to process the file
-    return jsonify({"hello": "HELLo"})
-    # # Call the utility function to process the file
-    # return processAddingStudents(file)
+        file = request.files['excelFile']
+        # print(processAddingCurriculumSubjects(file))
+        # Call the utility function to process the file
+    
+        # print('=================================================')
+        # print('data, status_code: ', data)
+        return processAddingStudentInSubject(file, class_subject_id)
+    else:
+        return render_template('404.html'), 404    
+    
