@@ -81,7 +81,7 @@
     ></div>
   </div>
 
-  <div class="flex lg:flex-nowrap flex-wrap gap-4 md:mt-4">
+  <div id="performance" class="hidden lg:flex-nowrap flex-wrap gap-4 md:mt-4">
     <div class="lg:w-9/12 w-screen rounded-lg bg-white p-6 shadow-md">
       <div id="response" class="rounded-lg text-black">
         <p class="text-2xl font-bold text-c1">Performance Overview Report</p>
@@ -147,7 +147,7 @@
     const gpa = document.getElementById('gpa');
 
     gpa.innerHTML = `${
-      data.Grade ? data.Grade : 'No GPA Available'
+      data.Grade ? data.Grade : '5.00'
     }<span class="text-c1 text-base ml-2 mb-1">GPA</span>`;
   }
 
@@ -173,7 +173,7 @@
     const overallGpa = document.getElementById('overall-gpa');
 
     overallGpa.innerHTML = `${
-      data.Grade ? data.Grade.toFixed(2) : 'No GPA Available'
+      data.Grade ? data.Grade.toFixed(2) : '5.00'
     }<span class="text-c1 text-base ml-2 mb-1">GPA</span>`;
   }
 
@@ -192,7 +192,15 @@
     }
 
     const data_performance = await response.json();
-    displayPerformance(data_performance);
+    console.log('data_performance: ', data_performance);
+    if (!data_performance.error) {
+      // Get performance and remove hidden
+      const performance = document.getElementById('performance');
+      performance.classList.remove('hidden');
+      performance.classList.add('flex');
+      displayPerformance(data_performance);
+    } else {
+    }
   }
 
   function displayPerformance(data_performance) {

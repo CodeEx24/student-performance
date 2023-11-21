@@ -22,7 +22,13 @@
           <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
              Class Subjects
           </h3>
-          <div class="grid grid-cols-2 gap-4 px-4 my-4">
+          <h5
+                class="block  font-bold text-lg mb-2 px-4 my-4"
+              >
+                Class Details:
+              </h5>
+          <div class="grid grid-cols-2 gap-4 px-4 mb-4">
+            
             <div>
                <p class="font-bold">Course:</p>
                <p class="font-normal" id="course"></p>
@@ -41,6 +47,71 @@
             </div>
         </div>
          
+        <hr class="mx-2" />
+
+        <div>
+          <form
+            class="bg-white p-4 rounded-lg"
+            enctype="multipart/form-data"
+            onsubmit="submitStudentAllSubject(event)"
+            method="POST"
+            id="student-class-form"
+          >
+            <div class="mb-4">
+              <h5
+                class="block  font-bold text-lg mb-2"
+              >
+                Add Student in all Subjects:
+              </h5>
+              <p class="font-semibold ">
+                Column Required:
+                <span class="font-normal"
+                  >Student Number</span
+                >
+              </p>
+            </div>
+            <div class="mb-4 flex gap-4">
+              <input
+                type="file"
+                name="classStudentsExcel"
+                id="classStudentsExcel"
+                accept=".xlsx, .xls"
+                class="bg-gray-200  rounded-lg py-2 px-4 w-1/2"
+              />
+  
+              <button
+                type="submit"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+              >
+                Upload Excel File
+              </button>
+            </div>
+            <p id="class-file-error" class="text-c4 text-sm"></p>
+            <div id="all-student-errors" class="hidden">
+              <div>
+                <p id="class-student-num-error" class="text-c1 text-xl font-semibold hidden">
+                  Student Number not exist:
+                </p>
+                <ul id="class-student-num-list-error" class="text-c1 text-sm"></ul>
+              </div>
+  
+              <div>
+                <p
+                  id="class-student-subject-error"
+                  class="text-c1 text-xl font-semibold hidden"
+                >
+                  Student already exist in subject:
+                </p>
+                <ul
+                  id="class-student-subject-list-error"
+                  class="text-c1 text-sm"
+                ></ul>
+              </div>
+  
+            </div>
+          </form>
+        </div>
+
           <hr class="mx-2" />
           <div class="flex items-end justify-between">
              <div class="w-full bg-white p-4 mt-4">
@@ -107,12 +178,12 @@
                 enctype="multipart/form-data"
                 onsubmit="submitStudents(event)"
                 method="POST"
-                id="reset-form-email"
+                id="student-class-form"
                 >
                 <div class="mb-4">
                    <label
-                      for="excelFile"
-                      class="block text-gray-700 font-bold text-lg mb-2"
+                      for="studentSubjectExcel"
+                      class="block  font-bold text-lg mb-2"
                       >
                    Add Student List: <span class="font-normal">Student Number (Column Required)</span>
                    </label>
@@ -120,10 +191,10 @@
                 <div class="mb-4 flex gap-4">
                    <input
                       type="file"
-                      name="excelFile"
-                      id="excelFile"
+                      name="studentSubjectExcel"
+                      id="studentSubjectExcel"
                       accept=".xlsx, .xls"
-                      class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+                      class="bg-gray-200  rounded-lg py-2 px-4 w-1/2"
                       />
                    <button
                       type="submit"
@@ -165,6 +236,20 @@
        <div class="modal-body w-full relative"></div>
     </div>
  </div>
+
+  <!-- Modal Structure -->
+  <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-10">
+    <div class="bg-white p-8 rounded shadow-md">
+      <p class="mb-4">Are you sure you want to remove this student?</p>
+      <div class="flex justify-end">
+        <button id="cancelBtn" class="mr-2 px-4 py-2 text-white bg-gray-600 rounded">Cancel</button>
+        <button id="confirmBtn" class="px-4 py-2 text-white bg-[#9D1D1D] rounded">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+
+
  <div
     id="loadingModal"
     class="modal hidden fixed inset-0 items-center justify-center z-50"
@@ -200,17 +285,172 @@
 <script>  
   var classSubjectId;
   var classId = '{{ class_id }}';
+
+
 </script>
+
+<script>  
+async function submitStudentAllSubject(event) {
+  event.preventDefault();
+  console.log("SUBMITTING ALL STUDENTS");
+
+  const fileErrorElement = document.getElementById('class-file-error');
+  const fileInput = document.getElementById('classStudentsExcel');
+  const file = fileInput.files[0];
+  // Get the exist
+  const errorContainer = document.getElementById('all-student-errors');
+  errorContainer.classList.add('hidden');
+
+  // Remove all errors message in those element if not exist in curriculum, subject and course
+
+  // Define the clearChildElements function
+  function clearChildElements(element) {
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+  }
+
+  // Now you can use the function in your code
+  const courseNotExistElement = document.getElementById(
+    'class-student-subject-list-error'
+  );
+  if (courseNotExistElement) {
+    clearChildElements(courseNotExistElement);
+  }
+
+  const curriculumNotExistElement = document.getElementById(
+    'class-student-num-list-error'
+  );
+  if (curriculumNotExistElement) {
+    clearChildElements(curriculumNotExistElement);
+  }
+  
+  hideElement('class-student-num-error');
+  hideElement('class-student-subject-error');
+
+  if (!file) {
+    fileErrorElement.innerText = 'Please choose a file.';
+    return;
+  }
+
+  if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    fileErrorElement.innerText =
+      'Invalid file type. Please select an Excel file.';
+    return;
+  } else {
+    fileErrorElement.innerText = '';
+  }
+
+  // If file type is valid, proceed with the API request
+  const formData = new FormData();
+  formData.append('classStudentsExcel', file);
+
+  console.log("RUNNING BEFORE SUBMIT TO CLASS");
+
+  const apiUrlSubmitClassStudent =
+    `${api_base_url}/add/class-student/${classId}`;
+  showLoadingModal();
+  await fetch(apiUrlSubmitClassStudent, {
+    method: 'POST',
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+
+      // closeLoadingModal();
+      // console.log(data);
+      // if (data.result) {
+      //   notyf.success(data.result);
+      //   // Get the grid datasource and concat the data.data
+      //   const grid = document.getElementById('grid-class').ej2_instances[0];
+      //   const dataSource = grid.dataSource;
+      //   grid.dataSource = data.data.concat(dataSource);
+      //   // add hidden in loadingModal
+      //   loadingModal.classList.add('hidden');
+      //   return;
+      // }
+
+      if (data.error) {
+        errorContainer.classList.remove('hidden');
+        if (data.errors.student_class_subject_exist.length > 0) {
+          console.log("STUDENT CLASS SUBJECT EXIST: ",data.errors.student_class_subject_exist);
+          showELement('class-student-subject-error');
+          
+          const elementListError = document.getElementById('class-student-subject-list-error')
+
+          data.errors.student_class_subject_exist.forEach((error) => {
+           
+            const errorP = createErrorList(
+              `${error.StudentNumber} - ${error.SubjectCode}`
+            );
+            elementListError.appendChild(errorP);
+          }); 
+        }
+
+        if (data.errors.student_number_not_exist.length > 0) {
+          console.log("STUDENT NOT EXIST: ", data.errors.student_number_not_exist);
+          showELement('class-student-num-error');
+
+          const elementListError = document.getElementById('class-student-num-list-error')
+
+          data.errors.student_number_not_exist.forEach((error) => {
+            console.log("ERROR: ", error);
+            const errorP = createErrorList(
+              `<span class="font-semibold">Student Number: </span>${error}`
+            );
+            elementListError.appendChild(errorP);
+          }); 
+
+        
+        }
+
+        
+      }
+      
+    })
+    .catch((error) => {
+     console.log(error);
+    }).finally(() => {
+      closeLoadingModal();
+    });
+}
+
+
+function handleListErrors(errors, elementId) {
+    const element = document.getElementById(elementId);
+
+    if (!element) {
+      console.error(`Element with ID '${elementId}' not found.`);
+      return;
+    }
+
+    errors.forEach((error) => {
+      console.log("ERROR: ", error);
+      const errorP = createErrorList(
+        `Student Number: ${error.StudentNumber}`
+      );
+      element.appendChild(errorP);
+    });
+  }
+
+  function createErrorList(text, type) {
+    const errorP = document.createElement('li');
+    errorP.innerHTML = text;
+    return errorP;
+  }
+</script>
+
 
 <!-- SUBMIT STUDENTS -->
 <script>
   async function submitStudents(event) {
     event.preventDefault();
-    console.log('classSubjectId: ', classSubjectId);
+    console.log("SUBMITTING STUDENT IN CLASS ONLY");
 
     const fileErrorElement = document.getElementById('students-file-error');
-    const fileInput = document.getElementById('excelFile');
+    const fileInput = document.getElementById('studentSubjectExcel');
     const file = fileInput.files[0];
+
     // // Get the exist
     const errorContainer = document.getElementById('errors');
     errorContainer.classList.add('hidden');
@@ -233,7 +473,7 @@
 
     // If file type is valid, proceed with the API request
     const formData = new FormData();
-    formData.append('excelFile', file);
+    formData.append('studentSubjectExcel', file);
 
     // Clear student-not-exist-error and student-subject-exist-error lists
     clearErrorList('student-num-list-error');
@@ -431,7 +671,7 @@ function hideElement(elementId) {
   }
 
   async function fetchStudents(data) {
-    console.log(data);
+    console.log("FETCH THIS: ", data);
     // Get teacher, subject, semester and update its value
     document.getElementById('teacher-modal').innerHTML = data.teacher ? data.teacher : "No assigned teacher yet";
     document.getElementById('subject-modal').innerHTML = data.subject;
@@ -447,6 +687,8 @@ function hideElement(elementId) {
         );
       }
 
+      console.log(("HERE ALREADY"));
+
       const json_class = await response.json();
       if (json_class) {
         // Get myModal
@@ -457,7 +699,7 @@ function hideElement(elementId) {
         // Hide student-num-error and student-subject-error elements
         hideElement('student-num-error');
         hideElement('student-subject-error');
-        document.getElementById('excelFile').value = '';
+        document.getElementById('studentSubjectExcel').value = '';
         
         const modal = document.getElementById('myModal');
         // Remove hidden
@@ -469,6 +711,37 @@ function hideElement(elementId) {
     } catch (error) {
     }
   }
+
+
+async function deleteStudent(classSubjectId, studentId) {
+  console.log("CONFIRM DELETE: ", classSubjectId, studentId);
+  fetch(`${api_base_url}/delete/class-subject/${classSubjectId}/student/${studentId}`, {
+    method: 'POST',
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Server response:', data);
+      // If success throw notyf showing the data.result
+      if (data.result) {
+        notyf.success(data.result);
+        // Remove the data from grid data source
+        const grid = document.getElementById(`grid-${classSubjectId}`).ej2_instances[0];
+        const dataSource = grid.dataSource;
+        for (let i=0;i<dataSource.length;i++) {
+          if (dataSource[i].StudentId === studentId) {
+            dataSource.splice(i, 1);
+            break;
+          }
+        }
+        grid.refresh();
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // Handle errors if needed
+    });
+}
+
 
 
   function displayGridClassSubject(json_class, teacherData) {
@@ -544,7 +817,7 @@ function hideElement(elementId) {
                 list_data.push(element.data);
               });
 
-              saveChangesToServer(list_data);
+              updateGridDataChanges(list_data);
           }
       },
     });
@@ -568,8 +841,6 @@ function hideElement(elementId) {
               const teacherName = rowData
                 ? (teacherData.find(teacher => teacher.TeacherId === rowData.TeacherId) || {}).TeacherName
                 : null;
-
-                console.log(teacherName);
 
               fetchStudents({
                 classSubjectId: rowData.ClassSubjectId,
@@ -595,7 +866,7 @@ function hideElement(elementId) {
 }
 
 // Function to save changes to the server
-  function saveChangesToServer(updatedRecords) {
+  function updateGridDataChanges(updatedRecords) {
     console.log('updatedRecords: ', updatedRecords);
     // Make a POST request to the Flask server
     fetch( `${api_base_url}/update/class-subject`, {
@@ -653,11 +924,48 @@ function hideElement(elementId) {
           headerText: 'Grade',
           width: 70,
         },
+        {
+          headerText: 'Actions',
+          template:
+            '<button class="btn-delete px-4 py-2 bg-c5 text-white font-bold" >Delete</button>', // Add a button to the cell
+          width: 150,
+          allowEditing: false
+        },
       ],
 
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
       excelExportComplete: function (args) {},
+    });
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn-delete')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              const deleteModal = document.getElementById('deleteModal');
+              deleteModal.classList.remove('hidden');
+              deleteModal.classList.add('flex');
+
+              const confirmBtn = document.getElementById('confirmBtn');
+              const cancelBtn = document.getElementById('cancelBtn');
+              
+              confirmBtn.onclick = () => {
+                deleteStudent(rowData.ClassSubjectId, rowData.StudentId);
+                deleteModal.classList.add('hidden');
+              };
+              cancelBtn.onclick = () => {
+                deleteModal.classList.add('hidden');
+              };
+
+            }
+          }
+        }
+      }
     });
 
     grid.toolbarClick = function (args) {

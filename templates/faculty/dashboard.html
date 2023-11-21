@@ -4,7 +4,7 @@
 {% block title %} SPS - Dashboard {% endblock title %} {% block styles %}
 <style>
   /* Set the chart container to 100% width */
-  #containerChart {
+  #class-grade {
     width: 100%;
   }
 </style>
@@ -106,12 +106,12 @@
       </div>
     </div>
     <!-- CONTAINER -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div id="class-container" class="hidden grid-cols-1 lg:grid-cols-2 gap-4">
       <div class="col-span-1 mt-4 shadow-sm h-max p-4 bg-white">
-        <div id="containerChart" class="w-full"></div>
+        <div id="class-grade" class="w-full"></div>
       </div>
       <div class="col-span-1 mt-4 shadow-sm h-max p-4 bg-white">
-        <div id="columnChartContainer"></div>
+        <div id="passed-failed"></div>
       </div>
     </div>
 
@@ -156,11 +156,20 @@
     const currentYear = new Date().getFullYear();
     document.getElementById('current-year').textContent = `${currentYear}`;
 
-    text_high_average.innerText = json_statistics.highest;
-    text_low_average.innerText = json_statistics.lowest;
-    text_subject_count.innerText = json_statistics.subjectCount;
-    text_high_class.innerText = json_statistics.highestClass;
-    text_low_class.innerText = json_statistics.lowestClass;
+    if (json_statistics.error) {
+      text_high_average.innerText = 'N/A';
+      text_low_average.innerText = 'N/A';
+      text_subject_count.innerText = 'N/A';
+      text_high_class.innerText = 'N/A';
+      text_low_class.innerText = 'N/A';
+      return;
+    } else {
+      text_high_average.innerText = json_statistics.highest;
+      text_low_average.innerText = json_statistics.lowest;
+      text_subject_count.innerText = json_statistics.subjectCount;
+      text_high_class.innerText = json_statistics.highestClass;
+      text_low_class.innerText = json_statistics.lowestClass;
+    }
   }
 
   fetchStatistics();
@@ -187,8 +196,17 @@
       }
 
       const json_class_grade = await response.json();
-
-      displayClassGradeSpline(json_class_grade);
+      const class_container = document.getElementById('class-container');
+      if (json_class_grade.error) {
+        class_container.classList.add('hidden');
+        class_container.classList.remove('grid');
+        return;
+      } else {
+        displayClassGradeSpline(json_class_grade);
+        // Get class-container and add flex and remove hidden
+        class_container.classList.add('grid');
+        class_container.classList.remove('hidden');
+      }
     } catch (error) {
       console.error(error);
     }
@@ -265,7 +283,7 @@
       width: '100%',
     });
 
-    chart.appendTo('#containerChart');
+    chart.appendTo('#class-grade');
   }
 
   fetchClassAverage();
@@ -349,7 +367,7 @@
     });
 
     // Render the chart
-    chart.appendTo('#columnChartContainer');
+    chart.appendTo('#passed-failed');
   }
 
   fetchPassFailRates();

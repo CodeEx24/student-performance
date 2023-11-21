@@ -118,7 +118,7 @@ def classAverageAndSubjectCount():
         if json_high_low_class and json_subject_count is not None:
             return ({**json_high_low_class, **json_subject_count})
         else:
-            return jsonify(message="Something went wrong")
+            return jsonify(error="Something went wrong")
     else:
         return render_template('404.html'), 404
 
@@ -134,7 +134,7 @@ def allClassAverages():
         if json_average_class:
             return (json_average_class)
         else:
-            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+            return jsonify(error="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return render_template('404.html'), 404
 

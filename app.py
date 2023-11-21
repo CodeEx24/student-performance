@@ -28,7 +28,14 @@ def create_app():
         app.run(debug=True)
     
     # SETUP YOUR POSTGRE DATABASE HERE
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
+    # Check if CONFIG_MODE is set to development
+    if os.getenv("CONFIG_MODE") == "production":
+        # Set the value to DEVELOPMENT_DATABASE_URI
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
+    else:
+        # Set the value to the default DATABASE_URI
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DEVELOPMENT_DATABASE_URI')
+        
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
@@ -77,7 +84,8 @@ def create_app():
     
     @app.before_request
     def before_request():
-        print(os.getenv("DATABASE_URI"))
+        print(os.getenv('DEVELOPMENT_DATABASE_URI'))
+
         session.permanent=True
         pass
     
@@ -236,6 +244,12 @@ def create_app():
     @role_required('universityAdmin')
     def universityChangePassword():
         return render_template('universityadmin/change-password.html', university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
+    
+    
+    @app.route('/university-admin/finalized-grades')
+    @role_required('universityAdmin')
+    def universityFinalizedGrades():
+        return render_template('universityadmin/finalized-grades.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
 
     # ========================================================================
     # ALL SYSTEM ADMIN ROUTES HERE

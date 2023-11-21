@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteStudent
 import os
 
 
@@ -284,7 +284,22 @@ def fetchStudentClassSubjectData(class_subject_id):
     universityAdmin = getCurrentUser()
     if universityAdmin:
         json_class_subject_data = getStudentClassSubjectData(class_subject_id)
+        print('json_class_subject_data: ', json_class_subject_data)
+        if json_class_subject_data:
+            return (json_class_subject_data)
+        else:
+            return jsonify(message="No class subject data available"), 400
+    else:
+        return render_template('404.html'), 404
 
+@university_admin_api.route('/delete/class-subject/<int:class_subject_id>/student/<int:student_id>', methods=['POST'])
+@role_required('universityAdmin')
+def deleteClassSubjectStudents(class_subject_id, student_id):
+    print("HERE IN CLASS SUBJECT")
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_class_subject_data = deleteStudent(class_subject_id, student_id)
+        print('json_class_subject_data: ', json_class_subject_data)
         if json_class_subject_data:
             return (json_class_subject_data)
         else:
@@ -378,10 +393,10 @@ def submitStudentsClassSubject(class_subject_id):
     print("REQUEST FILES: ", request.files)
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        if 'excelFile' not in request.files:
+        if 'studentSubjectExcel' not in request.files:
             return jsonify({'error': 'No file part'}), 400
 
-        file = request.files['excelFile']
+        file = request.files['studentSubjectExcel']
         # print(processAddingCurriculumSubjects(file))
         # Call the utility function to process the file
     
@@ -391,3 +406,53 @@ def submitStudentsClassSubject(class_subject_id):
     else:
         return render_template('404.html'), 404    
     
+
+# api_routes.py
+@university_admin_api.route('/metadata', methods=['GET'])
+@role_required('universityAdmin')
+def fetchMetadata():
+    university_admin = getCurrentUser()
+    if university_admin:
+        json_student_data = getMetadata()
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+    
+# api_routes.py
+@university_admin_api.route('/add/class-student/<int:class_id>', methods=['POST'])
+@role_required('universityAdmin')
+def submitClassStudents(class_id):
+    university_admin = getCurrentUser()
+    if university_admin:
+        if 'classStudentsExcel' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+
+        file = request.files['classStudentsExcel']
+        
+        json_student_data = processClassStudents(file, class_id)
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+
+# Finalized grades routes
+@university_admin_api.route('/finalized/grades/<int:metadata_id>', methods=['GET'])
+@role_required('universityAdmin')
+def finalizedGrades(metadata_id):
+    university_admin = getCurrentUser()
+    if university_admin:
+        json_student_data = finalizedGradesReport(metadata_id)
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404

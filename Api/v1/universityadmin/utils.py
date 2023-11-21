@@ -613,6 +613,7 @@ def processAddingClass(file):
                 return jsonify({'result': 'Data added successfully', 'data': list_new_class_data}), 200
  
     except Exception as e:
+        print("ERROR: ", e)
         db.session.rollback()
         return jsonify({'error': 'An error occurred while processing the file'}), 500
 
@@ -683,6 +684,95 @@ def processAddingClass(file):
     #     db.session.rollback()
     #     return jsonify({'error': 'An error occurred while processing the file'}), 500
     
+
+ 
+def processClassStudents(file, class_id):
+    try:
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+
+        df = pd.read_excel(file)
+        
+        list_student_added = []
+        list_student_number_not_exist = []
+        list_student_class_subject_exist = []
+        
+        # Find the class
+        class_data = db.session.query(Class).filter_by(ClassId=class_id).first()
+        if class_data:
+            class_subject_data = db.session.query(ClassSubject).filter_by(ClassId=class_id).all()
+            if class_subject_data:
+                # for loop the class_subject_data
+                for class_subject in class_subject_data:                    
+                    # Create StudentClassSubjectGrade for all ClassSubjectId
+                    for index, row in df.iterrows():
+                        student_number = row['Student Number']
+                        date_enrolled = row['Date Enrolled'].date()
+                        
+                        # Get the student data
+                        student_data = db.session.query(Student).filter_by(StudentNumber=student_number).first()
+                        if student_data:
+                            # Check if student_class_subject_grade exist
+                            student_class_subject_grade = db.session.query(StudentClassSubjectGrade).filter_by(StudentId=student_data.StudentId, ClassSubjectId=class_subject.ClassSubjectId).first()
+                            if student_class_subject_grade:
+                                # Find the subject 
+                                subject_data = db.session.query(Subject).filter_by(SubjectId=class_subject.SubjectId).first()
+                        
+                                list_student_class_subject_exist.append({
+                                    "StudentNumber": student_number,
+                                    "SubjectCode": subject_data.SubjectCode
+                                }) 
+                            else:
+                                subject_data = db.session.query(Subject).filter_by(SubjectId=class_subject.SubjectId).first()
+                                
+                                new_student_class_subject_grade = StudentClassSubjectGrade(
+                                    StudentId=student_data.StudentId,
+                                    ClassSubjectId=class_subject.ClassSubjectId,
+                                    DateEnrolled=date_enrolled
+                                )
+                                db.session.add(new_student_class_subject_grade)
+                                db.session.commit()
+                                
+                                # Append list_student_added
+                                list_student_added.append({
+                                    "StudentNumber": student_number,
+                                    "SubjectCode": subject_data.SubjectCode
+                                })
+                        else:
+                            if student_number not in list_student_number_not_exist:
+                                list_student_number_not_exist.append(student_number)   
+            else:
+                # return no class subject yet
+                return jsonify({'error': 'No class subject yet'}), 400
+        else:
+            # return error with message cannot find the class
+            return jsonify({'error': 'Cannot find the class'}), 400
+        
+        if list_student_number_not_exist:
+            print("list_student_number_not_exist: TRUE", )
+            
+        if list_student_class_subject_exist:
+            print("list_student_class_subject_exist: TRUE", )
+            
+        if not list_student_added:
+            print("list_student_added: TRUE", )
+        
+        # Check if length of list_student_number_not_exist or list_student_class_subject_exist
+        if (list_student_number_not_exist or list_student_class_subject_exist) and list_student_added:
+            db.session.rollback()
+            return jsonify({'error': 'Some data cannot be added', 'errors': {'student_number_not_exist': list_student_number_not_exist, 'student_class_subject_exist': list_student_class_subject_exist}}), 400
+        elif (list_student_number_not_exist or list_student_class_subject_exist) and not list_student_added:
+            db.session.rollback()
+            return jsonify({'error': 'Adding students failed', 'errors': {'student_number_not_exist': list_student_number_not_exist, 'student_class_subject_exist': list_student_class_subject_exist}}), 400
+        else:
+            return jsonify({'result': 'Data added successfully'}), 200
+
+    except Exception as e:
+        print("ERROR: ", e)
+        db.session.rollback()
+        return jsonify({'error': 'An error occurred while processing the file'}), 500
 
 
 def getStudentData():
@@ -827,17 +917,21 @@ def getStudentClassSubjectData(classSubjectId):
     try:
         data_class_details = db.session.query(ClassSubject).filter_by(ClassSubjectId = classSubjectId).first()
         # Get the StudentClassSubjectGrade
+        print('data_class_details: ', data_class_details)
         if data_class_details:
             data_student_subject_grade = db.session.query(StudentClassSubjectGrade, Student).join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId).filter(StudentClassSubjectGrade.ClassSubjectId == data_class_details.ClassSubjectId).all()
+            print('data_student_subject_grade: ', data_student_subject_grade)
             if data_student_subject_grade:
                 list_student_data = []
                     # For loop the data_student and put it in dictionary
                 for student_subject_grade in data_student_subject_grade:
                     dict_student_subject_grade = {
+                        "ClassSubjectId": student_subject_grade.StudentClassSubjectGrade.ClassSubjectId,
+                        "StudentId": student_subject_grade.Student.StudentId,
                         "StudentNumber": student_subject_grade.Student.StudentNumber,
                         "Name": student_subject_grade.Student.Name,
                         "Email": student_subject_grade.Student.Email,
-                        "Grade": round(student_subject_grade.StudentClassSubjectGrade.Grade, 2)
+                        "Grade": student_subject_grade.StudentClassSubjectGrade.Grade
                     }
                     list_student_data.append(dict_student_subject_grade)
                 return  jsonify({'data': list_student_data})
@@ -846,6 +940,22 @@ def getStudentClassSubjectData(classSubjectId):
         else:
             return None
     except Exception as e:
+        print("ERROR: ", e)
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    
+def deleteStudent(class_subject_id, student_id):
+    try:
+        student_class_subject_grade = db.session.query(StudentClassSubjectGrade).filter_by(ClassSubjectId = class_subject_id, StudentId = student_id).first()
+        
+        if student_class_subject_grade:
+            db.session.delete(student_class_subject_grade)
+            db.session.commit()
+            return jsonify({'result': 'Data deleted successfully'})
+        else:
+            return jsonify({'error': 'Data cannot be deleted'})
+    except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
     
@@ -1192,6 +1302,68 @@ def processAddingStudentInSubject(file, class_subject_id):
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
     
  
-   
-        
-    
+def getMetadata():
+    try:
+        data_metadata = db.session.query(Metadata, Course).join(Course, Course.CourseId == Metadata.CourseId).all()
+
+        list_metadata = []
+        if data_metadata:
+            for data in data_metadata:
+                # Check data.Course.Name, data.Metadata.Batch and data.Metadata.Semester if exist in list_metadata
+                if not any(d['Course'] == data.Course.Name and d['Batch'] == data.Metadata.Batch and d['Semester'] == data.Metadata.Semester for d in list_metadata):
+                    # Create a dict
+                    dict_metadata = {
+                        'MetadataId': data.Metadata.MetadataId,
+                        'Course': data.Course.Name,
+                        'CourseId': data.Course.CourseId,
+                        'Semester': data.Metadata.Semester,
+                        'Batch': data.Metadata.Batch
+                    }
+
+                    # Append the dict to the list_metadata
+                    list_metadata.append(dict_metadata)
+                
+            print('list_metadata: ', list_metadata)
+            return jsonify(list_metadata)
+        else:
+            return jsonify(None)
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return jsonify(error=str(e))
+
+
+def finalizedGradesReport(metadata_id):
+    print('metadata_id: ', metadata_id)
+    try:
+        data_metadata = db.session.query(Metadata, Course).join(Course, Course.CourseId == Metadata.CourseId).filter(Metadata.MetadataId == metadata_id).first()
+        list_class = []
+        print('data_metadata: ', data_metadata)
+        if data_metadata:
+            # Select class that has the same Batch, Semester and Course
+            data_class = db.session.query(Class).filter_by(Batch = data_metadata.Metadata.Batch, Semester = data_metadata.Metadata.Semester, CourseId = data_metadata.Course.CourseId).all()
+
+            # if data class 
+            if data_class:
+                # for loop the data_class and make a dictionary and append to the list_class
+                for class_data in data_class:
+                    print("INSIDE HERE")
+                    dict_class = {
+                        'ClassId': class_data.ClassId,
+                        'CourseId': class_data.CourseId,
+                        'Year': class_data.Year,
+                        'Section': class_data.Section,
+                        'Semester': class_data.Semester,
+                        'Batch': class_data.Batch
+                    }
+                    # Append th list_class
+                    list_class.append(dict_class)
+                
+                    print(list_class)
+            else:
+                return jsonify({"error": "There no class yet"})
+            return jsonify({"message": "Hello"})
+        else:
+            return jsonify(None)
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return jsonify(error=str(e))

@@ -265,6 +265,16 @@
     }
 
     const data_grades = await response.json();
+    if (data_grades.error) {
+      // Get contentContainer and add text "No Grades Currently Available"
+      const contentContainer = document.getElementById('contentContainer');
+      contentContainer.innerHTML = `
+        <div class="text-center text-c1 text-2xl font-bold my-4">
+          No Grades Currently Available
+        </div>
+      `;
+      return;
+    }
     displayGrades(data_grades);
   }
 

@@ -1,0 +1,289 @@
+{% extends "universityadmin/layout.html" %}
+
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
+  <div class="bg-white p-8 shadow-md col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Finalization of Grades
+      </h3>
+
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <div id="grid-metadata"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- The Modal -->
+<div
+  id="loadingModal"
+  class="hidden modal fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="curriculum-subjects-modal"
+  class="modal hidden fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">Curriculum List</h2>
+        <button class="modal-close" onclick="closeModal()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-8 px-4 mt-4">
+        <div>
+          <p class="font-bold">Course:</p>
+          <p class="font-normal" id="text-course-modal"></p>
+        </div>
+        <div>
+          <p class="font-bold">Batch:</p>
+          <p class="font-normal" id="text-batch-modal"></p>
+        </div>
+        <div>
+          <p class="font-bold">Year:</p>
+          <p class="font-normal" id="text-year-modal"></p>
+        </div>
+        <div>
+          <p class="font-bold">Semester:</p>
+          <p class="font-normal" id="text-semester-modal"></p>
+        </div>
+      </div>
+
+      <div>
+        <div>
+          <form
+            class="bg-white rounded-lg mt-4 px-4 mb-8"
+            enctype="multipart/form-data"
+            onsubmit="submitClass(event)"
+            method="POST"
+            id="reset-form-email"
+          >
+            <div class="mb-2 mt-4">
+              <label
+                for="excelFile"
+                class="block text-gray-700 font-bold text-lg mb-2"
+              >
+                Add Curriculum Subjects:
+              </label>
+            </div>
+            <div class="mb-4 flex gap-4">
+              <input
+                type="file"
+                name="excelFile"
+                id="excelFile"
+                accept=".xlsx, .xls"
+                class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+              />
+              <button
+                type="submit"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+              >
+                Upload Excel File
+              </button>
+            </div>
+            <p id="students-file-error" class="text-c4 text-sm"></p>
+            <div id="errors" class="hidden">
+              <p
+                id="students-header-error"
+                class="text-c1 text-xl font-semibold"
+              >
+                Student number or email already exist:
+              </p>
+              <div id="class-error" class="text-c1 text-sm"></div>
+            </div>
+          </form>
+        </div>
+        <div class="grid grid-cols-1 mt-4">
+          <div id="grid-student-list"></div>
+        </div>
+      </div>
+      <!-- Modal Body -->
+      <div class="modal-body w-full relative">
+        <hr class="mx-2" />
+        <div class="flex items-end justify-between">
+          <div class="w-full bg-white p-4 mt-4">
+            <div id="grid-subjects"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+{% block script %}
+
+<!-- FETCH ALL CLASS DATA (GRIDS)-->
+<script>
+  async function fetchMetadata() {
+    try {
+      const response = await fetch(`${api_base_url}/metadata`);
+
+      if (!response.ok) {
+        const empty = [];
+        displayGridCurriculum(empty);
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const result = await response.json();
+      if (result) {
+        displayGridMetadata(result);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  fetchMetadata();
+
+  function displayGridMetadata(metadata) {
+    console.log('metadata: ', metadata);
+    // Create the grid with filtering
+    var grid = new ej.grids.Grid({
+      dataSource: metadata,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      // rowData: json_class['ClassSubjectGrade'],
+      columns: [
+        {
+          field: 'Course',
+          headerText: 'Course',
+          width: 200,
+        },
+
+        {
+          field: 'Batch',
+          headerText: 'Batch',
+          width: 100,
+        },
+        {
+          field: 'Semester',
+          headerText: 'Semester',
+          width: 100,
+        },
+        {
+          headerText: 'Actions',
+          template:
+            '<button class="btn-metadata px-4 py-2 bg-primary text-white font-bold" >Finalized Grades</button>', // Add a button to the cell
+          width: 150,
+        },
+      ],
+    });
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn-metadata')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              finalizedGrades(rowData.MetadataId);
+            }
+          }
+        }
+      }
+    });
+
+    // Render the grid
+    grid.appendTo('#grid-metadata');
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
+  }
+
+  // Example function to show a modal when the "Performance" button is clicked
+
+  // JavaScript function to show the modal
+  async function finalizedGrades(metadata_id) {
+    console.log('metadata_id: ', metadata_id);
+    // Request in api to update the data
+    try {
+      const response = await fetch(
+        `${api_base_url}/finalized/grades/${metadata_id}`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const result = await response.json();
+      console.log('result: ', result);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+</script>
+
+{% endblock script %}

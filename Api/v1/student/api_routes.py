@@ -238,7 +238,7 @@ def performance():
         if json_performance_data:
             return (json_performance_data)
         else:
-            return jsonify(message="No data available")
+            return jsonify(error="No data available")
     else:
         return render_template('404.html'), 404
 
@@ -285,6 +285,6 @@ def subjectsGrade():
         if json_subjects_grade:
             return (json_subjects_grade)
         else:
-            return jsonify(message="No data available")
+            return jsonify(error="No data available")
     else:
         return render_template('404.html'), 404
