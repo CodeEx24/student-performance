@@ -2456,4 +2456,769 @@ subject_data = [
   "IsNSTP": False,
   "Description": "Practicum (500 Hours)"
  },
+
+# BBA
+{
+  "SubjectId": 312,
+  "SubjectCode": "MARK 30013",
+  "Name": "Retail Management and E-Tailing",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Retail Management and E-Tailing"
+},
+{
+  "SubjectId": 313,
+  "SubjectCode": "MARK 40013",
+  "Name": "Consumer Behavior",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Consumer Behavior"
+ },
+{
+  "SubjectId": 314,
+  "SubjectCode": "HRMA 20013",
+  "Name": "Human Resource Management",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Human Resource Management"
+ },
+
+# 1st Second
+{
+  "SubjectId": 315,
+  "SubjectCode": "MARK 30023",
+  "Name": "Distribution Management",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Distribution Management"
+ },
+{
+  "SubjectId": 316,
+  "SubjectCode": "MARK 30033",
+  "Name": "Professional Safemanship",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Professional Safemanship"
+ },
+{
+  "SubjectId": 317,
+  "SubjectCode": "OFAD 30013",
+  "Name": "Keyboarding and Documents Processing with Labaratory",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Keyboarding and Documents Processing with Labaratory"
+ },
+
+
+# 2nd Year 1st Semester
+{
+  "SubjectId": 318,
+  "SubjectCode": "BUMA 30013",
+  "Name": "Fundamentals of Business Process Outsourcing 101",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Fundamentals of Business Process Outsourcing 101"
+ },
+{
+  "SubjectId": 319,
+  "SubjectCode": "MARK 40023",
+  "Name": "Services Marketing",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Services Marketing"
+ },
+{
+  "SubjectId": 320,
+  "SubjectCode": "BUMA 30023",
+  "Name": "Fundamentals of Business Analytics",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Fundamentals of Business Analytics"
+ },
+{
+  "SubjectId": 321,
+  "SubjectCode": "MARK 40033",
+  "Name": "Environmental Marketing",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Environmental Marketing"
+ },
+{
+  "SubjectId": 322,
+  "SubjectCode": "GEED 10133",
+  "Name": "Panitikang Filipino",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Panitikang Filipino"
+ },
+{
+  "SubjectId": 323,
+  "SubjectCode": "MARK 40043",
+  "Name": "Sales Management",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Sales Management"
+ },
+{
+  "SubjectId": 324,
+  "SubjectCode": "ADVE 20113",
+  "Name": "Advertising",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Advertising"
+ },
+
+
+# 2nd Year 2nd Semester
+{
+  "SubjectId": 325,
+  "SubjectCode": "BUMA 20013",
+  "Name": "Operations Management (TQM)",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Operations Management (TQM)"
+ },
+{
+  "SubjectId": 326,
+  "SubjectCode": "BUMA 30033",
+  "Name": "Fundaments of Business Process Outsourcing 102",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Fundaments of Business Process Outsourcing 102"
+ },
+{
+  "SubjectId": 327,
+  "SubjectCode": "BUMA 30043",
+  "Name": "Fundamentals Data Warehousing",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Fundamentals Data Warehousing"
+ },
+{
+  "SubjectId": 328,
+  "SubjectCode": "BUMA 30053",
+  "Name": "Service Culture",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Service Culture"
+ },
+{
+  "SubjectId": 329,
+  "SubjectCode": "ECON 30103",
+  "Name": "Basic Microeconomics",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Basic Microeconomics"
+ },
+{
+  "SubjectId": 330,
+  "SubjectCode": "MARK 30043",
+  "Name": "Pricing Strategy",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Pricing Strategy"
+ },
+{
+  "SubjectId": 331,
+  "SubjectCode": "MARK 40053",
+  "Name": "Entrepreneurial Marketing Management",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Entrepreneurial Marketing Management"
+ },
+{
+  "SubjectId": 332,
+  "SubjectCode": "ACCO 20293",
+  "Name": "Business Management Accounting",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Business Management Accounting"
+ },
+
+
+
+# 3rd Year 1st Semester
+{
+  "SubjectId": 333,
+  "SubjectCode": "BUMA 011",
+  "Name": "Operations Management (TQM)",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Operations Management (TQM)"
+ },
+{
+  "SubjectId": 334,
+  "SubjectCode": "ELEC ENTR-E1",
+  "Name": "Elective 1",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Elective 1"
+ },
+{
+  "SubjectId": 335,
+  "SubjectCode": "ELEC ENTR-E2",
+  "Name": "Elective 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Elective 2"
+ },
+{
+  "SubjectId": 336,
+  "SubjectCode": "ENGL 011",
+  "Name": "Business Communication",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Business Communication"
+ },
+{
+  "SubjectId": 337,
+  "SubjectCode": "ENTR ST 1",
+  "Name": "Specialized Track 1",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Specialized Track 1"
+ },
+{
+  "SubjectId": 338,
+  "SubjectCode": "FIMA 202",
+  "Name": "Financial Management",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Financial Management"
+ },
+{
+  "SubjectId": 339,
+  "SubjectCode": "LAW 016",
+  "Name": "Business Law and Taxation",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Business Law and Taxation"
+ },
+
+# 3rd Year 1st Semester
+{
+  "SubjectId": 340,
+  "SubjectCode": "BUMA 014",
+  "Name": "International Business and Trade",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "International Business and Trade"
+ },
+{
+  "SubjectId": 341,
+  "SubjectCode": "COOP 107",
+  "Name": "Cooperatives and Social Developement",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Cooperatives and Social Developement"
+ },
+{
+  "SubjectId": 342,
+  "SubjectCode": "ELEC ENTR-E3",
+  "Name": "Elective 3",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Elective 3"
+ },
+{
+  "SubjectId": 343,
+  "SubjectCode": "ELEC ENTR-E4",
+  "Name": "Elective 4",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Elective 4"
+ },
+{
+  "SubjectId": 344,
+  "SubjectCode": "ENTR 301",
+  "Name": "Program and Policies on Enterprise Development",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Program and Policies on Enterprise Development"
+ },
+{
+  "SubjectId": 345,
+  "SubjectCode": "ENTR 302",
+  "Name": "Business Plan Preparation",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Business Plan Preparation"
+ },
+{
+  "SubjectId": 346,
+  "SubjectCode": "ENTR ST 2",
+  "Name": "Specialized Track 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Specialized Track 2"
+ },
+
+# 4th 1st Semester
+
+{
+  "SubjectId": 347,
+  "SubjectCode": "ENTR 401",
+  "Name": "Business Plan Implementation 1",
+  "Units": 5,
+  "IsNSTP": False,
+  "Description": "Business Plan Implementation 1"
+ },
+{
+  "SubjectId": 348,
+  "SubjectCode": "ENTR 403",
+  "Name": "Seminar in Entrepreneurial Trends and Issues",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Seminar in Entrepreneurial Trends and Issues"
+ },
+{
+  "SubjectId": 349,
+  "SubjectCode": "ENTR 404",
+  "Name": "Pricing and Costing",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Pricing and Costing"
+ },
+{
+  "SubjectId": 350,
+  "SubjectCode": "ENTR ST 3",
+  "Name": "Specialized Track 3",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Specialized Track 3"
+ },
+
+# 4th 2nd Semester
+
+{
+  "SubjectId": 351,
+  "SubjectCode": "ENTR 402",
+  "Name": "Business Plan Implementation 2",
+  "Units": 5,
+  "IsNSTP": False,
+  "Description": "Business Plan Implementation 2"
+ },
+{
+  "SubjectId": 352,
+  "SubjectCode": "ENTR 405",
+  "Name": "Social Entrepreneurship",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Social Entrepreneurship"
+ },
+{
+  "SubjectId": 353,
+  "SubjectCode": "ENTR 406",
+  "Name": "Business Immersion (300 Hours) (RC)",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Business Immersion (300 Hours) (RC)"
+},
+{
+  "SubjectId": 354,
+  "SubjectCode": "ENTR ST 4",
+  "Name": "Specialized Track 4",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Specialized Track 4"
+ },
+
+
+# BTLE 1st 1st Semester
+
+{
+  "SubjectId": 355,
+  "SubjectCode": "BTLE 30013",
+  "Name": "Office Productivity for Business Education",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Office Productivity for Business Education"
+ },
+{
+  "SubjectId": 356,
+  "SubjectCode": "BTLE 30023",
+  "Name": "Business Finance for Entrepreneurs",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Business Finance for Entrepreneurs"
+ },
+
+# BTLE 1st 2nd Semester
+
+{
+  "SubjectId": 357,
+  "SubjectCode": "BTLE 30033",
+  "Name": "Business Management and Office Ethics",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Business Management and Office Ethics"
+ },
+{
+  "SubjectId": 358,
+  "SubjectCode": "BTLE 30043",
+  "Name": "Bookkeeping for Service Business",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Bookkeeping for Service Business"
+ },
+{
+  "SubjectId": 359,
+  "SubjectCode": "EDUC 30013",
+  "Name": "The Child and Adolescent Learner and Learning Principles",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "The Child and Adolescent Learner and Learning Principles"
+ },
+{
+  "SubjectId": 360,
+  "SubjectCode": "EDUC 30023",
+  "Name": "The Teaching Profession",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "The Teaching Profession"
+ },
+{
+  "SubjectId": 361,
+  "SubjectCode": "GEED 20013",
+  "Name": "Then Entrepreneurial Mind",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Then Entrepreneurial Mind"
+ },
+
+  # BTLE 2nd Year 1st Semester
+
+{
+  "SubjectId": 362,
+  "SubjectCode": "BTLE 30053",
+  "Name": "Entrepreneurship for Business Education",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Entrepreneurship for Business Education"
+ },
+{
+  "SubjectId": 363,
+  "SubjectCode": "BTLE 30063",
+  "Name": "Home Economics Literacy",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Home Economics Literacy"
+ },
+{
+  "SubjectId": 364,
+  "SubjectCode": "BTLE 30073",
+  "Name": "Family and Consumer Life Skills",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Family and Consumer Life Skills"
+ },
+{
+  "SubjectId": 365,
+  "SubjectCode": "BTLE 30083",
+  "Name": "Introduction to Industrial Arts 1",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Introduction to Industrial Arts 1"
+ },
+{
+  "SubjectId": 366,
+  "SubjectCode": "BTLE 30093",
+  "Name": "Introduction to ICT Specializations 1  ",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Introduction to ICT Specializations 1 "
+ },
+{
+  "SubjectId": 367,
+  "SubjectCode": "EDUC 30033",
+  "Name": "Technology for Teaching and Learning 1",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Technology for Teaching and Learning 1"
+ },
+{
+  "SubjectId": 368,
+  "SubjectCode": "EDUC 30083",
+  "Name": "Assessment in Learning 1",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Assessment in Learning 1"
+ },
+{
+  "SubjectId": 369,
+  "SubjectCode": "EDUC 30163",
+  "Name": "Facilitating Learner-Centered Teaching: The Learner-Center Approaches with Emphasis on Trainers Methodology 1",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Facilitating Learner-Centered Teaching: The Learner-Center Approaches with Emphasis on Trainers Methodology 1"
+ },
+{
+  "SubjectId": 370,
+  "SubjectCode": "EDUC 30173",
+  "Name": "Building and ENhancing Literacy Accross the Curriculum with Emphasis on the 21st Century Skills",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Building and ENhancing Literacy Accross the Curriculum with Emphasis on the 21st Century Skills"
+ },
+
+
+# BTLE 2nd Year 2nd Semester
+
+{
+  "SubjectId": 371,
+  "SubjectCode": "BTLE 30103",
+  "Name": "E-Business for TLE",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "E-Business for TLE"
+ },
+{
+  "SubjectId": 372,
+  "SubjectCode": "BTLE 30113",
+  "Name": "Agri-Fishery 1",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Agri-Fishery 1"
+ },
+{
+  "SubjectId": 373,
+  "SubjectCode": "BTLE 30123",
+  "Name": "Introduction to ICT Specializations 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Introduction to ICT Specializations 2"
+ },
+{
+  "SubjectId": 374,
+  "SubjectCode": "BTLE 30133",
+  "Name": "Introductions to Industrial Arts 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Introductions to Industrial Arts 2"
+ },
+{
+  "SubjectId": 375,
+  "SubjectCode": "BTLE 40013",
+  "Name": "On-The-Job Training",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "On-The-Job Training"
+ },
+{
+  "SubjectId": 376,
+  "SubjectCode": "EDUC 30063",
+  "Name": "Foundation of Special and Inclusive Education",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Foundation of Special and Inclusive Education"
+ },
+{
+  "SubjectId": 377,
+  "SubjectCode": "EDUC 30183",
+  "Name": "The Teacher and the Community, School Culture and Organizational Leadership with focus on the Philippine TVET System",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "The Teacher and the Community, School Culture and Organizational Leadership with focus on the Philippine TVET System"
+ },
+{
+  "SubjectId": 378,
+  "SubjectCode": "EDUC 30193",
+  "Name": "Assessment Learning 2 with Focus on Trainers Methodology 1 & 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Assessment Learning 2 with Focus on Trainers Methodology 1 & 2"
+ },
+
+# BTLE 3rd Year 1st Semester
+
+{
+  "SubjectId": 379,
+  "SubjectCode": "BTLE 30143",
+  "Name": "Agri-Fishery 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Agri-Fishery 2"
+ },
+{
+  "SubjectId": 380,
+  "SubjectCode": "BTLE 30153",
+  "Name": "Human Resource Management",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Human Resource Management"
+ },
+{
+  "SubjectId": 381,
+  "SubjectCode": "BTLE 30163",
+  "Name": "Consumer Education",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Consumer Education"
+ },
+{
+  "SubjectId": 382,
+  "SubjectCode": "BTLE 30173",
+  "Name": "Principles of Food Preparation",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Principles of Food Preparation"
+ },
+{
+  "SubjectId": 383,
+  "SubjectCode": "BTLE 30183",
+  "Name": "Food and Nutrition",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Food and Nutrition"
+ },
+{
+  "SubjectId": 384,
+  "SubjectCode": "BTLE 30263",
+  "Name": "Marriage and Family Relationship",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Marriage and Family Relationship"
+ },
+{
+  "SubjectId": 385,
+  "SubjectCode": "EDUC 30053",
+  "Name": "Technology for Teacching and Learning 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Technology for Teacching and Learning 2"
+ },
+{
+  "SubjectId": 386,
+  "SubjectCode": "EDUC 30203",
+  "Name": "Research 1 (Methods of Research)",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Research 1 (Methods of Research)"
+ },
+{
+  "SubjectId": 387,
+  "SubjectCode": "EDUC 30213",
+  "Name": "Curriculum Development and Evaluation with Emphasis on Trainers Methodology 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Curriculum Development and Evaluation with Emphasis on Trainers Methodology 2"
+ },
+
+
+
+# BTLE 3rd Year 2nd Semester
+
+{
+  "SubjectId": 388,
+  "SubjectCode": "BTLE 30193",
+  "Name": "Fundamentals of Food Technology",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Fundamentals of Food Technology"
+ },
+{
+  "SubjectId": 389,
+  "SubjectCode": "BTLE 30203",
+  "Name": "School Food Service Management",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "School Food Service Management"
+ },
+{
+  "SubjectId": 390,
+  "SubjectCode": "BTLE 30213",
+  "Name": "Child and Adolescent Development",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Child and Adolescent Development"
+ },
+{
+  "SubjectId": 391,
+  "SubjectCode": "BTLE 30223",
+  "Name": "Clothing Selection, Purchase and Care",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Clothing Selection, Purchase and Care"
+ },
+{
+  "SubjectId": 392,
+  "SubjectCode": "BTLE 30233",
+  "Name": "Clothing Construction",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Clothing Construction"
+ },
+{
+  "SubjectId": 393,
+  "SubjectCode": "BTLE 30243",
+  "Name": "Arts in Daily Living",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Arts in Daily Living"
+ },
+{
+  "SubjectId": 394,
+  "SubjectCode": "BTLE 30253",
+  "Name": "Crafst Design (Handicrafts)",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Crafst Design (Handicrafts)"
+ },
+{
+  "SubjectId": 395,
+  "SubjectCode": "EDUC 30223",
+  "Name": "Research 2 (Thesis Writing)",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Research 2 (Thesis Writing)"
+ },
+
+# BTLE 4th Year 1st Semester
+
+{
+  "SubjectId": 396,
+  "SubjectCode": "EDUC 30133",
+  "Name": "Field Study 1",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Field Study 1"
+ },
+{
+  "SubjectId": 397,
+  "SubjectCode": "EDUC 30143",
+  "Name": "Field Study 2",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Field Study 2"
+ },
+
+{
+  "SubjectId": 398,
+  "SubjectCode": "GEED 10123",
+  "Name": "Intelektwalisasyon ng Wikang Pilipino",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Intelektwalisasyon ng Wikang Pilipino"
+ },
+
+{
+  "SubjectId": 399,
+  "SubjectCode": "GEED 20133",
+  "Name": "Living in the IT Era",
+  "Units": 3,
+  "IsNSTP": False,
+  "Description": "Living in the IT Era"
+ },
+
+
+{
+  "SubjectId": 400,
+  "SubjectCode": "EDUC 30236",
+  "Name": "Practice Teaching/Internship",
+  "Units": 6,
+  "IsNSTP": False,
+  "Description": "Practice Teaching/Internship"
+ }
+
+
 ]

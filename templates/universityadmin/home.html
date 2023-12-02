@@ -1,5 +1,5 @@
-{% extends "universityadmin/layout.html" %}
-
+{% extends "universityadmin/layout.html" %} {% block title %}
+<title>Home</title> {% endblock title %}
 <!----------------- STYLE ----------------->
 {% block style %}
 
@@ -72,19 +72,14 @@
   <div
     class="bg-c1 col-span-2 row-span-3 col-start-3 row-start-6 shadow-md p-4 flex flex-col justify-center"
   >
-    <h4
-      class="text-3xl text-white font-extrabold text-center my-2 mt-10 text-white"
-    >
+    <h4 class="text-3xl text-white font-extrabold text-center my-2 mt-10">
       Low Enrolled Courses
     </h4>
-    <p
-      class="font-bold text-white text-xl text-center text-white"
-      id="lowest-course"
-    >
+    <p class="font-bold text-white text-xl text-center" id="lowest-course">
       Bachelor Science of Information Technology
     </p>
     <h1
-      class="lg:text-8xl text-white font-extrabold text-center mb-10 text-white"
+      class="lg:text-8xl text-white font-extrabold text-center mb-10"
       id="lowest-count"
     >
       321
@@ -176,8 +171,8 @@
           dashArray: '5, 1',
           xName: 'x',
           width: 2,
-          yName: 'BBA',
-          name: 'BBA',
+          yName: 'BTLE-HE',
+          name: 'BTLE-HE',
         },
         {
           type: 'StackingLine',
@@ -186,18 +181,8 @@
           dashArray: '5, 1',
           xName: 'x',
           width: 2,
-          yName: 'BBTE',
-          name: 'BBTE',
-        },
-        {
-          type: 'StackingLine',
-          dataSource: chartData,
-          marker: { visible: true },
-          dashArray: '5, 1',
-          xName: 'x',
-          width: 2,
-          yName: 'BPAM',
-          name: 'BPAM',
+          yName: 'BSBA-MM',
+          name: 'BSBA-MM',
         },
         {
           type: 'StackingLine',
@@ -254,13 +239,13 @@
       {
         primaryXAxis: {
           valueType: 'Category',
-          title: 'Countries',
+          title: 'Year',
         },
         primaryYAxis: {
           minimum: 0,
           maximum: 80,
           interval: 20,
-          title: 'Medals',
+          title: 'Count',
         },
         series: [
           {

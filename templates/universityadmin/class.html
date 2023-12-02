@@ -1,5 +1,5 @@
-{% extends "universityadmin/layout.html" %}
-
+{% extends "universityadmin/layout.html" %} {% block title %}
+<title>Class Subjects</title> {% endblock title %}
 <!----------------- STYLE ----------------->
 {% block style %}
 
@@ -15,70 +15,189 @@
 <!----------------- CONTENT ----------------->
 {% block content %}
 <div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
-    <div class="bg-white p-8 shadow-md col-span-full">
-       <div
-          class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
-          >
-          <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
-             Class Subjects
-          </h3>
-          <h5
-                class="block  font-bold text-lg mb-2 px-4 my-4"
-              >
-                Class Details:
-              </h5>
-          <div class="grid grid-cols-2 gap-4 px-4 mb-4">
-            
-            <div>
-               <p class="font-bold">Course:</p>
-               <p class="font-normal" id="course"></p>
-            </div>
-            <div>
-               <p class="font-bold">Semester:</p>
-               <p class="font-normal" id="semester"></p>
-            </div>
-            <div>
-                <p class="font-bold">Section Code:</p>
-                <p class="font-normal" id="section-code"></p>
-             </div>
-            <div>
-               <p class="font-bold">Year:</p>
-               <p class="font-normal" id="year"></p>
-            </div>
+  <div class="bg-white p-8 shadow-md col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Class Subjects
+      </h3>
+      <h5 class="block font-bold text-lg mb-2 px-4 my-4">Class Details:</h5>
+      <div class="grid grid-cols-2 gap-4 px-4 mb-4">
+        <div>
+          <p class="font-bold">Course:</p>
+          <p class="font-normal" id="course"></p>
         </div>
-         
-        <hr class="mx-2" />
+        <div>
+          <p class="font-bold">Semester:</p>
+          <p class="font-normal" id="semester"></p>
+        </div>
+        <div>
+          <p class="font-bold">Section Code:</p>
+          <p class="font-normal" id="section-code"></p>
+        </div>
+        <div>
+          <p class="font-bold">Year:</p>
+          <p class="font-normal" id="year"></p>
+        </div>
+      </div>
 
+      <hr class="mx-2" />
+
+      <div>
+        <form
+          class="bg-white p-4 rounded-lg"
+          enctype="multipart/form-data"
+          onsubmit="submitStudentAllSubject(event)"
+          method="POST"
+          id="student-class-form"
+        >
+          <div class="mb-4">
+            <h5 class="block font-bold text-lg mb-2">
+              Add Student in all Subjects:
+            </h5>
+            <p class="font-semibold">
+              Column Required:
+              <span class="font-normal">Student Number</span>
+            </p>
+          </div>
+          <div class="mb-4 flex gap-4">
+            <input
+              type="file"
+              name="classStudentsExcel"
+              id="classStudentsExcel"
+              accept=".xlsx, .xls"
+              class="bg-gray-200 rounded-lg py-2 px-4 w-1/2"
+            />
+
+            <button
+              type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+            >
+              Upload Excel File
+            </button>
+          </div>
+          <p id="class-file-error" class="text-c4 text-sm"></p>
+          <div id="all-student-errors" class="hidden">
+            <div>
+              <p
+                id="class-student-num-error"
+                class="text-c1 text-xl font-semibold hidden"
+              >
+                Student Number not exist:
+              </p>
+              <ul
+                id="class-student-num-list-error"
+                class="text-c1 text-sm"
+              ></ul>
+            </div>
+
+            <div>
+              <p
+                id="class-student-subject-error"
+                class="text-c1 text-xl font-semibold hidden"
+              >
+                Student already exist in subject:
+              </p>
+              <ul
+                id="class-student-subject-list-error"
+                class="text-c1 text-sm"
+              ></ul>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <hr class="mx-2" />
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <div id="grid-class-subject"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- The Modal -->
+
+<div
+  id="studentListModal"
+  class="modal hidden fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div
+    class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"
+    onclick="closeModal()"
+  ></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">Student List</h2>
+        <button class="modal-close" onclick="closeModal()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-8 px-4 mt-4">
+        <div>
+          <p class="font-bold">Subject:</p>
+          <p class="font-normal" id="subject-modal"></p>
+        </div>
+        <div>
+          <p class="font-bold">Teacher:</p>
+          <p class="font-normal" id="teacher-modal"></p>
+        </div>
+        <div>
+          <p class="font-bold">Section Code:</p>
+          <p class="font-normal" id="section-code-modal"></p>
+        </div>
+        <div>
+          <p class="font-bold">Semester:</p>
+          <p class="font-normal" id="semester-modal"></p>
+        </div>
+      </div>
+
+      <div>
         <div>
           <form
-            class="bg-white p-4 rounded-lg"
+            class="bg-white rounded-lg mt-4 px-4 mb-8"
             enctype="multipart/form-data"
-            onsubmit="submitStudentAllSubject(event)"
+            onsubmit="submitStudents(event)"
             method="POST"
             id="student-class-form"
           >
             <div class="mb-4">
-              <h5
-                class="block  font-bold text-lg mb-2"
+              <label
+                for="studentSubjectExcel"
+                class="block font-bold text-lg mb-2"
               >
-                Add Student in all Subjects:
-              </h5>
-              <p class="font-semibold ">
-                Column Required:
+                Add Student List:
                 <span class="font-normal"
-                  >Student Number</span
+                  >Student Number (Column Required)</span
                 >
-              </p>
+              </label>
             </div>
             <div class="mb-4 flex gap-4">
               <input
                 type="file"
-                name="classStudentsExcel"
-                id="classStudentsExcel"
+                name="studentSubjectExcel"
+                id="studentSubjectExcel"
                 accept=".xlsx, .xls"
-                class="bg-gray-200  rounded-lg py-2 px-4 w-1/2"
+                class="bg-gray-200 rounded-lg py-2 px-4 w-1/2"
               />
-  
               <button
                 type="submit"
                 class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
@@ -86,337 +205,231 @@
                 Upload Excel File
               </button>
             </div>
-            <p id="class-file-error" class="text-c4 text-sm"></p>
-            <div id="all-student-errors" class="hidden">
-              <div>
-                <p id="class-student-num-error" class="text-c1 text-xl font-semibold hidden">
-                  Student Number not exist:
-                </p>
-                <ul id="class-student-num-list-error" class="text-c1 text-sm"></ul>
-              </div>
-  
+            <p id="students-file-error" class="text-c4 text-sm"></p>
+            <div id="errors" class="hidden">
               <div>
                 <p
-                  id="class-student-subject-error"
+                  id="student-num-error"
+                  class="text-c1 text-xl font-semibold hidden"
+                >
+                  Student Number not exist:
+                </p>
+                <ul id="student-num-list-error" class="text-c1 text-sm"></ul>
+              </div>
+
+              <div>
+                <p
+                  id="student-subject-error"
                   class="text-c1 text-xl font-semibold hidden"
                 >
                   Student already exist in subject:
                 </p>
                 <ul
-                  id="class-student-subject-list-error"
+                  id="student-subject-list-error"
                   class="text-c1 text-sm"
                 ></ul>
               </div>
-  
             </div>
           </form>
         </div>
-
-          <hr class="mx-2" />
-          <div class="flex items-end justify-between">
-             <div class="w-full bg-white p-4 mt-4">
-                <div id="grid-class-subject"></div>
-             </div>
-          </div>
-       </div>
-    </div>
- </div>
- <!-- The Modal -->
- 
- 
- 
- <div
-    id="myModal"
-    class="modal hidden fixed inset-0 items-center justify-center z-50"
-    >
- <!-- Modal Overlay -->
- <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
- <!-- Modal Content -->
- <div class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12">
-    <!-- Modal Header -->
-    <div class="modal-header">
-       <div class="flex justify-between">
-          <h2 class="text-c1 text-2xl font-semibold">Student List</h2>
-          <button class="modal-close" onclick="closeModal()">
-             <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                >
-                <path
-                   d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
-                   fill="#000"
-                   />
-             </svg>
-          </button>
-       </div>
-    <div class="grid grid-cols-2 gap-8 px-4 mt-4">
-        <div>
-           <p class="font-bold">Subject:</p>
-           <p class="font-normal" id="subject-modal"></p>
+        <div class="grid grid-cols-1 mt-4">
+          <div id="grid-student-list" class="overflow-y-auto"></div>
         </div>
-        <div>
-           <p class="font-bold">Teacher:</p>
-           <p class="font-normal" id="teacher-modal"></p>
-        </div>
-        <div>
-           <p class="font-bold">Section Code:</p>
-           <p class="font-normal" id="section-code-modal"></p>
-        </div>
-        <div>
-           <p class="font-bold">Semester:</p>
-           <p class="font-normal" id="semester-modal"></p>
-        </div>
-    </div>
-
-       <div>
-          <div>
-             <form
-                class="bg-white rounded-lg mt-4 px-4 mb-8"
-                enctype="multipart/form-data"
-                onsubmit="submitStudents(event)"
-                method="POST"
-                id="student-class-form"
-                >
-                <div class="mb-4">
-                   <label
-                      for="studentSubjectExcel"
-                      class="block  font-bold text-lg mb-2"
-                      >
-                   Add Student List: <span class="font-normal">Student Number (Column Required)</span>
-                   </label>
-                </div>
-                <div class="mb-4 flex gap-4">
-                   <input
-                      type="file"
-                      name="studentSubjectExcel"
-                      id="studentSubjectExcel"
-                      accept=".xlsx, .xls"
-                      class="bg-gray-200  rounded-lg py-2 px-4 w-1/2"
-                      />
-                   <button
-                      type="submit"
-                      class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
-                      >
-                   Upload Excel File
-                   </button>
-                </div>
-                <p id="students-file-error" class="text-c4 text-sm"></p>
-                <div id="errors" class="hidden">
-                  <div>
-                    <p id="student-num-error" class="text-c1 text-xl font-semibold hidden">
-                      Student Number not exist:
-                    </p>
-                    <ul id="student-num-list-error" class="text-c1 text-sm"></ul>
-                  </div>
-      
-                  <div>
-                    <p
-                      id="student-subject-error"
-                      class="text-c1 text-xl font-semibold hidden"
-                    >
-                      Student already exist in subject:
-                    </p>
-                    <ul
-                      id="student-subject-list-error"
-                      class="text-c1 text-sm"
-                    ></ul>
-                  </div>
-      
-                </div>
-             </form>
-          </div>
-          <div class="grid grid-cols-1 mt-4">
-             <div id="grid-student-list"></div>
-          </div>
-       </div>
-       <!-- Modal Body -->
-       <div class="modal-body w-full relative"></div>
-    </div>
- </div>
-
-  <!-- Modal Structure -->
-  <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-10">
-    <div class="bg-white p-8 rounded shadow-md">
-      <p class="mb-4">Are you sure you want to remove this student?</p>
-      <div class="flex justify-end">
-        <button id="cancelBtn" class="mr-2 px-4 py-2 text-white bg-gray-600 rounded">Cancel</button>
-        <button id="confirmBtn" class="px-4 py-2 text-white bg-[#9D1D1D] rounded">Confirm</button>
       </div>
+      <!-- Modal Body -->
+      <div class="modal-body w-full relative"></div>
     </div>
   </div>
 
-
-
- <div
-    id="loadingModal"
-    class="modal hidden fixed inset-0 items-center justify-center z-50"
-    >
-    <!-- Modal Overlay -->
-    <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
-    <!-- Modal Content -->
-    <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
-       <!-- Modal Header -->
-       <!-- Modal Body -->
-       <div class="modal-body w-full relative">
-          <div class="flex flex-row gap-2">
-             <div
-                class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
-                ></div>
-             <div
-                class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
-                ></div>
-             <div
-                class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
-                ></div>
-          </div>
-       </div>
+  <!-- Modal Structure -->
+  <div
+    id="deleteModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-10"
+  >
+    <div class="bg-white p-8 rounded shadow-md">
+      <p class="mb-4">Are you sure you want to remove this student?</p>
+      <div class="flex justify-end">
+        <button
+          id="cancelBtn"
+          class="mr-2 px-4 py-2 text-white bg-gray-600 rounded"
+        >
+          Cancel
+        </button>
+        <button
+          id="confirmBtn"
+          class="px-4 py-2 text-white bg-[#9D1D1D] rounded"
+        >
+          Confirm
+        </button>
+      </div>
     </div>
- </div>
+  </div>
 </div>
+
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
 </div>
+
 {% endblock content %}
 
 <!-- SCRIPTS DATA -->
 {% block script %}
 
-<script>  
+<script>
   var classSubjectId;
   var classId = '{{ class_id }}';
-
-
 </script>
 
-<script>  
-async function submitStudentAllSubject(event) {
-  event.preventDefault();
-  console.log("SUBMITTING ALL STUDENTS");
+<script>
+  async function submitStudentAllSubject(event) {
+    event.preventDefault();
+    console.log('SUBMITTING ALL STUDENTS');
 
-  const fileErrorElement = document.getElementById('class-file-error');
-  const fileInput = document.getElementById('classStudentsExcel');
-  const file = fileInput.files[0];
-  // Get the exist
-  const errorContainer = document.getElementById('all-student-errors');
-  errorContainer.classList.add('hidden');
+    const fileErrorElement = document.getElementById('class-file-error');
+    const fileInput = document.getElementById('classStudentsExcel');
+    const file = fileInput.files[0];
+    // Get the exist
+    const errorContainer = document.getElementById('all-student-errors');
+    errorContainer.classList.add('hidden');
 
-  // Remove all errors message in those element if not exist in curriculum, subject and course
+    // Remove all errors message in those element if not exist in curriculum, subject and course
 
-  // Define the clearChildElements function
-  function clearChildElements(element) {
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
-    }
-  }
-
-  // Now you can use the function in your code
-  const courseNotExistElement = document.getElementById(
-    'class-student-subject-list-error'
-  );
-  if (courseNotExistElement) {
-    clearChildElements(courseNotExistElement);
-  }
-
-  const curriculumNotExistElement = document.getElementById(
-    'class-student-num-list-error'
-  );
-  if (curriculumNotExistElement) {
-    clearChildElements(curriculumNotExistElement);
-  }
-  
-  hideElement('class-student-num-error');
-  hideElement('class-student-subject-error');
-
-  if (!file) {
-    fileErrorElement.innerText = 'Please choose a file.';
-    return;
-  }
-
-  if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-    fileErrorElement.innerText =
-      'Invalid file type. Please select an Excel file.';
-    return;
-  } else {
-    fileErrorElement.innerText = '';
-  }
-
-  // If file type is valid, proceed with the API request
-  const formData = new FormData();
-  formData.append('classStudentsExcel', file);
-
-  console.log("RUNNING BEFORE SUBMIT TO CLASS");
-
-  const apiUrlSubmitClassStudent =
-    `${api_base_url}/add/class-student/${classId}`;
-  showLoadingModal();
-  await fetch(apiUrlSubmitClassStudent, {
-    method: 'POST',
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-
-      // closeLoadingModal();
-      // console.log(data);
-      // if (data.result) {
-      //   notyf.success(data.result);
-      //   // Get the grid datasource and concat the data.data
-      //   const grid = document.getElementById('grid-class').ej2_instances[0];
-      //   const dataSource = grid.dataSource;
-      //   grid.dataSource = data.data.concat(dataSource);
-      //   // add hidden in loadingModal
-      //   loadingModal.classList.add('hidden');
-      //   return;
-      // }
-
-      if (data.error) {
-        errorContainer.classList.remove('hidden');
-        if (data.errors.student_class_subject_exist.length > 0) {
-          console.log("STUDENT CLASS SUBJECT EXIST: ",data.errors.student_class_subject_exist);
-          showELement('class-student-subject-error');
-          
-          const elementListError = document.getElementById('class-student-subject-list-error')
-
-          data.errors.student_class_subject_exist.forEach((error) => {
-           
-            const errorP = createErrorList(
-              `${error.StudentNumber} - ${error.SubjectCode}`
-            );
-            elementListError.appendChild(errorP);
-          }); 
-        }
-
-        if (data.errors.student_number_not_exist.length > 0) {
-          console.log("STUDENT NOT EXIST: ", data.errors.student_number_not_exist);
-          showELement('class-student-num-error');
-
-          const elementListError = document.getElementById('class-student-num-list-error')
-
-          data.errors.student_number_not_exist.forEach((error) => {
-            console.log("ERROR: ", error);
-            const errorP = createErrorList(
-              `<span class="font-semibold">Student Number: </span>${error}`
-            );
-            elementListError.appendChild(errorP);
-          }); 
-
-        
-        }
-
-        
+    // Define the clearChildElements function
+    function clearChildElements(element) {
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
       }
-      
+    }
+
+    // Now you can use the function in your code
+    const courseNotExistElement = document.getElementById(
+      'class-student-subject-list-error'
+    );
+    if (courseNotExistElement) {
+      clearChildElements(courseNotExistElement);
+    }
+
+    const curriculumNotExistElement = document.getElementById(
+      'class-student-num-list-error'
+    );
+    if (curriculumNotExistElement) {
+      clearChildElements(curriculumNotExistElement);
+    }
+
+    hideElement('class-student-num-error');
+    hideElement('class-student-subject-error');
+
+    if (!file) {
+      fileErrorElement.innerText = 'Please choose a file.';
+      return;
+    }
+
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      fileErrorElement.innerText =
+        'Invalid file type. Please select an Excel file.';
+      return;
+    } else {
+      fileErrorElement.innerText = '';
+    }
+
+    // If file type is valid, proceed with the API request
+    const formData = new FormData();
+    formData.append('classStudentsExcel', file);
+
+    console.log('RUNNING BEFORE SUBMIT TO CLASS');
+
+    const apiUrlSubmitClassStudent = `${api_base_url}/add/class-student/${classId}`;
+    showLoadingModal('loadingModal');
+    await fetch(apiUrlSubmitClassStudent, {
+      method: 'POST',
+      body: formData,
     })
-    .catch((error) => {
-     console.log(error);
-    }).finally(() => {
-      closeLoadingModal();
-    });
-}
+      .then((response) => response.json())
+      .then((data) => {
+        // closeLoadingModal();
+        console.log('DATA: ', data);
+        if (data.result) {
+          notyf.success(data.result);
+          return;
+        }
+        //   // Get the grid datasource and concat the data.data
+        //   const grid = document.getElementById('grid-class').ej2_instances[0];
+        //   const dataSource = grid.dataSource;
+        //   grid.dataSource = data.data.concat(dataSource);
+        //   // add hidden in loadingModal
+        //   loadingModal.classList.add('hidden');
 
+        if (data.error) {
+          errorContainer.classList.remove('hidden');
+          if (data.errors.student_class_subject_exist.length > 0) {
+            console.log(
+              'STUDENT CLASS SUBJECT EXIST: ',
+              data.errors.student_class_subject_exist
+            );
+            showELement('class-student-subject-error');
 
-function handleListErrors(errors, elementId) {
+            const elementListError = document.getElementById(
+              'class-student-subject-list-error'
+            );
+
+            data.errors.student_class_subject_exist.forEach((error) => {
+              const errorP = createErrorList(
+                `${error.StudentNumber} - ${error.SubjectCode}`
+              );
+              elementListError.appendChild(errorP);
+            });
+          }
+
+          if (data.errors.student_number_not_exist.length > 0) {
+            console.log(
+              'STUDENT NOT EXIST: ',
+              data.errors.student_number_not_exist
+            );
+            showELement('class-student-num-error');
+
+            const elementListError = document.getElementById(
+              'class-student-num-list-error'
+            );
+
+            data.errors.student_number_not_exist.forEach((error) => {
+              console.log('ERROR: ', error);
+              const errorP = createErrorList(
+                `<span class="font-semibold">Student Number: </span>${error}`
+              );
+              elementListError.appendChild(errorP);
+            });
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        closeLoadingModal('loadingModal');
+      });
+  }
+
+  function handleListErrors(errors, elementId) {
     const element = document.getElementById(elementId);
 
     if (!element) {
@@ -425,10 +438,8 @@ function handleListErrors(errors, elementId) {
     }
 
     errors.forEach((error) => {
-      console.log("ERROR: ", error);
-      const errorP = createErrorList(
-        `Student Number: ${error.StudentNumber}`
-      );
+      console.log('ERROR: ', error);
+      const errorP = createErrorList(`Student Number: ${error.StudentNumber}`);
       element.appendChild(errorP);
     });
   }
@@ -440,12 +451,11 @@ function handleListErrors(errors, elementId) {
   }
 </script>
 
-
 <!-- SUBMIT STUDENTS -->
 <script>
   async function submitStudents(event) {
     event.preventDefault();
-    console.log("SUBMITTING STUDENT IN CLASS ONLY");
+    console.log('SUBMITTING STUDENT IN CLASS ONLY');
 
     const fileErrorElement = document.getElementById('students-file-error');
     const fileInput = document.getElementById('studentSubjectExcel');
@@ -482,7 +492,7 @@ function handleListErrors(errors, elementId) {
     // Hide student-num-error and student-subject-error elements
     hideElement('student-num-error');
     hideElement('student-subject-error');
-
+    showLoadingModal('loadingModal');
     fetch(`${api_base_url}/submit/students-subject/${classSubjectId}`, {
       method: 'POST',
       body: formData,
@@ -491,100 +501,113 @@ function handleListErrors(errors, elementId) {
       .then((data) => {
         // Handle API response here
         console.log('RESULT: ', data);
-        
 
-        if(data.error){
+        if (data.error) {
           errorContainer.classList.remove('hidden');
-          notyf.error(data.error)
-        
-          if(data.error_data.student_not_exist.length != 0){
-            handleError(data.error_data.student_not_exist, 'student-num-error', 'student-num-list-error')
+          notyf.error(data.error);
+
+          if (data.error_data.student_not_exist.length != 0) {
+            handleError(
+              data.error_data.student_not_exist,
+              'student-num-error',
+              'student-num-list-error'
+            );
           }
 
-          if(data.error_data.student_subject_exist.length != 0){
-            handleError(data.error_data.student_subject_exist, 'student-subject-error', 'student-subject-list-error')
+          if (data.error_data.student_subject_exist.length != 0) {
+            handleError(
+              data.error_data.student_subject_exist,
+              'student-subject-error',
+              'student-subject-list-error'
+            );
           }
         }
 
-        if(data.warning){
+        if (data.warning) {
           errorContainer.classList.remove('hidden');
           notyf.open({
             type: 'warning',
-            message: data.warning
+            message: data.warning,
           });
 
-          if(data.error_data.student_not_exist.length != 0){
-            handleError(data.error_data.student_not_exist, 'student-num-error', 'student-num-list-error')
+          if (data.error_data.student_not_exist.length != 0) {
+            handleError(
+              data.error_data.student_not_exist,
+              'student-num-error',
+              'student-num-list-error'
+            );
           }
 
-          if(data.error_data.student_subject_exist.length != 0){
-            handleError(data.error_data.student_subject_exist, 'student-subject-error', 'student-subject-list-error')
+          if (data.error_data.student_subject_exist.length != 0) {
+            handleError(
+              data.error_data.student_subject_exist,
+              'student-subject-error',
+              'student-subject-list-error'
+            );
           }
 
-          if(data.added){
+          if (data.added) {
             // Nothing to do
-            gridAddData(data.added, classSubjectId)
+            gridAddData(data.added, classSubjectId);
           }
-        } 
-        
-        if (data.success){
-          notyf.success(data.success)
-          gridAddData(data.data, classSubjectId)
         }
 
-       
-
-        
+        if (data.success) {
+          notyf.success(data.success);
+          gridAddData(data.data, classSubjectId);
+        }
       })
       .catch((error) => {
-        console.log("DATA ON ERROR: ", error);
-        notyf.error(error)
+        console.log('DATA ON ERROR: ', error);
+        notyf.error(error);
+      })
+      .finally(() => {
+        closeLoadingModal('loadingModal');
       });
   }
 
-  function gridAddData(data){
-    const grid = document.getElementById(`grid-${classSubjectId}`).ej2_instances[0];
-          data.forEach((student) => {
-            grid.dataSource = grid.dataSource.concat(student);
-          });
-          grid.refresh();
+  function gridAddData(data) {
+    const grid = document.getElementById(`grid-${classSubjectId}`)
+      .ej2_instances[0];
+    data.forEach((student) => {
+      grid.dataSource = grid.dataSource.concat(student);
+    });
+    grid.refresh();
   }
 
-  function handleError(error, pElement, listElement){
-      const pTextElement = document.getElementById(pElement);
-      pTextElement.classList.remove('hidden')
+  function handleError(error, pElement, listElement) {
+    const pTextElement = document.getElementById(pElement);
+    pTextElement.classList.remove('hidden');
 
-      const listErrorElement = document.getElementById(listElement);
-      // Remove all child nodes (content) inside #student-not-exist-error
-      while (listErrorElement.firstChild) {
-        listErrorElement.removeChild(listErrorElement.firstChild);
-      }
-      // For each error make a p element that will have a text of data.error_data.student_not_exist
-      error.forEach((studentNumber) => {
-        const p = document.createElement('p');
-        p.innerText = `${studentNumber}`;
-        listErrorElement.appendChild(p);
-      });
+    const listErrorElement = document.getElementById(listElement);
+    // Remove all child nodes (content) inside #student-not-exist-error
+    while (listErrorElement.firstChild) {
+      listErrorElement.removeChild(listErrorElement.firstChild);
     }
-
-    function clearErrorList(listId) {
-  const listElement = document.getElementById(listId);
-  // Remove all child nodes (content) inside the list
-  while (listElement.firstChild) {
-    listElement.removeChild(listElement.firstChild);
+    // For each error make a p element that will have a text of data.error_data.student_not_exist
+    error.forEach((studentNumber) => {
+      const p = document.createElement('p');
+      p.innerText = `${studentNumber}`;
+      listErrorElement.appendChild(p);
+    });
   }
-}
 
-function hideElement(elementId) {
-  const element = document.getElementById(elementId);
-  element.classList.add('hidden');
-}
+  function clearErrorList(listId) {
+    const listElement = document.getElementById(listId);
+    // Remove all child nodes (content) inside the list
+    while (listElement.firstChild) {
+      listElement.removeChild(listElement.firstChild);
+    }
+  }
 
+  function hideElement(elementId) {
+    const element = document.getElementById(elementId);
+    element.classList.add('hidden');
+  }
 </script>
 
 <!-- FETCH CLASS PERFORMANCE (CHART) -->
 <script>
-
   fetchClassDetails();
   fetchClassSubject();
 
@@ -619,7 +642,7 @@ function hideElement(elementId) {
       const json_teacher = await response.json();
       // If json teacher return json_teacher.data else empty array
       const teacherData = json_teacher ? json_teacher.data : [];
-      return teacherData
+      return teacherData;
     } catch (error) {
       console.log(error);
     }
@@ -639,8 +662,7 @@ function hideElement(elementId) {
 
       const json_class = await response.json();
       displayGridClassSubject(json_class.data);
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   async function fetchClassDetails() {
@@ -661,21 +683,25 @@ function hideElement(elementId) {
           json_class.data['Section Code'];
         document.getElementById('course').innerHTML = json_class.data['Course'];
         document.getElementById('year').innerHTML = json_class.data['Batch'];
-        document.getElementById('semester').innerHTML = json_class.data['Semester'];
+        document.getElementById('semester').innerHTML =
+          json_class.data['Semester'];
 
-        document.getElementById('semester-modal').innerHTML =  json_class.data['Semester'];
-        document.getElementById('section-code-modal').innerHTML =  json_class.data['Section Code'];
+        document.getElementById('semester-modal').innerHTML =
+          json_class.data['Semester'];
+        document.getElementById('section-code-modal').innerHTML =
+          json_class.data['Section Code'];
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   async function fetchStudents(data) {
-    console.log("FETCH THIS: ", data);
+    console.log('FETCH THIS: ', data);
     // Get teacher, subject, semester and update its value
-    document.getElementById('teacher-modal').innerHTML = data.teacher ? data.teacher : "No assigned teacher yet";
+    document.getElementById('teacher-modal').innerHTML = data.teacher
+      ? data.teacher
+      : 'No assigned teacher yet';
     document.getElementById('subject-modal').innerHTML = data.subject;
-    
+
     try {
       const response = await fetch(
         `${api_base_url}/class/subject/${data.classSubjectId}`
@@ -687,11 +713,11 @@ function hideElement(elementId) {
         );
       }
 
-      console.log(("HERE ALREADY"));
+      console.log('HERE ALREADY');
 
       const json_class = await response.json();
       if (json_class) {
-        // Get myModal
+        // Get studentListModal
         // Clear student-not-exist-error and student-subject-exist-error lists
         clearErrorList('student-num-list-error');
         clearErrorList('student-subject-list-error');
@@ -700,49 +726,49 @@ function hideElement(elementId) {
         hideElement('student-num-error');
         hideElement('student-subject-error');
         document.getElementById('studentSubjectExcel').value = '';
-        
-        const modal = document.getElementById('myModal');
+
+        const modal = document.getElementById('studentListModal');
         // Remove hidden
         modal.classList.add('flex');
         modal.classList.remove('hidden');
         classSubjectId = data.classSubjectId;
         displayGridStudentList(json_class.data, classSubjectId);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
-
-async function deleteStudent(classSubjectId, studentId) {
-  console.log("CONFIRM DELETE: ", classSubjectId, studentId);
-  fetch(`${api_base_url}/delete/class-subject/${classSubjectId}/student/${studentId}`, {
-    method: 'POST',
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Server response:', data);
-      // If success throw notyf showing the data.result
-      if (data.result) {
-        notyf.success(data.result);
-        // Remove the data from grid data source
-        const grid = document.getElementById(`grid-${classSubjectId}`).ej2_instances[0];
-        const dataSource = grid.dataSource;
-        for (let i=0;i<dataSource.length;i++) {
-          if (dataSource[i].StudentId === studentId) {
-            dataSource.splice(i, 1);
-            break;
-          }
-        }
-        grid.refresh();
+  async function deleteStudent(classSubjectId, studentId) {
+    console.log('CONFIRM DELETE: ', classSubjectId, studentId);
+    fetch(
+      `${api_base_url}/delete/class-subject/${classSubjectId}/student/${studentId}`,
+      {
+        method: 'POST',
       }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      // Handle errors if needed
-    });
-}
-
-
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Server response:', data);
+        // If success throw notyf showing the data.result
+        if (data.result) {
+          notyf.success(data.result);
+          // Remove the data from grid data source
+          const grid = document.getElementById(`grid-${classSubjectId}`)
+            .ej2_instances[0];
+          const dataSource = grid.dataSource;
+          for (let i = 0; i < dataSource.length; i++) {
+            if (dataSource[i].StudentId === studentId) {
+              dataSource.splice(i, 1);
+              break;
+            }
+          }
+          grid.refresh();
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle errors if needed
+      });
+  }
 
   function displayGridClassSubject(json_class, teacherData) {
     console.log('json_class: ', json_class);
@@ -760,7 +786,7 @@ async function deleteStudent(classSubjectId, studentId) {
         allowExcelExport: true,
         mode: 'Batch', // Set the edit mode to 'Normal'
       },
-      
+
       // rowData: json_class['ClassSubjectGrade'],
       columns: [
         {
@@ -794,14 +820,14 @@ async function deleteStudent(classSubjectId, studentId) {
           field: 'Grade',
           headerText: 'GWA (Class)',
           width: 100,
-          allowEditing: false
+          allowEditing: false,
         },
         {
           headerText: 'Actions',
           template:
             '<button class="btn px-4 py-2 bg-primary text-white font-bold" >View Students</button>', // Add a button to the cell
           width: 150,
-          allowEditing: false
+          allowEditing: false,
         },
       ],
 
@@ -809,16 +835,16 @@ async function deleteStudent(classSubjectId, studentId) {
       excelExportComplete: function (args) {},
       actionComplete: function (args) {
         console.log(args);
-        
-          if (args.requestType === 'batchsave') {
-              const list_data = [];
 
-              args.rows.forEach((element) => {
-                list_data.push(element.data);
-              });
+        if (args.requestType === 'batchsave') {
+          const list_data = [];
 
-              updateGridDataChanges(list_data);
-          }
+          args.rows.forEach((element) => {
+            list_data.push(element.data);
+          });
+
+          updateGridDataChanges(list_data);
+        }
       },
     });
 
@@ -839,7 +865,11 @@ async function deleteStudent(classSubjectId, studentId) {
             if (rowData) {
               // Find TeacherName in teacherData using rowData.TeacherId
               const teacherName = rowData
-                ? (teacherData.find(teacher => teacher.TeacherId === rowData.TeacherId) || {}).TeacherName
+                ? (
+                    teacherData.find(
+                      (teacher) => teacher.TeacherId === rowData.TeacherId
+                    ) || {}
+                  ).TeacherName
                 : null;
 
               fetchStudents({
@@ -863,33 +893,32 @@ async function deleteStudent(classSubjectId, studentId) {
       grid.filterSettings.showFilterBarOperator = args.checked;
       grid.clearFiltering();
     });
-}
+  }
 
-// Function to save changes to the server
+  // Function to save changes to the server
   function updateGridDataChanges(updatedRecords) {
     console.log('updatedRecords: ', updatedRecords);
     // Make a POST request to the Flask server
-    fetch( `${api_base_url}/update/class-subject`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedRecords),
+    fetch(`${api_base_url}/update/class-subject`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedRecords),
     })
-    .then(response => response.json())
-    .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         console.log('Server response:', data);
         // If success throw notyf showing the data.result
         if (data.result) {
           notyf.success(data.result);
           return;
-        } 
-    })
-    .catch(error => {
+        }
+      })
+      .catch((error) => {
         console.error('Error:', error);
         // Handle errors if needed
-    });
-    
+      });
   }
 
   function displayGridStudentList(json_student_list, classSubjectId) {
@@ -902,6 +931,7 @@ async function deleteStudent(classSubjectId, studentId) {
       allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
+      pageSettings: { pageSize: 5 }, // Set the page size
       // rowData: json_class['ClassSubjectGrade'],
       columns: [
         {
@@ -929,7 +959,7 @@ async function deleteStudent(classSubjectId, studentId) {
           template:
             '<button class="btn-delete px-4 py-2 bg-c5 text-white font-bold" >Delete</button>', // Add a button to the cell
           width: 150,
-          allowEditing: false
+          allowEditing: false,
         },
       ],
 
@@ -953,7 +983,7 @@ async function deleteStudent(classSubjectId, studentId) {
 
               const confirmBtn = document.getElementById('confirmBtn');
               const cancelBtn = document.getElementById('cancelBtn');
-              
+
               confirmBtn.onclick = () => {
                 deleteStudent(rowData.ClassSubjectId, rowData.StudentId);
                 deleteModal.classList.add('hidden');
@@ -961,7 +991,6 @@ async function deleteStudent(classSubjectId, studentId) {
               cancelBtn.onclick = () => {
                 deleteModal.classList.add('hidden');
               };
-
             }
           }
         }
@@ -1000,10 +1029,8 @@ async function deleteStudent(classSubjectId, studentId) {
     }
 
     // Hide the modal
-    document.getElementById('myModal').classList.add('hidden');
+    document.getElementById('studentListModal').classList.add('hidden');
   }
-
-
 
   function hideElement(elementId) {
     document.getElementById(elementId).classList.add('hidden');

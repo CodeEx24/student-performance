@@ -1,5 +1,5 @@
-{% extends "universityadmin/layout.html" %}
-
+{% extends "universityadmin/layout.html" %} {% block title %}
+<title>Class List</title> {% endblock title %}
 <!----------------- STYLE ----------------->
 {% block style %}
 
@@ -250,6 +250,7 @@
     chart.appendTo(`#columnChartClassPerformance`);
 
     document.getElementById('myModal').classList.remove('hidden');
+    document.getElementById('myModal').classList.add('flex');
   }
 
   // JavaScript function to close the modal
@@ -288,6 +289,7 @@
       allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
+      pageSettings: { pageSize: 10 }, // Set the page size
       // rowData: json_class['ClassSubjectGrade'],
       columns: [
         {
@@ -388,7 +390,6 @@
 
   async function submitClass(event) {
     event.preventDefault();
-    showLoadingModal();
 
     const fileErrorElement = document.getElementById('class-file-error');
     const fileInput = document.getElementById('excelFile');
@@ -450,14 +451,14 @@
     const apiUrlSubmitClass =
       "{{ url_for('university_admin_api.submitClass') }}";
 
+    showLoadingModal('loadingModal');
     await fetch(apiUrlSubmitClass, {
       method: 'POST',
       body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
-        closeLoadingModal();
-        console.log(data);
+        console.log('DATA: ', data);
         if (data.result) {
           notyf.success(data.result);
           // Get the grid datasource and concat the data.data
@@ -469,9 +470,49 @@
           return;
         }
 
-        if (data.error) {
+        if (data.warning) {
+          notyf.open({
+            type: 'warning',
+            message: data.warning,
+          });
           errorContainer.classList.remove('hidden');
-          console.log('DATAIN ERROR: ', data);
+          const grid = document.getElementById('grid-class').ej2_instances[0];
+          const dataSource = grid.dataSource;
+          grid.dataSource = data.data.concat(dataSource);
+
+          if (data.errors.class_data_exist.length > 0) {
+            showELement('class-error');
+
+            handleListErrors(
+              data.errors.class_data_exist,
+              'class-exist-list-error'
+            );
+          }
+
+          if (data.errors.curriculum_not_exist.length > 0) {
+            showELement('curriculum-error');
+
+            handleListErrors(
+              data.errors.curriculum_not_exist,
+              'curriculum-not-exist-list-error'
+            );
+          }
+
+          if (data.errors.list_course_not_exist.length > 0) {
+            showELement('course-error');
+            // ccreate an error list
+            data.errors.list_course_not_exist.forEach((error) => {
+              const errorP = document.createElement('li');
+              errorP.innerText = error;
+              // create list in error
+              courseNotExistElement.appendChild(errorP);
+            });
+          }
+        }
+
+        if (data.error) {
+          notyf.error(data.error);
+          errorContainer.classList.remove('hidden');
 
           if (data.errors.class_data_exist.length > 0) {
             showELement('class-error');
@@ -504,7 +545,11 @@
         }
       })
       .catch((error) => {
-        closeLoadingModal();
+        console.log(error);
+        notyf.error(error);
+      })
+      .finally(() => {
+        closeLoadingModal('loadingModal');
       });
   }
 

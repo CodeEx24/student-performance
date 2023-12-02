@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from models import Student, db
 import os
 
-from decorators.auth_decorators import role_required
+from decorators.auth_decorators import preventAuthenticated, role_required
 
 # FUNCTIONS IMPORT
 from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, getStudentData, updateStudentData, updatePassword, getCurrentUser
@@ -55,6 +55,7 @@ def forgotPassword():
 
 # Step 6: Create a route to render the password reset confirmation form
 @student_api.route('/reset_password_confirm/<token>', methods=['GET'])
+@preventAuthenticated
 def resetPasswordConfirm(token):
     print("GETTING")
     # Check if the token is valid and not expired
@@ -281,7 +282,7 @@ def subjectsGrade():
     student = getCurrentUser()
     if student:
         json_subjects_grade = getSubjectsGrade(student.StudentId)
-
+        print('json_subjects_grade: ', json_subjects_grade)
         if json_subjects_grade:
             return (json_subjects_grade)
         else:

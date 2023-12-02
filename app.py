@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv
 
 from models import init_db
-from flask_jwt_extended import JWTManager
+# from flask_jwt_extended import JWTManager
 
 from decorators.auth_decorators import preventAuthenticated, role_required
 from datetime import  timedelta
@@ -37,7 +37,7 @@ def create_app():
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DEVELOPMENT_DATABASE_URI')
         
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+    # app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     
@@ -50,7 +50,7 @@ def create_app():
     allowed_origins = ["*"]
     CORS(app, origins=allowed_origins, allow_headers=["Authorization", "X-API-Key"])
 
-    jwt = JWTManager(app)
+    # jwt = JWTManager(app)
     init_db(app)
     
    
@@ -84,8 +84,6 @@ def create_app():
     
     @app.before_request
     def before_request():
-        print(os.getenv('DEVELOPMENT_DATABASE_URI'))
-
         session.permanent=True
         pass
     

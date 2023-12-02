@@ -224,7 +224,7 @@ def fetchStudents():
         if json_student_data:
             return (json_student_data)
         else:
-            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+            return jsonify(error="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return render_template('404.html'), 404
 
@@ -390,7 +390,7 @@ def updateClassSubject():
 @role_required('universityAdmin')
 def submitStudentsClassSubject(class_subject_id):
     print("class_subject_id: ", class_subject_id)
-    print("REQUEST FILES: ", request.files)
+
     universityAdmin = getCurrentUser()
     if universityAdmin:
         if 'studentSubjectExcel' not in request.files:

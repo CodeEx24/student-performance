@@ -1,5 +1,5 @@
-{% extends "universityadmin/layout.html" %}
-
+{% extends "universityadmin/layout.html" %} {% block title %}
+<title>Students</title> {% endblock title %}
 <!----------------- STYLE ----------------->
 {% block style %}
 
@@ -168,11 +168,12 @@
         console.log('RESULT: ', data);
 
         if (data.result) {
-          notyf.success(data.result);
           const grid = document.getElementById('grid').ej2_instances[0];
           data.data.forEach((student) => {
             grid.dataSource = grid.dataSource.concat(student);
           });
+          notyf.success(data.result);
+
           grid.refresh();
         } else {
           // Get students-exist-error and remove content
@@ -209,8 +210,11 @@
     }
 
     const data = await response.json();
-    console.log('data: ', data);
-    displayStudent(data, 10);
+    if (!data.error) {
+      displayStudent(data, 10);
+    } else {
+      displayStudent([], 10);
+    }
   }
 
   // Function to initialize and display the Syncfusion Grid

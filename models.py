@@ -216,7 +216,7 @@ class Subject(db.Model):
 
     SubjectId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     SubjectCode = db.Column(db.String(20), unique=True)
-    Name = db.Column(db.String(100))
+    Name = db.Column(db.String(200))
     Description = db.Column(db.String(200))
     Units = db.Column(db.Float)
     IsNSTP = db.Column(db.Boolean, default=False)
@@ -417,9 +417,9 @@ def init_db(app):
         from data.metadata import metadata_data
 
         def create_sample_data():
-            for data in student_data:
-                student = Student(**data)
-                db.session.add(student)
+            # for data in student_data:
+            #     student = Student(**data)
+            #     db.session.add(student)
 
             for data in faculty_data:
                 faculty = Faculty(**data)
@@ -443,56 +443,56 @@ def init_db(app):
                 db.session.add(subject)
                 db.session.flush()
 
-            for data in metadata_data:
-                metadata = Metadata(**data)
-                db.session.add(metadata)
-                db.session.flush()
+            # for data in metadata_data:
+            #     metadata = Metadata(**data)
+            #     db.session.add(metadata)
+            #     db.session.flush()
 
-            for data in curriculum_data:
-                curriculum = Curriculum(**data)
-                db.session.add(curriculum)
-                db.session.flush()
+            # for data in curriculum_data:
+            #     curriculum = Curriculum(**data)
+            #     db.session.add(curriculum)
+            #     db.session.flush()
                 
-            for data in course_enrolled_data:
-                course_enrolled = CourseEnrolled(**data)
-                db.session.add(course_enrolled)
-                db.session.flush()
+            # for data in course_enrolled_data:
+            #     course_enrolled = CourseEnrolled(**data)
+            #     db.session.add(course_enrolled)
+            #     db.session.flush()
 
             
-            for data in class_data:
-                class_ = Class(**data)
-                db.session.add(class_)
-                db.session.flush()
+            # for data in class_data:
+            #     class_ = Class(**data)
+            #     db.session.add(class_)
+            #     db.session.flush()
 
-            for data in class_subject_data:
-                class_subject = ClassSubject(**data)
-                db.session.add(class_subject)
-                db.session.flush()
+            # for data in class_subject_data:
+            #     class_subject = ClassSubject(**data)
+            #     db.session.add(class_subject)
+            #     db.session.flush()
 
-            for data in student_class_subject_grade_data:
-                student_class_subject_grade = StudentClassSubjectGrade(**data)
-                db.session.add(student_class_subject_grade)
-                db.session.flush()
+            # for data in student_class_subject_grade_data:
+            #     student_class_subject_grade = StudentClassSubjectGrade(**data)
+            #     db.session.add(student_class_subject_grade)
+            #     db.session.flush()
 
-            for data in student_class_grade_data:
-                student_class_grade = StudentClassGrade(**data)
-                db.session.add(student_class_grade)
-                db.session.flush()
+            # for data in student_class_grade_data:
+            #     student_class_grade = StudentClassGrade(**data)
+            #     db.session.add(student_class_grade)
+            #     db.session.flush()
 
-            for data in class_subject_grade_data:
-                class_subject_grade = ClassSubjectGrade(**data)
-                db.session.add(class_subject_grade)
-                db.session.flush()
+            # for data in class_subject_grade_data:
+            #     class_subject_grade = ClassSubjectGrade(**data)
+            #     db.session.add(class_subject_grade)
+            #     db.session.flush()
 
-            for data in class_grade_data:
-                class_grade = ClassGrade(**data)
-                db.session.add(class_grade)
-                db.session.flush()
+            # for data in class_grade_data:
+            #     class_grade = ClassGrade(**data)
+            #     db.session.add(class_grade)
+            #     db.session.flush()
 
-            for data in course_grade_data:
-                course_grade = CourseGrade(**data)
-                db.session.add(course_grade)
-                db.session.flush()
+            # for data in course_grade_data:
+            #     course_grade = CourseGrade(**data)
+            #     db.session.add(course_grade)
+            #     db.session.flush()
             
             db.session.commit()
             db.session.close()

@@ -1,5 +1,5 @@
-{% extends "universityadmin/layout.html" %}
-
+{% extends "universityadmin/layout.html" %} {% block title %}
+<title>Curriculum</title> {% endblock title %}
 <!----------------- STYLE ----------------->
 {% block style %}
 
@@ -495,7 +495,7 @@
     async function submitCurriculumSubjects(event) {
       event.preventDefault();
       // get loadingModal
-      showLoadingModal();
+      showLoadingModal('loadingModal');
 
       console.log('INSIDE SUBMIT CURRICULUM');
 
@@ -558,7 +558,7 @@
       } catch (error) {
         console.log('Error:', error);
       } finally {
-        closeLoadingModal();
+        closeLoadingModal('loadingModal');
       }
     }
 

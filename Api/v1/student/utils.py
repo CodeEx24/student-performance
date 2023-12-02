@@ -199,21 +199,20 @@ def getOverallGrade(str_student_id):
 
 def getSubjectsGrade(str_student_id):
     try:
-
+        print("STUDENT ID: ", str_student_id)
         data_student_class_subject_grade = (
-            db.session.query(StudentClassSubjectGrade,
-                             ClassSubject, Subject, Class, Faculty, Course)
+            db.session.query(StudentClassSubjectGrade, ClassSubject, Class, Course, Subject )
             .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .join(Class, ClassSubject.ClassId == Class.ClassId)
             .join(Course, Course.CourseId == Class.CourseId)
             .join(Subject, ClassSubject.SubjectId == Subject.SubjectId)
-            .join(Faculty, ClassSubject.TeacherId == Faculty.TeacherId)
             .filter(StudentClassSubjectGrade.StudentId == str_student_id)
             .order_by(desc(Class.Batch), desc(Class.Semester))
             .all()
         )
+        print("data_student_class_subject_grade: ", data_student_class_subject_grade)
         
-      
+
         
         if data_student_class_subject_grade:
             class_combinations = set()
@@ -221,12 +220,25 @@ def getSubjectsGrade(str_student_id):
             list_student_class_subject_grade = []
 
             for student_class_subject_grade in data_student_class_subject_grade:
+                teacher_name = ""
+                
+                # Check if teacher exist
+                if student_class_subject_grade.ClassSubject.TeacherId:
+                    # Query the teacher
+                    data_teacher = (
+                        db.session.query(Faculty)
+                        .filter(Faculty.FacultyId == student_class_subject_grade.ClassSubject.TeacherId)
+                        .first()
+                    )
+                    teacher_name = data_teacher.Name
+                
+                
                 class_combination = (
                     student_class_subject_grade.Class.ClassId,
                     student_class_subject_grade.Class.Batch,
                     student_class_subject_grade.Class.Semester
                 )
-
+                print("class_combination: ", class_combination)
                 if class_combination not in class_combinations:
                     class_combinations.add(class_combination)
 
@@ -236,33 +248,40 @@ def getSubjectsGrade(str_student_id):
                         .filter(StudentClassGrade.StudentId == str_student_id, StudentClassGrade.ClassId == student_class_subject_grade.Class.ClassId)
                         .first()
                     ) 
-
+                    print("data_student_class_grade: ", data_student_class_grade)
                     dict_class_group = {
                         "Batch": student_class_subject_grade.Class.Batch,
-                        "GPA": format(data_student_class_grade.Grade, '.2f'),
+                        "GPA": format(data_student_class_grade.Grade, '.2f') if data_student_class_grade and data_student_class_grade.Grade is not None else "No GPA yet",
                         "Semester": student_class_subject_grade.Class.Semester,
                         "Subject": []
                     }
+
                     list_student_class_subject_grade.append(dict_class_group)
-
-                    
-
+                    print("dict_class_group: ", dict_class_group)
+                
+                print("========================================================================")
+                print('student_class_subject_grade.Subject.Name: ', student_class_subject_grade.Subject.Name)
+                print('student_class_subject_grade.StudentClassSubjectGrade.Grade: ', student_class_subject_grade.StudentClassSubjectGrade.Grade)
                 # Append the subject details to the existing class group
                 subject_details = {
-                    "Grade": format(student_class_subject_grade.StudentClassSubjectGrade.Grade, ".2f"),
+                    "Grade": format(student_class_subject_grade.StudentClassSubjectGrade.Grade, '.2f') if student_class_subject_grade.StudentClassSubjectGrade.Grade is not None else "0.00",
                     "Subject": student_class_subject_grade.Subject.Name,
-                    "Code": student_class_subject_grade.Subject.SubjectId,
-                    "Teacher": student_class_subject_grade.Faculty.Name,
-                    "SecCode": str(student_class_subject_grade.Course.CourseCode) + " " + str(student_class_subject_grade.Class.Year) + "-" + str(student_class_subject_grade.Class.Section),
+                    "Code": student_class_subject_grade.Subject.SubjectCode,
+                    "Teacher": teacher_name if teacher_name else "N/A",
+                    "SecCode": f"{student_class_subject_grade.Course.CourseCode} {student_class_subject_grade.Class.Year}-{student_class_subject_grade.Class.Section}",
                     "Units": format(student_class_subject_grade.Subject.Units, '.2f'),
-                    "Status": checkStatus(student_class_subject_grade.StudentClassSubjectGrade.Grade)
+                    "Status": checkStatus(student_class_subject_grade.StudentClassSubjectGrade.Grade) if student_class_subject_grade.StudentClassSubjectGrade.Grade is not None else "-"
+                        
                 }
+
                 dict_class_group["Subject"].append(subject_details)
+            print('list_student_class_subject_grade: ', list_student_class_subject_grade)
             return (list_student_class_subject_grade)
 
         else:
             return None
     except Exception as e:
+        print("ERRIR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
 
