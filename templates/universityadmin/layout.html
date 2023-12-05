@@ -634,16 +634,16 @@
     </script>
 
     <script>
-      function showLoadingModal(elemetId) {
+      function showModal(elemetId) {
         const loadingModal = document.getElementById(elemetId);
         loadingModal.classList.add('flex');
         loadingModal.classList.remove('hidden');
       }
 
-      function closeLoadingModal(elemetId) {
+      function closeModal(elemetId) {
         const loadingModal = document.getElementById(elemetId);
-        loadingModal.classList.add('flex');
         loadingModal.classList.add('hidden');
+        loadingModal.classList.remove('flex');
       }
     </script>
 

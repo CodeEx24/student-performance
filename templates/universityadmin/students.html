@@ -1,16 +1,7 @@
 {% extends "universityadmin/layout.html" %} {% block title %}
 <title>Students</title> {% endblock title %}
 <!----------------- STYLE ----------------->
-{% block style %}
-
-<style>
-  /* #lister_svg{
-    background-color: aqua;
-  
-  }
-   */
-</style>
-{% endblock style %}
+{% block style %} {% endblock style %}
 
 <!----------------- CONTENT ----------------->
 {% block content %}
@@ -241,6 +232,15 @@
         pageSizes: [10, 20, 50, 100], // Custom page size options
         showPageCount: true, // Display page count
         showPager: true, // Display pager
+      },
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      excelExportComplete: function (args) {
+        // Exclude the 'Subject Code' column from the exported Excel file
+        args.xlsxExportOptions.sheets[0].columns =
+          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
+            return column.field !== 'Subject';
+          });
       },
     });
 

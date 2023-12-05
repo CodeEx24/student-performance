@@ -163,6 +163,11 @@ def create_app():
     @role_required('faculty')
     def facultyHome():
         return render_template('faculty/dashboard.html', faculty_api_base_url=faculty_api_base_url, current_page="dashboard")
+    
+    @app.route('/faculty/practice')
+    @role_required('faculty')
+    def facultyPractice():
+        return render_template('faculty/practice.html', faculty_api_base_url=faculty_api_base_url, current_page="dashboard")
 
 
     @app.route('/faculty/grades')

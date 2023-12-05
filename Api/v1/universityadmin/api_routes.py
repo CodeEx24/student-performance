@@ -295,11 +295,9 @@ def fetchStudentClassSubjectData(class_subject_id):
 @university_admin_api.route('/delete/class-subject/<int:class_subject_id>/student/<int:student_id>', methods=['POST'])
 @role_required('universityAdmin')
 def deleteClassSubjectStudents(class_subject_id, student_id):
-    print("HERE IN CLASS SUBJECT")
     universityAdmin = getCurrentUser()
     if universityAdmin:
         json_class_subject_data = deleteStudent(class_subject_id, student_id)
-        print('json_class_subject_data: ', json_class_subject_data)
         if json_class_subject_data:
             return (json_class_subject_data)
         else:

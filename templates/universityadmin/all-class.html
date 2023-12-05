@@ -451,7 +451,7 @@
     const apiUrlSubmitClass =
       "{{ url_for('university_admin_api.submitClass') }}";
 
-    showLoadingModal('loadingModal');
+    showModal('loadingModal');
     await fetch(apiUrlSubmitClass, {
       method: 'POST',
       body: formData,
@@ -549,7 +549,7 @@
         notyf.error(error);
       })
       .finally(() => {
-        closeLoadingModal('loadingModal');
+        closeModal('loadingModal');
       });
   }
 

@@ -359,14 +359,14 @@
     console.log('RUNNING BEFORE SUBMIT TO CLASS');
 
     const apiUrlSubmitClassStudent = `${api_base_url}/add/class-student/${classId}`;
-    showLoadingModal('loadingModal');
+    showModal('loadingModal');
     await fetch(apiUrlSubmitClassStudent, {
       method: 'POST',
       body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
-        // closeLoadingModal();
+        // closeModal();
         console.log('DATA: ', data);
         if (data.result) {
           notyf.success(data.result);
@@ -425,7 +425,7 @@
         console.log(error);
       })
       .finally(() => {
-        closeLoadingModal('loadingModal');
+        closeModal('loadingModal');
       });
   }
 
@@ -492,7 +492,7 @@
     // Hide student-num-error and student-subject-error elements
     hideElement('student-num-error');
     hideElement('student-subject-error');
-    showLoadingModal('loadingModal');
+    showModal('loadingModal');
     fetch(`${api_base_url}/submit/students-subject/${classSubjectId}`, {
       method: 'POST',
       body: formData,
@@ -562,7 +562,7 @@
         notyf.error(error);
       })
       .finally(() => {
-        closeLoadingModal('loadingModal');
+        closeModal('loadingModal');
       });
   }
 
