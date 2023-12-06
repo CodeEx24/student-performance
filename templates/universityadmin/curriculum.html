@@ -54,34 +54,6 @@
             </button>
           </div>
           <p id="class-file-error" class="text-c4 text-sm"></p>
-          <div id="errors" class="hidden">
-            <div>
-              <p
-                id="subject-error"
-                class="text-c1 text-xl font-semibold hidden"
-              >
-                Subject not exist:
-              </p>
-              <ul id="subject-list-error" class="text-c1 text-sm"></ul>
-            </div>
-
-            <div>
-              <p
-                id="curriculum-error"
-                class="text-c1 text-xl font-semibold hidden"
-              >
-                Curriculum already exist:
-              </p>
-              <ul id="curriculum-list-error" class="text-c1 text-sm"></ul>
-            </div>
-
-            <div>
-              <p id="course-error" class="text-c1 text-xl font-semibold hidden">
-                Course not exist:
-              </p>
-              <ul id="course-list-error" class="text-c1 text-sm"></ul>
-            </div>
-          </div>
         </form>
       </div>
 
@@ -103,7 +75,7 @@
   <!-- Modal Overlay -->
   <div
     class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"
-    onclick="closeModalCurriculumSubjects()"
+    onclick="closeModalError('curriculumErrorModal', 'grid-error-list')"
   ></div>
   <!-- Modal Content -->
   <div
@@ -113,9 +85,12 @@
     <div class="modal-header overflow-y-auto">
       <div class="flex justify-between">
         <h2 class="text-c1 text-2xl font-semibold">
-          Submit Curriculum Error List
+          Adding Students Error List
         </h2>
-        <button class="modal-close" onclick="closeModalCurriculumSubjects()">
+        <button
+          class="modal-close"
+          onclick="closeModalError('curriculumErrorModal', 'grid-error-list')"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -135,30 +110,6 @@
         <div id="grid-error-list" class="overflow-y-auto">
           <!-- This is the content of modal -->
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Structure -->
-  <div
-    id="deleteModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-10"
-  >
-    <div class="bg-white p-8 rounded shadow-md">
-      <p class="mb-4">Are you sure you want to remove this student?</p>
-      <div class="flex justify-end">
-        <button
-          id="cancelBtn"
-          class="mr-2 px-4 py-2 text-white bg-gray-600 rounded"
-        >
-          Cancel
-        </button>
-        <button
-          id="confirmBtn"
-          class="px-4 py-2 text-white bg-[#9D1D1D] rounded"
-        >
-          Confirm
-        </button>
       </div>
     </div>
   </div>
@@ -194,21 +145,6 @@
 
 <!-- SCRIPTS DATA -->
 {% block script %}
-
-<!-- FETCH CLASS PERFORMANCE (CHART) -->
-<script>
-  function closeModalCurriculumSubjects() {
-    // Get the #grid-student-list element
-    var gridErrorList = document.getElementById('grid-error-list');
-
-    // Remove all child nodes (content) inside #grid-student-list
-    while (gridErrorList.firstChild) {
-      gridErrorList.removeChild(gridErrorList.firstChild);
-    }
-
-    closeModal('curriculumErrorModal');
-  }
-</script>
 
 <!-- FETCH ALL CLASS DATA (GRIDS)-->
 <script>
@@ -442,31 +378,13 @@
 
       const data = await response.json();
 
-      if (data.result) {
-        handleAddData('grid-curriculum', data);
-        notyf.success(data.result);
-        fileInput.value = '';
-      }
-
-      if (data.warning) {
-        notyf.open({
-          type: 'warning',
-          message: data.warning,
-        });
-        displaySubmitErrorCurriculum(data.errors);
-        showModal('curriculumErrorModal');
-        handleAddData('grid-curriculum', data);
-        // Delete input fields value
-        fileInput.value = '';
-      }
-
-      if (data.error) {
-        notyf.error(data.error);
-        // closeModalCurriculumSubjects('loadingModal');
-        displaySubmitErrorCurriculum(data.errors);
-        showModal('curriculumErrorModal');
-        fileInput.value = '';
-      }
+      handleDataSubmitResults(
+        data,
+        'grid-curriculum',
+        'curriculumErrorModal',
+        fileInput,
+        displaySubmitErrorCurriculum
+      );
     } catch (error) {
       console.log('Error:', error);
     } finally {
@@ -570,12 +488,6 @@
       grid.filterSettings.showFilterBarOperator = args.checked;
       grid.clearFiltering();
     });
-  }
-
-  function handleAddData(elementId, data) {
-    const grid = document.getElementById('grid-curriculum').ej2_instances[0];
-    const dataSource = grid.dataSource;
-    grid.dataSource = data.data.concat(dataSource);
   }
 </script>
 {% endblock script %}

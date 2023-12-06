@@ -63,34 +63,6 @@
             </button>
           </div>
           <p id="class-file-error" class="text-c4 text-sm"></p>
-          <div id="errors" class="hidden">
-            <div>
-              <p id="course-error" class="text-c1 text-xl font-semibold hidden">
-                Course not existing:
-              </p>
-              <ul id="course-not-exist-list-error" class="text-c1 text-sm"></ul>
-            </div>
-
-            <div>
-              <p
-                id="curriculum-error"
-                class="text-c1 text-xl font-semibold hidden"
-              >
-                Curriculum not exist for:
-              </p>
-              <ul
-                id="curriculum-not-exist-list-error"
-                class="text-c1 text-sm"
-              ></ul>
-            </div>
-
-            <div>
-              <p id="class-error" class="text-c1 text-xl font-semibold hidden">
-                Class already exist:
-              </p>
-              <ul id="class-exist-list-error" class="text-c1 text-sm"></ul>
-            </div>
-          </div>
         </form>
       </div>
 
@@ -98,6 +70,54 @@
       <div class="flex items-end justify-between">
         <div class="w-full bg-white p-4 mt-4">
           <div id="grid-class"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR ERROR -->
+<div
+  id="allClassErrorModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div
+    class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"
+    onclick="closeModalError('allClassErrorModal', 'grid-error-all-class-list')"
+  ></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">
+          Adding Classes Error List
+        </h2>
+        <button
+          class="modal-close"
+          onclick="closeModalError('allClassErrorModal', 'grid-error-all-class-list')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body w-full relative mt-8">
+        <div id="grid-error-all-class-list" class="overflow-y-auto">
+          <!-- This is the content of modal -->
         </div>
       </div>
     </div>
@@ -118,7 +138,7 @@
     <div class="modal-header">
       <div class="flex justify-between">
         <h2 class="text-c1 text-2xl font-semibold">Performance Details</h2>
-        <button class="modal-close" onclick="closeModal()">
+        <button class="modal-close" onclick="closeModal('myModal')">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -157,16 +177,12 @@
 
 <div
   id="loadingModal"
-  class="modal hidden fixed inset-0 items-center justify-center z-50"
+  class="hidden modal flex fixed inset-0 items-center justify-center z-50"
 >
   <!-- Modal Overlay -->
   <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
-
   <!-- Modal Content -->
   <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
-    <!-- Modal Header -->
-
-    <!-- Modal Body -->
     <div class="modal-body w-full relative">
       <div class="flex flex-row gap-2">
         <div
@@ -251,11 +267,6 @@
 
     document.getElementById('myModal').classList.remove('hidden');
     document.getElementById('myModal').classList.add('flex');
-  }
-
-  // JavaScript function to close the modal
-  function closeModal() {
-    document.getElementById('myModal').classList.add('hidden');
   }
 </script>
 
@@ -394,42 +405,6 @@
     const fileErrorElement = document.getElementById('class-file-error');
     const fileInput = document.getElementById('excelFile');
     const file = fileInput.files[0];
-    // Get the exist
-    const errorContainer = document.getElementById('errors');
-    errorContainer.classList.add('hidden');
-
-    // Remove all errors message in those element if not exist in curriculum, subject and course
-
-    // Define the clearChildElements function
-    function clearChildElements(element) {
-      while (element.firstChild) {
-        element.removeChild(element.firstChild);
-      }
-    }
-
-    // Now you can use the function in your code
-    const courseNotExistElement = document.getElementById(
-      'course-not-exist-list-error'
-    );
-    if (courseNotExistElement) {
-      clearChildElements(courseNotExistElement);
-    }
-
-    const curriculumNotExistElement = document.getElementById(
-      'curriculum-not-exist-list-error'
-    );
-    if (curriculumNotExistElement) {
-      clearChildElements(curriculumNotExistElement);
-    }
-
-    const classExistElement = document.getElementById('class-exist-list-error');
-    if (classExistElement) {
-      clearChildElements(classExistElement);
-    }
-
-    hideElement('class-error');
-    hideElement('course-error');
-    hideElement('curriculum-error');
 
     if (!file) {
       fileErrorElement.innerText = 'Please choose a file.';
@@ -448,153 +423,109 @@
     const formData = new FormData();
     formData.append('excelFile', file);
 
-    const apiUrlSubmitClass =
-      "{{ url_for('university_admin_api.submitClass') }}";
+    try {
+      const apiUrlSubmitClass =
+        "{{ url_for('university_admin_api.submitClass') }}";
 
-    showModal('loadingModal');
-    await fetch(apiUrlSubmitClass, {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('DATA: ', data);
-        if (data.result) {
-          notyf.success(data.result);
-          // Get the grid datasource and concat the data.data
-          const grid = document.getElementById('grid-class').ej2_instances[0];
-          const dataSource = grid.dataSource;
-          grid.dataSource = data.data.concat(dataSource);
-          // add hidden in loadingModal
-          loadingModal.classList.add('hidden');
-          return;
-        }
-
-        if (data.warning) {
-          notyf.open({
-            type: 'warning',
-            message: data.warning,
-          });
-          errorContainer.classList.remove('hidden');
-          const grid = document.getElementById('grid-class').ej2_instances[0];
-          const dataSource = grid.dataSource;
-          grid.dataSource = data.data.concat(dataSource);
-
-          if (data.errors.class_data_exist.length > 0) {
-            showELement('class-error');
-
-            handleListErrors(
-              data.errors.class_data_exist,
-              'class-exist-list-error'
-            );
-          }
-
-          if (data.errors.curriculum_not_exist.length > 0) {
-            showELement('curriculum-error');
-
-            handleListErrors(
-              data.errors.curriculum_not_exist,
-              'curriculum-not-exist-list-error'
-            );
-          }
-
-          if (data.errors.list_course_not_exist.length > 0) {
-            showELement('course-error');
-            // ccreate an error list
-            data.errors.list_course_not_exist.forEach((error) => {
-              const errorP = document.createElement('li');
-              errorP.innerText = error;
-              // create list in error
-              courseNotExistElement.appendChild(errorP);
-            });
-          }
-        }
-
-        if (data.error) {
-          notyf.error(data.error);
-          errorContainer.classList.remove('hidden');
-
-          if (data.errors.class_data_exist.length > 0) {
-            showELement('class-error');
-
-            handleListErrors(
-              data.errors.class_data_exist,
-              'class-exist-list-error'
-            );
-          }
-
-          if (data.errors.curriculum_not_exist.length > 0) {
-            showELement('curriculum-error');
-
-            handleListErrors(
-              data.errors.curriculum_not_exist,
-              'curriculum-not-exist-list-error'
-            );
-          }
-
-          if (data.errors.list_course_not_exist.length > 0) {
-            showELement('course-error');
-            // ccreate an error list
-            data.errors.list_course_not_exist.forEach((error) => {
-              const errorP = document.createElement('li');
-              errorP.innerText = error;
-              // create list in error
-              courseNotExistElement.appendChild(errorP);
-            });
-          }
-        }
+      showModal('loadingModal');
+      await fetch(apiUrlSubmitClass, {
+        method: 'POST',
+        body: formData,
       })
-      .catch((error) => {
-        console.log(error);
-        notyf.error(error);
-      })
-      .finally(() => {
-        closeModal('loadingModal');
-      });
-  }
-
-  function handleListErrors(errors, elementId) {
-    const element = document.getElementById(elementId);
-
-    if (!element) {
-      console.error(`Element with ID '${elementId}' not found.`);
-      return;
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('DATA: ', data);
+          handleDataSubmitResults(
+            data,
+            'grid-class',
+            'allClassErrorModal',
+            fileInput,
+            displaySubmitErrorAllClass
+          );
+        })
+        .catch((error) => {
+          console.log(error);
+          notyf.error(error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    } catch (error) {
+      console.log(error);
     }
+  }
 
-    errors.forEach((error) => {
-      const semesterOrdinal = getOrdinal(error.Semester);
-      const errorP = createErrorList(
-        `${error.CourseCode} ${error.Year}-${error.Semester} (${error.Batch} - ${semesterOrdinal} Semester)`
-      );
-      element.appendChild(errorP);
+  function displaySubmitErrorAllClass(classData) {
+    console.log(classData);
+    var grid = new ej.grids.Grid({
+      dataSource: classData,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      pageSettings: { pageSize: 10 }, // Set the page size
+      // rowData: json_class['ClassSubjectGrade'],
+      columns: [
+        {
+          field: 'CourseCode',
+          headerText: 'Course',
+          width: 100,
+        },
+
+        {
+          field: 'Section',
+          headerText: 'Subject Code',
+          width: 100,
+        },
+        {
+          field: 'Year',
+          headerText: 'Year',
+          width: 100,
+        },
+        {
+          field: 'Semester',
+          headerText: 'Semester',
+          width: 100,
+        },
+        {
+          field: 'Batch',
+          headerText: 'Batch',
+          width: 100,
+        },
+        {
+          field: 'Error',
+          headerText: 'Error',
+          width: 100,
+        },
+      ],
+
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      excelExportComplete: function (args) {
+        // Exclude the 'Subject Code' column from the exported Excel file
+        args.xlsxExportOptions.sheets[0].columns =
+          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
+            return column.field !== 'Subject';
+          });
+      },
     });
-  }
 
-  function getOrdinal(semester) {
-    const suffixes = ['st', 'nd', 'rd'];
-    const remainder = semester % 10;
-    const suffix =
-      remainder >= 1 &&
-      remainder <= 3 &&
-      semester !== 11 &&
-      semester !== 12 &&
-      semester !== 13
-        ? suffixes[remainder - 1]
-        : 'th';
-    return `${semester}${suffix}`;
-  }
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-error-all-class-list_excelexport') {
+        grid.excelExport();
+      }
+    };
 
-  function createErrorList(text, type) {
-    const errorP = document.createElement('li');
-    errorP.innerText = text;
-    return errorP;
-  }
-  function hideElement(elementId) {
-    document.getElementById(elementId).classList.add('hidden');
-  }
+    // Render the grid
+    grid.appendTo('#grid-error-all-class-list');
 
-  function showELement(elementId) {
-    document.getElementById(elementId).classList.remove('hidden');
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
   }
 </script>
 {% endblock script %}

@@ -59,12 +59,6 @@
             </button>
           </div>
           <p id="students-file-error" class="text-c4 text-sm"></p>
-          <div id="exist" class="hidden">
-            <p class="text-c1 text-xl font-semibold">
-              Student number or email already exist:
-            </p>
-            <div id="students-exist-error" class="text-c1 text-sm"></div>
-          </div>
         </form>
       </div>
 
@@ -105,32 +99,80 @@
     </div>
   </div>
 </div>
+
+<div
+  id="studentErrorModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div
+    class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"
+    onclick="closeModalError('studentErrorModal', 'grid-error-students-list')"
+  ></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">
+          Adding Curriculum Error List
+        </h2>
+        <button
+          class="modal-close"
+          onclick="closeModalError('studentErrorModal', 'grid-error-students-list')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body w-full relative mt-8">
+        <div id="grid-error-students-list" class="overflow-y-auto">
+          <!-- This is the content of modal -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}
 
 <!-- SCRIPTS DATA -->
 {% block script %}
 
+<script>
+  function closeModalCurriculumSubjects(modalElementId, listElementId) {
+    // Get the #grid-student-list element
+    var gridErrorList = document.getElementById(listElementId);
+
+    // Remove all child nodes (content) inside #grid-student-list
+    while (gridErrorList.firstChild) {
+      gridErrorList.removeChild(gridErrorList.firstChild);
+    }
+
+    closeModal(modalElementId);
+  }
+</script>
+
 <!-- ADDING STUDENTS -->
 <script>
   async function submitStudents(event) {
     event.preventDefault();
-    // get loadingModal
-    const loadingModal = document.getElementById('loadingModal');
-    loadingModal.classList.remove('hidden');
-
-    console.log('INSIDE SUBMIT STUDENTS');
 
     const fileErrorElement = document.getElementById('students-file-error');
     const fileInput = document.getElementById('excelFile');
     const file = fileInput.files[0];
-    const existElement = document.getElementById('exist');
-
-    existElement.classList.add('hidden');
-    const listElement = document.getElementById('students-exist-error');
-
-    while (listElement.firstChild) {
-      listElement.removeChild(listElement.firstChild);
-    }
 
     if (!file) {
       fileErrorElement.innerText = 'Please choose a file.';
@@ -149,42 +191,123 @@
     const formData = new FormData();
     formData.append('excelFile', file);
 
-    fetch(`${api_base_url}/submit-students`, {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle API response here
-        console.log('RESULT: ', data);
-
-        if (data.result) {
-          const grid = document.getElementById('grid').ej2_instances[0];
-          data.data.forEach((student) => {
-            grid.dataSource = grid.dataSource.concat(student);
-          });
-          notyf.success(data.result);
-
-          grid.refresh();
-        } else {
-          // Get students-exist-error and remove content
-          if (data.existing_data) {
-            data.existing_data.forEach((element) => {
-              const p = document.createElement('p');
-              p.innerText = `${element.StudentNumber} - ${element.StudentEmail}`;
-              listElement.appendChild(p);
-            });
-            existElement.appendChild(listElement);
-          }
-          notyf.error(data.error);
-          existElement.classList.remove('hidden');
-        }
-        // hide loadingModal
-        loadingModal.classList.add('hidden');
+    try {
+      showModal('loadingModal');
+      fetch(`${api_base_url}/submit-students`, {
+        method: 'POST',
+        body: formData,
       })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          handleDataSubmitResults(
+            data,
+            'grid',
+            'studentErrorModal',
+            fileInput,
+            displaySubmitErrorStudents
+          );
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function displaySubmitErrorStudents(students) {
+    console.log('students: ', students);
+    var grid = new ej.grids.Grid({
+      dataSource: students,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      pageSettings: { pageSize: 10 }, // Set the page size
+      // rowData: json_class['ClassSubjectGrade'],
+      columns: [
+        {
+          field: 'StudentNumber',
+          headerText: 'Student Number',
+          width: 100,
+        },
+        {
+          field: 'Name',
+          headerText: 'Name',
+          width: 100,
+        },
+        {
+          field: 'Email',
+          headerText: 'Email',
+          width: 100,
+        },
+        {
+          field: 'Phone',
+          headerText: 'Phone',
+          width: 100,
+        },
+        {
+          field: 'Address',
+          headerText: 'Address',
+          width: 100,
+        },
+        {
+          field: 'Gender',
+          headerText: 'Gender',
+          width: 100,
+        },
+        {
+          field: 'CourseCode',
+          headerText: 'Course Code',
+          width: 100,
+        },
+        {
+          field: 'DateEnrolled',
+          headerText: 'Date Enrolled',
+          width: 100,
+        },
+        {
+          field: 'Batch',
+          headerText: 'Batch',
+          width: 100,
+        },
+        {
+          field: 'Error',
+          headerText: 'Error',
+          width: 100,
+        },
+      ],
+
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      excelExportComplete: function (args) {
+        // Exclude the 'Subject Code' column from the exported Excel file
+        args.xlsxExportOptions.sheets[0].columns =
+          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
+            return column.field !== 'Subject';
+          });
+      },
+    });
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-error-students-list_excelexport') {
+        grid.excelExport();
+      }
+    };
+
+    // Render the grid
+    grid.appendTo('#grid-error-students-list');
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
   }
 </script>
 
