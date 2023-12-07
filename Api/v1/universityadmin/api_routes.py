@@ -62,7 +62,6 @@ def updateDetails():
     universityAdmin = getCurrentUser()
     if universityAdmin:
         if request.method == 'POST':
-            print("HERE POSTING")
             email = request.json.get('email')
             number = request.json.get('number')
             residentialAddress = request.json.get('residentialAddress')
@@ -169,11 +168,9 @@ def classData():
 @university_admin_api.route('/class/performance/<int:id>', methods=['GET', 'POST'])
 @role_required('universityAdmin')
 def classPerformance(id):
-    print("THE ID: ", id)
     universityAdmin = getCurrentUser()
     if universityAdmin:
         json_class_performance = getClassPerformance(id)
-        print("json_class_performance: ", json_class_performance)
 
         if json_class_performance:
             return (json_class_performance)
@@ -186,8 +183,6 @@ def classPerformance(id):
 @university_admin_api.route('/submit-students', methods=['POST'])
 @role_required('universityAdmin')
 def submitStudents():
-    # print("IN UNIVERSITY ADMIN STUDENTS SERVER")
-    # print("REQUEST FILES: ", request.files)
     # Check if the request contains a file named 'excelFile'
     if 'excelFile' not in request.files:
         return jsonify({'error': 'No file part'}), 400
@@ -201,8 +196,6 @@ def submitStudents():
 @university_admin_api.route('/submit-class', methods=['POST'])
 @role_required('universityAdmin')
 def submitClass():
-    print("IN UNIVERSITY ADMIN STUDENTS SERVER")
-    print("REQUEST FILES: ", request.files)
     # Check if the request contains a file named 'excelFile'
     if 'excelFile' not in request.files:
         return jsonify({'error': 'No file part'}), 400
@@ -250,7 +243,6 @@ def classSubjectData():
 @role_required('universityAdmin')
 def fetchClassData(class_id):
     universityAdmin = getCurrentUser()
-    print("GETTING THE CLASS SUBJECT")
     if universityAdmin:
         json_class_subject_data = getClassSubject(class_id)
 
@@ -280,11 +272,9 @@ def fetchClassDetails(class_id):
 @university_admin_api.route('/class/subject/<int:class_subject_id>', methods=['GET'])
 @role_required('universityAdmin')
 def fetchStudentClassSubjectData(class_subject_id):
-    print("HERE IN CLASS SUBJECT")
     universityAdmin = getCurrentUser()
     if universityAdmin:
         json_class_subject_data = getStudentClassSubjectData(class_subject_id)
-        print('json_class_subject_data: ', json_class_subject_data)
         if json_class_subject_data:
             return (json_class_subject_data)
         else:
@@ -340,7 +330,6 @@ def fetchActiveTeacher():
 @university_admin_api.route('/curriculum/subjects/<int:metadata_id>', methods=['GET'])
 @role_required('universityAdmin')
 def fetchCurriculumSubjects(metadata_id):
-    print("HERE IN CURRICULUM SUBJECTS")
     universityAdmin = getCurrentUser()
     if universityAdmin:
         json_class_subject_data = getCurriculumSubject(metadata_id)
@@ -356,14 +345,12 @@ def fetchCurriculumSubjects(metadata_id):
 @university_admin_api.route('/submit-curriculum-subjects', methods=['POST'])
 @role_required('universityAdmin')
 def submitCurriculumSubjects():
-    print("HERE IN CURRICULUM SUBJECTS")
     universityAdmin = getCurrentUser()
     if universityAdmin:
         if 'excelFile' not in request.files:
             return jsonify({'error': 'No file part'}), 400
 
         file = request.files['excelFile']
-        # print(processAddingCurriculumSubjects(file))
         # Call the utility function to process the file
         return processAddingCurriculumSubjects(file)
     else:
@@ -387,7 +374,6 @@ def updateClassSubject():
 @university_admin_api.route('/submit/students-subject/<int:class_subject_id>', methods=['POST'])
 @role_required('universityAdmin')
 def submitStudentsClassSubject(class_subject_id):
-    print("class_subject_id: ", class_subject_id)
 
     universityAdmin = getCurrentUser()
     if universityAdmin:
@@ -395,11 +381,8 @@ def submitStudentsClassSubject(class_subject_id):
             return jsonify({'error': 'No file part'}), 400
 
         file = request.files['studentSubjectExcel']
-        # print(processAddingCurriculumSubjects(file))
         # Call the utility function to process the file
     
-        # print('=================================================')
-        # print('data, status_code: ', data)
         return processAddingStudentInSubject(file, class_subject_id)
     else:
         return render_template('404.html'), 404    

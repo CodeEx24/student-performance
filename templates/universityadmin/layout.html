@@ -668,34 +668,39 @@
       // Handling for results of submission of data
       function handleDataSubmitResults(
         data,
-        gridId,
-        ModalId,
         fileInput,
-        displayData
+        displayData,
+        ModalId,
+        gridId = ''
       ) {
-        console.log('DATA: ', data);
         if (data.result) {
-          handleAddData(gridId, data);
+          if (gridId != '') {
+            handleAddData(gridId, data);
+          }
           notyf.success(data.result);
           fileInput.value = '';
         }
 
         if (data.warning) {
-          handleAddData(gridId, data);
+          if (gridId) {
+            handleAddData(gridId, data);
+          }
           notyf.open({
             type: 'warning',
             message: data.warning,
           });
+          fileInput.value = '';
           displayData(data.errors);
           showModal(ModalId);
-          fileInput.value = '';
         }
 
         if (data.error) {
           notyf.error(data.error);
-          displayData(data.errors);
-          showModal(ModalId);
           fileInput.value = '';
+          if (data.errors) {
+            displayData(data.errors);
+            showModal(ModalId);
+          }
         }
 
         if (data.errorException) {

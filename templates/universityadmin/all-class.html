@@ -208,7 +208,6 @@
 <script>
   // JavaScript function to show the modal
   async function fetchClassPerformance(class_id, course, class_name) {
-    console.log('class_id, course, class_name: ', class_id, course, class_name);
     const response = await fetch(
       `${api_base_url}/class/performance/${class_id}`
     );
@@ -224,8 +223,6 @@
   }
 
   function displayClassPerformance(json_class_performance, course, class_name) {
-    console.log('json_class_performance: ', json_class_performance);
-    // Sample dummy data
     var chartData = [...json_class_performance['ListGrade']];
 
     // Create the chart
@@ -292,7 +289,6 @@
   }
 
   function displayGridClass(json_class) {
-    console.log('json_class: ', json_class);
     // Create the grid with filtering
     var grid = new ej.grids.Grid({
       dataSource: json_class,
@@ -345,7 +341,6 @@
 
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {},
     });
 
     grid.toolbarClick = function (args) {
@@ -393,8 +388,6 @@
 <!-- ADDING STUDENTS -->
 <script>
   function redirectToClass(id) {
-    console.log('ID REDIRECT: ', id);
-
     // Open link in a new tab
     window.open(`/university-admin/class/${id}`, '_blank');
   }
@@ -434,17 +427,15 @@
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log('DATA: ', data);
           handleDataSubmitResults(
             data,
-            'grid-class',
-            'allClassErrorModal',
             fileInput,
-            displaySubmitErrorAllClass
+            displaySubmitErrorAllClass,
+            'allClassErrorModal',
+            'grid-class'
           );
         })
         .catch((error) => {
-          console.log(error);
           notyf.error(error);
         })
         .finally(() => {
@@ -456,7 +447,6 @@
   }
 
   function displaySubmitErrorAllClass(classData) {
-    console.log(classData);
     var grid = new ej.grids.Grid({
       dataSource: classData,
       allowPaging: true,
@@ -501,13 +491,6 @@
 
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {
-        // Exclude the 'Subject Code' column from the exported Excel file
-        args.xlsxExportOptions.sheets[0].columns =
-          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
-            return column.field !== 'Subject';
-          });
-      },
     });
 
     grid.toolbarClick = function (args) {

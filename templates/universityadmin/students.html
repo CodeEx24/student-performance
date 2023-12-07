@@ -201,10 +201,10 @@
         .then((data) => {
           handleDataSubmitResults(
             data,
-            'grid',
-            'studentErrorModal',
             fileInput,
-            displaySubmitErrorStudents
+            displaySubmitErrorStudents,
+            'studentErrorModal',
+            'grid'
           );
         })
         .catch((error) => {
@@ -219,7 +219,6 @@
   }
 
   function displaySubmitErrorStudents(students) {
-    console.log('students: ', students);
     var grid = new ej.grids.Grid({
       dataSource: students,
       allowPaging: true,
@@ -283,13 +282,6 @@
 
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {
-        // Exclude the 'Subject Code' column from the exported Excel file
-        args.xlsxExportOptions.sheets[0].columns =
-          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
-            return column.field !== 'Subject';
-          });
-      },
     });
 
     grid.toolbarClick = function (args) {
@@ -369,6 +361,12 @@
 
     // Render the Syncfusion Grid in the specified element
     grid.appendTo('#grid');
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid_excelexport') {
+        grid.excelExport();
+      }
+    };
   }
 
   fetchStudents();

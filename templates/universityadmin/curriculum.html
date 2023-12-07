@@ -85,7 +85,7 @@
     <div class="modal-header overflow-y-auto">
       <div class="flex justify-between">
         <h2 class="text-c1 text-2xl font-semibold">
-          Adding Students Error List
+          Adding Curriculum Error List
         </h2>
         <button
           class="modal-close"
@@ -371,24 +371,28 @@
   async function postCurriculum(apiUrl, formData, fileInput) {
     try {
       showModal('loadingModal');
-      const response = await fetch(apiUrl, {
+      fetch(apiUrl, {
         method: 'POST',
         body: formData,
-      });
-
-      const data = await response.json();
-
-      handleDataSubmitResults(
-        data,
-        'grid-curriculum',
-        'curriculumErrorModal',
-        fileInput,
-        displaySubmitErrorCurriculum
-      );
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          handleDataSubmitResults(
+            data,
+            fileInput,
+            displaySubmitErrorCurriculum,
+            'curriculumErrorModal',
+            'grid-curriculum'
+          );
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
     } catch (error) {
-      console.log('Error:', error);
-    } finally {
-      closeModal('loadingModal');
+      console.log(error);
     }
   }
 
@@ -413,11 +417,6 @@
           headerText: 'Subject Code',
           width: 100,
         },
-        // {
-        //   field: 'Subject',
-        //   headerText: 'Subject',
-        //   width: 250,
-        // },
         {
           field: 'Year',
           headerText: 'Year',
@@ -456,27 +455,6 @@
         grid.excelExport();
       }
     };
-    // // Add a click event handler for all buttons with the "btn" class
-    // document.addEventListener('click', function (event) {
-    //   if (event.target.classList.contains('btn-subjects')) {
-    //     const cellElement = event.target.closest('.e-rowcell');
-    //     if (cellElement) {
-    //       const dataUid = cellElement.parentElement.getAttribute('data-uid');
-    //       if (dataUid) {
-    //         const rowData = grid.getRowObjectFromUID(dataUid).data;
-    //         if (rowData && isDisplaySubjects == false) {
-    //           fetchCurriculumSubjects({
-    //             MetadataId: rowData.MetadataId,
-    //             Course: rowData.Course,
-    //             Year: rowData.Year,
-    //             Semester: rowData.Semester,
-    //             Batch: rowData.Batch,
-    //           });
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
 
     // Render the grid
     grid.appendTo('#grid-error-list');
