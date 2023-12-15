@@ -199,7 +199,6 @@ def getOverallGrade(str_student_id):
 
 def getSubjectsGrade(str_student_id):
     try:
-        print("STUDENT ID: ", str_student_id)
         data_student_class_subject_grade = (
             db.session.query(StudentClassSubjectGrade, ClassSubject, Class, Course, Subject )
             .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
@@ -210,7 +209,6 @@ def getSubjectsGrade(str_student_id):
             .order_by(desc(Class.Batch), desc(Class.Semester))
             .all()
         )
-        print("data_student_class_subject_grade: ", data_student_class_subject_grade)
         
 
         
@@ -227,7 +225,7 @@ def getSubjectsGrade(str_student_id):
                     # Query the teacher
                     data_teacher = (
                         db.session.query(Faculty)
-                        .filter(Faculty.FacultyId == student_class_subject_grade.ClassSubject.TeacherId)
+                        .filter(Faculty.TeacherId == student_class_subject_grade.ClassSubject.TeacherId)
                         .first()
                     )
                     teacher_name = data_teacher.Name
@@ -238,7 +236,6 @@ def getSubjectsGrade(str_student_id):
                     student_class_subject_grade.Class.Batch,
                     student_class_subject_grade.Class.Semester
                 )
-                print("class_combination: ", class_combination)
                 if class_combination not in class_combinations:
                     class_combinations.add(class_combination)
 
@@ -248,7 +245,6 @@ def getSubjectsGrade(str_student_id):
                         .filter(StudentClassGrade.StudentId == str_student_id, StudentClassGrade.ClassId == student_class_subject_grade.Class.ClassId)
                         .first()
                     ) 
-                    print("data_student_class_grade: ", data_student_class_grade)
                     dict_class_group = {
                         "Batch": student_class_subject_grade.Class.Batch,
                         "GPA": format(data_student_class_grade.Grade, '.2f') if data_student_class_grade and data_student_class_grade.Grade is not None else "No GPA yet",
@@ -257,11 +253,7 @@ def getSubjectsGrade(str_student_id):
                     }
 
                     list_student_class_subject_grade.append(dict_class_group)
-                    print("dict_class_group: ", dict_class_group)
                 
-                print("========================================================================")
-                print('student_class_subject_grade.Subject.Name: ', student_class_subject_grade.Subject.Name)
-                print('student_class_subject_grade.StudentClassSubjectGrade.Grade: ', student_class_subject_grade.StudentClassSubjectGrade.Grade)
                 # Append the subject details to the existing class group
                 subject_details = {
                     "Grade": format(student_class_subject_grade.StudentClassSubjectGrade.Grade, '.2f') if student_class_subject_grade.StudentClassSubjectGrade.Grade is not None else "0.00",
@@ -275,7 +267,6 @@ def getSubjectsGrade(str_student_id):
                 }
 
                 dict_class_group["Subject"].append(subject_details)
-            print('list_student_class_subject_grade: ', list_student_class_subject_grade)
             return (list_student_class_subject_grade)
 
         else:
@@ -288,19 +279,20 @@ def getSubjectsGrade(str_student_id):
 
 def getStudentData(student_id):
     try:
+        print("HERE IN GETTING")
         data_student = (
             db.session.query(Student).filter(
                 Student.StudentId == student_id).first()
         )
-
+        print("data_student: ", data_student)
         if data_student:
-            data_course_enrolled = (
-                db.session.query(CourseEnrolled, Course)
-                .join(Course, Course.CourseId == CourseEnrolled.CourseId)
-                .filter(CourseEnrolled.StudentId==student_id)
-                .order_by(desc(CourseEnrolled.DateEnrolled)).first()
-            )
-
+            #  data_course_enrolled = (
+            #     db.session.query(Course, CourseEnrolled)
+            #     .join(CourseEnrolled, CourseEnrolled.CourseId == Course.CourseId)
+            #     .filter(CourseEnrolled.StudentId==student_id)
+            #     .order_by(desc(CourseEnrolled.DateEnrolled)).first()
+            # )
+  
             dict_student_data = {
                 "StudentNumber": data_student.StudentNumber,
                 "Name": data_student.Name,
@@ -309,9 +301,9 @@ def getStudentData(student_id):
                 "Email": data_student.Email,
                 "MobileNumber": data_student.MobileNumber,
                 "Gender": "Male" if data_student.Gender == 1 else "Female",
-                "Course": data_course_enrolled.Course.CourseCode if data_course_enrolled else "None"
+                # "Course": data_course_enrolled.Course.CourseCode if data_course_enrolled else "None"
             }
-
+            print('dict_student_data: ', dict_student_data)
             return (dict_student_data)
         else:
             return None
