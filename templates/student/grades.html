@@ -220,11 +220,12 @@
     }
 
     const data_student_details = await response.json();
-
+    console.log('data_student_detailsL ', data_student_details);
     displayDetails(data_student_details);
   }
 
   function displayDetails(data) {
+    console.log('DATA: ', data);
     const number = document.getElementById('student-number');
     const name = document.getElementById('student-name');
     const email = document.getElementById('student-email');
@@ -241,7 +242,11 @@
       data.MobileNumber ? data.MobileNumber : 'No Mobile Number'
     }`;
 
-    student_course.innerHTML = `${data.Course ? data.Course : 'No Course'}`;
+    student_course.innerHTML = `${
+      data.Course
+        ? data.Course
+        : 'Bachelor of Science in Information Technology'
+    }`;
 
     name_number.innerHTML = `${
       data.Name && data.StudentNumber

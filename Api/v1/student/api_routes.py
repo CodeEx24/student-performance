@@ -26,10 +26,8 @@ student_api = Blueprint('student_api', __name__)
 # Step 4: Handle the form submission for requesting a password reset email
 @student_api.route('/reset_password', methods=['POST'])
 def forgotPassword():
-    print("HEREIN RESET")
     data = request.get_json()
     email = data.get('email')
-    print('email: ', email)
 
     # Check if email exists in the database
     student = Student.query.filter_by(Email=email).first()
@@ -57,15 +55,11 @@ def forgotPassword():
 @student_api.route('/reset_password_confirm/<token>', methods=['GET'])
 @preventAuthenticated
 def resetPasswordConfirm(token):
-    print("GETTING")
     # Check if the token is valid and not expired
     student = Student.query.filter_by(Token=token).first()
-    print("STUDENT EXIST")
     if student and student.TokenExpiration > datetime.now():
-        print("STUDENT VALID")
         return render_template('student/reset_password_confirm.html', token=token, student_api_base_url=student_api_base_url)
     else:
-        print("STUDENT TOKEN EXPIRED")
         flash('Invalid or expired token.', 'danger')
         return render_template('404.html')
 # student_api.py (continued)
@@ -104,7 +98,6 @@ def resetPassword(token):
 @student_api.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
-        print("STUDENT")
         email = request.form['email']
         password = request.form['password']
         # create_app.sayHello()
@@ -136,6 +129,7 @@ def profile():
 
 # Getting the overall GPA
 @student_api.route('/overall-gpa', methods=['GET'])
+
 @role_required('student')
 def overallGrade():
     student = getCurrentUser()
@@ -282,7 +276,6 @@ def subjectsGrade():
     student = getCurrentUser()
     if student:
         json_subjects_grade = getSubjectsGrade(student.StudentId)
-        print('json_subjects_grade: ', json_subjects_grade)
         if json_subjects_grade:
             return (json_subjects_grade)
         else:
