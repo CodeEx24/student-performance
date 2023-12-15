@@ -173,13 +173,22 @@ def topPerformerStudent():
 
 
 # Getting the student subject grade in a class
-@faculty_api.route('/class-subject-grade', methods=['GET'])
+@faculty_api.route('/class-subject-grade/', methods=['GET'])
 @role_required('faculty')
 def studentClassSubjectGrade():
     faculty = getCurrentUser()
+    
     if faculty:
+        
+        # skip = int(request.args.get('$skip', 1))
+        # top = int(request.args.get('$top', 10))
+        # order_by = (request.args.get('$orderby'))
+        # filter = (request.args.get('$filter'))
+      
         json_class_subject_grade = getStudentClassSubjectGrade(
             faculty.TeacherId)
+        # json_class_subject_grade = getStudentClassSubjectGrade(
+        #     faculty.TeacherId, skip, top, order_by, filter)
 
         if json_class_subject_grade:
             return (json_class_subject_grade)
