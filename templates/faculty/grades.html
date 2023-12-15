@@ -74,6 +74,7 @@
         <div class="flex items-end justify-between">
           <div class="w-full bg-white p-4 mt-4">
             <div id="Grid"></div>
+            <!-- <div id="GridSample"></div> -->
           </div>
         </div>
       </div>
@@ -233,7 +234,7 @@
 <script>
   async function fetchStudentClassSubjectGrade() {
     try {
-      const response = await fetch(`${api_base_url}/class-subject-grade`);
+      const response = await fetch(`${api_base_url}/class-subject-grade/`);
 
       if (!response.ok) {
         throw new Error(
@@ -392,61 +393,102 @@
       .catch((error) => {
         console.error('Error:', error);
       });
-
-    // const emailInput = document.getElementById('email');
-    // const emailError = document.getElementById('email-error');
-    // const emailValue = emailInput.value.trim();
-    // console.log('GET THE ELEMENT');
-    // // Regular expression for validating email format
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // if (!emailValue) {
-    //   emailError.classList.add('mt-2'); // Corrected the method name from 'addclassList' to 'classList.add'
-    //   emailError.textContent = 'Input your email';
-    //   return false;
-    // } else if (!emailValue.match(emailRegex)) {
-    //   emailError.classList.add('mt-2');
-    //   emailError.textContent = 'Input a valid email format';
-    //   return false; // Prevent form submission
-    // }
-
-    // try {
-    //   // Make a POST request to the login API
-    //   fetch(`${api_base_url}/reset_password`, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //       email: emailValue,
-    //     }),
-    //     credentials: 'include', // Include credentials (cookies) in the request
-    //   })
-    //     .then((response) => {
-    //       if (response.status != 200) {
-    //         notyf.error(data.message);
-    //       }
-    //       return response.json(); // Parse the JSON response
-    //     })
-    //     .then((data) => {
-    //       notyf.success(data.message);
-    //       const formElement = document.getElementById('reset-form-email');
-    //       const submitElement = document.getElementById('submit-link');
-    //       const subDescriptionElement = document.getElementById('sub-desc');
-
-    //       formElement.classList.add('hidden');
-    //       submitElement.classList.remove('hidden');
-    //       subDescriptionElement.classList.add('px-20');
-    //       subDescriptionElement.innerText =
-    //         'Open gmail and read the instruction to reset your password';
-    //       // window.location.href = "{{ url_for('studentLogin') }}";
-    //     })
-    //     .catch((error) => {
-    //       const messageContainer = document.getElementById('message-container');
-    //       messageContainer.innerHTML = `<div class="text-red-500">Login failed: ${error.message}</div>`;
-    //     });
-    // } catch (error) {
-    //   console.error('Error:', error);
-    // }
   }
 </script>
+
+<link
+  rel="stylesheet"
+  href="https://cdn.syncfusion.com/ej2/17.3.29/material.css"
+/>
+<script src="https://cdn.syncfusion.com/ej2/17.3.29/dist/ej2.min.js"></script>
+
+<!-- Your Flask script to render configuration data -->
+<!-- <script>
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/class-subject-grade`,
+    columns: [
+      {
+        field: 'StudentNumber',
+        headerText: 'Student Number',
+        width: 150,
+        editType: 'dropdownedit', // Use dropdown filter for this column
+      },
+      { field: 'StudentName', headerText: 'Student Name', width: 150 },
+      {
+        field: 'Class',
+        headerText: 'Section Code',
+        width: 150,
+        // filterBarTemplate: classOptions, // Add a dropdown filter
+      },
+      {
+        field: 'SubjectCode',
+        headerText: 'SubjectCode',
+        width: 150,
+      },
+      {
+        field: 'Semester',
+        headerText: 'Semester',
+        width: 120,
+      },
+      {
+        field: 'Grade',
+        headerText: 'Grade',
+        width: 120,
+      },
+      {
+        field: 'Batch',
+        headerText: 'Batch',
+        width: 100,
+      },
+      {
+        headerText: 'Actions',
+        template:
+          '<button class="btn px-4 py-2 bg-primary text-white font-bold">Performance</button>', // Add a button to the cell
+        width: 150,
+      },
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create a DataManager with the provided API URL
+    let data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      adaptor: new ej.data.WebApiAdaptor(),
+    });
+
+    console.log('data.adaptor: ', data);
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      pageSettings: { pageSize: 10, totalRecordsCount: 0 },
+      beforeDataBound: function (args) {
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+      actionBegin: function (args) {
+        console.log('args');
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+      },
+    });
+    console.log('GRID: ', grid.dataSource);
+    // Append the grid to the container
+    grid.appendTo('#GridSample');
+  });
+</script> -->
+
 {% endblock script %}
