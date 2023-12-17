@@ -409,6 +409,27 @@
         grid.excelExport();
       }
     };
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              fetchStudentPerformance(
+                rowData.StudentId,
+                rowData.StudentName,
+                rowData.StudentNumber
+              );
+            }
+          }
+        }
+      }
+    });
+
     console.log('GRID: ', grid.dataSource);
     // Append the grid to the container
     grid.appendTo('#GridSample');
