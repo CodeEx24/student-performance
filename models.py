@@ -399,6 +399,7 @@ def init_db(app):
     db.init_app(app)
     
     if add_data=='True':
+        print("Adding data")
         from data.student import student_data
         from data.faculty import faculty_data
         from data.universityadmin import university_admin_data
@@ -498,12 +499,13 @@ def init_db(app):
             db.session.close()
 
     
-    if config_mode == 'development' and add_data=='True':
-        print("DEVELOPMENT AND ADDING DATA")
+    if config_mode == 'development' :
+        
         with app.app_context():
             inspector = inspect(db.engine)
-            if not inspector.has_table('Students'):
-                db.create_all()
+            db.create_all()
+            if add_data=='True' and not inspector.has_table('Students'):
+                print("DEVELOPMENT AND ADDING DATA")
                 create_sample_data()
 
   

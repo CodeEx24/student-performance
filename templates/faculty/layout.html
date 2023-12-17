@@ -68,8 +68,15 @@
       .e-input-group.e-control-wrapper.e-float-icon-left:not(.e-float-input)
         .e-input-in-wrap::before,
       .e-input-group.e-control-wrapper.e-float-icon-left:not(.e-float-input)
-        .e-input-in-wrap::after {
-        background-color: #9d1d1d;
+        .e-input-in-wrap::after,
+      .e-toolbar.e-control[class*='e-toolbar'] {
+        background-color: #9d1d1d !important;
+      }
+
+      .e-toolbar .e-toolbar-items,
+      .e-pager .e-currentitem,
+      .e-pager .e-currentitem:hover {
+        background: #9d1d1d !important;
       }
 
       .e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn-text,
@@ -79,7 +86,7 @@
         .e-tbar-btn.e-btn.e-tbtn-txt
         .e-icons.e-btn-icon,
       span.e-tbar-btn-text {
-        color: white;
+        color: white !important;
       }
 
       .e-headertext {
