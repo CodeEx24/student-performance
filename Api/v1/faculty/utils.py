@@ -1,5 +1,5 @@
 from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, ClassGrade, ClassSubjectGrade, db
-from sqlalchemy import desc, distinct, func
+from sqlalchemy import desc, distinct, func, and_
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
 import datetime
@@ -286,14 +286,10 @@ def getTopPerformerStudent(str_teacher_id, count):
         return None
 
 
-def getStudentClassSubjectGrade(str_teacher_id):
+def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
     try:
-        current_year = datetime.datetime.now().year
-
-        # Subject , Grade,
-        # Class - Semester, Batch, Class Code
-
-        data_class_subject_grade_handle = (
+        # Initial query
+        query = (
             db.session.query(
                 ClassSubject,
                 StudentClassSubjectGrade,
@@ -307,17 +303,194 @@ def getStudentClassSubjectGrade(str_teacher_id):
             .join(Class, Class.ClassId == ClassSubject.ClassId)
             .join(Course, Course.CourseId == Class.CourseId)
             .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
-            .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
-            .order_by(desc(Course.CourseCode), desc(Class.Batch), desc(Class.Year), desc(Class.Semester), Student.Name)
-            .all()
+            # .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
         )
 
-        if data_class_subject_grade_handle:
+        # Parse and apply filters
+        
+        filter_conditions = []
+        # Split filter string by 'and'
+        # append the str_teacher_id
+        filter_conditions.append(
+            ClassSubject.TeacherId == str_teacher_id
+        )
+
+        if filter:
+            filter_parts = filter.split('and')
+         
+            for part in filter_parts:
+           
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(tolower(")[1].split("),'")[0]
+                    value = part.split("),'")[1][:-2].strip("')")
+                    column_str = None
+                    
+                    if column_name.strip() == 'Class':
+                        split_values = value.split(' ')
+                        
+                        if len(split_values) >= 2:
+                            
+                            # Check split values if have a number
+                            if any(char.isdigit() for char in split_values[-1]):
+                                batch_section = split_values[-1]
+                                course_code = ' '.join(split_values[:-1])
+                                column_arr_1 = getattr(Course, 'CourseCode')
+                                year, section = None, None
+                                
+                                if '-' in batch_section:
+                                    year, section = batch_section.split('-')
+                                    if section:
+                                        column_arr_3 = getattr(Class, 'Section')
+                                    column_arr_2 = getattr(Class, 'Year')
+                                else:
+                                    year = batch_section
+                                    column_arr_2 = getattr(Class, 'Year')
+                            else:
+                                course_code = ' '.join(split_values)
+                                year, section = None, None
+                                column_arr_1 = getattr(Course, 'CourseCode')
+
+                            # Append column_arr_1
+                            filter_conditions.append(
+                                Course.CourseCode.startswith(course_code.upper())
+                            )
+                            # Check if year then append
+                            if year:
+                                filter_conditions.append(Class.Year == int(year))
+                                
+                            if section:
+                                filter_conditions.append(
+                                    Class.Section == int(section)
+                                )
+                            continue
+                        elif len(split_values) == 1:
+                            course_code, year, section = None, None, None
+                            if '-' in value:
+                                year, section = value.split('-')
+                                column_arr_2 = Class.Year
+                                column_arr_3 = Class.Section
+                            else:
+                                course_code = value
+                                column_arr_1 = getattr(Course, 'CourseCode')
+                            
+                            if course_code:
+                                filter_conditions.append(column_arr_1.startswith(course_code.upper()))
+
+                            if year:
+                                filter_conditions.append(
+                                    column_arr_2 == int(year)
+                                )
+                            
+                            if section:
+                                filter_conditions.append(
+                                    column_arr_3 == int(section)
+                                )
+                            continue
+                    elif column_name.strip() == 'StudentName':
+                        column_str = getattr(Student, 'Name')
+                    elif column_name.strip() == 'StudentNumber':
+                        column_str =  getattr(Student, 'StudentNumber')     
+                    elif column_name.strip() == 'SubjectCode':
+                        column_str = getattr(Subject, 'SubjectCode')
+                 
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).startswith(value)
+                        )
+                else:
+                    # split by space and get the first element and remove the opening ( of part element
+                    
+                    
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    
+                    column_num = None
+                    int_value = value.strip(')')
+                    
+                    # Check for column name 
+
+                    if column_name.strip() == 'Grade':
+                        column_num = StudentClassSubjectGrade.Grade
+                    elif column_name.strip() == 'Batch':
+                        column_num = Class.Batch
+                    elif column_name.strip() == 'Semester':
+                        column_num = Class.Semester
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                # END OF ELSE PART
+            # END OF FOR LOOP
+                
+        
+        # Apply all filter conditions with 'and'
+  
+        filter_query = query.filter(and_(*filter_conditions))
+      
+        print(filter_query.statement.compile().params)
+        # Apply sorting logic
+        if order_by:
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'StudentNumber':
+                order_attr = getattr(Student, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == "StudentName":
+                order_attr = getattr(Student, 'Name')
+            elif order_by.split(' ')[0] == 'Grade':
+                order_attr = getattr(StudentClassSubjectGrade, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'SubjectCode':
+                print('SUBJECT CODE DATAP: ', order_by.split(' ')[0])
+                order_attr = getattr(Subject, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'Batch':
+                order_attr = getattr(Class, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'Semester':
+                order_attr = getattr(Class, order_by.split(' ')[0])
+            else:
+                print("CLASS ORDER BY: ", order_by)
+
+                if ' ' in order_by:
+                    order_query = filter_query.order_by(desc(Course.CourseCode), desc(Class.Year), desc(Class.Section))
+                    print(order_query)
+                
+                else:
+                    order_query = filter_query.order_by(Course.CourseCode, Class.Year, Class.Section)
+                    print(order_query)
+                # close the if_order by and go to next line of it
+
+            # Check if order_by contains space
+            if not order_by.split(' ')[0] == "Class":
+                if ' ' in order_by:
+                    order_query = filter_query.order_by(desc(order_attr))
+                    print("ORDER: ", order_query.statement.compile().params)
+                else:
+                    order_query = filter_query.order_by(order_attr)
+                    print("ORDER: ", order_query.statement.compile().params)
+        else:
+            # Apply default sorting
+            order_query = filter_query.order_by(
+                desc(Course.CourseCode), desc(Class.Batch), desc(Class.Year), desc(Class.Semester), Student.Name
+            )
+
+        # Check if order_query and filter query exists:
+
+        # Apply skip and top
+        result_all = order_query.all()
+        # print('result_all: ', result_all)
+        result = result_all[skip: skip + top]
+        total_count = order_query.count()
+        
+
+        if result:
             list_data_class_subject_grade = []
             unique_classes = set()
-
-            for class_subject_grade in data_class_subject_grade_handle:
-                # Get the class name
+     
+            for class_subject_grade in result:
+               
                 class_name = f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}"
 
                 dict_class_subject_grade = {
@@ -335,14 +508,14 @@ def getStudentClassSubjectGrade(str_teacher_id):
                 unique_classes.add(class_name)
 
             sorted_unique_classes = sorted(unique_classes)
-
-            # Return the list of class grades and the lowest/highest grades dictionary
-            return {'ClassSubjectGrade': list_data_class_subject_grade, 'Classes': list(sorted_unique_classes)}
+      
+            # Return the list of class grades, the classes, and pagination information
+            return jsonify({'result':list_data_class_subject_grade, 'count': total_count, 'classes': list(sorted_unique_classes)})
         else:
-            return None
+            return {'ClassSubjectGrade': [], 'Classes': [], 'currentPage': 1, 'totalPages': 0, 'totalItems': 0}
 
     except Exception as e:
-        # Handle the exception here, e.g., log it or return an error response
+        # Log the exception or handle it appropriately
         return None
 
 
@@ -769,14 +942,6 @@ def processGradeSubmission(file):
                 .order_by(desc(Student.Name), desc(Class.Year), desc(Class.Section), desc(Class.Batch))
                 .first()
             )
-            
-            print("INDEX NAME: ", index + 1, student_data.Student.StudentNumber, student_data.Student.Name)
-            print("Subject Code: ", student_data.Subject.SubjectCode)  # Assuming SubjectName is the attribute for the subject's name
-            print("Section Code: ",  student_data.Course.CourseCode, student_data.Class.Year ,  "-", student_data.Class.Section)
-            print("Semester: ", student_data.Class.Semester)
-            print("Batch: ", student_data.Class.Batch)
-            print("Batch: ", student_data.Class.IsGradeFinalized)
-            print("===========================================================")
             
             if(student_data.Class.IsGradeFinalized==False):
                 # Update the Class isGradeFinalized to False

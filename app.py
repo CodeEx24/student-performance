@@ -30,9 +30,11 @@ def create_app():
     # SETUP YOUR POSTGRE DATABASE HERE
     # Check if CONFIG_MODE is set to development
     if os.getenv("CONFIG_MODE") == "production":
+        print("USING PRODUCTION")
         # Set the value to DEVELOPMENT_DATABASE_URI
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
     else:
+        print("USING DEVELOPMENT")
         # Set the value to the default DATABASE_URI
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DEVELOPMENT_DATABASE_URI')
         
