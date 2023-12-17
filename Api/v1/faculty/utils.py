@@ -518,6 +518,142 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
         # Log the exception or handle it appropriately
         return None
 
+
+def getStudentClassSubjectGrade2(str_teacher_id, skip, top, order_by, filter):
+    try:
+        current_year = datetime.datetime.now().year
+
+        first_query = (
+            db.session.query(
+                ClassSubject,
+                StudentClassSubjectGrade,
+                Subject,
+                Class,
+                Course,
+                Student
+            )
+            .join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+            .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+            .join(Class, Class.ClassId == ClassSubject.ClassId)
+            .join(Course, Course.CourseId == Class.CourseId)
+            .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+            .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
+        )
+
+        print('ORDER BY: ', order_by)
+
+        # ...
+
+        if order_by:
+            if order_by.split(' ')[0] == 'StudentNumber':
+                print("STUDENT NUMBER")
+                order_attr = getattr(Student, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == "StudentName":
+                order_attr = getattr(Student, 'Name')
+            elif order_by.split(' ')[0] == 'Grade':
+                order_attr = getattr(StudentClassSubjectGrade, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'SubjectCode':
+                print("SUBJECT CODE")
+                order_attr = getattr(Subject, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'Batch':
+                print("BATCH")
+                order_attr = getattr(Class, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'Semester':
+                print("SEMESTER")
+                order_attr = getattr(Class, order_by.split(' ')[0])
+            else:
+                order_by.split(' ')[0] == "Class"
+                print("CLASS")
+                order_attr = getattr(Class, order_by.split(' ')[0])
+         
+
+            # Check if order_by contains space
+            if ' ' in order_by:
+                print("INSIDE SPACE")
+                second_query = first_query.order_by(desc(order_attr)).all()
+                print('second_query: ', second_query)
+            else:
+                print("NO SPACE")
+                second_query = first_query.order_by(order_attr).all()
+                print('second_query: ', second_query)
+        else:
+            # ...
+
+            second_query = first_query.order_by(desc(Course.CourseCode), desc(Class.Batch), desc(Class.Year), desc(Class.Semester), Student.Name).all()
+        # query_class_subject_grade_handle = (
+        #     db.session.query(
+        #         ClassSubject,
+        #         StudentClassSubjectGrade,
+        #         Subject,
+        #         Class,
+        #         Course,
+        #         Student
+        #     )
+        #     .join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+        #     .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+        #     .join(Class, Class.ClassId == ClassSubject.ClassId)
+        #     .join(Course, Course.CourseId == Class.CourseId)
+        #     .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+        #     .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
+        #     .order_by(desc(Course.CourseCode), desc(Class.Batch), desc(Class.Year), desc(Class.Semester), Student.Name)
+        #     .offset(skip)
+        #     .limit(top)
+        #     .all()
+        # )
+        
+        # print('DATA HERE: ', data_class_subject_grade_handle)
+        # # Count the total number of rows without applying the limit and offset
+        total_count = (
+            db.session.query(
+                ClassSubject,
+                StudentClassSubjectGrade,
+                Subject,
+                Class,
+                Course,
+                Student
+            )
+            .join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+            .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+            .join(Class, Class.ClassId == ClassSubject.ClassId)
+            .join(Course, Course.CourseId == Class.CourseId)
+            .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+            .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
+            .order_by(desc(Course.CourseCode), desc(Class.Batch), desc(Class.Year), desc(Class.Semester), Student.Name).count()
+        )
+
+        if second_query:
+            list_data_class_subject_grade = []
+            unique_classes = set()
+     
+            for class_subject_grade in second_query:
+               
+                class_name = f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}"
+
+                dict_class_subject_grade = {
+                    'StudentId': class_subject_grade.Student.StudentId,
+                    'StudentNumber': class_subject_grade.Student.StudentNumber,
+                    'StudentName': class_subject_grade.Student.Name,
+                    'Class': class_name,
+                    'Batch': class_subject_grade.Class.Batch,
+                    'Semester': class_subject_grade.Class.Semester,
+                    'Grade': class_subject_grade.StudentClassSubjectGrade.Grade,
+                    'SubjectCode': class_subject_grade.Subject.SubjectCode
+                }
+
+                list_data_class_subject_grade.append(dict_class_subject_grade)
+                unique_classes.add(class_name)
+
+            sorted_unique_classes = sorted(unique_classes)
+      
+            # Return the list of class grades, the classes, and pagination information
+            return jsonify({'result':list_data_class_subject_grade, 'count': total_count, 'classes': list(sorted_unique_classes)})
+        else:
+            return {'ClassSubjectGrade': [], 'Classes': [], 'currentPage': 1, 'totalPages': 0, 'totalItems': 0}
+
+    except Exception as e:
+        # Log the exception or handle it appropriately
+        return None
+
 # RENDER THIS IN FRONTEND
 
 

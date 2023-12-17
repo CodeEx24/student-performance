@@ -179,7 +179,6 @@ def studentClassSubjectGrade():
     faculty = getCurrentUser()
     
     if faculty:
-        
         skip = int(request.args.get('$skip', 1))
         top = int(request.args.get('$top', 10))
         order_by = (request.args.get('$orderby'))
