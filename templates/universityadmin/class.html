@@ -14,8 +14,8 @@
 
 <!----------------- CONTENT ----------------->
 {% block content %}
-<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
-  <div class="bg-white p-8 shadow-md col-span-full">
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
     <div
       class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
     >
@@ -477,8 +477,6 @@
     formData.append('studentSubjectExcel', file);
 
     // Clear student-not-exist-error and student-subject-exist-error lists
-    clearErrorList('student-num-list-error');
-    clearErrorList('student-subject-list-error');
 
     showModal('loadingModal');
     fetch(`${api_base_url}/submit/students-subject/${classSubjectId}`, {
@@ -681,6 +679,7 @@
   }
 
   async function fetchStudents(data) {
+    console.log('CLICK DATA: ', data);
     // Get teacher, subject, semester and update its value
     document.getElementById('teacher-modal').innerHTML = data.teacher
       ? data.teacher
@@ -699,11 +698,10 @@
       }
 
       const json_class = await response.json();
+      console.log('json_class: ', json_class);
       if (json_class) {
         // Get studentListModal
         // Clear student-not-exist-error and student-subject-exist-error lists
-        clearErrorList('student-num-list-error');
-        clearErrorList('student-subject-list-error');
 
         document.getElementById('studentSubjectExcel').value = '';
 
@@ -712,6 +710,7 @@
         modal.classList.add('flex');
         modal.classList.remove('hidden');
         classSubjectId = data.classSubjectId;
+        console.log('HERE');
         displayGridStudentList(json_class.data, classSubjectId);
       }
     } catch (error) {}
@@ -756,9 +755,10 @@
     var grid = new ej.grids.Grid({
       dataSource: json_class,
       allowPaging: true,
-      allowFiltering: true,
+      // allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
+      toolbar: ['ExcelExport'],
       editSettings: {
         allowEditing: true,
         allowAdding: false,
@@ -811,7 +811,6 @@
         },
       ],
 
-      toolbar: ['ExcelExport', 'Update', 'Cancel'],
       excelExportComplete: function (args) {},
       actionComplete: function (args) {
         if (args.requestType === 'batchsave') {

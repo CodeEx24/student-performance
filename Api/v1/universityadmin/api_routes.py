@@ -141,20 +141,25 @@ def overallCoursePerformance():
         json_performance_data = getOverallCoursePerformance()
 
         if json_performance_data:
-            return (json_performance_data)
+            return jsonify({'result': json_performance_data})
         else:
-            return jsonify(message="No Performance data available")
+            return jsonify(error="No Performance data available")
     else:
         return render_template('404.html'), 404
 
 
 # Getting all the class data in current year
-@university_admin_api.route('/class/data', methods=['GET'])
+@university_admin_api.route('/class/data/', methods=['GET'])
 @role_required('universityAdmin')
 def classData():
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        json_class_data = getAllClassData()
+        skip = int(request.args.get('$skip', 1))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_class_data = getAllClassData(skip, top, order_by, filter)
 
         if json_class_data:
             return (json_class_data)
@@ -207,12 +212,17 @@ def submitClass():
 
 
 # api_routes.py
-@university_admin_api.route('/students', methods=['GET'])
+@university_admin_api.route('/students/', methods=['GET'])
 @role_required('universityAdmin')
 def fetchStudents():
     university_admin = getCurrentUser()
     if university_admin:
-        json_student_data = getStudentData()
+        skip = int(request.args.get('$skip', 1))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_student_data = getStudentData(skip, top, order_by, filter)
 
         if json_student_data:
             return (json_student_data)
@@ -296,17 +306,23 @@ def deleteClassSubjectStudents(class_subject_id, student_id):
         return render_template('404.html'), 404
     
     
-@university_admin_api.route('/curriculum', methods=['GET'])
+@university_admin_api.route('/curriculum/', methods=['GET'])
 @role_required('universityAdmin')
 def fetchCurriculum():
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        json_curriculum_data = getCurriculumData()
-
+        skip = int(request.args.get('$skip', 1))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_curriculum_data = getCurriculumData(skip, top, order_by, filter)
+        print('json_curriculum_data: ', json_curriculum_data)
         if json_curriculum_data:
+            print('json_curriculum_data: ', json_curriculum_data)
             return (json_curriculum_data)
         else:
-            return jsonify(message="No class subject data available"), 400
+            return jsonify(message="No curriculum data available"), 400
     else:
         return render_template('404.html'), 404
     
@@ -345,14 +361,66 @@ def fetchCurriculumSubjects(metadata_id):
 @university_admin_api.route('/submit-curriculum-subjects', methods=['POST'])
 @role_required('universityAdmin')
 def submitCurriculumSubjects():
+    # Check if method is post
+    if request.method == 'POST':
+        universityAdmin = getCurrentUser()
+        if universityAdmin:
+            if 'excelFile' in request.files:
+                file = request.files['excelFile']
+                result = processAddingCurriculumSubjects(file, True)
+                # Call the utility function to process the file
+                return result
+            # else if request.get_json() has a data
+            elif request.get_json():
+                data = request.get_json()
+                print('data: ', data)
+                result = processAddingCurriculumSubjects(data)
+                # Call the utility function to process the file
+                return result
+            else:
+                if 'excelFile' not in request.files:
+                    return jsonify({'error': 'No file part'}), 400
+                else:
+                    return jsonify({'error': 'Something went wrong'}), 400
+        else:
+            return render_template('404.html'), 404
+    
+        universityAdmin = getCurrentUser()
+        if universityAdmin:
+            # print reqquest
+            curriculum_request = request.get_json()
+            print('curriculum_request: ', curriculum_request)
+            
+            
+            if 'excelFile' not in request.files:
+                return jsonify({'error': 'No file part'}), 400
+
+            file = request.files['excelFile']
+            result = processAddingCurriculumSubjects(file)
+            # Call the utility function to process the file
+            return result
+        else:
+            return render_template('404.html'), 404    
+    
+
+@university_admin_api.route('/submit-curriculum-subject', methods=['POST'])
+@role_required('universityAdmin')
+def submitCurriculumSubject():
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        if 'excelFile' not in request.files:
-            return jsonify({'error': 'No file part'}), 400
+        print('IN UNIVE ADMIN')
+        data = request.json()  # assuming the data is sent as JSON
+        course = data['Course']
+        subject_code = data['Subject Code']
+        year = data['Year']
+        semester = data['Semester']
+        batch = data['Batch']
+        
+        # Print all the data
+        print(course, subject_code, year, semester, batch)
 
-        file = request.files['excelFile']
         # Call the utility function to process the file
-        return processAddingCurriculumSubjects(file)
+        return jsonify({'course': course})
     else:
         return render_template('404.html'), 404    
     
@@ -389,12 +457,17 @@ def submitStudentsClassSubject(class_subject_id):
     
 
 # api_routes.py
-@university_admin_api.route('/metadata', methods=['GET'])
+@university_admin_api.route('/metadata/', methods=['GET'])
 @role_required('universityAdmin')
 def fetchMetadata():
     university_admin = getCurrentUser()
     if university_admin:
-        json_student_data = getMetadata()
+        skip = int(request.args.get('$skip', 1))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_student_data = getMetadata(skip, top, order_by, filter)
 
         if json_student_data:
             return (json_student_data)

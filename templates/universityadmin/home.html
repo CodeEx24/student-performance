@@ -16,7 +16,7 @@
 {% block content %}
 
 <div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
-  <div class="bg-white col-span-4 row-span-5 shadow-md p-4">
+  <div class="bg-white col-span-4 row-span-4 shadow-md p-4">
     <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
       Enrollment Trends
     </h4>
@@ -30,77 +30,10 @@
     <div id="lister"></div>
   </div>
 
-  <!-- <div class="bg-warning col-span-2 row-span-2 col-start-5 row-start-3 shadow-md p-4">
-    <h4 class="text-3xl font-extrabold text-center my-2 mt-10 text-white">Deans Lister</h4>
-    <p class="font-bold text-xl  text-center  text-white">Bachelor Science of Information Technology</p>
-    <h1 class="lg:text-8xl font-extrabold text-center  mb-10 text-white">325</h1>
-  </div> -->
-
   <div
-    class="bg-warning col-span-2 row-span-2 col-start-5 row-start-5 shadow-md p-4"
+    class="bg-white p-8 shadow-md col-span-full hidden"
+    id="course-performance-container"
   >
-    <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
-      Average GPA Given
-    </h4>
-    <p class="font-bold text-xl text-c1 text-center">Overall Count</p>
-    <h1
-      class="lg:text-8xl text-c1 font-extrabold text-center mb-10"
-      id="average-gpa"
-    >
-      325
-    </h1>
-  </div>
-
-  <div
-    class="bg-primary col-span-2 row-span-3 col-start-1 row-start-6 shadow-md p-4 flex flex-col justify-center"
-  >
-    <h4
-      class="text-3xl text-c1 text-white font-extrabold text-center my-2 mt-10"
-    >
-      Popular Courses
-    </h4>
-    <p class="font-bold text-xl text-white text-center" id="highest-course">
-      Bachelor Science of Information Technology
-    </p>
-    <h1
-      class="lg:text-8xl text-white font-extrabold text-center mb-10"
-      id="highest-count"
-    >
-      325
-    </h1>
-  </div>
-  <div
-    class="bg-c1 col-span-2 row-span-3 col-start-3 row-start-6 shadow-md p-4 flex flex-col justify-center"
-  >
-    <h4 class="text-3xl text-white font-extrabold text-center my-2 mt-10">
-      Low Enrolled Courses
-    </h4>
-    <p class="font-bold text-white text-xl text-center" id="lowest-course">
-      Bachelor Science of Information Technology
-    </p>
-    <h1
-      class="lg:text-8xl text-white font-extrabold text-center mb-10"
-      id="lowest-count"
-    >
-      321
-    </h1>
-  </div>
-  <div
-    class="bg-c4 col-span-2 row-span-2 col-start-5 row-start-7 shadow-md p-4"
-  >
-    <h4 class="text-3xl font-extrabold text-center my-2 mt-10 text-white">
-      Student Enrolled
-    </h4>
-    <p class="font-bold text-xl text-center text-white">Overall Count</p>
-    <h1
-      class="lg:text-8xl font-extrabold text-center mb-10 text-white"
-      id="student-enrolled"
-    >
-      323
-    </h1>
-  </div>
-
-  <div class="bg-white p-8 shadow-md col-span-full">
     <h1 class="text-3xl font-bold text-c1 mb-8">Course Performances</h1>
     <div id="course-performance"></div>
   </div>
@@ -295,7 +228,15 @@
       }
 
       const json_course_performance = await response.json();
-      displayCoursePerformance(json_course_performance);
+      if (!json_course_performance.error) {
+        console.log('IN JSON');
+        console.log(json_course_performance);
+        // Select course-performance-container
+        document
+          .getElementById('course-performance-container')
+          .classList.remove('hidden');
+        displayCoursePerformance(json_course_performance);
+      }
     } catch (error) {
       console.error(error);
     }

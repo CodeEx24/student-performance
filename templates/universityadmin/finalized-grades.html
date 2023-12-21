@@ -15,8 +15,8 @@
 <!----------------- CONTENT ----------------->
 {% block content %}
 
-<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
-  <div class="bg-white p-8 shadow-md col-span-full">
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
     <div
       class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
     >
@@ -69,63 +69,183 @@
 
 <!-- FETCH ALL CLASS DATA (GRIDS)-->
 <script>
-  async function fetchMetadata() {
+  // JavaScript function to show the modal
+  async function finalizedGrades(metadata_id) {
+    console.log('metadata_id: ', metadata_id);
+    // Request in api to update the data
     try {
-      const response = await fetch(`${api_base_url}/metadata`);
+      const response = await fetch(
+        `${api_base_url}/finalized/grades/${metadata_id}`
+      );
 
       if (!response.ok) {
-        const empty = [];
-        displayGridCurriculum(empty);
         throw new Error(
           `Failed to fetch data. Try to contact the admin to resolve the issue.`
         );
       }
 
       const result = await response.json();
-      if (result) {
-        displayGridMetadata(result);
-      }
+      console.log('result: ', result);
     } catch (error) {
       console.error(error);
     }
   }
+</script>
 
-  fetchMetadata();
+<script>
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/metadata/`,
+    columns: [
+      {
+        field: 'CourseCode',
+        headerText: 'CourseCode',
+        width: 70,
+      },
+      {
+        field: 'Course',
+        headerText: 'Course',
+        width: 200,
+      },
 
-  function displayGridMetadata(metadata) {
-    console.log('metadata: ', metadata);
-    // Create the grid with filtering
-    var grid = new ej.grids.Grid({
-      dataSource: metadata,
+      {
+        field: 'Batch',
+        headerText: 'Batch',
+        width: 100,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Batch';
+            return dd;
+          },
+          write: function (args) {
+            var currentYear = new Date().getFullYear();
+            var years = [];
+            years.push('All');
+            // Add 2 future years and, current year,  Add 10 past years
+            for (var i = currentYear + 2; i >= currentYear - 10; i--) {
+              years.push(i.toString());
+            }
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: years,
+              fields: { text: 'Batch', value: 'Batch' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Batch');
+                } else {
+                  gridObj.filterByColumn('Batch', 'equal', parseInt(e.value));
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Batch');
+          },
+        },
+      },
+      {
+        field: 'Semester',
+        headerText: 'Semester',
+        width: 70,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Semester';
+            return dd;
+          },
+          write: function (args) {
+            var semester = ['All', '1', '2', '3'];
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: semester,
+              fields: { text: 'Semester', value: 'Semester' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Semester');
+                } else {
+                  gridObj.filterByColumn(
+                    'Semester',
+                    'equal',
+                    parseInt(e.value)
+                  );
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Semester');
+          },
+        },
+      },
+      {
+        headerText: 'Actions',
+        template:
+          '<button class="btn-metadata px-4 py-2 bg-primary text-white font-bold" >Finalized Grades</button>', // Add a button to the cell
+        width: 150,
+      },
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create a DataManager with the provided API URL
+    let curriculum_subject_data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      adaptor: new ej.data.WebApiAdaptor(),
+    });
+
+    console.log(
+      'data.adaptor curriculum_subject_data: ',
+      curriculum_subject_data
+    );
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: curriculum_subject_data,
+      columns: gridConfig.columns,
       allowPaging: true,
       allowFiltering: true,
       allowSorting: true, // Enable sorting
-      // rowData: json_class['ClassSubjectGrade'],
-      columns: [
-        {
-          field: 'Course',
-          headerText: 'Course',
-          width: 200,
-        },
+      allowExcelExport: true,
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
 
-        {
-          field: 'Batch',
-          headerText: 'Batch',
-          width: 100,
-        },
-        {
-          field: 'Semester',
-          headerText: 'Semester',
-          width: 100,
-        },
-        {
-          headerText: 'Actions',
-          template:
-            '<button class="btn-metadata px-4 py-2 bg-primary text-white font-bold" >Finalized Grades</button>', // Add a button to the cell
-          width: 150,
-        },
-      ],
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
     });
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-metadata_excelexport') {
+        grid.excelExport();
+      }
+    };
 
     // Add a click event handler for all buttons with the "btn" class
     document.addEventListener('click', function (event) {
@@ -153,31 +273,7 @@
       grid.filterSettings.showFilterBarOperator = args.checked;
       grid.clearFiltering();
     });
-  }
-
-  // Example function to show a modal when the "Performance" button is clicked
-
-  // JavaScript function to show the modal
-  async function finalizedGrades(metadata_id) {
-    console.log('metadata_id: ', metadata_id);
-    // Request in api to update the data
-    try {
-      const response = await fetch(
-        `${api_base_url}/finalized/grades/${metadata_id}`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const result = await response.json();
-      console.log('result: ', result);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  });
 </script>
 
 {% endblock script %}

@@ -15,8 +15,8 @@
 <!----------------- CONTENT ----------------->
 {% block content %}
 
-<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
-  <div class="bg-white p-8 shadow-md col-span-full">
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
     <div
       class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
     >
@@ -267,84 +267,171 @@
   }
 </script>
 
-<!-- FETCH ALL CLASS DATA (GRIDS)-->
 <script>
-  async function fetchAllClass() {
-    try {
-      const response = await fetch(`${api_base_url}/class/data`);
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/class/data/`,
+    columns: [
+      {
+        field: 'Course',
+        headerText: 'Course Name',
+        width: 250,
+      },
+      {
+        field: 'ClassName',
+        headerText: 'Section Code',
+        width: 150,
+      },
+      {
+        field: 'Batch',
+        headerText: 'Batch',
+        width: 100,
+        validationRules: {
+          required: true,
+        },
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Batch';
+            return dd;
+          },
+          write: function (args) {
+            var currentYear = new Date().getFullYear();
+            var years = [];
+            years.push('All');
+            for (var i = currentYear; i > currentYear - 10; i--) {
+              years.push(i.toString());
+            }
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-        return;
-      }
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: years,
+              fields: { text: 'Batch', value: 'Batch' },
+              placeholder: 'Select a value',
 
-      const json_class = await response.json();
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Batch');
+                } else {
+                  gridObj.filterByColumn('Batch', 'equal', parseInt(e.value));
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Batch');
+          },
+        },
+      },
+      {
+        field: 'Semester',
+        headerText: 'Semester',
+        width: 100,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Semester';
+            return dd;
+          },
+          write: function (args) {
+            var semester = ['All', '1', '2', '3'];
 
-      displayGridClass(json_class.Classes);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: semester,
+              fields: { text: 'Semester', value: 'Semester' },
+              placeholder: 'Select a value',
 
-  function displayGridClass(json_class) {
-    // Create the grid with filtering
-    var grid = new ej.grids.Grid({
-      dataSource: json_class,
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Semester');
+                } else {
+                  gridObj.filterByColumn(
+                    'Semester',
+                    'equal',
+                    parseInt(e.value)
+                  );
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Semester');
+          },
+        },
+      },
+      {
+        field: 'Grade',
+        headerText: 'Grade',
+        width: 100,
+      },
+
+      {
+        headerText: 'Actions',
+        template:
+          '<button class="btn px-4 py-2 bg-primary text-white font-bold" >Performance</button>', // Add a button to the cell
+        width: 150,
+      },
+      {
+        headerText: 'Link',
+        template:
+          '<a href="#" onclick="redirectToClass(${ClassId})" class="underline">Class Details</a>',
+        width: 150,
+      },
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create a DataManager with the provided API URL
+    let curriculum_subject_data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      adaptor: new ej.data.WebApiAdaptor(),
+    });
+
+    console.log(
+      'data.adaptor curriculum_subject_data: ',
+      curriculum_subject_data
+    );
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: curriculum_subject_data,
+      columns: gridConfig.columns,
       allowPaging: true,
       allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
-      pageSettings: { pageSize: 10 }, // Set the page size
-      // rowData: json_class['ClassSubjectGrade'],
-      columns: [
-        {
-          field: 'Course',
-          headerText: 'Course Name',
-          width: 250,
-        },
-        {
-          field: 'ClassName',
-          headerText: 'Section Code',
-          width: 150,
-        },
-        {
-          field: 'Batch',
-          headerText: 'Batch',
-          width: 100,
-        },
-        {
-          field: 'Semester',
-          headerText: 'Semester',
-          width: 100,
-        },
-        {
-          field: 'Grade',
-          headerText: 'Grade',
-          width: 100,
-        },
-
-        {
-          headerText: 'Actions',
-          template:
-            '<button class="btn px-4 py-2 bg-primary text-white font-bold" >Performance</button>', // Add a button to the cell
-          width: 150,
-        },
-        {
-          headerText: 'Link',
-          template:
-            '<a href="#" onclick="redirectToClass(${ClassId})" class="underline">Class Details</a>',
-          width: 150,
-        },
-      ],
-
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
     });
 
     grid.toolbarClick = function (args) {
-      if (args['item'].id === 'Grid_excelexport') {
+      if (args['item'].id === 'grid-class_excelexport') {
         grid.excelExport();
       }
     };
@@ -368,9 +455,6 @@
       }
     });
 
-    // Render the grid
-    grid.appendTo('#grid-class');
-
     const filterbarOperator = new ej.buttons.CheckBox();
     filterbarOperator.appendTo('#filterBarOperator');
 
@@ -378,11 +462,11 @@
       grid.filterSettings.showFilterBarOperator = args.checked;
       grid.clearFiltering();
     });
-  }
 
-  // Example function to show a modal when the "Performance" button is clicked
-
-  fetchAllClass();
+    console.log('GRID: ', grid.dataSource);
+    // Append the grid to the container
+    grid.appendTo('#grid-class');
+  });
 </script>
 
 <!-- ADDING STUDENTS -->
@@ -511,4 +595,5 @@
     });
   }
 </script>
+
 {% endblock script %}

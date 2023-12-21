@@ -1,5 +1,5 @@
 from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db, UniversityAdmin, ClassSubjectGrade, Metadata, Curriculum
-from sqlalchemy import desc
+from sqlalchemy import desc, distinct, func, and_
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
 from collections import defaultdict
@@ -238,29 +238,170 @@ def getOverallCoursePerformance():
             return None
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
-        return None
+        return e
 
 
-def getAllClassData():
+def getAllClassData(skip, top, order_by, filter):
     try:
-        current_year = datetime.datetime.now().year
+        # current_year = datetime.datetime.now().year
 
-        data_class_subject_grade_handle = (
-            db.session.query(   
-                Class, Course, ClassGrade
-            )
-            .join(Course, Course.CourseId == Class.CourseId)
-            .join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
-            # .filter(Class.Batch == current_year - 1)
-            .order_by(desc(Class.Batch), desc(Class.CourseId), Class.Year, Class.Section)
-            .all()
-        )
+        class_grade_query = db.session.query(Class, Course, ClassGrade).join(Course, Course.CourseId == Class.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
+        
+        # .filter(Class.Batch == current_year - 1)
+        # DEFAULT QUERY
+        # .order_by(desc(Class.Batch), desc(Class.CourseId), Class.Year, Class.Section)
+        
+        
+        filter_conditions = []
+        
+        if filter:
+            filter_parts = filter.split(' and ')
+            for part in filter_parts:
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(")[3].split("),'")[0]
+                    value = part.split("'")[1]
+                    column_str = None
+                    
+                    if column_name.strip() == 'ClassName':
+                        split_values = value.split(' ')
+                        
+                        if len(split_values) >= 2:
+                            # Check split values if have a number
+                            if any(char.isdigit() for char in split_values[-1]):
+                                batch_section = split_values[-1]
+                                course_code = ' '.join(split_values[:-1])
+                                column_arr_1 = getattr(Course, 'CourseCode')
+                                year, section = None, None
+                                
+                                if '-' in batch_section:
+                                    year, section = batch_section.split('-')
+                                    if section:
+                                        column_arr_3 = getattr(Class, 'Section')
+                                    column_arr_2 = getattr(Class, 'Year')
+                                else:
+                                    year = batch_section
+                                    column_arr_2 = getattr(Class, 'Year')
+                            else:
+                                course_code = ' '.join(split_values)
+                                year, section = None, None
+                                column_arr_1 = getattr(Course, 'CourseCode')
 
-        if data_class_subject_grade_handle:
+                            # Append column_arr_1
+                            filter_conditions.append(
+                                func.lower(column_arr_1).like(f'%{split_values[0]}%')
+                            )
+                            # Check if year then append
+                            if year:
+                                filter_conditions.append(Class.Year == int(year))
+                                
+                            if section:
+                                filter_conditions.append(
+                                    Class.Section == int(section)
+                                )
+                            continue
+                        elif len(split_values) == 1:
+                            course_code, year, section = None, None, None
+                            # check if value contains "-" and digit in it
+                            if '-' in value and any(x.isdigit() for x in value):
+                                year, section = value.split('-')
+                                column_arr_2 = Class.Year
+                                column_arr_3 = Class.Section
+                            else:
+                                course_code = value
+                                column_arr_1 = getattr(Course, 'CourseCode')
+                            
+                            if course_code:
+                                filter_conditions.append(column_arr_1.like(f'%{course_code.upper()}%'))
+
+                            if year:
+                                filter_conditions.append(
+                                    column_arr_2 == int(year)
+                                )
+                            
+                            if section:
+                                filter_conditions.append(
+                                    column_arr_3 == int(section)
+                                )
+                            continue
+                    elif column_name.strip() == 'Course':
+                        column_str = getattr(Course, 'Name')
+                    elif column_name.strip() == 'Grade':
+                        filter_conditions.append(
+                            ClassGrade.Grade == value
+                        )
+                        continue
+                 
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).like(f'%{value}%')
+                        )
+                else:
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    column_num = None
+                    int_value = value.strip(')')
+                    
+                    # Check for column name 
+                    if column_name.strip() == 'Batch':
+                        column_num = Class.Batch
+                    elif column_name.strip() == 'Semester':
+                        column_num = Class.Semester
+                    # elif column_name.strip() == 'Semester':
+                    #     column_num = Class.Semester
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                # END OF ELSE PART
+            # END OF FOR LOOP
+                
+        
+        # Apply all filter conditions with 'and'
+  
+        filter_query = class_grade_query.filter(and_(*filter_conditions))
+        # print('FILTER: ', filter_query.statement.compile().params)
+        
+         # Apply sorting logic
+        if order_by:
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'Course':
+                order_attr = getattr(Course, 'Name')
+            elif order_by.split(' ')[0] == "Batch":
+                order_attr = getattr(Class, "Batch")
+            elif order_by.split(' ')[0] == 'Semester':
+                order_attr = getattr(Class, 'Semester')
+            elif order_by.split(' ')[0] == 'Grade':
+                order_attr = getattr(ClassGrade, 'Grade')
+            else:
+                if ' ' in order_by:
+                    order_query = filter_query.order_by(desc(Course.CourseCode), desc(Class.Year), desc(Class.Section))
+                else:
+                    order_query = filter_query.order_by(Course.CourseCode, Class.Year, Class.Section)
+
+            # Check if order_by contains space
+            if not order_by.split(' ')[0] == "ClassName":
+                if ' ' in order_by:
+                    order_query = filter_query.order_by(desc(order_attr))
+                else:
+                    order_query = filter_query.order_by(order_attr)
+        else:
+            # Apply default sorting
+            order_query = filter_query.order_by(desc(Class.Batch), desc(Class.CourseId), Class.Year, Class.Section)
+        
+        class_grade_main_query = order_query.offset(skip).limit(top).all()
+        
+
+        if class_grade_main_query:
             list_classes = []
             seen_class_ids = set()  # Initialize a set to track seen ClassIds
 
-            for class_subject_grade in data_class_subject_grade_handle:
+            for class_subject_grade in class_grade_main_query:
                 class_id = class_subject_grade.Class.ClassId
 
                 # Check if the ClassId is not in the seen_class_ids set
@@ -272,7 +413,7 @@ def getAllClassData():
                         grade_value = f"{class_subject_grade.ClassGrade.Grade:.2f}"
                     else:
                         # If Grade does not exist, set it to 'N/A'
-                        grade_value = "N/A"
+                        grade_value = 0.00
                         
                     class_obj = {
                         'ClassId': class_id,
@@ -290,7 +431,7 @@ def getAllClassData():
                     list_classes.append(class_obj)
 
             # Return the list of class objects
-            return {'Classes': list_classes}
+            return {'result': list_classes, 'count': 50}
         else:
             return None
 
@@ -1038,27 +1179,119 @@ def processClassStudents(file, class_id):
     #     return jsonify({'error': 'An error occurred while processing the file'}), 500
 
 
-def getStudentData():
+def getStudentData(skip, top, order_by, filter):
     try:
-        data_student = (
-            db.session.query(Student).all()
+        student_query = (
+            db.session.query(Student, CourseEnrolled, Course).join(CourseEnrolled, CourseEnrolled.StudentId == Student.StudentId).join(Course, Course.CourseId == CourseEnrolled.CourseId)
         )
-
         
-        if data_student:
-             # For loop the data_student and put it in dictionary
+        filter_conditions = []
+        if filter:
+            filter_parts = filter.split(' and ')
+            for part in filter_parts:
+                
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(")[3].split("),'")[0]
+                    value = part.split("'")[1]
+                    column_str = None
+                    if column_name.strip() == 'StudentNumber':
+                        column_str = getattr(Student, 'StudentNumber')
+                    elif column_name.strip() == 'Name':
+                        column_str = getattr(Student, 'Name')
+                    elif column_name.strip() == 'Email':
+                        column_str =  getattr(Student, 'Email')     
+                    elif column_name.strip() == 'MobileNumber':
+                        column_str = getattr(Student, 'MobileNumber')
+                    elif column_name.strip() == 'CourseCode':
+                        column_str = getattr(Course, 'CourseCode')
+                    elif column_name.strip() == 'DateEnrolled':
+                        column_str = getattr(CourseEnrolled, 'DateEnrolled')
+                        filter_conditions.append(
+                            CourseEnrolled.DateEnrolled == (1 if value == 'male' else 2)
+                        )
+                    elif column_name.strip() == 'Gender':
+                        filter_conditions.append(
+                            Student.Gender == (1 if value == 'male' else 2)
+                        )
+                        continue
+                    
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).like(f'%{value}%')
+                        )
+                else:
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    
+                    column_num = None
+                    int_value = value.strip(')')
+             
+                    if column_name.strip() == 'Batch':
+                        column_num = CourseEnrolled.CurriculumYear
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                        
+        filter_query = student_query.filter(and_(*filter_conditions))
+        
+        if order_by:
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'StudentNumber':
+                order_attr = getattr(Student, 'StudentNumber')
+            elif order_by.split(' ')[0] == "Name":
+                order_attr = getattr(Student, 'Name')
+            elif order_by.split(' ')[0] == 'Email':
+                order_attr = getattr(Student, 'Email')
+            elif order_by.split(' ')[0] == 'Gender':
+                order_attr = getattr(Student, 'Gender')
+            elif order_by.split(' ')[0] == 'MobileNumber':
+                order_attr = getattr(Student, 'MobileNumber')
+            elif order_by.split(' ')[0] == 'CourseCode':
+                order_attr = getattr(Course, 'CourseCode')
+            elif order_by.split(' ')[0] == 'DateEnrolled':
+                order_attr = getattr(CourseEnrolled, 'DateEnrolled')
+            elif order_by.split(' ')[0] == 'Batch':
+                order_attr = getattr(CourseEnrolled, 'CurriculumYear')
+           
+           
+            if ' ' in order_by:
+                order_query = filter_query.order_by(desc(order_attr))
+            else:
+                order_query = filter_query.order_by(order_attr)
+        else:
+            # Apply default sorting
+            order_query = filter_query.order_by(desc(CourseEnrolled.CurriculumYear), desc(Course.CourseCode), desc(Student.StudentNumber))
+        
+        
+        # Query for counting all records
+        total_count = order_query.count()
+        # Limitized query = 
+        student_limit_offset_query = order_query.offset(skip).limit(top).all()
+
+        if student_limit_offset_query:
+             # For loop the student_query and put it in dictionary
             list_student_data = []
-            for student in data_student:
+            for data in student_limit_offset_query:
                 dict_student = {
-                    "Student Number": student.StudentNumber,
-                    "Name": student.Name,
-                    "Email": student.Email,
-                    "Mobile Number": student.MobileNumber,
-                    "Gender": "Male" if student.Gender == 1 else "Female",
+                    "StudentNumber": data.Student.StudentNumber,
+                    "Name": data.Student.Name,
+                    "Email": data.Student.Email,
+                    "MobileNumber": data.Student.MobileNumber,
+                    "Gender": "Male" if data.Student.Gender == 1 else "Female",
+                    "CourseCode": data.Course.CourseCode,
+                    "DateEnrolled": data.CourseEnrolled.DateEnrolled.strftime('%Y-%m-%d'),
+                    "Batch": data.CourseEnrolled.CurriculumYear
                 }
                 # Append the data
                 list_student_data.append(dict_student)
-            return (list_student_data)
+            return jsonify({"result": list_student_data, "count":total_count})
         else:
             return None
     except Exception as e:
@@ -1238,29 +1471,166 @@ def deleteStudent(class_subject_id, student_id):
     
     # getCurriculumSubject
 
-def getCurriculumData():
+def getCurriculumData(skip, top, order_by, filter):
     try:
-        metadata = db.session.query(Curriculum, Metadata, Course, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).order_by(desc(Metadata.Batch), desc(Metadata.YearLevel)).all()
+        
+        metadata_query = (
+            db.session.query(Curriculum, Metadata, Course, Subject)
+            .join(Metadata, Metadata.MetadataId == Curriculum.MetadataId)
+            .join(Course, Course.CourseId == Metadata.CourseId)
+            .join(Subject, Subject.SubjectId == Curriculum.SubjectId)
+        )
+        
+        # metadata_query = db.session.query(Curriculum, Metadata, Course, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Subject, Subject.SubjectId == Curriculum.SubjectId)
+        # DEFAULT ORDER BY
+        # .order_by(desc(Metadata.Batch), desc(Metadata.YearLevel)).all()
+        
+        filter_conditions = []
+        # Split filter string by 'and'
+        # append the str_teacher_id
+        if filter:
+            filter_parts = filter.split(' and ')
+            for part in filter_parts:
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(")[3].split(")")[0]
+                    value = part.split("'")[1]
+                    column_str = None
+                    
+                    if column_name.strip() == 'CourseCode':
+                        column_str = getattr(Course, 'CourseCode')
+                    elif column_name.strip() == 'SubjectCode':
+                        column_str = getattr(Subject, 'SubjectCode')
+                    elif column_name.strip() == 'Subject':
+                        column_str =  getattr(Subject, 'Name')     
+                 
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).like(f'%{value}%')
+                        )
+                else:
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    
+                    column_num = None
+                    int_value = value.strip(')')
+                    
+                    if column_name.strip() == 'Year':
+                        column_num = Metadata.YearLevel
+                    elif column_name.strip() == 'Batch':
+                        column_num = Metadata.Batch
+                    elif column_name.strip() == 'Semester':
+                        column_num = Metadata.Semester
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                    
+        filter_query = metadata_query.filter(and_(*filter_conditions))
+        if order_by:
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'CourseCode':
+                order_attr = getattr(Course, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == "SubjectCode":
+                order_attr = getattr(Subject, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'Subject':
+                order_attr = getattr(Subject, 'Name')
+            elif order_by.split(' ')[0] == 'Year':
+                order_attr = getattr(Metadata, order_by.split(' ')[0] + 'Level')
+            elif order_by.split(' ')[0] == 'Semester':
+                order_attr = getattr(Metadata, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'Batch':
+                order_attr = getattr(Metadata, order_by.split(' ')[0])
+           
+           
+            if ' ' in order_by:
+                order_query = filter_query.order_by(desc(order_attr))
+            else:
+                order_query = filter_query.order_by(order_attr)
+        else:
+            # Apply default sorting
+            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.YearLevel))
+        
+        
+        # Query for counting all records
+        total_count = order_query.count()
+        # Limitized query = 
+        metadata_limit_offset = order_query.offset(skip).limit(top).all()
+
+        # Get all unique SubjectCode and CourseCode
+        unique_subject_code = db.session.query(Subject).all()
+        unique_course_code = db.session.query(Course).all()
+        
+        year_options = []
+        batch_options = []
+        semester_options = []
+        course_options = []
+        subject_options = []
+        
+        current_year = datetime.datetime.now().year
+        previous_year = current_year - 1
+        future_year = current_year + 1
+        
+        # Options for frontend
+        year = [1, 2, 3, 4]
+        batch = [previous_year, current_year, future_year]
+        semesters = [1, 2, 3]
+        
+        
+        for y in year:
+            year_dict = {
+                "Year": y
+            }
+            year_options.append(year_dict)
+            
+        for b in batch:
+            batch_dict = {
+                "Batch": b
+            }
+            batch_options.append(batch_dict)
+        
+        for s in semesters:
+            semester_dict = {
+                "Semester": s
+            }
+            semester_options.append(semester_dict)
+        
+        for c in unique_course_code:
+            course_dict = {
+                "Course": c.CourseCode
+            }
+            course_options.append(course_dict)
+            
+        for s in unique_subject_code:
+            subject_dict = {
+                "SubjectCode": s.SubjectCode
+            }
+            subject_options.append(subject_dict)
+        
         
         # Get the StudentClassSubjectGrade
-        if metadata:
+        if metadata_limit_offset:
             list_metadata = []
                 # For loop the data_student and put it in dictionary
-            for data in metadata:
+            for data in metadata_limit_offset:
                 # Convert the YearLevel to 1st, 2nd, 3rd, 4th
-                
-                
                 dict_metadata = {
                     "MetadataId": data.Metadata.MetadataId,
                     "Year": data.Metadata.YearLevel,
                     "Semester": data.Metadata.Semester,
                     "Batch": data.Metadata.Batch,
-                    "Course": data.Course.CourseCode,
-                    # "Subject": data.Subject.Name,
-                    "Subject Code": data.Subject.SubjectCode
+                    "CourseCode": data.Course.CourseCode,
+                    "Subject": data.Subject.Name,
+                    "SubjectCode": data.Subject.SubjectCode
                 }
                 list_metadata.append(dict_metadata)
-            return  jsonify({'data': list_metadata})
+            return jsonify({'result': list_metadata, 'count': total_count, 'yearOptions': year_options, 'subjectCodeOptions': subject_options, 'batchOptions': batch_options, 'courseOptions': course_options, 'semesterOptions': semester_options})
+
         else:
             return None
     except Exception as e:
@@ -1311,54 +1681,40 @@ def getActiveTeacher():
         return None
     
     
-def processAddingCurriculumSubjects(file):
-
-    # Check if the file is empty
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-
-    # Check file extension
-    if not file.filename.endswith(('.xlsx', '.xls')):
-        return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
-
-    # Read the Excel file into a DataFrame
-    df = pd.read_excel(file)
-
-    # dict data list
-    list_curriculum_subjects = []
-    errors = []
-    
-    # For example, you can iterate through rows and access columns like this:
-    for index, row in df.iterrows():
-        # Extract the values from the DataFrame
-        course_code = row['Course']
-        subject_code = row['Subject Code']
-        year_level = row['Year']
-        semester = row['Semester']
-        batch = row['Batch']
-    
+def processAddingCurriculumSubjects(data, excelType=False):
+    # MANUAL ADDING DATA
+    if excelType == False:
+        course_code = data['Course']
+        subject_code = data['SubjectCode']
+        year_level = data['Year']
+        semester = data['Semester']
+        batch = data['Batch']
+        
         course = db.session.query(Course).filter_by(CourseCode = course_code).first()
-            
+                
         # Check if course existing
         if not course:
-            errors.append({
-                "Course": course_code,
-                "Subject Code": subject_code,
-                "Year": year_level,
-                "Semester": semester,
-                "Batch": batch,
-                "Error": "Invalid Course"
-            })
+            # Return cannot added data. Course already exist
+            return jsonify({'error': 'Invalid Course'}), 400
         else:
-            metadata = db.session.query(Metadata).filter_by(YearLevel = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+            # Check if already have classes and avoid adding curriculum.
+            class_data = db.session.query(Class).filter_by(Year = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+            if class_data:
+                # Return cannot added data. Class already exist
+                return jsonify({'error': 'Cannot add subject curriculum has already class existing.'}), 400
             
+            metadata = db.session.query(Metadata).filter_by(YearLevel = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+            # Check if have a class already with yhe same year_level, semester, batch and course id
             if metadata:
                 # Check if subject is existing
                 subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()
                 
+                
                 if subject:
                     # Check if Curriculum is existing
                     curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Metadata.CourseId == course.CourseId, Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                    
+                    # If no curriculum subject exist then create curriculum
                     if not curriculum_subject_exist:
                         # Create a curriculum
                         new_curriculum = Curriculum(
@@ -1367,41 +1723,19 @@ def processAddingCurriculumSubjects(file):
                         )
                     
                         db.session.add(new_curriculum)
-                        db.session.commit()
+                        db.session.commit()                        
                         
-                        # Append the list_curriculum_subjects
-                        list_curriculum_subjects.append({
-                            "MetadataId": metadata.MetadataId,
-                            "Course": course_code,
-                            "Subject Code": subject_code,
-                            "Year": year_level,
-                            "Semester": semester,
-                            "Batch": batch
-                        })
+                        dict_subject = subject.to_dict()
+                        
+                        # Return data added successfully
+                        return jsonify({'success': 'Data added successfully', 'SubjectName': dict_subject['Name']}), 200
                     else:
-                        db.session.rollback()
-                        errors.append({
-                            "Course": course_code,
-                            "Subject Code": subject_code,
-                            "Year": year_level,
-                            "Semester": semester,
-                            "Batch": batch,
-                            "Error": "Already exist"
-                        })
-                        
-                        
+                        # Return cannot added data. Curriculum already exist
+                        return jsonify({'error': 'Already exist'}), 400
                 else:
-                    db.session.rollback()
-                    errors.append({
-                            "Course": course_code,
-                            "Subject Code": subject_code,
-                            "Year": year_level,
-                            "Semester": semester,
-                            "Batch": batch,
-                            "Error": "Invalid Subject Code"
-                    })
-                    
-            else: # NO META DATA FIELD
+                    # Return cannot added data. Invalid Subject Code
+                    return jsonify({'error': 'Invalid Subject Code'}), 400
+            else:
                 # Check if subject is existing
                 subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()   
         
@@ -1428,46 +1762,191 @@ def processAddingCurriculumSubjects(file):
                         db.session.add(new_curriculum)
                         db.session.commit()
                         
-                        # Append the list_curriculum_subjects
-                        list_curriculum_subjects.append({
-                            "MetadataId": new_metadata.MetadataId,
-                            "Course": course_code,
-                            "Subject Code": subject_code,
-                            "Year": year_level,
-                            "Semester": semester,
-                            "Batch": batch
-                        })
+                        dict_subject = subject.to_dict()
+                        
+                        # Return data added successfully
+                        return jsonify({'success': 'Data added successfully', 'SubjectName': dict_subject['Name']}), 200
+                    else:
+                        # Return cannot added data. Curriculum already exist
+                        return jsonify({'error': 'Already exist'}), 400
+                    
+                else:
+                    # Return cannot added data. Invalid Subject Code
+                    return jsonify({'error': 'Invalid Subject Code'}), 400
+            
+    # EXCEL TYPE
+    if excelType == True:
+        # Check if the file is empty
+        if data.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        # Check file extension
+        if not data.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+
+        # Read the Excel file into a DataFrame
+        df = pd.read_excel(data)
+
+        # dict data list
+        list_curriculum_subjects = []
+        errors = []
+        
+        # For example, you can iterate through rows and access columns like this:
+        for index, row in df.iterrows():
+            # Extract the values from the DataFrame
+            course_code = row['Course']
+            subject_code = row['Subject Code']
+            year_level = row['Year']
+            semester = row['Semester']
+            batch = row['Batch']
+        
+            course = db.session.query(Course).filter_by(CourseCode = course_code).first()
+                
+            # Check if course existing
+            if not course:
+                errors.append({
+                    "Course": course_code,
+                    "Subject Code": subject_code,
+                    "Year": year_level,
+                    "Semester": semester,
+                    "Batch": batch,
+                    "Error": "Invalid Course"
+                })
+            else:
+                # Check if already have classes and avoid adding curriculum.
+                class_data = db.session.query(Class).filter_by(Year = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+                if class_data:
+                    errors.append({
+                                "Course": course_code,
+                                "Subject Code": subject_code,
+                                "Year": year_level,
+                                "Semester": semester,
+                                "Batch": batch,
+                                "Error": "Curriculum has already class existing"
+                    })
+                    # Go to next for loop
+                    continue
+                
+                metadata = db.session.query(Metadata).filter_by(YearLevel = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+                
+                if metadata:
+                    # Check if subject is existing
+                    subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()
+                    
+                    if subject:
+                        # Check if Curriculum is existing
+                        curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Metadata.CourseId == course.CourseId, Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                        if not curriculum_subject_exist:
+                            # Create a curriculum
+                            new_curriculum = Curriculum(
+                                MetadataId=metadata.MetadataId,
+                                SubjectId=subject.SubjectId
+                            )
+                        
+                            db.session.add(new_curriculum)
+                            db.session.commit()
+                            
+                            # Append the list_curriculum_subjects
+                            list_curriculum_subjects.append({
+                                "MetadataId": metadata.MetadataId,
+                                "Course": course_code,
+                                "Subject Code": subject_code,
+                                "Year": year_level,
+                                "Semester": semester,
+                                "Batch": batch
+                            })
+                        else:
+                            db.session.rollback()
+                            errors.append({
+                                "Course": course_code,
+                                "Subject Code": subject_code,
+                                "Year": year_level,
+                                "Semester": semester,
+                                "Batch": batch,
+                                "Error": "Already exist"
+                            })
+                            
+                            
                     else:
                         db.session.rollback()
                         errors.append({
-                            "Course": course_code,
-                            "Subject Code": subject_code,
-                            "Year": year_level,
-                            "Semester": semester,
-                            "Batch": batch,
-                            "Error": "Already exist"
+                                "Course": course_code,
+                                "Subject Code": subject_code,
+                                "Year": year_level,
+                                "Semester": semester,
+                                "Batch": batch,
+                                "Error": "Invalid Subject Code"
                         })
-                       
-                else:
-                    db.session.rollback()
-                    errors.append({
-                            "Course": course_code,
-                            "Subject Code": subject_code,
-                            "Year": year_level,
-                            "Semester": semester,
-                            "Batch": batch,
-                            "Error": "Invalid Subject Code"
-                    })
-                  
+                        
+                else: # NO META DATA FIELD
+                    # Check if subject is existing
+                    subject = db.session.query(Subject).filter_by(SubjectCode = subject_code).first()   
+            
+                    new_metadata = Metadata(
+                        CourseId=course.CourseId,
+                        YearLevel=year_level,
+                        Semester=semester,
+                        Batch=batch
+                    )
+                        
+                    db.session.add(new_metadata)
+                    db.session.flush()
+                                                        
+                    if subject:                       
+                        curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                            
+                        if not curriculum_subject_exist:
+                            # Create a curriculum
+                            new_curriculum = Curriculum(
+                                MetadataId=new_metadata.MetadataId,
+                                SubjectId=subject.SubjectId
+                            )
+                    
+                            db.session.add(new_curriculum)
+                            db.session.commit()
+                            
+                            # Append the list_curriculum_subjects
+                            list_curriculum_subjects.append({
+                                "MetadataId": new_metadata.MetadataId,
+                                "Course": course_code,
+                                "Subject Code": subject_code,
+                                "Year": year_level,
+                                "Semester": semester,
+                                "Batch": batch
+                            })
+                        else:
+                            db.session.rollback()
+                            errors.append({
+                                "Course": course_code,
+                                "Subject Code": subject_code,
+                                "Year": year_level,
+                                "Semester": semester,
+                                "Batch": batch,
+                                "Error": "Already exist"
+                            })
+                        
+                    else:
+                        db.session.rollback()
+                        errors.append({
+                                "Course": course_code,
+                                "Subject Code": subject_code,
+                                "Year": year_level,
+                                "Semester": semester,
+                                "Batch": batch,
+                                "Error": "Invalid Subject Code"
+                        })
+                    
+            
+        if errors and not list_curriculum_subjects:
+            return jsonify({'error': 'Something went wrong. The data could not be processed successfully.', 'errors': errors}), 500
+        if errors and list_curriculum_subjects:
+            return jsonify({'warning': 'Some data added successfully', 'errors': errors, 'data': list_curriculum_subjects}), 500
+        else:
+            db.session.commit()
+            return  jsonify({'result': 'Data added successfully', 'data': (list_curriculum_subjects)}), 200
         
-    if errors and not list_curriculum_subjects:
-        return jsonify({'error': 'Something went wrong. The data could not be processed successfully.', 'errors': errors}), 500
-    if errors and list_curriculum_subjects:
-        return jsonify({'warning': 'Some data added successfully', 'errors': errors, 'data': list_curriculum_subjects}), 500
-    else:
-        db.session.commit()
-        return  jsonify({'result': 'Data added successfully', 'data': (list_curriculum_subjects)}), 200
-    
+
+
 
 def processUpdatingClassSubjectDetails(data):
     try:
@@ -1633,30 +2112,115 @@ def processAddingStudentInSubject(file, class_subject_id):
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
     
  
-def getMetadata():
+def getMetadata(skip, top, order_by, filter):
     try:
-        data_metadata = db.session.query(Metadata, Course).join(Course, Course.CourseId == Metadata.CourseId).order_by(desc(Metadata.Batch), desc(Metadata.Semester)).all()
+        print("skip, top, order_by, filter: ", skip, top, order_by, filter)
+        
+        metadata_query = db.session.query(Metadata, Course).join(Course, Course.CourseId == Metadata.CourseId).distinct(Course.CourseCode, Course.Name, Metadata.Batch, Metadata.Semester)
+        
+        # Order default
+        # .order_by(desc(Metadata.Batch), desc(Metadata.Semester))
+
+
+        filter_conditions = []
+        if filter:
+            filter_parts = filter.split(' and ')
+            for part in filter_parts:
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(")[3].split("),'")[0]
+                    value = part.split("'")[1]
+                    column_str = None
+                    print('column_name: ', column_name)
+                    print('value: ', value)
+                    
+                    if column_name.strip() == 'CourseCode':
+                        column_str = getattr(Course, 'CourseCode')
+                    elif column_name.strip() == 'Course':
+                        column_str = getattr(Course, 'Name')
+                 
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).like(f'%{value}%')
+                        )
+                else:
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    column_num = None
+                    int_value = value.strip(')')
+                    
+                    # Check for column name 
+                    if column_name.strip() == 'Batch':
+                        column_num = Metadata.Batch
+                    elif column_name.strip() == 'Semester':
+                        column_num = Metadata.Semester
+                    # elif column_name.strip() == 'Semester':
+                    #     column_num = Class.Semester
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                # END OF ELSE PART
+            # END OF FOR LOOP
+                
+        
+        # Apply all filter conditions with 'and'
+  
+        filter_query = metadata_query.filter(and_(*filter_conditions))
+        print('FILTER: ', filter_query.statement.compile().params)
+        
+        if order_by:
+            print('order_by: ', order_by)
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'CourseCode':
+                print('IN COURSE CODE')
+                order_attr = getattr(Course, 'CourseCode')
+            elif order_by.split(' ')[0] == "Course":
+                order_attr = getattr(Course, 'Name')
+            elif order_by.split(' ')[0] == 'Batch':
+                order_attr = getattr(Metadata, 'Batch')
+            elif order_by.split(' ')[0] == 'Semester':
+                order_attr = getattr(Metadata, 'Semester')           
+           
+            if ' ' in order_by:
+                order_query = filter_query.order_by(desc(order_attr))
+            else:
+                print("IN QUERY")
+                order_query = filter_query.order_by(order_attr)
+        else:
+            # Apply default sorting
+            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.Semester))
+            # order params
+            
+
+        metadata_main_query = order_query.offset(skip).limit(top).all()
+        total_count = order_query.count()
 
         list_metadata = []
-        if data_metadata:
-            for data in data_metadata:
+        if metadata_main_query:
+            for data in metadata_main_query:
                 # Check data.Course.Name, data.Metadata.Batch and data.Metadata.Semester if exist in list_metadata
-                if not any(d['Course'] == data.Course.Name and d['Batch'] == data.Metadata.Batch and d['Semester'] == data.Metadata.Semester for d in list_metadata):
-                    # Create a dict
-                    dict_metadata = {
-                        'MetadataId': data.Metadata.MetadataId,
-                        'Course': data.Course.Name,
-                        'CourseId': data.Course.CourseId,
-                        'Semester': data.Metadata.Semester,
-                        'Batch': data.Metadata.Batch
-                    }
-
-                    # Append the dict to the list_metadata
-                    list_metadata.append(dict_metadata)
                 
-            return jsonify(list_metadata)
+                # Create a dict
+                dict_metadata = {
+                    'MetadataId': data.Metadata.MetadataId,
+                    'Course': data.Course.Name,
+                    'CourseCode': data.Course.CourseCode,
+                    'Semester': data.Metadata.Semester,
+                    'Batch': data.Metadata.Batch
+                }
+
+                # Append the dict to the list_metadata
+                list_metadata.append(dict_metadata)
+            
+            return jsonify({'result': list_metadata, 'count': total_count})
         else:
-            return jsonify(None)
+            return jsonify({'result': None})
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         return jsonify(error=str(e))

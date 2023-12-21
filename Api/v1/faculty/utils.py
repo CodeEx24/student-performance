@@ -316,16 +316,18 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
         )
 
         if filter:
-            filter_parts = filter.split('and')
-         
+            filter_parts = filter.split(' and ')
+            print('filter_parts: ', filter_parts)
             for part in filter_parts:
-           
+                print('PART: ', part)
                 # Check if part has to lower in value
                 if '(tolower(' in part:
                     # Extracting column name and value
-                    column_name = part.split("(tolower(")[1].split("),'")[0]
-                    value = part.split("),'")[1][:-2].strip("')")
+                    column_name = part.split("(")[3].split("),'")[0]
+                    print('column_name: ', column_name)
+                    value = part.split("'")[1]
                     column_str = None
+                    print('value: ', value)
                     
                     if column_name.strip() == 'Class':
                         split_values = value.split(' ')
@@ -354,7 +356,7 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
 
                             # Append column_arr_1
                             filter_conditions.append(
-                                Course.CourseCode.startswith(course_code.upper())
+                                func.lower(column_arr_1).like(f'%{value}%')
                             )
                             # Check if year then append
                             if year:
@@ -367,7 +369,8 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
                             continue
                         elif len(split_values) == 1:
                             course_code, year, section = None, None, None
-                            if '-' in value:
+                            # check if value contains "-" and digit in it
+                            if '-' in value and any(x.isdigit() for x in value):
                                 year, section = value.split('-')
                                 column_arr_2 = Class.Year
                                 column_arr_3 = Class.Section
@@ -376,7 +379,8 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
                                 column_arr_1 = getattr(Course, 'CourseCode')
                             
                             if course_code:
-                                filter_conditions.append(column_arr_1.startswith(course_code.upper()))
+                                print('course_code.upper(): ', course_code.upper())
+                                filter_conditions.append(column_arr_1.like(f'%{course_code.upper()}%'))
 
                             if year:
                                 filter_conditions.append(
@@ -398,12 +402,9 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
                     if column_str:
                         # Append column_str
                         filter_conditions.append(
-                            func.lower(column_str).startswith(value)
+                            func.lower(column_str).like(f'%{value}%')
                         )
                 else:
-                    # split by space and get the first element and remove the opening ( of part element
-                    
-                    
                     # column_name = part[0][1:]  # Remove the opening '('
                     column_name, value = [x.strip() for x in part[:-1].split("eq")]
                     column_name = column_name[1:]
@@ -432,8 +433,8 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
         # Apply all filter conditions with 'and'
   
         filter_query = query.filter(and_(*filter_conditions))
-      
-        print(filter_query.statement.compile().params)
+
+ 
         # Apply sorting logic
         if order_by:
             # Determine the order attribute
@@ -444,7 +445,6 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
             elif order_by.split(' ')[0] == 'Grade':
                 order_attr = getattr(StudentClassSubjectGrade, order_by.split(' ')[0])
             elif order_by.split(' ')[0] == 'SubjectCode':
-                print('SUBJECT CODE DATAP: ', order_by.split(' ')[0])
                 order_attr = getattr(Subject, order_by.split(' ')[0])
             elif order_by.split(' ')[0] == 'Batch':
                 order_attr = getattr(Class, order_by.split(' ')[0])
@@ -455,11 +455,9 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
 
                 if ' ' in order_by:
                     order_query = filter_query.order_by(desc(Course.CourseCode), desc(Class.Year), desc(Class.Section))
-                    print(order_query)
                 
                 else:
                     order_query = filter_query.order_by(Course.CourseCode, Class.Year, Class.Section)
-                    print(order_query)
                 # close the if_order by and go to next line of it
 
             # Check if order_by contains space

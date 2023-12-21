@@ -1,16 +1,23 @@
 {% extends "universityadmin/layout.html" %} {% block title %}
 <title>Curriculum</title> {% endblock title %}
 <!----------------- STYLE ----------------->
-{% block style %} {% endblock style %}
+{% block style %}
+
+<style>
+  .e-grid .e-validation-message {
+    color: blue; /* Change the text color to red */
+    font-style: italic; /* Apply italic style */
+    font-size: 12px; /* Adjust the font size */
+  }
+</style>
+{% endblock style %}
 
 <!----------------- CONTENT ----------------->
 {% block content %}
 
-<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto p-4">
-  <div class="bg-white p-8 shadow-md col-span-full">
-    <div
-      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
-    >
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div class="rounded-sm border border-stroke bg-white p-4 shadow-sm">
       <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
         Curriculum
       </h3>
@@ -116,6 +123,25 @@
 </div>
 
 <!-- The Modal -->
+<div
+  id="deleteModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-10"
+>
+  <div class="bg-white p-8 rounded shadow-md">
+    <p class="mb-4">Are you sure you want to remove this student?</p>
+    <div class="flex justify-end">
+      <button
+        id="cancelBtn"
+        class="mr-2 px-4 py-2 text-white bg-gray-600 rounded"
+      >
+        Cancel
+      </button>
+      <button id="confirmBtn" class="px-4 py-2 text-white bg-[#9D1D1D] rounded">
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
 
 <div
   id="loadingModal"
@@ -145,196 +171,6 @@
 
 <!-- SCRIPTS DATA -->
 {% block script %}
-
-<!-- FETCH ALL CLASS DATA (GRIDS)-->
-<script>
-  async function fetchCurriculum() {
-    try {
-      const response = await fetch(`${api_base_url}/curriculum`);
-
-      if (!response.ok) {
-        const empty = [];
-        displayGridCurriculum(empty);
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const result = await response.json();
-      if (result.data) {
-        displayGridCurriculum(result.data);
-      }
-    } catch (error) {
-      console.error('Error: ', error);
-    }
-  }
-
-  function displayGridCurriculum(curriculum) {
-    // Create the grid with filtering
-    var grid = new ej.grids.Grid({
-      dataSource: curriculum,
-      allowPaging: true,
-      allowFiltering: true,
-      allowSorting: true, // Enable sorting
-      allowExcelExport: true,
-      // rowData: json_class['ClassSubjectGrade'],
-      columns: [
-        {
-          field: 'Course',
-          headerText: 'Course',
-          width: 100,
-        },
-
-        {
-          field: 'Subject Code',
-          headerText: 'Subject Code',
-          width: 100,
-        },
-        {
-          field: 'Year',
-          headerText: 'Year',
-          width: 100,
-        },
-        {
-          field: 'Semester',
-          headerText: 'Semester',
-          width: 100,
-        },
-        {
-          field: 'Batch',
-          headerText: 'Batch',
-          width: 100,
-        },
-      ],
-
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
-      allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {
-        // Exclude the 'Subject Code' column from the exported Excel file
-        args.xlsxExportOptions.sheets[0].columns =
-          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
-            return column.field !== 'Subject';
-          });
-      },
-    });
-
-    grid.toolbarClick = function (args) {
-      if (args['item'].id === 'grid-curriculum_excelexport') {
-        grid.excelExport();
-      }
-    };
-
-    // Render the grid
-    grid.appendTo('#grid-curriculum');
-
-    const filterbarOperator = new ej.buttons.CheckBox();
-    filterbarOperator.appendTo('#filterBarOperator');
-
-    filterbarOperator.addEventListener('change', function (args) {
-      grid.filterSettings.showFilterBarOperator = args.checked;
-      grid.clearFiltering();
-    });
-  }
-
-  // Example function to show a modal when the "Performance" button is clicked
-
-  // JavaScript function to show the modal
-  async function fetchCurriculumSubjects(data) {
-    isDisplaySubjects = true;
-
-    const response = await fetch(
-      `${api_base_url}/curriculum/subjects/${data.MetadataId}`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch data. Try to contact the admin to resolve the issue.`
-      );
-    }
-
-    const result = await response.json();
-    displayCurriculumSubjects({
-      Subject: result.data,
-      Course: data.Course,
-      Year: data.Year,
-      Semester: data.Semester,
-      Batch: data.Batch,
-    });
-  }
-
-  function displayCurriculumSubjects(data) {
-    // Get all text modal
-    const textCourseModal = document.getElementById('text-course-modal');
-    const textBatchModal = document.getElementById('text-batch-modal');
-    const textYearModal = document.getElementById('text-year-modal');
-    const textSemesterModal = document.getElementById('text-semester-modal');
-
-    // Update the text
-    textCourseModal.innerText = data.Course;
-    textBatchModal.innerText = data.Batch;
-    textYearModal.innerText = data.Year;
-    textSemesterModal.innerText = data.Semester;
-
-    displayGridSubjects(data.Subject);
-
-    document
-      .getElementById('curriculum-subjects-modal')
-      .classList.remove('hidden');
-  }
-
-  function displayGridSubjects(subjects) {
-    // Create the grid with filtering
-    var grid = new ej.grids.Grid({
-      dataSource: subjects,
-      allowPaging: true,
-      allowFiltering: true,
-      allowSorting: true, // Enable sorting
-      allowExcelExport: true,
-      // rowData: json_class['ClassSubjectGrade'],
-      columns: [
-        {
-          field: 'Subject Code',
-          headerText: 'Course Name',
-          width: 100,
-        },
-        {
-          field: 'Name',
-          headerText: 'Name',
-          width: 250,
-        },
-        {
-          field: 'Units',
-          headerText: 'Units',
-          width: 100,
-        },
-      ],
-
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
-      allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {},
-    });
-
-    grid.toolbarClick = function (args) {
-      if (args['item'].id === 'Grid_excelexport') {
-        grid.excelExport();
-      }
-    };
-    // Add a click event handler for all buttons with the "btn" class
-
-    // Render the grid
-    grid.appendTo('#grid-subjects');
-
-    const filterbarOperator = new ej.buttons.CheckBox();
-    filterbarOperator.appendTo('#filterBarOperator');
-
-    filterbarOperator.addEventListener('change', function (args) {
-      grid.filterSettings.showFilterBarOperator = args.checked;
-      grid.clearFiltering();
-    });
-  }
-
-  fetchCurriculum();
-</script>
 
 <!-- ADDING STUDENTS -->
 <script>
@@ -467,5 +303,186 @@
       grid.clearFiltering();
     });
   }
+</script>
+<!-- ################################################################################## -->
+<!-- WEB API URL UPDATE -->
+<!-- Your Flask script to render configuration data -->
+<link
+  rel="stylesheet"
+  href="https://cdn.syncfusion.com/ej2/17.3.29/material.css"
+/>
+<script src="https://cdn.syncfusion.com/ej2/17.3.29/dist/ej2.min.js"></script>
+<script>
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/curriculum`,
+    columns: [
+      {
+        field: 'CourseCode',
+        headerText: 'Course',
+        width: 50,
+        editType: 'dropdownedit',
+        validationRules: {
+          required: true,
+        },
+      },
+      {
+        field: 'SubjectCode',
+        headerText: 'Subject Code',
+        width: 80,
+        editType: 'dropdownedit',
+        validationRules: {
+          required: true,
+        },
+      },
+      {
+        field: 'Subject',
+        headerText: 'Subject',
+        width: 130,
+        allowEditing: false,
+      },
+
+      {
+        field: 'Year',
+        headerText: 'Year',
+        width: 50,
+        editType: 'dropdownedit',
+        validationRules: {
+          required: true,
+        },
+      },
+
+      {
+        field: 'Semester',
+        headerText: 'Semester',
+        width: 50,
+        editType: 'dropdownedit',
+        validationRules: {
+          required: true,
+        },
+      },
+      {
+        field: 'Batch',
+        headerText: 'Batch',
+        width: 50,
+        validationRules: {
+          required: true,
+        },
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Batch';
+            return dd;
+          },
+          write: function (args) {
+            var currentYear = new Date().getFullYear();
+            var years = [];
+            years.push('All');
+            for (var i = currentYear; i > currentYear - 10; i--) {
+              years.push(i.toString());
+            }
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: years,
+              fields: { text: 'Batch', value: 'Batch' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Batch');
+                } else {
+                  gridObj.filterByColumn('Batch', 'equal', parseInt(e.value));
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Batch');
+          },
+        },
+      },
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create a DataManager with the provided API URL
+    let curriculum_subject_data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      adaptor: new ej.data.WebApiAdaptor(),
+    });
+
+    console.log(
+      'data.adaptor curriculum_subject_data: ',
+      curriculum_subject_data
+    );
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: curriculum_subject_data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+    });
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-curriculum_excelexport') {
+        grid.columns[7].visible = false;
+        grid.excelExport();
+      }
+    };
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              fetchStudentPerformance(
+                rowData.StudentId,
+                rowData.StudentName,
+                rowData.StudentNumber
+              );
+            }
+          }
+        }
+      }
+    });
+
+    console.log('GRID: ', grid.dataSource);
+    // Append the grid to the container
+    grid.appendTo('#grid-curriculum');
+  });
 </script>
 {% endblock script %}

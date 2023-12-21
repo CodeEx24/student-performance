@@ -377,7 +377,7 @@ class Curriculum(db.Model):
 class Metadata(db.Model):
     __tablename__ = 'Metadata'
 
-    MetadataId = db.Column(db.Integer, primary_key=True)
+    MetadataId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     CourseId = db.Column(db.Integer, db.ForeignKey('Course.CourseId', ondelete="CASCADE"))
     YearLevel = db.Column(db.Integer, nullable=False)
     Semester = db.Column(db.Integer, nullable=False)
@@ -500,7 +500,6 @@ def init_db(app):
 
     
     if config_mode == 'development' :
-        
         with app.app_context():
             inspector = inspect(db.engine)
             db.create_all()
