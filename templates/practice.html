@@ -671,5 +671,390 @@
 
     <!-- SCRIPTS -->
     {% block script %} {% endblock script %}
+
+    <!-- FETCH ALL CURRICULUM DATA (GRIDS)-->
+    <script>
+      async function fetchCurriculum() {
+        try {
+          const response = await fetch(`${api_base_url}/curriculum`);
+
+          if (!response.ok) {
+            const empty = [];
+            displayGridCurriculum(empty);
+            throw new Error(
+              `Failed to fetch data. Try to contact the admin to resolve the issue.`
+            );
+          }
+
+          const result = await response.json();
+          console.log('result: ', result);
+          if (result.curriculum) {
+            displayGridCurriculum(result);
+          }
+        } catch (error) {
+          console.error('Error: ', error);
+        }
+      }
+
+      function displayGridCurriculum(data) {
+        var grid = new ej.grids.Grid({
+          dataSource: data.curriculum,
+          allowPaging: true,
+          allowFiltering: true,
+          allowSorting: true, // Enable sorting
+          allowExcelExport: true,
+          toolbar: ['Add', 'Delete', 'Cancel', 'ExcelExport'],
+          loadingIndicator: { indicatorType: 'Shimmer' },
+          editSettings: {
+            showConfirmDialog: true,
+            showDeleteConfirmDialog: true,
+            allowAdding: true,
+            allowDeleting: true,
+            mode: 'Normal',
+          },
+
+          // rowData: json_class['ClassSubjectGrade'],
+          columns: [
+            {
+              field: 'Course',
+              headerText: 'Course',
+              width: 50,
+              editType: 'dropdownedit',
+              validationRules: {
+                required: true,
+              },
+              edit: {
+                params: {
+                  dataSource: data.courseOptions,
+                  // fields: { value: 'Course', text: 'Course' },
+                },
+              },
+            },
+            {
+              field: 'SubjectCode',
+              headerText: 'Subject Code',
+              width: 80,
+              editType: 'dropdownedit',
+              edit: {
+                params: {
+                  dataSource: data.subjectCodeOptions,
+                  // fields: { value: 'SubjectCode', text: 'SubjectCode' },
+                },
+              },
+              validationRules: {
+                required: true,
+              },
+            },
+            {
+              field: 'Subject',
+              headerText: 'Subject',
+              width: 130,
+              allowEditing: false,
+            },
+
+            {
+              field: 'Year',
+              headerText: 'Year',
+              width: 50,
+              editType: 'dropdownedit',
+              validationRules: {
+                required: true,
+              },
+              edit: {
+                params: {
+                  dataSource: data.yearOptions,
+                },
+              },
+            },
+
+            {
+              field: 'Semester',
+              headerText: 'Semester',
+              width: 50,
+              editType: 'dropdownedit',
+              validationRules: {
+                required: true,
+              },
+              edit: {
+                params: {
+                  dataSource: data.semesterOptions,
+                },
+              },
+            },
+            {
+              field: 'Batch',
+              headerText: 'Batch',
+              width: 50,
+              // editType: 'dropdownedit',
+              validationRules: {
+                required: true,
+              },
+              edit: {
+                params: {
+                  dataSource: data.batchOptions,
+                },
+              },
+            },
+          ],
+          // actionBegin: function (args) {
+          //   if (args.requestType === 'save') {
+          //     console.log('BEGIN SAVE ARGS: ', args);
+          //   } else if (args.requestType === 'add') {
+          //     console.log('ADDING DATA INPUTS');
+          //   }
+
+          //   if (args.requestType === 'add') {
+          //     console.log('ADDING');
+          //   }
+          // },
+
+          // actionComplete: function (args) {
+          //   if (args.requestType === 'save') {
+          //     console.log('COMPLETE SAVE ARGS: ', args);
+          //   }
+          // },
+
+          excelExportComplete: function (args) {
+            // Exclude the 'Subject Code' column from the exported Excel file
+          },
+        });
+
+        grid.toolbarClick = function (args) {
+          if (args['item'].id === 'grid-curriculum_excelexport') {
+            grid.excelExport();
+          }
+          // Check if grid-curriculum_add
+          if (args['item'].id === 'grid-curriculum_add') {
+            console.log('GID ADD');
+            // showCustomDialog();
+            // Show the modal dialog modal
+          }
+        };
+
+        // Render the grid
+        grid.appendTo('#grid-curriculum');
+
+        const filterbarOperator = new ej.buttons.CheckBox();
+        filterbarOperator.appendTo('#filterBarOperator');
+
+        filterbarOperator.addEventListener('change', function (args) {
+          grid.filterSettings.showFilterBarOperator = args.checked;
+          grid.clearFiltering();
+        });
+      }
+
+      fetchCurriculum();
+    </script>
+
+    <!-- FETCH ALL CLASS DATA (GRIDS)-->
+    <script>
+      async function fetchAllClass() {
+        try {
+          const response = await fetch(`${api_base_url}/class/data`);
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch data. Try to contact the admin to resolve the issue.`
+            );
+            return;
+          }
+
+          const json_class = await response.json();
+
+          displayGridClass(json_class.Classes);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      function displayGridClass(json_class) {
+        // Create the grid with filtering
+        var grid = new ej.grids.Grid({
+          dataSource: json_class,
+          allowPaging: true,
+          allowFiltering: true,
+          allowSorting: true, // Enable sorting
+          allowExcelExport: true,
+          pageSettings: { pageSize: 10 }, // Set the page size
+          // rowData: json_class['ClassSubjectGrade'],
+          columns: [
+            {
+              field: 'Course',
+              headerText: 'Course Name',
+              width: 250,
+            },
+            {
+              field: 'ClassName',
+              headerText: 'Section Code',
+              width: 150,
+            },
+            {
+              field: 'Batch',
+              headerText: 'Batch',
+              width: 100,
+            },
+            {
+              field: 'Semester',
+              headerText: 'Semester',
+              width: 100,
+            },
+            {
+              field: 'Grade',
+              headerText: 'Grade',
+              width: 100,
+            },
+
+            {
+              headerText: 'Actions',
+              template:
+                '<button class="btn px-4 py-2 bg-primary text-white font-bold" >Performance</button>', // Add a button to the cell
+              width: 150,
+            },
+            {
+              headerText: 'Link',
+              template:
+                '<a href="#" onclick="redirectToClass(${ClassId})" class="underline">Class Details</a>',
+              width: 150,
+            },
+          ],
+
+          toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+          allowExcelExport: true, // Enable Excel export feature
+        });
+
+        grid.toolbarClick = function (args) {
+          if (args['item'].id === 'grid-class_excelexport') {
+            grid.excelExport();
+          }
+        };
+        // Add a click event handler for all buttons with the "btn" class
+        document.addEventListener('click', function (event) {
+          if (event.target.classList.contains('btn')) {
+            const cellElement = event.target.closest('.e-rowcell');
+            if (cellElement) {
+              const dataUid =
+                cellElement.parentElement.getAttribute('data-uid');
+              if (dataUid) {
+                const rowData = grid.getRowObjectFromUID(dataUid).data;
+                if (rowData) {
+                  fetchClassPerformance(
+                    rowData.ClassId,
+                    rowData.Course,
+                    rowData.ClassName
+                  );
+                }
+              }
+            }
+          }
+        });
+
+        // Render the grid
+        grid.appendTo('#grid-class');
+
+        const filterbarOperator = new ej.buttons.CheckBox();
+        filterbarOperator.appendTo('#filterBarOperator');
+
+        filterbarOperator.addEventListener('change', function (args) {
+          grid.filterSettings.showFilterBarOperator = args.checked;
+          grid.clearFiltering();
+        });
+      }
+
+      // Example function to show a modal when the "Performance" button is clicked
+
+      fetchAllClass();
+    </script>
+
+    <!-- FINALIZED GRADES -->
+    <script>
+      async function fetchMetadata() {
+        try {
+          const response = await fetch(`${api_base_url}/metadata`);
+
+          if (!response.ok) {
+            const empty = [];
+            displayGridCurriculum(empty);
+            throw new Error(
+              `Failed to fetch data. Try to contact the admin to resolve the issue.`
+            );
+          }
+
+          const result = await response.json();
+          if (result) {
+            displayGridMetadata(result);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      fetchMetadata();
+
+      function displayGridMetadata(metadata) {
+        console.log('metadata: ', metadata);
+        // Create the grid with filtering
+        var grid = new ej.grids.Grid({
+          dataSource: metadata,
+          allowPaging: true,
+          allowFiltering: true,
+          allowSorting: true, // Enable sorting
+          // rowData: json_class['ClassSubjectGrade'],
+          columns: [
+            {
+              field: 'Course',
+              headerText: 'Course',
+              width: 200,
+            },
+
+            {
+              field: 'Batch',
+              headerText: 'Batch',
+              width: 100,
+            },
+            {
+              field: 'Semester',
+              headerText: 'Semester',
+              width: 100,
+            },
+            {
+              headerText: 'Actions',
+              template:
+                '<button class="btn-metadata px-4 py-2 bg-primary text-white font-bold" >Finalized Grades</button>', // Add a button to the cell
+              width: 150,
+            },
+          ],
+        });
+
+        // Add a click event handler for all buttons with the "btn" class
+        document.addEventListener('click', function (event) {
+          if (event.target.classList.contains('btn-metadata')) {
+            const cellElement = event.target.closest('.e-rowcell');
+            if (cellElement) {
+              const dataUid =
+                cellElement.parentElement.getAttribute('data-uid');
+              if (dataUid) {
+                const rowData = grid.getRowObjectFromUID(dataUid).data;
+                if (rowData) {
+                  finalizedGrades(rowData.MetadataId);
+                }
+              }
+            }
+          }
+        });
+
+        // Render the grid
+        grid.appendTo('#grid-metadata');
+
+        const filterbarOperator = new ej.buttons.CheckBox();
+        filterbarOperator.appendTo('#filterBarOperator');
+
+        filterbarOperator.addEventListener('change', function (args) {
+          grid.filterSettings.showFilterBarOperator = args.checked;
+          grid.clearFiltering();
+        });
+      }
+
+      // Example function to show a modal when the "Performance" button is clicked
+    </script>
   </body>
 </html>

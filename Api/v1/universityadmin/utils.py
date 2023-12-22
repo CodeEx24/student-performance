@@ -1562,56 +1562,7 @@ def getCurriculumData(skip, top, order_by, filter):
         # Limitized query = 
         metadata_limit_offset = order_query.offset(skip).limit(top).all()
 
-        # Get all unique SubjectCode and CourseCode
-        unique_subject_code = db.session.query(Subject).all()
-        unique_course_code = db.session.query(Course).all()
-        
-        year_options = []
-        batch_options = []
-        semester_options = []
-        course_options = []
-        subject_options = []
-        
-        current_year = datetime.datetime.now().year
-        previous_year = current_year - 1
-        future_year = current_year + 1
-        
-        # Options for frontend
-        year = [1, 2, 3, 4]
-        batch = [previous_year, current_year, future_year]
-        semesters = [1, 2, 3]
-        
-        
-        for y in year:
-            year_dict = {
-                "Year": y
-            }
-            year_options.append(year_dict)
-            
-        for b in batch:
-            batch_dict = {
-                "Batch": b
-            }
-            batch_options.append(batch_dict)
-        
-        for s in semesters:
-            semester_dict = {
-                "Semester": s
-            }
-            semester_options.append(semester_dict)
-        
-        for c in unique_course_code:
-            course_dict = {
-                "Course": c.CourseCode
-            }
-            course_options.append(course_dict)
-            
-        for s in unique_subject_code:
-            subject_dict = {
-                "SubjectCode": s.SubjectCode
-            }
-            subject_options.append(subject_dict)
-        
+       
         
         # Get the StudentClassSubjectGrade
         if metadata_limit_offset:
@@ -1620,6 +1571,7 @@ def getCurriculumData(skip, top, order_by, filter):
             for data in metadata_limit_offset:
                 # Convert the YearLevel to 1st, 2nd, 3rd, 4th
                 dict_metadata = {
+                    "CurriculumId": data.Curriculum.CurriculumId,
                     "MetadataId": data.Metadata.MetadataId,
                     "Year": data.Metadata.YearLevel,
                     "Semester": data.Metadata.Semester,
@@ -1629,13 +1581,77 @@ def getCurriculumData(skip, top, order_by, filter):
                     "SubjectCode": data.Subject.SubjectCode
                 }
                 list_metadata.append(dict_metadata)
-            return jsonify({'result': list_metadata, 'count': total_count, 'yearOptions': year_options, 'subjectCodeOptions': subject_options, 'batchOptions': batch_options, 'courseOptions': course_options, 'semesterOptions': semester_options})
+            return jsonify({'result': list_metadata, 'count': total_count})
 
         else:
-            return None
+            return jsonify({'result': None, 'count': 0})
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         return None
+    
+def getCurriculumOptions():
+    try:
+      # Get all unique SubjectCode and CourseCode
+        unique_subject_code = db.session.query(Subject).all()
+        unique_course_code = db.session.query(Course).all()
+        
+        if not unique_subject_code:
+            return jsonify({'error': 'No subject found'}), 400
+        elif not unique_course_code:
+            return jsonify({'error': 'No course found'}), 400
+        else:
+            year_options = []
+            batch_options = []
+            semester_options = []
+            course_options = []
+            subject_options = []
+            
+            current_year = datetime.datetime.now().year
+            previous_year = current_year - 1
+            future_year = current_year + 1
+            
+            # Options for frontend
+            year = [1, 2, 3, 4]
+            batch = [previous_year , current_year, future_year]
+            semesters = [1, 2, 3]
+            
+            
+            for y in year:
+                year_dict = {
+                    "Year": y
+                }
+                year_options.append(year_dict)
+                
+            for b in batch:
+                batch_dict = {
+                    "Batch": b
+                }
+                batch_options.append(batch_dict)
+            
+            for s in semesters:
+                semester_dict = {
+                    "Semester": s
+                }
+                semester_options.append(semester_dict)
+            
+            for c in unique_course_code:
+                course_dict = {
+                    "CourseCode": c.CourseCode
+                }
+                course_options.append(course_dict)
+                
+            for s in unique_subject_code:
+                subject_dict = {
+                    "SubjectCode": s.SubjectCode + ' - ' + s.Name
+                }
+                subject_options.append(subject_dict)
+            
+            # Return all options
+            return jsonify({'result': {'yearOptions': year_options, 'subjectCodeOptions': subject_options, 'batchOptions': batch_options, 'courseOptions': course_options, 'semesterOptions': semester_options}})
+        
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return jsonify({'error': e})
     
 
 def getCurriculumSubject(metadata_id):
@@ -1684,16 +1700,23 @@ def getActiveTeacher():
 def processAddingCurriculumSubjects(data, excelType=False):
     # MANUAL ADDING DATA
     if excelType == False:
-        course_code = data['Course']
+        # print("DATA: ", data,Cours)
+        course_code = data['CourseCode']
         subject_code = data['SubjectCode']
         year_level = data['Year']
         semester = data['Semester']
         batch = data['Batch']
         
+        if ' - ' in subject_code:
+            # Split and get the 1st element
+            subject_code = subject_code.split(' - ')[0]
+        
         course = db.session.query(Course).filter_by(CourseCode = course_code).first()
                 
         # Check if course existing
         if not course:
+            
+            print("INVALID COURSE")
             # Return cannot added data. Course already exist
             return jsonify({'error': 'Invalid Course'}), 400
         else:
@@ -1727,11 +1750,13 @@ def processAddingCurriculumSubjects(data, excelType=False):
                         
                         dict_subject = subject.to_dict()
                         
+                        print('dict_subject:: ', dict_subject)
+                        
                         # Return data added successfully
-                        return jsonify({'success': 'Data added successfully', 'SubjectName': dict_subject['Name']}), 200
+                        return jsonify({'success': 'Data added successfully'}), 200
                     else:
                         # Return cannot added data. Curriculum already exist
-                        return jsonify({'error': 'Already exist'}), 400
+                        return jsonify({'error': 'Curriculum already exist'}), 400
                 else:
                     # Return cannot added data. Invalid Subject Code
                     return jsonify({'error': 'Invalid Subject Code'}), 400
@@ -1945,7 +1970,32 @@ def processAddingCurriculumSubjects(data, excelType=False):
             db.session.commit()
             return  jsonify({'result': 'Data added successfully', 'data': (list_curriculum_subjects)}), 200
         
-
+def deleteCurriculumSubjectData(curriculumId):
+    try:
+      # Get curriculum
+        curriculum = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Curriculum.CurriculumId == curriculumId).first()
+      
+        if curriculum:
+            print("EXIST")
+            # Find a class that has the same metadata value which is CourseId, YearLevel, Semester, Batch
+            class_data = db.session.query(Class).filter_by(CourseId = curriculum.Metadata.CourseId, Year = curriculum.Metadata.YearLevel, Semester = curriculum.Metadata.Semester, Batch = curriculum.Metadata.Batch).first()
+            
+            if class_data:
+                return jsonify({'error': 'Cannot delete subject. Already have class existing'}), 400
+            else:
+                # Delete the metadata 
+                db.session.delete(curriculum.Metadata)
+                db.session.commit()
+                return jsonify({'result': 'Data deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Data cannot be deleted'}), 400
+        
+    except Exception as e:
+        # Rollback the changes in case of an error
+        db.session.rollback()
+        # Return an error response
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+      
 
 
 def processUpdatingClassSubjectDetails(data):

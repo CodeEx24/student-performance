@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteStudent
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteStudent, getCurriculumOptions, deleteCurriculumSubjectData
 import os
 
 
@@ -326,6 +326,44 @@ def fetchCurriculum():
     else:
         return render_template('404.html'), 404
     
+@university_admin_api.route('/curriculum/options', methods=['GET'])
+@role_required('universityAdmin')
+def fetchCurriculumOptions():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+
+        json_curriculum_options = getCurriculumOptions()
+        if json_curriculum_options:
+            return (json_curriculum_options)
+        else:
+            return jsonify(message="No curriculum data available"), 400
+    else:
+        return render_template('404.html'), 404
+    
+    
+@university_admin_api.route('/curriculum/insert', methods=['POST'])
+@role_required('universityAdmin')
+def insertCurriculumSubject():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        data = request.json  # assuming the data is sent as JSON
+        result = processAddingCurriculumSubjects(data)
+        return result
+    else:
+        return render_template('404.html'), 404        
+    
+    
+@university_admin_api.route('/curriculum/delete(<int:curriculumId>)', methods=['DELETE'])
+@role_required('universityAdmin')
+def deleteCurriculumSubject(curriculumId):
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        print('curriculumId: ', curriculumId)
+        # data = request.json  # assuming the data is sent as JSON
+        result = deleteCurriculumSubjectData(curriculumId)
+        return result
+    else:
+        return render_template('404.html'), 404        
     
 @university_admin_api.route('/active/teacher', methods=['GET'])
 @role_required('universityAdmin')
@@ -385,44 +423,8 @@ def submitCurriculumSubjects():
         else:
             return render_template('404.html'), 404
     
-        universityAdmin = getCurrentUser()
-        if universityAdmin:
-            # print reqquest
-            curriculum_request = request.get_json()
-            print('curriculum_request: ', curriculum_request)
-            
-            
-            if 'excelFile' not in request.files:
-                return jsonify({'error': 'No file part'}), 400
 
-            file = request.files['excelFile']
-            result = processAddingCurriculumSubjects(file)
-            # Call the utility function to process the file
-            return result
-        else:
-            return render_template('404.html'), 404    
-    
 
-@university_admin_api.route('/submit-curriculum-subject', methods=['POST'])
-@role_required('universityAdmin')
-def submitCurriculumSubject():
-    universityAdmin = getCurrentUser()
-    if universityAdmin:
-        print('IN UNIVE ADMIN')
-        data = request.json()  # assuming the data is sent as JSON
-        course = data['Course']
-        subject_code = data['Subject Code']
-        year = data['Year']
-        semester = data['Semester']
-        batch = data['Batch']
-        
-        # Print all the data
-        print(course, subject_code, year, semester, batch)
-
-        # Call the utility function to process the file
-        return jsonify({'course': course})
-    else:
-        return render_template('404.html'), 404    
     
     
 @university_admin_api.route('/update/class-subject', methods=['POST'])

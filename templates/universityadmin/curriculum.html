@@ -9,6 +9,10 @@
     font-style: italic; /* Apply italic style */
     font-size: 12px; /* Adjust the font size */
   }
+
+  .e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn-text {
+    color: white !important;
+  }
 </style>
 {% endblock style %}
 
@@ -312,61 +316,118 @@
   href="https://cdn.syncfusion.com/ej2/17.3.29/material.css"
 />
 <script src="https://cdn.syncfusion.com/ej2/17.3.29/dist/ej2.min.js"></script>
+
+<script></script>
+
 <script>
   // Assume your Flask route provides configuration data
   let gridConfig = {
     apiUrl: `${api_base_url}/curriculum`,
+    insertUrl: `${api_base_url}/curriculum/insert`,
+    removeUrl: `${api_base_url}/curriculum/delete`,
     columns: [
+      {
+        field: 'CurriculumId',
+        isPrimaryKey: true,
+        visible: false, // Set to false to hide the column
+      },
+      // Course Code
       {
         field: 'CourseCode',
         headerText: 'Course',
         width: 50,
-        editType: 'dropdownedit',
         validationRules: {
           required: true,
         },
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+            allowFiltering: true,
+          },
+        },
       },
+      // Subject Code
       {
         field: 'SubjectCode',
         headerText: 'Subject Code',
         width: 80,
-        editType: 'dropdownedit',
         validationRules: {
           required: true,
         },
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+            allowFiltering: true,
+            filterType: 'contains',
+            change: function (args) {
+              // Change the selected value to current value
+              subject = args.value.split(' - ');
+
+              const subjectCodeInput = document.getElementById(
+                'grid-curriculumSubjectCode'
+              );
+              const subjectInput = document.getElementById(
+                'grid-curriculumSubject'
+              );
+              // Set the value of the input to the selected subject code
+              subjectInput.value = subject[1];
+              subjectCodeInput.value = subject[0];
+            },
+          },
+        },
       },
+      // Subject
       {
         field: 'Subject',
         headerText: 'Subject',
         width: 130,
         allowEditing: false,
       },
-
+      // Year
       {
         field: 'Year',
         headerText: 'Year',
         width: 50,
-        editType: 'dropdownedit',
         validationRules: {
           required: true,
         },
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+          },
+        },
       },
-
+      // Semester
       {
         field: 'Semester',
         headerText: 'Semester',
         width: 50,
-        editType: 'dropdownedit',
         validationRules: {
           required: true,
         },
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+          },
+        },
       },
+      // Batch
       {
         field: 'Batch',
         headerText: 'Batch',
         width: 50,
         validationRules: {
           required: true,
+        },
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+          },
         },
         filterBarTemplate: {
           create: function (args) {
@@ -388,7 +449,6 @@
               placeholder: 'Select a value',
 
               change: function (e) {
-                console.log('CHANGE: ', e.value);
                 var gridObj =
                   document.getElementsByClassName('e-grid')[0].ej2_instances[0];
                 if (e.value == 'All') {
@@ -405,17 +465,38 @@
     ],
   };
 
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', async function () {
+    try {
+      await fetch(`${api_base_url}/curriculum/options`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.result) {
+            gridConfig.columns[0].edit.params.dataSource =
+              data.result.courseOptions;
+            gridConfig.columns[1].edit.params.dataSource =
+              data.result.subjectCodeOptions;
+            gridConfig.columns[3].edit.params.dataSource =
+              data.result.yearOptions;
+            gridConfig.columns[4].edit.params.dataSource =
+              data.result.semesterOptions;
+            gridConfig.columns[5].edit.params.dataSource =
+              data.result.batchOptions;
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+
     // Create a DataManager with the provided API URL
     let curriculum_subject_data = new ej.data.DataManager({
       url: gridConfig.apiUrl,
-      adaptor: new ej.data.WebApiAdaptor(),
+      insertUrl: gridConfig.insertUrl,
+      removeUrl: gridConfig.removeUrl,
+      adaptor: new ej.data.ODataAdaptor(),
     });
-
-    console.log(
-      'data.adaptor curriculum_subject_data: ',
-      curriculum_subject_data
-    );
 
     // Create Syncfusion Grid using the provided configuration
     let grid = new ej.grids.Grid({
@@ -425,7 +506,13 @@
       allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      toolbar: ['ExcelExport', 'Add', 'Delete', 'Cancel'], // Add the ExcelExport button to the toolbar
+      editSettings: {
+        allowEditing: true,
+        allowAdding: true,
+        allowDeleting: true,
+        showDeleteConfirmDialog: true,
+      },
       allowExcelExport: true, // Enable Excel export feature
       pageSettings: { pageSize: 10, totalRecordsCount: 10 },
       beforeDataBound: function (args) {
@@ -437,19 +524,54 @@
         // RUn the adaptor
 
         // Access the data returned from the server
-        console.log('Data returned from server:', args);
+        console.log('Data returned server');
       },
 
       actionBegin: function (args) {
-        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+      },
+      actionComplete: function (args) {
+        if (args.requestType === 'save' && args.action === 'add') {
+          console.log('INSERTED ARGS: ', args);
+          onSuccess('Data inserted successfully');
+        }
+
+        if (args.requestType === 'delete') {
+          onSuccess('Data deleted successfully');
+        }
+
         if (args.requestType === 'paging') {
           // Handle pagination click
-          console.log('Page clicked:', args.currentPage);
           // You can perform additional actions here, such as loading data for the new page.
         }
         if (args.requestType === 'filtering') {
           // Go to page 1
           grid.goToPage(1);
+        }
+      },
+      actionFailure: function (args) {
+        if (args.error) {
+          var errorResponse = JSON.parse(args.error[0].error.response);
+
+          notyf.error(errorResponse.error);
+        }
+
+        // Handle the failure, you can display an error message or perform other actions
+        if (args.requestType === 'save') {
+          console.error('Error in saving data:', args.error);
+          // Test for failure and perform actions accordingly
+          if (args.error) {
+            // There is an error in saving data
+            console.log('Save operation failed!');
+          } else {
+            // No specific error information available
+            console.log('Unknown error in save operation');
+          }
+
+          // Prevent the default action (data insertion) on failure
+          args.cancel = true;
         }
       },
     });
@@ -480,9 +602,17 @@
       }
     });
 
-    console.log('GRID: ', grid.dataSource);
     // Append the grid to the container
     grid.appendTo('#grid-curriculum');
   });
+
+  function onSuccess(message) {
+    notyf.success(message);
+  }
+
+  function onError(message) {
+    notyf.error(message);
+  }
 </script>
+
 {% endblock script %}

@@ -371,7 +371,7 @@ class Curriculum(db.Model):
 
     CurriculumId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     SubjectId = db.Column(db.Integer, db.ForeignKey('Subject.SubjectId', ondelete="CASCADE"))
-    MetadataId = db.Column(db.Integer, db.ForeignKey('Metadata.MetadataId'), nullable=False)
+    MetadataId = db.Column(db.Integer, db.ForeignKey('Metadata.MetadataId', ondelete="CASCADE"), nullable=False)
 
 
 class Metadata(db.Model):
