@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteStudent, getCurriculumOptions, deleteCurriculumSubjectData
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData
 import os
 
 
@@ -184,18 +184,7 @@ def classPerformance(id):
     else:
         return render_template('404.html'), 404
 
-# api_routes.py
-@university_admin_api.route('/submit-students', methods=['POST'])
-@role_required('universityAdmin')
-def submitStudents():
-    # Check if the request contains a file named 'excelFile'
-    if 'excelFile' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
 
-    file = request.files['excelFile']
-
-    # Call the utility function to process the file
-    return processAddingStudents(file)
 
 # api_routes.py
 @university_admin_api.route('/submit-class', methods=['POST'])
@@ -231,6 +220,59 @@ def fetchStudents():
     else:
         return render_template('404.html'), 404
 
+# api_routes.py
+@university_admin_api.route('/submit-students', methods=['POST'])
+@role_required('universityAdmin')
+def submitStudents():
+    # Check if the request contains a file named 'excelFile'
+    if 'excelFile' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['excelFile']
+
+    # Call the utility function to process the file
+    return processAddingStudents(file, excelType=True)
+
+# api_routes.py
+@university_admin_api.route('/student/options', methods=['GET'])
+@role_required('universityAdmin')
+def fetchStudentDataOptions():
+    university_admin = getCurrentUser()
+    if university_admin:
+        
+        json_student_data_options = getStudentAddOptions()
+
+        if json_student_data_options:
+            return (json_student_data_options)
+        else:
+            return jsonify(error="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+    
+    
+@university_admin_api.route('/students/insert', methods=['POST'])
+@role_required('universityAdmin')
+def insertStudent():
+    university_admin = getCurrentUser()
+    if university_admin:
+        data = request.json  # assuming the data is sent as JSON
+        result = processAddingStudents(data)
+        print('result: ', result)
+        return result
+    else:
+        return render_template('404.html'), 404
+    
+
+@university_admin_api.route('/students/delete(<int:studentId>)', methods=['DELETE'])
+@role_required('universityAdmin')
+def deleteStudent(studentId):
+    university_admin = getCurrentUser()
+    if university_admin:
+        result = deleteStudentData(studentId)
+        print('result: ', result)
+        return result
+    else:
+        return render_template('404.html'), 404
 
 # Getting all the class data in current year
 @university_admin_api.route('/class/subject', methods=['GET'])
@@ -278,13 +320,18 @@ def fetchClassDetails(class_id):
     else:
         return render_template('404.html'), 404
     
-
-@university_admin_api.route('/class/subject/<int:class_subject_id>', methods=['GET'])
+@university_admin_api.route('/class/subject/<int:class_subject_id>/', methods=['GET'])
 @role_required('universityAdmin')
 def fetchStudentClassSubjectData(class_subject_id):
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        json_class_subject_data = getStudentClassSubjectData(class_subject_id)
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_class_subject_data = getStudentClassSubjectData(class_subject_id, skip, top, order_by, filter)
+        print('json_class_subject_data: ', json_class_subject_data)
         if json_class_subject_data:
             return (json_class_subject_data)
         else:
@@ -292,18 +339,30 @@ def fetchStudentClassSubjectData(class_subject_id):
     else:
         return render_template('404.html'), 404
 
-@university_admin_api.route('/delete/class-subject/<int:class_subject_id>/student/<int:student_id>', methods=['POST'])
+# DOING HERE
+@university_admin_api.route('/class/subject/<int:class_subject_id>/insert', methods=['POST'])
 @role_required('universityAdmin')
-def deleteClassSubjectStudents(class_subject_id, student_id):
+def studentClassSubjectInsert(class_subject_id):
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        json_class_subject_data = deleteStudent(class_subject_id, student_id)
-        if json_class_subject_data:
-            return (json_class_subject_data)
-        else:
-            return jsonify(message="No class subject data available"), 400
+        data = request.json  # assuming the data is sent as JSON
+        result = processAddingStudentInSubject(data, class_subject_id)
+        return result
     else:
         return render_template('404.html'), 404
+    
+# DOING HERE
+@university_admin_api.route('/class/subject/<int:class_subject_id>/delete(<int:student_id>)', methods=['DELETE'])
+@role_required('universityAdmin')
+def studentClassSubjectDelete(class_subject_id, student_id):
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        result = deleteClassSubjectStudent(class_subject_id, student_id)
+        return result
+    else:
+        return render_template('404.html'), 404
+
+
     
     
 @university_admin_api.route('/curriculum/', methods=['GET'])
@@ -453,7 +512,7 @@ def submitStudentsClassSubject(class_subject_id):
         file = request.files['studentSubjectExcel']
         # Call the utility function to process the file
     
-        return processAddingStudentInSubject(file, class_subject_id)
+        return processAddingStudentInSubject(file, class_subject_id, excelType=True)
     else:
         return render_template('404.html'), 404    
     

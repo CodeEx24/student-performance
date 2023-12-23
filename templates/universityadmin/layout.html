@@ -58,7 +58,7 @@
       .e-toolbar .e-toolbar-items,
       .e-pager .e-currentitem,
       .e-pager .e-currentitem:hover {
-        background-color: #9d1d1d;
+        background-color: #9d1d1d !important;
         font-weight: bold;
       }
 
@@ -98,8 +98,12 @@
       }
 
       .e-toolbar .e-toolbar-items .e-toolbar-item.e-overlay .e-tbar-btn-text {
-        opacity: 0.8; /* The value should be between 0 (completely transparent) and 1 (completely opaque) */
+        /* The value should be between 0 (completely transparent) and 1 (completely opaque) */
         color: white;
+      }
+
+      .e-overlay {
+        background-color: #9d1d1d !important;
       }
 
       .e-headertext {
@@ -653,8 +657,8 @@
       // Adding Data in the Grids
       function handleAddData(elementId, data) {
         const grid = document.getElementById(elementId).ej2_instances[0];
-        const dataSource = grid.dataSource;
-        grid.dataSource = data.data.concat(dataSource);
+        // Refresh the grid
+        grid.refresh();
       }
 
       function closeModalError(modalElementId, listElementId) {
@@ -675,7 +679,9 @@
         ModalId,
         gridId = ''
       ) {
+        console.log('data: ', data);
         if (data.result) {
+          console.log('data.result: ', data.result);
           if (gridId != '') {
             handleAddData(gridId, data);
           }
@@ -697,6 +703,11 @@
         }
 
         if (data.error) {
+          if (data.errorLast) {
+            notyf.error(data.errorLast);
+            return;
+          }
+
           notyf.error(data.error);
           fileInput.value = '';
           if (data.errors) {
@@ -708,6 +719,14 @@
         if (data.errorException) {
           notyf.error(data.errorException);
         }
+      }
+
+      function onSuccess(message) {
+        notyf.success(message);
+      }
+
+      function onError(message) {
+        notyf.error(message);
       }
     </script>
 

@@ -279,7 +279,7 @@
         },
       ],
 
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      // toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
       excelExportComplete: function (args) {
         // Exclude the 'Subject Code' column from the exported Excel file
@@ -471,15 +471,15 @@
         .then((response) => response.json())
         .then((data) => {
           if (data.result) {
-            gridConfig.columns[0].edit.params.dataSource =
-              data.result.courseOptions;
             gridConfig.columns[1].edit.params.dataSource =
+              data.result.courseOptions;
+            gridConfig.columns[2].edit.params.dataSource =
               data.result.subjectCodeOptions;
-            gridConfig.columns[3].edit.params.dataSource =
-              data.result.yearOptions;
             gridConfig.columns[4].edit.params.dataSource =
-              data.result.semesterOptions;
+              data.result.yearOptions;
             gridConfig.columns[5].edit.params.dataSource =
+              data.result.semesterOptions;
+            gridConfig.columns[6].edit.params.dataSource =
               data.result.batchOptions;
           }
         })
@@ -513,7 +513,7 @@
         allowDeleting: true,
         showDeleteConfirmDialog: true,
       },
-      allowExcelExport: true, // Enable Excel export feature
+
       pageSettings: { pageSize: 10, totalRecordsCount: 10 },
       beforeDataBound: function (args) {
         // If args action type is filter then go to page 1
@@ -605,14 +605,6 @@
     // Append the grid to the container
     grid.appendTo('#grid-curriculum');
   });
-
-  function onSuccess(message) {
-    notyf.success(message);
-  }
-
-  function onError(message) {
-    notyf.error(message);
-  }
 </script>
 
 {% endblock script %}

@@ -204,7 +204,7 @@
             fileInput,
             displaySubmitErrorStudents,
             'studentErrorModal',
-            'grid'
+            'grid-students-list'
           );
         })
         .catch((error) => {
@@ -378,39 +378,55 @@
   // Assume your Flask route provides configuration data
   let gridConfig = {
     apiUrl: `${api_base_url}/students`,
+    insertUrl: `${api_base_url}/students/insert`,
+    removeUrl: `${api_base_url}/students/delete`,
     columns: [
+      {
+        field: 'StudentId',
+        isPrimaryKey: true,
+        visible: false, // Set to false to hide the column
+      },
+      // Studen Number
       {
         field: 'StudentNumber',
         headerText: 'Student Number',
         width: 80,
-        editType: 'dropdownedit',
+
         validationRules: {
           required: true,
         },
       },
+      // Student Name
       {
         field: 'Name',
         headerText: 'Name',
         width: 70,
-        editType: 'dropdownedit',
+
         validationRules: {
           required: true,
         },
       },
+      // Student Email
       {
         field: 'Email',
         headerText: 'Email',
         width: 100,
-        editType: 'dropdownedit',
+
         validationRules: {
           required: true,
         },
       },
+      // Gender
       {
         field: 'Gender',
         headerText: 'Gender',
         width: 50,
-
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+          },
+        },
         filterBarTemplate: {
           create: function (args) {
             var dd = document.createElement('input');
@@ -439,32 +455,49 @@
           },
         },
       },
+      // Mobile Number
       {
         field: 'MobileNumber',
         headerText: 'Mobile Number',
         width: 80,
-        editType: 'dropdownedit',
-        validationRules: {
-          required: true,
-        },
       },
+      // Course Code
       {
         field: 'CourseCode',
         headerText: 'Course Code',
         width: 50,
+        validationRules: {
+          required: true,
+        },
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+          },
+        },
       },
+      // Date Enrolled
       {
         field: 'DateEnrolled',
         headerText: 'Date Enrolled',
         width: 70,
         type: 'date',
-        format: 'yMd',
+        format: { type: 'date', format: 'dd/MM/yyyy' },
+        editType: 'datepickeredit',
+        edit: { params: { format: 'dd/MM/yy', max: new Date() } },
         allowFiltering: false,
+        validationRules: {
+          required: true,
+        },
       },
+      // Batch
       {
         field: 'Batch',
         headerText: 'Batch',
         width: 50,
+        validationRules: {
+          required: true,
+        },
         filterBarTemplate: {
           create: function (args) {
             var dd = document.createElement('input');
@@ -498,15 +531,44 @@
             DropDownListObj.appendTo('#Batch');
           },
         },
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+          },
+        },
       },
     ],
   };
 
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', async function () {
+    try {
+      await fetch(`${api_base_url}/student/options`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('dTAL: ', data);
+          if (data.result) {
+            gridConfig.columns[4].edit.params.dataSource =
+              data.result.genderOptions;
+            gridConfig.columns[6].edit.params.dataSource =
+              data.result.courseOptions;
+            gridConfig.columns[8].edit.params.dataSource =
+              data.result.batchOptions;
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+
     // Create a DataManager with the provided API URL
     let curriculum_subject_data = new ej.data.DataManager({
       url: gridConfig.apiUrl,
-      adaptor: new ej.data.WebApiAdaptor(),
+      insertUrl: gridConfig.insertUrl,
+      removeUrl: gridConfig.removeUrl,
+      adaptor: new ej.data.ODataAdaptor(),
     });
 
     console.log(
@@ -523,7 +585,12 @@
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
       toolbar: ['ExcelExport', 'Add', 'Delete', 'Cancel'], // Add the ExcelExport button to the toolbar
-      allowExcelExport: true, // Enable Excel export feature
+      editSettings: {
+        // allowEditing: true,
+        allowAdding: true,
+        allowDeleting: true,
+        showDeleteConfirmDialog: true,
+      },
       pageSettings: { pageSize: 10, totalRecordsCount: 10 },
       beforeDataBound: function (args) {
         // If args action type is filter then go to page 1
@@ -547,6 +614,29 @@
         if (args.requestType === 'filtering') {
           // Go to page 1
           grid.goToPage(1);
+        }
+      },
+
+      actionComplete: function (args) {
+        if (args.requestType === 'save' && args.action === 'add') {
+          console.log('INSERTED ARGS: ', args);
+          onSuccess('Data inserted successfully');
+        }
+
+        if (args.requestType === 'delete') {
+          onSuccess('Data deleted successfully');
+        }
+
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+      actionFailure: function (args) {
+        if (args.error) {
+          var errorResponse = JSON.parse(args.error[0].error.response);
+
+          notyf.error(errorResponse.error);
         }
       },
     });

@@ -146,7 +146,7 @@
       <div>
         <div>
           <form
-            class="bg-white rounded-lg mt-4 px-4 mb-8"
+            class="bg-white rounded-lg mt-4 px-4 mb-8 overflow-y-auto"
             enctype="multipart/form-data"
             onsubmit="submitStudents(event)"
             method="POST"
@@ -181,7 +181,7 @@
             <p id="students-file-error" class="text-c4 text-sm"></p>
           </form>
         </div>
-        <div class="grid grid-cols-1 mt-4">
+        <div class="grid grid-cols-1 mt-4 overflow-y-auto">
           <div id="grid-student-list" class="overflow-y-auto"></div>
         </div>
       </div>
@@ -678,44 +678,6 @@
     } catch (error) {}
   }
 
-  async function fetchStudents(data) {
-    console.log('CLICK DATA: ', data);
-    // Get teacher, subject, semester and update its value
-    document.getElementById('teacher-modal').innerHTML = data.teacher
-      ? data.teacher
-      : 'No assigned teacher yet';
-    document.getElementById('subject-modal').innerHTML = data.subject;
-
-    try {
-      const response = await fetch(
-        `${api_base_url}/class/subject/${data.classSubjectId}`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the admin to resolve the issue.`
-        );
-      }
-
-      const json_class = await response.json();
-      console.log('json_class: ', json_class);
-      if (json_class) {
-        // Get studentListModal
-        // Clear student-not-exist-error and student-subject-exist-error lists
-
-        document.getElementById('studentSubjectExcel').value = '';
-
-        const modal = document.getElementById('studentListModal');
-        // Remove hidden
-        modal.classList.add('flex');
-        modal.classList.remove('hidden');
-        classSubjectId = data.classSubjectId;
-        console.log('HERE');
-        displayGridStudentList(json_class.data, classSubjectId);
-      }
-    } catch (error) {}
-  }
-
   async function deleteStudent(classSubjectId, studentId) {
     fetch(
       `${api_base_url}/delete/class-subject/${classSubjectId}/student/${studentId}`,
@@ -899,84 +861,159 @@
       });
   }
 
+  async function fetchStudents(data) {
+    console.log('CLICK DATA: ', data);
+    // Get teacher, subject, semester and update its value
+    document.getElementById('teacher-modal').innerHTML = data.teacher
+      ? data.teacher
+      : 'No assigned teacher yet';
+    document.getElementById('subject-modal').innerHTML = data.subject;
+
+    document.getElementById('studentSubjectExcel').value = '';
+
+    const modal = document.getElementById('studentListModal');
+    // Remove hidden
+    modal.classList.add('flex');
+    modal.classList.remove('hidden');
+    displayGridStudentList('wew', data.classSubjectId);
+  }
+
   function displayGridStudentList(json_student_list, classSubjectId) {
     // Check the length of json_student_list if 0 assign an empty array else put the json_student_list in dataSource of grid
-    var data = json_student_list.length === 0 ? [] : json_student_list;
-
-    var grid = new ej.grids.Grid({
-      dataSource: data,
-      allowPaging: true,
-      allowFiltering: true,
-      allowSorting: true, // Enable sorting
-      allowExcelExport: true,
-      pageSettings: { pageSize: 5 }, // Set the page size
-      // rowData: json_class['ClassSubjectGrade'],
+    // var data = json_student_list.length === 0 ? [] : json_student_list;
+    console.log('classSubjectId: ', classSubjectId);
+    let gridConfig = {
+      apiUrl: `${api_base_url}/class/subject/${classSubjectId}`,
+      insertUrl: `${api_base_url}/class/subject/${classSubjectId}/insert`,
+      removeUrl: `${api_base_url}/class/subject/${classSubjectId}/delete`,
       columns: [
+        {
+          field: 'StudentId',
+          isPrimaryKey: true,
+          visible: false, // Set to false to hide the column
+        },
         {
           field: 'StudentNumber',
           headerText: 'Student Number',
           width: 150,
+          validationRules: {
+            required: true,
+          },
         },
         {
           field: 'Name',
           headerText: 'Name',
           width: 150,
+          allowEditing: false,
         },
         {
           field: 'Email',
           headerText: 'Email',
           width: 200,
+          allowEditing: false,
         },
         {
           field: 'Grade',
           headerText: 'Grade',
           width: 70,
-        },
-        {
-          headerText: 'Actions',
-          template:
-            '<button class="btn-delete px-4 py-2 bg-c5 text-white font-bold" >Delete</button>', // Add a button to the cell
-          width: 150,
           allowEditing: false,
         },
+        {
+          field: 'DateEnrolled',
+          headerText: 'Date Enrolled',
+          width: 100,
+          type: 'date',
+          allowFiltering: false,
+          format: { type: 'date', format: 'MM/dd/yyyy' },
+          editType: 'datepickeredit',
+          edit: { params: { format: 'MM/dd/yy', max: new Date() } },
+          validationRules: {
+            required: true,
+          },
+        },
       ],
+    };
 
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
-      allowExcelExport: true, // Enable Excel export feature
-      excelExportComplete: function (args) {},
+    // Create a DataManager with the provided API URL
+    let subject_student_list_data = new ej.data.DataManager({
+      url: `${gridConfig.apiUrl}`,
+      insertUrl: gridConfig.insertUrl,
+      removeUrl: gridConfig.removeUrl,
+      adaptor: new ej.data.ODataAdaptor(),
     });
 
-    // Add a click event handler for all buttons with the "btn" class
-    document.addEventListener('click', function (event) {
-      if (event.target.classList.contains('btn-delete')) {
-        const cellElement = event.target.closest('.e-rowcell');
-        if (cellElement) {
-          const dataUid = cellElement.parentElement.getAttribute('data-uid');
-          if (dataUid) {
-            const rowData = grid.getRowObjectFromUID(dataUid).data;
-            if (rowData) {
-              const deleteModal = document.getElementById('deleteModal');
-              deleteModal.classList.remove('hidden');
-              deleteModal.classList.add('flex');
+    console.log('subject_student_list_data: ', subject_student_list_data);
 
-              const confirmBtn = document.getElementById('confirmBtn');
-              const cancelBtn = document.getElementById('cancelBtn');
+    var grid = new ej.grids.Grid({
+      dataSource: subject_student_list_data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      toolbar: ['ExcelExport', 'Add', 'Delete', 'Cancel'], // Add the ExcelExport button to the toolbar
+      editSettings: {
+        // allowEditing: true,
+        allowAdding: true,
+        allowDeleting: true,
+        showDeleteConfirmDialog: true,
+      },
+      pageSettings: { pageSize: 10 },
+      // rowData: json_class['ClassSubjectGrade'],
+      excelExportComplete: function (args) {},
 
-              confirmBtn.onclick = () => {
-                deleteStudent(rowData.ClassSubjectId, rowData.StudentId);
-                deleteModal.classList.add('hidden');
-              };
-              cancelBtn.onclick = () => {
-                deleteModal.classList.add('hidden');
-              };
-            }
-          }
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
         }
-      }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+
+      actionComplete: function (args) {
+        if (args.requestType === 'save' && args.action === 'add') {
+          console.log('INSERTED ARGS: ', args);
+          onSuccess('Data inserted successfully');
+        }
+
+        if (args.requestType === 'delete') {
+          onSuccess('Data deleted successfully');
+        }
+
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+
+      actionFailure: function (args) {
+        if (args.error) {
+          var errorResponse = JSON.parse(args.error[0].error.response);
+
+          notyf.error(errorResponse.error);
+        }
+      },
     });
 
     grid.toolbarClick = function (args) {
-      if (args['item'].id === 'Grid_excelexport') {
+      if (args['item'].id === `grid-${classSubjectId}_excelexport`) {
         grid.excelExport();
       }
     };
