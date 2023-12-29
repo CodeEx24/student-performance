@@ -175,7 +175,7 @@ class CourseEnrolled(db.Model):
         'Students.StudentId', ondelete="CASCADE"), primary_key=True)
     DateEnrolled = db.Column(db.Date)
     Status = db.Column(db.Integer, nullable=False) 
-    # 1 - Not Graduated, 2 - Graduated, 3 - Drop, 4 - Transfer Course, 5 - Transfer School
+    # 0 - Not Graduated ||  1 - Graduated  ||  2 - Drop  ||  3 - Transfer Course || 4 - Transfer School
     CurriculumYear = db.Column(db.Integer, nullable=False)  
 
 
@@ -186,30 +186,37 @@ class CourseEnrolled(db.Model):
             'DateEnrolled': self.DateEnrolled
         }
 
+class Metadata(db.Model):
+    __tablename__ = 'Metadata'
+
+    MetadataId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    CourseId = db.Column(db.Integer, db.ForeignKey('Course.CourseId', ondelete="CASCADE"))
+    Year = db.Column(db.Integer, nullable=False) # Change this
+    Semester = db.Column(db.Integer, nullable=False)
+    Batch = db.Column(db.Integer, nullable=False)
+
 
 class Class(db.Model):
     __tablename__ = 'Class'
 
     ClassId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    CourseId = db.Column(db.Integer, db.ForeignKey(
-        'Course.CourseId', ondelete="CASCADE"))
-    Year = db.Column(db.Integer)
     Section = db.Column(db.Integer)
-    Semester = db.Column(db.Integer)
-    Batch = db.Column(db.Integer)
     IsGradeFinalized = db.Column(db.Boolean, default=False)
+    MetadataId = db.Column(db.Integer, db.ForeignKey(
+        'Metadata.MetadataId', ondelete="CASCADE"))
+    
+    __table_args__ = (db.UniqueConstraint('MetadataId', 'Section', name='uq_metadata_section'),)
 
     def to_dict(self):
         return {
             'ClassId': self.ClassId,
-            'CourseId': self.CourseId,
-            'Year': self.Year,
             'Section': self.Section,
-            'Semester': self.Semester,
-            'Batch': self.Batch,
-            'IsGradeFinalized': self.IsGradeFinalized
+            'IsGradeFinalized': self.IsGradeFinalized,
+            'MetadataId': self.MetadataId
         }
-
+    
+    # Adding a unique constraint
+   
 
 class Subject(db.Model):
     __tablename__ = 'Subject'
@@ -256,7 +263,7 @@ class ClassSubject(db.Model):
             'ClassId': self.ClassId,
             'SubjectId': self.SubjectId,
             'TeacherId': self.TeacherId,
-            'Semester': self.Semester,
+            'Schedule': self.Schedule,
         }
 
 
@@ -268,9 +275,10 @@ class StudentClassSubjectGrade(db.Model):
         'ClassSubject.ClassSubjectId', ondelete="CASCADE"), primary_key=True)
     StudentId = db.Column(db.Integer, db.ForeignKey(
         'Students.StudentId', ondelete="CASCADE"), primary_key=True)
+    # Grade = db.Column(db.String(5), CheckConstraint("Grade IN ('INC', 'W', '1.00', '1.25', '1.5', '1.75', '2.00', '2.25', '2.5', '2.75', '3.0', '4.0', '5.0')"))
     Grade = db.Column(db.Float)
     DateEnrolled = db.Column(db.Date)
-    AcademicStatus = db.Column(db.Integer)
+    AcademicStatus = db.Column(db.Integer) # Status 1 = Passed (3.0) , 2 (4.0, 5.0)= Failed, 3 //////////  Incomplete = (INC),  Withdrawn = (W)
 
     def to_dict(self):
         return {
@@ -284,14 +292,14 @@ class StudentClassSubjectGrade(db.Model):
 
 class StudentClassGrade(db.Model):
     __tablename__ = 'StudentClassGrade'
-
+    
     # StudentClassGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     StudentId = db.Column(db.Integer, db.ForeignKey(
         'Students.StudentId', ondelete="CASCADE"), primary_key=True)
     ClassId = db.Column(db.Integer, db.ForeignKey(
         'Class.ClassId', ondelete="CASCADE"), primary_key=True)
     Grade = db.Column(db.Float)
-    IsLister = db.Column(db.Integer)
+    Lister = db.Column(db.Integer) # 1 - President, 2 - Dean, 0 - Not Lister
 
     def to_dict(self):
         return {
@@ -353,8 +361,8 @@ class CourseGrade(db.Model):
     CourseGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     CourseId = db.Column(db.Integer, db.ForeignKey(
         'Course.CourseId', ondelete="CASCADE"))
-    Year = db.Column(db.Integer, primary_key=True)
-    # Semester = db.Column(db.Integer, primary_key=True)
+    Batch = db.Column(db.Integer, primary_key=True)
+    Semester = db.Column(db.Integer, primary_key=True, nullable=False)
     Grade = db.Column(db.Float)
 
     def to_dict(self):
@@ -373,54 +381,47 @@ class Curriculum(db.Model):
     SubjectId = db.Column(db.Integer, db.ForeignKey('Subject.SubjectId', ondelete="CASCADE"))
     MetadataId = db.Column(db.Integer, db.ForeignKey('Metadata.MetadataId', ondelete="CASCADE"), nullable=False)
 
-
-class Metadata(db.Model):
-    __tablename__ = 'Metadata'
-
-    MetadataId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    CourseId = db.Column(db.Integer, db.ForeignKey('Course.CourseId', ondelete="CASCADE"))
-    YearLevel = db.Column(db.Integer, nullable=False)
-    Semester = db.Column(db.Integer, nullable=False)
-    Batch = db.Column(db.Integer, nullable=False)
-
     def to_dict(self):
         return {
-            'MetadataId': self.MetadataId,
-            'CourseId': self.CourseId,
-            'YearLevel': self.YearLevel,
-            'Semester': self.Semester,
-            'Batch': self.Batch
+            'CurriculumId': self.CurriculumId,
+            'SubjectId': self.SubjectId,
+            'MetadataId': self.MetadataId
+            # Add other attributes if needed
         }
+
         
 config_mode = os.getenv("CONFIG_MODE")
 add_data = os.getenv("ADD_DATA")
+
+print('/'+config_mode+'/')
+print('/'+add_data+'/')
 
 def init_db(app):
     db.init_app(app)
     
     if add_data=='True':
         print("Adding data")
-        from data.student import student_data
-        from data.faculty import faculty_data
-        from data.universityadmin import university_admin_data
-        from data.systemadmin import system_admin_data
-        from data.course import course_data
-        from data.courseEnrolled import course_enrolled_data
-        from data.subject import subject_data
-        from data.classes import class_data
-        from data.classSubject import class_subject_data
-        from data.studentClassSubjectGrade import student_class_subject_grade_data
-        from data.studentClassGrade import student_class_grade_data
-        from data.classSubjectGrade import class_subject_grade_data
-        from data.classGrade import class_grade_data
-        from data.courseGrade import course_grade_data
-        from data.curriculum import curriculum_data
-        from data.metadata import metadata_data
+        from data.data2.student import student_data
+        from data.data2.faculty import faculty_data
+        from data.data2.universityadmin import university_admin_data
+        from data.data2.systemadmin import system_admin_data
+        from data.data2.course import course_data
+        from data.data2.courseEnrolled import course_enrolled_data
+        from data.data2.subject import subject_data
+        from data.data2.classes import class_data
+        from data.data2.classSubject import class_subject_data
+        from data.data2.studentClassSubjectGrade import student_class_subject_grade_data
+        from data.data2.studentClassGrade import student_class_grade_data
+        from data.data2.classSubjectGrade import class_subject_grade_data
+        from data.data2.classGrade import class_grade_data
+        from data.data2.courseGrade import course_grade_data
+        from data.data2.curriculum import curriculum_data
+        from data.data2.metadata import metadata_data
 
         def create_sample_data():
-            # for data in student_data:
-            #     student = Student(**data)
-            #     db.session.add(student)
+            for data in student_data:
+                student = Student(**data)
+                db.session.add(student)
 
             for data in faculty_data:
                 faculty = Faculty(**data)
@@ -444,56 +445,56 @@ def init_db(app):
                 db.session.add(subject)
                 db.session.flush()
 
-            # for data in metadata_data:
-            #     metadata = Metadata(**data)
-            #     db.session.add(metadata)
-            #     db.session.flush()
+            for data in metadata_data:
+                metadata = Metadata(**data)
+                db.session.add(metadata)
+                db.session.flush()
 
-            # for data in curriculum_data:
-            #     curriculum = Curriculum(**data)
-            #     db.session.add(curriculum)
-            #     db.session.flush()
+            for data in curriculum_data:
+                curriculum = Curriculum(**data)
+                db.session.add(curriculum)
+                db.session.flush()
                 
-            # for data in course_enrolled_data:
-            #     course_enrolled = CourseEnrolled(**data)
-            #     db.session.add(course_enrolled)
-            #     db.session.flush()
+            for data in course_enrolled_data:
+                course_enrolled = CourseEnrolled(**data)
+                db.session.add(course_enrolled)
+                db.session.flush()
 
             
-            # for data in class_data:
-            #     class_ = Class(**data)
-            #     db.session.add(class_)
-            #     db.session.flush()
+            for data in class_data:
+                class_ = Class(**data)
+                db.session.add(class_)
+                db.session.flush()
 
-            # for data in class_subject_data:
-            #     class_subject = ClassSubject(**data)
-            #     db.session.add(class_subject)
-            #     db.session.flush()
+            for data in class_subject_data:
+                class_subject = ClassSubject(**data)
+                db.session.add(class_subject)
+                db.session.flush()
 
-            # for data in student_class_subject_grade_data:
-            #     student_class_subject_grade = StudentClassSubjectGrade(**data)
-            #     db.session.add(student_class_subject_grade)
-            #     db.session.flush()
+            for data in student_class_subject_grade_data:
+                student_class_subject_grade = StudentClassSubjectGrade(**data)
+                db.session.add(student_class_subject_grade)
+                db.session.flush()
 
-            # for data in student_class_grade_data:
-            #     student_class_grade = StudentClassGrade(**data)
-            #     db.session.add(student_class_grade)
-            #     db.session.flush()
+            for data in student_class_grade_data:
+                student_class_grade = StudentClassGrade(**data)
+                db.session.add(student_class_grade)
+                db.session.flush()
 
-            # for data in class_subject_grade_data:
-            #     class_subject_grade = ClassSubjectGrade(**data)
-            #     db.session.add(class_subject_grade)
-            #     db.session.flush()
+            for data in class_subject_grade_data:
+                class_subject_grade = ClassSubjectGrade(**data)
+                db.session.add(class_subject_grade)
+                db.session.flush()
 
-            # for data in class_grade_data:
-            #     class_grade = ClassGrade(**data)
-            #     db.session.add(class_grade)
-            #     db.session.flush()
+            for data in class_grade_data:
+                class_grade = ClassGrade(**data)
+                db.session.add(class_grade)
+                db.session.flush()
 
-            # for data in course_grade_data:
-            #     course_grade = CourseGrade(**data)
-            #     db.session.add(course_grade)
-            #     db.session.flush()
+            for data in course_grade_data:
+                course_grade = CourseGrade(**data)
+                db.session.add(course_grade)
+                db.session.flush()
             
             db.session.commit()
             db.session.close()
@@ -503,7 +504,8 @@ def init_db(app):
         with app.app_context():
             inspector = inspect(db.engine)
             db.create_all()
-            if add_data=='True' and not inspector.has_table('Students'):
+            
+            if add_data=='True' and 'Students' not in inspector.get_table_names():
                 print("DEVELOPMENT AND ADDING DATA")
                 create_sample_data()
 

@@ -348,13 +348,10 @@
 <script>
   async function submitStudentAllSubject(event) {
     event.preventDefault();
-
+    console.log('GHELLO');
     const fileErrorElement = document.getElementById('class-file-error');
     const fileInput = document.getElementById('classStudentsExcel');
     const file = fileInput.files[0];
-    // Get the exist
-    const errorContainer = document.getElementById('all-student-errors');
-    errorContainer.classList.add('hidden');
 
     if (!file) {
       fileErrorElement.innerText = 'Please choose a file.';
@@ -862,7 +859,9 @@
   }
 
   async function fetchStudents(data) {
-    console.log('CLICK DATA: ', data);
+    // Set classSubjectId
+    classSubjectId = data.classSubjectId;
+    // console.log('CLICK DATA: ', data);
     // Get teacher, subject, semester and update its value
     document.getElementById('teacher-modal').innerHTML = data.teacher
       ? data.teacher

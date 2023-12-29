@@ -1,4 +1,4 @@
-from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, db
+from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, Metadata, db
 from sqlalchemy import desc
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -15,7 +15,7 @@ def getCurrentUser():
 def getStudentGpa(studentId):
     try:
         gpa = StudentClassGrade.query.filter_by(
-            StudentId=studentId).join(Class, StudentClassGrade.ClassId == Class.ClassId).order_by(desc(Class.Batch), desc(Class.Semester)).first()
+            StudentId=studentId).join(Class, StudentClassGrade.ClassId == Class.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).order_by(desc(Metadata.Batch), desc(Metadata.Semester)).first()
         if gpa:
             dict_gpa = gpa.to_dict()
             return dict_gpa
@@ -29,10 +29,11 @@ def getStudentGpa(studentId):
 def getStudentPerformance(str_student_id):
     try:
         list_student_performance = (
-            db.session.query(StudentClassGrade, Class)
+            db.session.query(StudentClassGrade, Class, Metadata)
             .join(Class, StudentClassGrade.ClassId == Class.ClassId)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .filter(StudentClassGrade.StudentId == str_student_id)
-            .order_by(desc(Class.Batch), desc(Class.Semester))
+            .order_by(desc(Metadata.Batch), desc(Metadata.Semester))
             .all()
         )
 
@@ -42,8 +43,8 @@ def getStudentPerformance(str_student_id):
 
                 gpa_dict = {
                     'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
-                    'Semester': gpa.Class.Semester,
-                    'Year': gpa.Class.Batch,
+                    'Semester': gpa.Metadata.Semester,
+                    'Year': gpa.Metadata.Batch,
                 }
                 # Append the dictionary to the list
                 list_performance_data.append(gpa_dict)
@@ -86,8 +87,9 @@ def getLatestSubjectGrade(str_student_id):
             db.session.query(StudentClassSubjectGrade, ClassSubject, Class)
             .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .join(Class, ClassSubject.ClassId == Class.ClassId)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .filter(StudentClassSubjectGrade.StudentId == str_student_id)
-            .order_by(desc(Class.Batch), desc(Class.Semester))
+            .order_by(desc(Metadata.Batch), desc(Metadata.Semester))
             .first()
         )
         
@@ -95,10 +97,12 @@ def getLatestSubjectGrade(str_student_id):
 
             data_class_subject_grade = (
                 db.session.query(
-                    ClassSubject, StudentClassSubjectGrade, Subject)
+                    ClassSubject, StudentClassSubjectGrade, Subject, Class, Metadata)
                 .join(StudentClassSubjectGrade, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
+                .join(Class, Class.ClassId == ClassSubject.ClassId)
+                .join(Metadata, Metadata.MetadataId == Class.MetadataId)
                 .join(Subject, ClassSubject.SubjectId == Subject.SubjectId)
-                .filter(StudentClassSubjectGrade.StudentId == str_student_id, ClassSubject.ClassId == data_latest_class_subject.Class.ClassId, Class.Semester == data_latest_class_subject.Class.Semester)
+                .filter(StudentClassSubjectGrade.StudentId == str_student_id, ClassSubject.ClassId == data_latest_class_subject.Class.ClassId, Metadata.Semester == data_latest_class_subject.Metadata.Semester)
                 .all()
             )
             if data_class_subject_grade:
@@ -200,17 +204,18 @@ def getOverallGrade(str_student_id):
 def getSubjectsGrade(str_student_id):
     try:
         data_student_class_subject_grade = (
-            db.session.query(StudentClassSubjectGrade, ClassSubject, Class, Course, Subject )
+            db.session.query(StudentClassSubjectGrade, ClassSubject, Class, Course, Subject, Metadata )
             .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .join(Class, ClassSubject.ClassId == Class.ClassId)
-            .join(Course, Course.CourseId == Class.CourseId)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+            .join(Course, Course.CourseId == Metadata.CourseId)
             .join(Subject, ClassSubject.SubjectId == Subject.SubjectId)
             .filter(StudentClassSubjectGrade.StudentId == str_student_id)
-            .order_by(desc(Class.Batch), desc(Class.Semester))
+            .order_by(desc(Metadata.Batch), desc(Metadata.Semester))
             .all()
         )
         
-
+        # print('data_student_class_subject_grade: '. )
         
         if data_student_class_subject_grade:
             class_combinations = set()
@@ -233,8 +238,8 @@ def getSubjectsGrade(str_student_id):
                 
                 class_combination = (
                     student_class_subject_grade.Class.ClassId,
-                    student_class_subject_grade.Class.Batch,
-                    student_class_subject_grade.Class.Semester
+                    student_class_subject_grade.Metadata.Batch,
+                    student_class_subject_grade.Metadata.Semester
                 )
                 if class_combination not in class_combinations:
                     class_combinations.add(class_combination)
@@ -246,9 +251,9 @@ def getSubjectsGrade(str_student_id):
                         .first()
                     ) 
                     dict_class_group = {
-                        "Batch": student_class_subject_grade.Class.Batch,
+                        "Batch": student_class_subject_grade.Metadata.Batch,
                         "GPA": format(data_student_class_grade.Grade, '.2f') if data_student_class_grade and data_student_class_grade.Grade is not None else "No GPA yet",
-                        "Semester": student_class_subject_grade.Class.Semester,
+                        "Semester": student_class_subject_grade.Metadata.Semester,
                         "Subject": []
                     }
 
@@ -260,7 +265,7 @@ def getSubjectsGrade(str_student_id):
                     "Subject": student_class_subject_grade.Subject.Name,
                     "Code": student_class_subject_grade.Subject.SubjectCode,
                     "Teacher": teacher_name if teacher_name else "N/A",
-                    "SecCode": f"{student_class_subject_grade.Course.CourseCode} {student_class_subject_grade.Class.Year}-{student_class_subject_grade.Class.Section}",
+                    "SecCode": f"{student_class_subject_grade.Course.CourseCode} {student_class_subject_grade.Metadata.Year}-{student_class_subject_grade.Class.Section}",
                     "Units": format(student_class_subject_grade.Subject.Units, '.2f'),
                     "Status": checkStatus(student_class_subject_grade.StudentClassSubjectGrade.Grade) if student_class_subject_grade.StudentClassSubjectGrade.Grade is not None else "-"
                         
