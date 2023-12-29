@@ -256,11 +256,7 @@ def getOverallCoursePerformance():
 def getAllClassData(skip, top, order_by, filter):
     try:
 
-        class_grade_query = db.session.query(Class, Course, ClassGrade).join(Course, Course.CourseId == Class.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
-        
-        # .filter(Class.Batch == current_year - 1)
-        # DEFAULT QUERY
-        # .order_by(desc(Class.Batch), desc(Class.CourseId), Class.Year, Class.Section)
+        class_grade_query = db.session.query(Class, Metadata,  Course, ClassGrade).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
         
         
         filter_conditions = []
@@ -290,10 +286,10 @@ def getAllClassData(skip, top, order_by, filter):
                                     year, section = batch_section.split('-')
                                     if section:
                                         column_arr_3 = getattr(Class, 'Section')
-                                    column_arr_2 = getattr(Class, 'Year')
+                                    column_arr_2 = getattr(Metadata, 'Year')
                                 else:
                                     year = batch_section
-                                    column_arr_2 = getattr(Class, 'Year')
+                                    column_arr_2 = getattr(Metadata, 'Year')
                             else:
                                 course_code = ' '.join(split_values)
                                 year, section = None, None
@@ -305,7 +301,7 @@ def getAllClassData(skip, top, order_by, filter):
                             )
                             # Check if year then append
                             if year:
-                                filter_conditions.append(Class.Year == int(year))
+                                filter_conditions.append(Metadata.Year == int(year))
                                 
                             if section:
                                 filter_conditions.append(
@@ -317,7 +313,7 @@ def getAllClassData(skip, top, order_by, filter):
                             # check if value contains "-" and digit in it
                             if '-' in value and any(x.isdigit() for x in value):
                                 year, section = value.split('-')
-                                column_arr_2 = Class.Year
+                                column_arr_2 = Metadata.Year
                                 column_arr_3 = Class.Section
                             else:
                                 course_code = value
@@ -358,11 +354,10 @@ def getAllClassData(skip, top, order_by, filter):
                     
                     # Check for column name 
                     if column_name.strip() == 'Batch':
-                        column_num = Class.Batch
+                        column_num = Metadata.Batch
                     elif column_name.strip() == 'Semester':
-                        column_num = Class.Semester
-                    # elif column_name.strip() == 'Semester':
-                    #     column_num = Class.Semester
+                        column_num = Metadata.Semester
+               
                     
                     if column_num:
                         # Append column_num
@@ -384,16 +379,16 @@ def getAllClassData(skip, top, order_by, filter):
             if order_by.split(' ')[0] == 'Course':
                 order_attr = getattr(Course, 'Name')
             elif order_by.split(' ')[0] == "Batch":
-                order_attr = getattr(Class, "Batch")
+                order_attr = getattr(Metadata, "Batch")
             elif order_by.split(' ')[0] == 'Semester':
-                order_attr = getattr(Class, 'Semester')
+                order_attr = getattr(Metadata, 'Semester')
             elif order_by.split(' ')[0] == 'Grade':
                 order_attr = getattr(ClassGrade, 'Grade')
             else:
                 if ' ' in order_by:
-                    order_query = filter_query.order_by(desc(Course.CourseCode), desc(Class.Year), desc(Class.Section))
+                    order_query = filter_query.order_by(desc(Course.CourseCode), desc(Metadata.Year), desc(Class.Section))
                 else:
-                    order_query = filter_query.order_by(Course.CourseCode, Class.Year, Class.Section)
+                    order_query = filter_query.order_by(Course.CourseCode, Metadata.Year, Class.Section)
 
             # Check if order_by contains space
             if not order_by.split(' ')[0] == "ClassName":
@@ -403,7 +398,7 @@ def getAllClassData(skip, top, order_by, filter):
                     order_query = filter_query.order_by(order_attr)
         else:
             # Apply default sorting
-            order_query = filter_query.order_by(desc(Class.Batch), desc(Class.CourseId), Class.Year, Class.Section)
+            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.CourseId), Metadata.Year, Class.Section)
         
         class_grade_main_query = order_query.offset(skip).limit(top).all()
         
@@ -428,10 +423,10 @@ def getAllClassData(skip, top, order_by, filter):
                         
                     class_obj = {
                         'ClassId': class_id,
-                        'ClassName': f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Class.Year}-{class_subject_grade.Class.Section}",
-                        'Semester': class_subject_grade.Class.Semester,
+                        'ClassName': f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Metadata.Year}-{class_subject_grade.Class.Section}",
+                        'Semester': class_subject_grade.Metadata.Semester,
                         "Course": class_subject_grade.Course.Name,
-                        "Batch": class_subject_grade.Class.Batch,
+                        "Batch": class_subject_grade.Metadata.Batch,
                         "Grade": grade_value
                     }
 
@@ -455,10 +450,11 @@ def getClassPerformance(class_id):
     try:
         class_grade = (
             db.session.query(
-                ClassGrade, Course, Class
+                ClassGrade, Course, Class, Metadata
             )
             .join(Class, Class.ClassId == ClassGrade.ClassId)
-            .join(Course, Class.CourseId == Course.CourseId)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+            .join(Course, Course.CourseId == Metadata.CourseId)
             .filter(ClassGrade.ClassId == class_id)
             .first()
         )
@@ -467,8 +463,8 @@ def getClassPerformance(class_id):
         if class_grade:
 
             # Calculate class name
-            class_name = f"{class_grade.Course.CourseCode} {class_grade.Class.Year}-{class_grade.Class.Section} ({class_grade.Class.Batch})"
-            num_class_batch = class_grade.Class.Batch
+            class_name = f"{class_grade.Course.CourseCode} {class_grade.Metadata.Year}-{class_grade.Class.Section} ({class_grade.Metadata.Batch})"
+            num_class_batch = class_grade.Metadata.Batch
             num_class_section = class_grade.Class.Section
 
             dict_class_grade = {
@@ -480,21 +476,22 @@ def getClassPerformance(class_id):
             }
             
             list_grade = []
-            for i in range(1, class_grade.Class.Year+1):
-                batch = class_grade.Class.Batch - class_grade.Class.Year + i
+            for i in range(1, class_grade.Metadata.Year+1):
+                batch = class_grade.Metadata.Batch - class_grade.Metadata.Year + i
                 class_grade_result = (
                     db.session.query(
                         Class,
+                        Metadata,
                         ClassGrade,
                     )
                     .join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
-                    .filter(Class.Year == i, Class.Batch == batch, Class.Section == num_class_section)
+                    .filter(Metadata.Year == i, Metadata.Batch == batch, Class.Section == num_class_section)
                     .first()
 
                 )
 
                 list_grade.append(
-                    {'x': class_grade_result.Class.Batch, 'y': convertGradeToPercentage(class_grade_result.ClassGrade.Grade)})
+                    {'x': class_grade_result.Metadata.Batch, 'y': convertGradeToPercentage(class_grade_result.ClassGrade.Grade)})
                 
             dict_class_grade['ListGrade'].extend(list_grade)
 
@@ -864,9 +861,6 @@ def processAddingClass(file):
         
         list_new_class_data = []
         
-        list_course_not_exist = []
-        curriculum_not_exist = []
-        class_data_exist = []
         errors = []
 
         
@@ -883,7 +877,7 @@ def processAddingClass(file):
                 errors.append({"CourseCode": course_code, "Section": section, "Year": year, "Semester": semester, "Batch": batch, "Error": "Course Not Exist"})
                 continue
                     
-            metadata = db.session.query(Metadata).filter_by(CourseId=course.CourseId, YearLevel=year, Semester=semester, Batch=batch).first()
+            metadata = db.session.query(Metadata).filter_by(CourseId=course.CourseId, Year=year, Semester=semester, Batch=batch).first()
 
             if not metadata:
                 errors.append({"CourseCode": course_code, "Section": section, "Year": year, "Semester": semester, "Batch": batch, "Error": "Curriculum not exist"})
@@ -892,19 +886,21 @@ def processAddingClass(file):
             if course and metadata:
                 curriculum = db.session.query(Curriculum).filter_by(MetadataId=metadata.MetadataId).all()
                 if curriculum:
-                    class_data = db.session.query(Class).filter_by(
-                        CourseId=course.CourseId, Year=year, Section=section, Semester=semester, Batch=batch).first()
+                    class_data = db.session.query(Class, Metadata).join(Metadata, Metadata.MetadataId == Class.MetadataId).filter(
+                        Metadata.CourseId==course.CourseId, Metadata.Year==year, Class.Section==section, Metadata.Semester==semester, Metadata.Batch==batch).first()
 
                     if not class_data:
                         class_name = f"{course_code} {year}-{section}"
                         course_name = course.Name
                         new_class = Class(
-                            CourseId=course.CourseId,
-                            Year=year,
                             Section=section,
-                            Semester=semester,
-                            Batch=batch,
-                            IsGradeFinalized=False
+                            IsGradeFinalized=False,
+                            # Transition to metadata
+                            MetadataId = metadata.MetadataId
+                            # Semester=semester,
+                            # Batch=batch,
+                            # CourseId=course.CourseId,
+                            # Year=year
                         )
 
                         db.session.add(new_class)
@@ -924,8 +920,8 @@ def processAddingClass(file):
                             "ClassName": class_name,
                             "Course": course_name,
                             "Grade": 'N/A',
-                            "Semester": new_class.Semester,
-                            "Batch": new_class.Batch
+                            "Semester": metadata.Semester,
+                            "Batch": metadata.Batch
                         })
                         
                         for cur in curriculum:
@@ -963,6 +959,7 @@ def processAddingClass(file):
             return jsonify({'result': 'Data added successfully', 'data': list_new_class_data}), 200
  
     except Exception as e:
+        print("ERROR: ", e)
         db.session.rollback()
         return jsonify({'errorException': 'An error occurred while processing the file'}), 500
 
@@ -971,6 +968,7 @@ def processAddingClass(file):
  
 def processClassStudents(file, class_id):
     try:
+        print("HERE IN processClassStudents")
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
         if not file.filename.endswith(('.xlsx', '.xls')):
@@ -1081,6 +1079,7 @@ def processClassStudents(file, class_id):
             return jsonify({'error': 'Cannot find the class'}), 400    
             
     except Exception as e:
+        
         db.session.rollback()
         return jsonify({'errorException': 'An error occurred while processing the file'}), 500
             
@@ -1319,7 +1318,7 @@ def getStudentAddOptions():
 def getAllClassSubjectData():
     try:
         data_class_subject = (
-            db.session.query(ClassSubject, Subject, Class, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Course, Course.CourseId == Class.CourseId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).order_by(desc(Class.Batch),desc(Class.Semester), (Subject.Name)).all()
+            db.session.query(ClassSubject, Subject, Class, Metadata, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).order_by(desc(Metadata.Batch),desc(Metadata.Semester), (Subject.Name)).all()
         )
         
 
@@ -1329,15 +1328,15 @@ def getAllClassSubjectData():
             list_class_subject = []
             for class_subject in data_class_subject:
                 # Combine the course_code, year, section to class_name variable
-                class_name = f"{class_subject.Course.CourseCode} {class_subject.Class.Year}-{class_subject.Class.Section}"
+                class_name = f"{class_subject.Course.CourseCode} {class_subject.Metadata.Year}-{class_subject.Class.Section}"
                 
                 dict_class_subject = {
                     "Section Code": class_name,
                     "Subject": class_subject.Subject.Name,
                     "Teacher": class_subject.Faculty.Name,
                     "Schedule": class_subject.ClassSubject.Schedule,
-                    'Batch': class_subject.Class.Batch,
-                    'Semester': class_subject.Class.Semester
+                    'Batch': class_subject.Metadata.Batch,
+                    'Semester': class_subject.Metadata.Semester
                 }
                 # # Append the data
                 list_class_subject.append(dict_class_subject)
@@ -1352,10 +1351,11 @@ def getAllClassSubjectData():
 def getClassSubject(class_id):
     try:
         data_class_subject = (
-            db.session.query(Class, ClassSubject, Subject, ClassSubjectGrade, Course)
+            db.session.query(Class, Metadata, ClassSubject, Subject, ClassSubjectGrade, Course)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(ClassSubject, ClassSubject.ClassId == Class.ClassId)
             .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
-            .join(Course, Course.CourseId == Class.CourseId)
+            .join(Course, Course.CourseId == Metadata.CourseId)
             .join(ClassSubjectGrade, ClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .filter(ClassSubject.ClassId == class_id)
             .all()
@@ -1366,7 +1366,7 @@ def getClassSubject(class_id):
             list_class_subject = []
             for class_subject in data_class_subject:
                 # Combine the course_code, year, section to class_name variable
-                class_name = f"{class_subject.Course.CourseCode} {class_subject.Class.Year}-{class_subject.Class.Section}"
+                class_name = f"{class_subject.Course.CourseCode} {class_subject.Metadata.Year}-{class_subject.Class.Section}"
 
                 # Check if the class_subject.TeacherId exists, if yes, make a query for it
                 if class_subject.ClassSubject.TeacherId or class_subject.ClassSubject.Schedule:
@@ -1389,7 +1389,7 @@ def getClassSubject(class_id):
                     "Subject": class_subject.Subject.Name,
                     "TeacherId": teacher_id,
                     "Schedule": schedule,
-                    'Batch': class_subject.Class.Batch if class_subject.Class else None,
+                    'Batch': class_subject.Metadata.Batch if class_subject.Metadata else None,
                 }
 
                 # Append the data
@@ -1405,19 +1405,19 @@ def getClassSubject(class_id):
     
 def getClassDetails(class_id):
     try:
-        data_class_details = db.session.query(Class, Course).join(Course, Course.CourseId == Class.CourseId).filter(Class.ClassId == class_id).all()
+        data_class_details = db.session.query(Class, Metadata, Course).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).filter(Class.ClassId == class_id).all()
         
         if data_class_details:
                 # For loop the data_student and put it in dictionary
             for class_details in data_class_details:
                 # Combine the course_code, year, section to class_name variable
-                class_name = f"{class_details.Course.CourseCode} {class_details.Class.Year}-{class_details.Class.Section}"
+                class_name = f"{class_details.Course.CourseCode} {class_details.Metadata.Year}-{class_details.Class.Section}"
 
                 dict_class_details = {
                     "Course": class_details.Course.Name,
                     "Section Code": class_name,
-                    'Batch': class_details.Class.Batch,
-                    "Semester": class_details.Class.Semester
+                    'Batch': class_details.Metadata.Batch,
+                    "Semester": class_details.Metadata.Semester
                 }
                 return jsonify({'data': dict_class_details})
         else:
@@ -1612,7 +1612,7 @@ def getCurriculumData(skip, top, order_by, filter):
         
         # metadata_query = db.session.query(Curriculum, Metadata, Course, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Subject, Subject.SubjectId == Curriculum.SubjectId)
         # DEFAULT ORDER BY
-        # .order_by(desc(Metadata.Batch), desc(Metadata.YearLevel)).all()
+        # .order_by(desc(Metadata.Batch), desc(Metadata.Year)).all()
         
         filter_conditions = []
         # Split filter string by 'and'
@@ -1646,9 +1646,12 @@ def getCurriculumData(skip, top, order_by, filter):
                     
                     column_num = None
                     int_value = value.strip(')')
+
+                    if not int_value.isdigit():
+                        int_value = 0
                     
                     if column_name.strip() == 'Year':
-                        column_num = Metadata.YearLevel
+                        column_num = Metadata.Year
                     elif column_name.strip() == 'Batch':
                         column_num = Metadata.Batch
                     elif column_name.strip() == 'Semester':
@@ -1670,7 +1673,7 @@ def getCurriculumData(skip, top, order_by, filter):
             elif order_by.split(' ')[0] == 'Subject':
                 order_attr = getattr(Subject, 'Name')
             elif order_by.split(' ')[0] == 'Year':
-                order_attr = getattr(Metadata, order_by.split(' ')[0] + 'Level')
+                order_attr = getattr(Metadata, order_by.split(' ')[0])
             elif order_by.split(' ')[0] == 'Semester':
                 order_attr = getattr(Metadata, order_by.split(' ')[0])
             elif order_by.split(' ')[0] == 'Batch':
@@ -1683,7 +1686,7 @@ def getCurriculumData(skip, top, order_by, filter):
                 order_query = filter_query.order_by(order_attr)
         else:
             # Apply default sorting
-            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.YearLevel))
+            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.Year))
         
         
         # Query for counting all records
@@ -1698,11 +1701,11 @@ def getCurriculumData(skip, top, order_by, filter):
             list_metadata = []
                 # For loop the data_student and put it in dictionary
             for data in metadata_limit_offset:
-                # Convert the YearLevel to 1st, 2nd, 3rd, 4th
+                # Convert the Year to 1st, 2nd, 3rd, 4th
                 dict_metadata = {
                     "CurriculumId": data.Curriculum.CurriculumId,
                     "MetadataId": data.Metadata.MetadataId,
-                    "Year": data.Metadata.YearLevel,
+                    "Year": data.Metadata.Year,
                     "Semester": data.Metadata.Semester,
                     "Batch": data.Metadata.Batch,
                     "CourseCode": data.Course.CourseCode,
@@ -1713,7 +1716,8 @@ def getCurriculumData(skip, top, order_by, filter):
             return jsonify({'result': list_metadata, 'count': total_count})
 
         else:
-            return jsonify({'result': None, 'count': 0})
+            print("NO METADA FOUND")
+            return jsonify({'result': [], 'count': 0})
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         return None
@@ -1851,12 +1855,12 @@ def processAddingCurriculumSubjects(data, excelType=False):
             return jsonify({'error': 'Invalid Course'}), 400
         else:
             # Check if already have classes and avoid adding curriculum.
-            class_data = db.session.query(Class).filter_by(Year = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+            class_data = db.session.query(Class, Metadata).join(Metadata, Metadata.MetadataId == Class.MetadataId).filter(Metadata.Year == year_level, Metadata.Semester == semester, Metadata.Batch == batch, Metadata.CourseId == course.CourseId).first()
             if class_data:
                 # Return cannot added data. Class already exist
                 return jsonify({'error': 'Cannot add subject curriculum has already class existing.'}), 400
             
-            metadata = db.session.query(Metadata).filter_by(YearLevel = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+            metadata = db.session.query(Metadata).filter_by(Year = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
             # Check if have a class already with yhe same year_level, semester, batch and course id
             if metadata:
                 # Check if subject is existing
@@ -1865,7 +1869,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
                 
                 if subject:
                     # Check if Curriculum is existing
-                    curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Metadata.CourseId == course.CourseId, Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                    curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Metadata.CourseId == course.CourseId, Subject.SubjectCode == subject_code, Metadata.Year == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
                     
                     # If no curriculum subject exist then create curriculum
                     if not curriculum_subject_exist:
@@ -1896,7 +1900,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
         
                 new_metadata = Metadata(
                     CourseId=course.CourseId,
-                    YearLevel=year_level,
+                    Year=year_level,
                     Semester=semester,
                     Batch=batch
                 )
@@ -1905,7 +1909,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
                 db.session.flush()
                                                     
                 if subject:                       
-                    curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                    curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.Year == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
                         
                     if not curriculum_subject_exist:
                         # Create a curriculum
@@ -1969,7 +1973,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
                 })
             else:
                 # Check if already have classes and avoid adding curriculum.
-                class_data = db.session.query(Class).filter_by(Year = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+                class_data = db.session.query(Class, Metadata).join(Metadata, Metadata.MetadataId == Class.MetadataId).filter(Metadata.Year == year_level, Metadata.Semester == semester, Metadata.Batch == batch, Metadata.CourseId == course.CourseId).first()
                 if class_data:
                     errors.append({
                                 "Course": course_code,
@@ -1982,7 +1986,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
                     # Go to next for loop
                     continue
                 
-                metadata = db.session.query(Metadata).filter_by(YearLevel = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
+                metadata = db.session.query(Metadata).filter_by(Year = year_level, Semester = semester, Batch = batch, CourseId = course.CourseId).first()
                 
                 if metadata:
                     # Check if subject is existing
@@ -1990,7 +1994,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
                     
                     if subject:
                         # Check if Curriculum is existing
-                        curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Metadata.CourseId == course.CourseId, Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                        curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Metadata.CourseId == course.CourseId, Subject.SubjectCode == subject_code, Metadata.Year == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
                         if not curriculum_subject_exist:
                             # Create a curriculum
                             new_curriculum = Curriculum(
@@ -2018,7 +2022,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
                                 "Year": year_level,
                                 "Semester": semester,
                                 "Batch": batch,
-                                "Error": "Already exist"
+                                "Error": "Curriculum subject already exist"
                             })
                             
                             
@@ -2039,7 +2043,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
             
                     new_metadata = Metadata(
                         CourseId=course.CourseId,
-                        YearLevel=year_level,
+                        Year=year_level,
                         Semester=semester,
                         Batch=batch
                     )
@@ -2048,7 +2052,7 @@ def processAddingCurriculumSubjects(data, excelType=False):
                     db.session.flush()
                                                         
                     if subject:                       
-                        curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.YearLevel == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
+                        curriculum_subject_exist = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Subject.SubjectCode == subject_code, Metadata.Year == year_level, Metadata.Semester == semester, Metadata.Batch == batch).first()
                             
                         if not curriculum_subject_exist:
                             # Create a curriculum
@@ -2108,8 +2112,8 @@ def deleteCurriculumSubjectData(curriculumId):
       
         if curriculum:
             print("EXIST")
-            # Find a class that has the same metadata value which is CourseId, YearLevel, Semester, Batch
-            class_data = db.session.query(Class).filter_by(CourseId = curriculum.Metadata.CourseId, Year = curriculum.Metadata.YearLevel, Semester = curriculum.Metadata.Semester, Batch = curriculum.Metadata.Batch).first()
+            # Find a class that has the same metadata value which is CourseId, Year, Semester, Batch
+            class_data = db.session.query(Class).filter_by(CourseId = curriculum.Metadata.CourseId, Year = curriculum.Metadata.Year, Semester = curriculum.Metadata.Semester, Batch = curriculum.Metadata.Batch).first()
             
             if class_data:
                 return jsonify({'error': 'Cannot delete subject. Already have class existing'}), 400
@@ -2384,7 +2388,6 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
  
 def getMetadata(skip, top, order_by, filter):
     try:
-        print("skip, top, order_by, filter: ", skip, top, order_by, filter)
         
         metadata_query = db.session.query(Metadata, Course).join(Course, Course.CourseId == Metadata.CourseId).distinct(Course.CourseCode, Course.Name, Metadata.Batch, Metadata.Semester)
         
@@ -2402,8 +2405,6 @@ def getMetadata(skip, top, order_by, filter):
                     column_name = part.split("(")[3].split("),'")[0]
                     value = part.split("'")[1]
                     column_str = None
-                    print('column_name: ', column_name)
-                    print('value: ', value)
                     
                     if column_name.strip() == 'CourseCode':
                         column_str = getattr(Course, 'CourseCode')
@@ -2427,8 +2428,7 @@ def getMetadata(skip, top, order_by, filter):
                         column_num = Metadata.Batch
                     elif column_name.strip() == 'Semester':
                         column_num = Metadata.Semester
-                    # elif column_name.strip() == 'Semester':
-                    #     column_num = Class.Semester
+    
                     
                     if column_num:
                         # Append column_num
@@ -2442,10 +2442,8 @@ def getMetadata(skip, top, order_by, filter):
         # Apply all filter conditions with 'and'
   
         filter_query = metadata_query.filter(and_(*filter_conditions))
-        print('FILTER: ', filter_query.statement.compile().params)
         
         if order_by:
-            print('order_by: ', order_by)
             # Determine the order attribute
             if order_by.split(' ')[0] == 'CourseCode':
                 print('IN COURSE CODE')
@@ -2499,74 +2497,420 @@ def getMetadata(skip, top, order_by, filter):
 def finalizedGradesReport(metadata_id):
     try:
         data_metadata = db.session.query(Metadata, Course).join(Course, Course.CourseId == Metadata.CourseId).filter(Metadata.MetadataId == metadata_id).first()
-        list_class = []
+        
+        
+        
+        # print('data_metadata: ', data_metadata)
         if data_metadata:
             # Select class that has the same Batch, Semester and Course
-            data_class = db.session.query(Class, Course).join(Course, Course.CourseId == Class.CourseId).filter(Class.Batch == data_metadata.Metadata.Batch, Class.Semester == data_metadata.Metadata.Semester, Class.CourseId == data_metadata.Course.CourseId).order_by(Class.Year, Class.Section).all()
-
+            data_course_class = db.session.query(Class, Metadata, Course).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).filter(Metadata.Batch == data_metadata.Metadata.Batch, Metadata.Semester == data_metadata.Metadata.Semester, Metadata.CourseId == data_metadata.Course.CourseId).order_by(Metadata.Year, Class.Section).all()
             # if data class 
-            if data_class:
+            if data_course_class:
+                student_class_grade_list = [] # For list of grade in class subject (Object - Lister, StudentId, ClassId etc...)
+
+                course_grade_list = [] # Class grade lisst to calculate course grade
+                
+                student_list = [] # For checking of student if graduated
+                list_class = [] # For class list that will be reiterated
+                list_grade_analytics_details = [] # For details of analytics (Lister, Passed, Failed, Incomplete etc.)
+                
                 # for loop the data_class and make a dictionary and append to the list_class
-                for class_data in data_class:
+                for course_class_data in data_course_class:
                     dict_class = {
-                        'ClassId': class_data.Class.ClassId,
-                        'CourseId': class_data.Class.CourseId,
-                        'Course': class_data.Course.CourseCode,
-                        'Year': class_data.Class.Year,
-                        'Section': class_data.Class.Section,
-                        'Semester': class_data.Class.Semester,
-                        'Batch': class_data.Class.Batch
+                        'ClassId': course_class_data.Class.ClassId,
+                        'CourseId': course_class_data.Metadata.CourseId,
+                        'Section': course_class_data.Class.Section,
+                        'Course': course_class_data.Course.CourseCode,
+                        'Year': course_class_data.Metadata.Year,
+                        'Semester': course_class_data.Metadata.Semester,
+                        'Batch': course_class_data.Metadata.Batch
                     }
                     # Append th list_class
                     list_class.append(dict_class)
+
+                    # Make a course grade data for CourseId, Batch, Semester, Grade and Grades Array for storing all grades
+                    course_grade_data = {
+                        'CourseId': course_class_data.Metadata.CourseId,
+                        'Batch': course_class_data.Metadata.Batch,
+                        'Semester': course_class_data.Metadata.Semester,
+                        'Grade': 0.00,
+                        'Grades': []
+                    }
                 
                 if list_class:
+                    
                     # for loop it
                     for class_data in list_class:
                         # Get the class_subject
-                        data_class_subject = db.session.query(ClassSubject, Subject, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).filter(ClassSubject.ClassId == class_data['ClassId']).all()
+                        print('class_data: ', class_data)
+                        # Get Class data and update IsGradeFinalized
+                        class_data_update = db.session.query(Class).filter_by(ClassId = class_data['ClassId']).first()
+                        class_data_update.IsGradeFinalized = True
+                        
+                        data_class_subject = db.session.query(ClassSubject, Subject).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).filter(ClassSubject.ClassId == class_data['ClassId']).all()
+                        # data_class_subject = db.session.query(ClassSubject, Subject, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).filter(ClassSubject.ClassId == class_data['ClassId']).all()
+                        
                         list_class_subject = []
+                        
                         if data_class_subject:
                             # for loop the data_class_subject and make a dictionary and append to the list_class_subject
                             for class_subject in data_class_subject:
+                                # print('===============================================================================================================================================: ')
                                 dict_class_subject = {
                                     'ClassSubjectId': class_subject.ClassSubject.ClassSubjectId,
                                     'SubjectCode': class_subject.Subject.SubjectCode,
                                     'Subject': class_subject.Subject.Name,
-                                    'Teacher': class_subject.Faculty.Name,
                                     'Schedule': class_subject.ClassSubject.Schedule
                                 }
+                                
+                                # Make a dict_class_subject_grade
+                                dict_grade_data_list = {
+                                    'ClassSubjectId': class_subject.ClassSubject.ClassSubjectId,
+                                    'ClassId': class_subject.ClassSubject.ClassId,
+                                    'StudentId': [],
+                                    'StudentClassSubjectGrade': [],
+                                    'Grade': 0,
+                                    'Passed': 0,
+                                    'Failed': 0,
+                                    'Incomplete': 0,
+                                    'Dropout': 0,
+                                    'PresidentsLister': 0,
+                                    'DeansLister': 0
+                                }
+                                
+                                
                                 # Append the list_class_subject
                                 list_class_subject.append(dict_class_subject)
-                                
                                 # Get all student in the classSubject with the same classId
                                 data_student_class_subject_grade = db.session.query(StudentClassSubjectGrade, Student).join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId).filter(StudentClassSubjectGrade.ClassSubjectId == class_subject.ClassSubject.ClassSubjectId).all()
                                 
+                                # Additional details for generating report for analytics (Passed, Failed, PresidentLister, DeansLister)
                                 if data_student_class_subject_grade:
-                                    # for loop the data_student_class_subject_grade and make a dictionary and append to the list_student_class_subject_grade
-                                    list_student_class_subject_grade = []
                                     for student_class_subject_grade in data_student_class_subject_grade:
-                                        dict_student_class_subject_grade = {
-                                            'StudentNumber': student_class_subject_grade.Student.StudentNumber,
-                                            'Name': student_class_subject_grade.Student.Name,
-                                            'Grade': student_class_subject_grade.StudentClassSubjectGrade.Grade
-                                        }
-                                        # Append the list_student_class_subject_grade
-                                        list_student_class_subject_grade.append(dict_student_class_subject_grade)
                                         
-                                    # Append the list_student_class_subject_grade to the dict_class_subject
-                                    dict_class_subject['StudentClassSubjectGrade'] = list_student_class_subject_grade
+                                        
+                                        current_student_id = student_class_subject_grade.Student.StudentId
+                                        current_grade = student_class_subject_grade.StudentClassSubjectGrade.Grade
+                                        # Get academic status
+                                        academic_status = student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus
+                                        
+                                        if academic_status == 1:
+                                            dict_grade_data_list['Passed'] += 1
+                                        elif academic_status == 2:
+                                            dict_grade_data_list['Failed'] += 1
+                                        elif academic_status == 3:
+                                            dict_grade_data_list['Incomplete'] += 1
+                                        elif academic_status == 4:
+                                            dict_grade_data_list['Dropout'] += 1
+                                            
+                                        # Append StudentId
+                                        dict_grade_data_list['StudentId'].append(current_student_id)
+                                        
+
+                                        if current_grade != 0: 
+                                            dict_grade_data_list['StudentClassSubjectGrade'].append(current_grade)
+                                            # Check if an entry with the same StudentId already exists in student_class_grade_list
+                                            found_entry = next((entry for entry in student_class_grade_list if entry["StudentId"] == current_student_id), None)
+                                            
+                                            if found_entry:
+                                                # If an entry with the same StudentId exists, append the grade to the existing entry
+                                                found_entry["Grade"].append(current_grade)
+                                            else:
+                                                # If no entry with the same StudentId exists, add a new entry to student_class_grade_list
+                                                student_class_grade_list.append({
+                                                    "StudentId": current_student_id,
+                                                    "ClassId": class_subject.ClassSubject.ClassId,
+                                                    "Grade": [current_grade],
+                                                    # "IsGradeCompleted": True,
+                                                    "Lister": 0
+                                                })
+                                                
+                                        # else:
+                                        #     # Check if an entry with the same StudentId already exists in student_class_grade_list
+                                        #     found_entry = next((entry for entry in student_class_grade_list if entry["StudentId"] == current_student_id), None)
+                                            
+                                        #     if found_entry:
+                                        #         # If an entry with the same StudentId exists, append the grade to the existing entry
+                                        #         found_entry["IsGradeCompleted"] = False
+                                        #     else:
+                                        #         # If no entry with the same StudentId exists, add a new entry to student_class_grade_list
+                                        #         student_class_grade_list.append({
+                                        #             "StudentId": current_student_id,
+                                        #             "ClassId": course_class_data.Class.ClassId,
+                                        #             "Grade": [],
+                                        #             "IsGradeCompleted": False,
+                                        #             "Lister": 0
+                                        #         })
+                                        
+                                    list_grade_analytics_details.append(dict_grade_data_list)
                             # Append the list_class_subject to the class_data
                             class_data['ClassSubject'] = list_class_subject
+                            
                         else:
                             class_data['ClassSubject'] = None
+                    # print('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ: ')
+                    # For caclculating the student overall grade
+                    
+                    for data in student_class_grade_list:
+                        print("CLS GRADE: ", data)
+                        # append stundet id
+                        student_list.append(data['StudentId'])
+                        # Check the length of grade if more than or equal to 1
+                        if len(data['Grade']) >= 1:
+                            # Check if any grade is 4.0, if yes, set Lister to 0
+                            if any(grade >= 2.75 for grade in data['Grade']):
+                                data['Lister'] = 0
+                                
+                            sum_grade = sum(data['Grade'])
+                            # Get the average grade
+                            average_grade = sum_grade / len(data['Grade'])
+                            # Update the Grade
+                            data['Grade'] = average_grade
+          
+                            # Check if sum grade is below 1.75
+                            if average_grade <= 1.5:
+                                data['Lister'] = 1
+                            elif average_grade <= 1.75 and average_grade > 1.5:
+                                data['Lister'] = 2
+                            else:
+                                data['Lister'] = 0
+                            
+                            # STUDENT CLASS GRADE - StudentId, ClassId, Grade, Lister
+                            # Data for Student Class Grade Average
+                            student_class_grade = db.session.query(StudentClassGrade).filter_by(StudentId = data['StudentId'], ClassId = data['ClassId']).first()
+                            if student_class_grade:
+                                db.session.query(StudentClassGrade).filter_by(StudentId = data['StudentId'], ClassId = data['ClassId']).update({
+                                    'Grade': data['Grade']
+                                })
+                            else:
+                                # Create a student_class_grade
+                                new_student_class_grade = StudentClassGrade(
+                                    StudentId = data['StudentId'],
+                                    ClassId = data['ClassId'],
+                                    Grade = data['Grade'],
+                                    Lister = data['Lister']
+                                )
+                                
+                                db.session.add(new_student_class_grade)
+                                db.session.flush()
+                    
+                    # print('/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////: ')
+                    # In analyticcs we have already StudentId this can be used to track class subject grade?
+                    class_grade_list = []
+                    
+                    for data in list_grade_analytics_details:
+                        print("DATA ANALYtICS: ", data)
+                        # CLASS SUBJET GRADE - ClassSubjectId, Grade, (Passed, Failed, Incomplete Dropout)
+                        # CLASS GRADE - ClassId, (DeansLister, PresidentsLister), Grade
+                        
+                        # Find the average of StudentClassSubjectGrade
+                        if len(data['StudentClassSubjectGrade']) >= 1:
+                            sum_grade = sum(data['StudentClassSubjectGrade'])
+                            # Get the average grade rounded to 2 decimal places
+                            average_grade = round(sum_grade / len(data['StudentClassSubjectGrade']), 2)
+                            # Update the Grade
+                            data['StudentClassSubjectGrade'] = average_grade
+                        else:
+                            data['StudentClassSubjectGrade'] = 0.00
+                        
+                        # For loop the StudentId
+                        for student_id in data['StudentId']:
+                            # Check if student_id is in student_class_grade_list
+                            found_entry = next((entry for entry in student_class_grade_list if entry["StudentId"] == student_id), None)
+                            
+                            if found_entry:
+                                # Check if Lister is 1
+                                if found_entry['Lister'] == 1:
+                                    data['DeansLister'] += 1
+                                elif found_entry['Lister'] == 2:
+                                    data['PresidentsLister'] += 1
+                            
+                            else:
+                                print("NOT FOUND")
+                                
+                        # Add it in database:
+                        # Check if class_subject_grade is existing
+                        class_subject_grade = db.session.query(ClassSubjectGrade).filter_by(ClassSubjectId = data['ClassSubjectId']).first()
+                        # If yes update it with new values
+                        if class_subject_grade:
+                            db.session.query(ClassSubjectGrade).filter_by(ClassSubjectId = data['ClassSubjectId']).update({
+                                'Grade': data['StudentClassSubjectGrade'],
+                                'Passed': data['Passed'],
+                                'Failed': data['Failed'],
+                                'Incomplete': data['Incomplete'],
+                                'Dropout': data['Dropout']
+                            })
+                        else:
+                            # Create a class_subject_grade
+                            new_class_subject_grade = ClassSubjectGrade(
+                                ClassSubjectId = data['ClassSubjectId'],
+                                Grade = data['StudentClassSubjectGrade'],
+                                Passed = data['Passed'],
+                                Failed = data['Failed'],
+                                Incomplete = data['Incomplete'],
+                                Dropout = data['Dropout']
+                            )
+                            
+                            db.session.add(new_class_subject_grade)
+                            db.session.flush()
+                            
+                        # Check if ClassId already exisitng in class_grade_list
+                        found_entry = next((entry for entry in class_grade_list if entry["ClassId"] == data['ClassId']), None)
+                        if not any(d['ClassId'] == data['ClassId'] for d in class_grade_list):
+                            # If not existing then append
+                            class_grade_list.append({
+                                'ClassId': data['ClassId'],
+                                'DeansLister': data['DeansLister'],
+                                'PresidentsLister': data['PresidentsLister'],
+                                # Append Grade in array
+                                'Grade': [data['StudentClassSubjectGrade']]
+                            })
+                            
+                        else:
+                            # If existing then append grade only
+                            found_entry['Grade'].append(data['StudentClassSubjectGrade'])
+                            
+                    print('')
+                    
+                    for data in class_grade_list:
+                        # print("ANALYTICS: ", data)
+                        
+                        # Check if grade is more than or equal to 1
+                        if len(data['Grade']) >= 1:
+                            # Get the sum of grade
+                            sum_grade = sum(data['Grade'])
+                            # Get the average grade rounded to 2 decimal places
+                            average_grade = round(sum_grade / len(data['Grade']), 2)
+                            # Update the Grade
+                            data['Grade'] = average_grade
+                            # Append average in course_grade_list
+                            course_grade_list.append(average_grade)
+                        else:
+                            data['Grade'] = 0.00
+                            
+                        class_grade = db.session.query(ClassGrade).filter_by(ClassId = data['ClassId']).first()
+                        
+                        # CLASS GRADE - Analytics for Class Grade Report
+                        if class_grade:
+                            # Update the class_grade
+                            db.session.query(ClassGrade).filter_by(ClassId = data['ClassId']).update({
+                                'DeansLister': data['DeansLister'],
+                                'PresidentsLister': data['PresidentsLister'],
+                                'Grade': data['Grade']
+                            })             
+                        else:
+                            # Create a class_grade
+                            new_class_grade = ClassGrade(
+                                ClassId = data['ClassId'],
+                                DeansLister = data['DeansLister'],
+                                PresidentsLister = data['PresidentsLister'],
+                                Grade = data['Grade']
+                            )
+                            
+                            db.session.add(new_class_grade)
+                            db.session.flush()
+
+                        # Update the course grade by average of all class grade
+                        # Check if course_grade is existing
                    
-                
-            else:
+                    course_grade = db.session.query(CourseGrade).filter_by(CourseId = course_grade_data['CourseId'], Batch = course_grade_data['Batch'], Semester = course_grade_data['Semester']).first()
+                    
+                    average_course_grade = sum(course_grade_list) / len(course_grade_list)
+                    
+                    # COURSE GRADE - Calculating data of course grade
+                    if course_grade:
+                        # Update the course_grade
+                        db.session.query(CourseGrade).filter_by(CourseId = course_grade_data['CourseId'], Batch = course_grade_data['Batch'], Semester = course_grade_data['Semester']).update({
+                            'Grade': round(average_course_grade, 2)
+                        })
+                        
+                        # # COURSE GRADE CHECKER
+                        # print("\nUPDATED COURSE GRADE: " + str({
+                        #     'CourseId': course_grade_data['CourseId'],
+                        #     'Batch': course_grade_data['Batch'],
+                        #     'Semester': course_grade_data['Semester'],
+                        #     'Grade': round(average_course_grade, 2)
+                        # }))
+                    else:
+                        # Create a course_grade
+                        new_course_grade = CourseGrade(
+                            CourseId = course_grade_data['CourseId'],
+                            Batch = course_grade_data['Batch'],
+                            Semester = course_grade_data['Semester'],
+                            Grade = round(average_course_grade, 2)
+                        )
+                        
+                        db.session.add(new_course_grade)
+                        db.session.flush()
+                        
+                        # # COURSE GRADE CHECKER
+                        # print("\nUPDATED COURSE GRADE: " + str({
+                        #     'CourseId': course_grade_data['CourseId'],
+                        #     'Batch': course_grade_data['Batch'],
+                        #     'Semester': course_grade_data['Semester'],
+                        #     'Grade': round(average_course_grade, 2)
+                        # }))
+                    
+                    # COURSE ENROLLED - Checking if Student is already graduated (Status).
+                    if student_list:
+                        # for loop the student_list
+                        for student_id in student_list:
+                            # Get student id in "CourseEnrolled" column order by latest of "DateEnrolled"
+                            course_enrolled = db.session.query(CourseEnrolled).filter_by(StudentId = student_id).order_by(desc(CourseEnrolled.DateEnrolled)).first()
+                            # print('course_enrolled.DateEnrolled: ', course_enrolled.DateEnrolled)
+                            
+                            # Get the curriculum of course with the same batch
+                            curriculum = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Metadata.Batch == course_enrolled.DateEnrolled.year, Metadata.CourseId == course_grade_data['CourseId']).all()
+                            
+                            # For loop and print the Subject Name
+                            bool_graduate = True;
+                            for data in curriculum:
+                                
+                                # print('data: ', data)
+                                # Find class with the same StudentId
+                                class_subject_grade_data = db.session.query(ClassSubject, StudentClassSubjectGrade).join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId).filter(StudentClassSubjectGrade.StudentId == student_id, ClassSubject.SubjectId == data.Subject.SubjectId).order_by(desc(StudentClassSubjectGrade.DateEnrolled)).first()
+                                
+                                # print('class_data: ', class_data)
+                                
+                                # Check if existing
+                                if class_subject_grade_data:
+                                    if class_subject_grade_data.StudentClassSubjectGrade.AcademicStatus == 1:
+                                        # Go to next for loop of curriculum
+                                        continue
+                                    else:
+                                        bool_graduate = False;
+                                        
+                                        # Set the CourseEnrolled Status to 0
+                                        db.session.query(CourseEnrolled).filter_by(StudentId = student_id).update({
+                                            'Status': 0
+                                        })
+                                        db.session.commit()
+                                        break
+                                else:
+                                    bool_graduate = False;
+                                    # Set the CourseEnrolled Status to 0
+                                    db.session.query(CourseEnrolled).filter_by(StudentId = student_id).update({
+                                        'Status': 0
+                                    })
+                                    db.session.commit()
+                                    break     
+                            # Check for value of flag if still true
+                            if bool_graduate:
+                                print("GRADUATED")
+                                # Set the CourseEnrolled Status to 1
+                                db.session.query(CourseEnrolled).filter_by(StudentId = student_id).update({
+                                    'Status': 1
+                                })
+
+                                db.session.commit()
+                                
+            else:   
+                db.session.rollback()
                 return jsonify({"error": "There no class yet"})
             return jsonify({"message": "Hello"})
         else:
             return jsonify(None)
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return jsonify(error=str(e))

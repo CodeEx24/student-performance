@@ -302,7 +302,7 @@
       }
 
       const json_pass_fail_rates = await response.json();
-
+      console.log('json_pass_fail_rates: ', json_pass_fail_rates);
       displayPassFailRates(json_pass_fail_rates);
     } catch (error) {
       console.error(error);
