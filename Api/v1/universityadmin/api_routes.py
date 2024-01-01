@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown
 import os
 
 
@@ -571,3 +571,20 @@ def finalizedGrades(metadata_id):
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return render_template('404.html'), 404
+    
+
+# api_routes.py
+# ?batch=value
+@university_admin_api.route('/class/dropdown', methods=['GET'])
+def fetchClassDropdown():
+    # Check if batch already have value
+    batch = request.args.get('batch')
+    if batch:
+        class_list = getClassListDropdown(True)
+    else:
+        class_list = getClassListDropdown()
+
+    if class_list:
+        return (class_list)
+    else:
+        return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")

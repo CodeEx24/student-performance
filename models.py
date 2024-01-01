@@ -393,8 +393,8 @@ class Curriculum(db.Model):
 config_mode = os.getenv("CONFIG_MODE")
 add_data = os.getenv("ADD_DATA")
 
-print('/'+config_mode+'/')
-print('/'+add_data+'/')
+# print('/'+config_mode+'/')
+# print('/'+add_data+'/')
 
 def init_db(app):
     db.init_app(app)
@@ -500,13 +500,18 @@ def init_db(app):
             db.session.close()
 
     
-    if config_mode == 'development' :
-        with app.app_context():
-            inspector = inspect(db.engine)
-            db.create_all()
+    # if config_mode == 'development' :
+    #     with app.app_context():
+    #         inspector = inspect(db.engine)
+    #         db.create_all()
             
-            if add_data=='True' and 'Students' not in inspector.get_table_names():
-                print("DEVELOPMENT AND ADDING DATA")
-                create_sample_data()
+    #         if add_data=='True' and 'Students' not in inspector.get_table_names():
+    #             print("DEVELOPMENT AND ADDING DATA")
+    #             create_sample_data()
 
-  
+    if config_mode == 'development' and add_data=='True':
+            with app.app_context():
+                inspector = inspect(db.engine)
+              
+                db.create_all()
+                create_sample_data()

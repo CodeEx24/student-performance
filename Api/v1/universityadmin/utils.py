@@ -2914,3 +2914,44 @@ def finalizedGradesReport(metadata_id):
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return jsonify(error=str(e))
+
+
+
+def getClassListDropdown(batch=False):
+    # Get all unique class with distinc of CourseId, Year, Section
+    if batch:
+        class_grade_query = db.session.query(Class, Metadata,  Course, ClassGrade).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId).all()
+        
+        if class_grade_query:
+            # loop the data of it
+            list_class = []
+            for data in class_grade_query:
+                section = str(data.Metadata.Year) + "-" + str(data.Class.Section)
+
+                dict_class = {
+                    "course": data.Course.CourseCode,
+                    "section": section,
+                    "batch": data.Metadata.Batch
+                }
+                # Append
+                list_class.append(dict_class)
+        
+            return list_class
+    else:
+        class_grade_query = db.session.query(Class, Metadata,  Course, ClassGrade).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId).distinct(Course.CourseId, Metadata.Year, Class.Section).all()
+        
+        if class_grade_query:
+            # loop the data of it
+            list_class = []
+            for data in class_grade_query:
+                section = str(data.Metadata.Year) + "-" + str(data.Class.Section)
+
+                dict_class = {
+                    "course": data.Course.CourseCode,
+                    "section": section
+                }
+                # Append
+                list_class.append(dict_class)
+        
+            return list_class
+
