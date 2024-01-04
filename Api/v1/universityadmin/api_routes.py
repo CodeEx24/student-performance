@@ -571,8 +571,6 @@ def finalizedGrades(metadata_id):
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return render_template('404.html'), 404
-    
-    
 
 # api_routes.py
 # ?batch=value

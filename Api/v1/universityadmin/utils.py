@@ -2563,7 +2563,8 @@ def finalizedGradesReport(metadata_id):
                         class_data_update.IsGradeFinalized = True
                         
                         data_class_subject = db.session.query(ClassSubject, Subject).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).filter(ClassSubject.ClassId == class_data['ClassId']).all()
-                       
+                        # data_class_subject = db.session.query(ClassSubject, Subject, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).filter(ClassSubject.ClassId == class_data['ClassId']).all()
+
                         
                         list_class_subject = []
                         
@@ -2921,7 +2922,6 @@ def finalizedGradesReport(metadata_id):
                                 
             else:   
                 db.session.rollback()
-                print("ERROR")
                 return jsonify({"error": "There no class yet"})
             print("SUCCESS")
             return jsonify({"success": True, "message": "Data finalized successfully"})
@@ -2931,6 +2931,7 @@ def finalizedGradesReport(metadata_id):
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return jsonify(error=str(e))
+
 
 
 def getClassListDropdown(batch=False):

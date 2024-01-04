@@ -1,4 +1,5 @@
 from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty_Profile, Student, Course, ClassGrade, ClassSubjectGrade, Metadata, db
+
 from sqlalchemy import desc, distinct, func, and_
 import re
 from werkzeug.security import check_password_hash, generate_password_hash

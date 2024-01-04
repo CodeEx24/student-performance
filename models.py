@@ -392,7 +392,7 @@ class Curriculum(db.Model):
     CurriculumId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     SubjectId = db.Column(db.Integer, db.ForeignKey('Subject.SubjectId', ondelete="CASCADE"))
     MetadataId = db.Column(db.Integer, db.ForeignKey('Metadata.MetadataId', ondelete="CASCADE"), nullable=False)
-
+    
     def to_dict(self):
         return {
             'CurriculumId': self.CurriculumId,
@@ -1119,8 +1119,7 @@ class PDS_Teacher_Information(db.Model):
             'information': self.information,
             'type': self.type,
             'is_delete': self.is_delete,
-            
-        }
+
         
     def get_id(self):
         return str(self.id)  # Convert to string to ensure compatibility     
@@ -1841,6 +1840,7 @@ def init_db(app):
         print("Adding data")
         from data.data2.student import student_data
         # from data.data2.faculty import faculty_data
+
         from data.data2.universityadmin import university_admin_data
         from data.data2.systemadmin import system_admin_data
         from data.data2.course import course_data
@@ -1853,6 +1853,7 @@ def init_db(app):
         from data.data2.classSubjectGrade import class_subject_grade_data
         from data.data2.classGrade import class_grade_data
         # from data.data2.courseGrade import course_grade_data
+
         from data.data2.curriculum import curriculum_data
         from data.data2.metadata import metadata_data
 
@@ -1933,6 +1934,7 @@ def init_db(app):
             #     course_grade = CourseGrade(**data)
             #     db.session.add(course_grade)
             #     db.session.flush()
+
             
             db.session.commit()
             db.session.close()
@@ -1942,7 +1944,7 @@ def init_db(app):
     #     with app.app_context():
     #         inspector = inspect(db.engine)
     #         db.create_all()
-            
+
     #         if add_data=='True':
     #             print("DEVELOPMENT AND ADDING DATA")
     #             create_sample_data()
