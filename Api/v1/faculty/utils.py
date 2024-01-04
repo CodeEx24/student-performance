@@ -1,4 +1,4 @@
-from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, ClassGrade, ClassSubjectGrade, Metadata, db
+from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty_Profile, Student, Course, ClassGrade, ClassSubjectGrade, Metadata, db
 from sqlalchemy import desc, distinct, func, and_
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -11,7 +11,7 @@ from static.js.utils import convertGradeToPercentage, checkStatus
 
 def getCurrentUser():
     current_user_id = session.get('user_id')
-    return Faculty.query.get(current_user_id)
+    return Faculty_Profile.query.get(current_user_id)
 
 
 def getAllClassAverageWithPreviousYear(str_teacher_id):
@@ -917,19 +917,22 @@ def getStudentPerformance(str_student_id):
 def getFacultyData(str_teacher_id):
     try:
         data_faculty = (
-            db.session.query(Faculty).filter(
-                Faculty.TeacherId == str_teacher_id).first()
+            db.session.query(Faculty_Profile).filter(
+                Faculty_Profile.faculty_account_id == str_teacher_id).first()
         )
 
         if data_faculty:
+            middle_name = data_faculty.middle_name if data_faculty.middle_name else ""
+            full_name = f"{data_faculty.last_name}, {data_faculty.first_name} {middle_name}"
+            
             dict_faculty_data = {
-                "TeacherId": data_faculty.TeacherId,
-                "TeacherNumber": data_faculty.TeacherNumber,
-                "Name": data_faculty.Name,
-                "ResidentialAddress": data_faculty.ResidentialAddress,
-                "Email": data_faculty.Email,
-                "MobileNumber": data_faculty.MobileNumber,
-                "Gender": "Male" if data_faculty.Gender == 1 else "Female",
+                "TeacherId": data_faculty.faculty_account_id,
+                "TeacherNumber": data_faculty.faculty_code,
+                "Name": full_name,
+                "ResidentialAddress": data_faculty.residential_address,
+                "Email": data_faculty.email,
+                "MobileNumber": data_faculty.mobile_number,
+                "Gender": "Male" if data_faculty.gender == 1 else "Female",
             }
 
             return (dict_faculty_data)
@@ -952,13 +955,13 @@ def updateFacultyData(str_teacher_id, email, number, residential_address):
             return {"type": "residential", "status": 400}
         
         # Update the student data in the database
-        data_faculty = db.session.query(Faculty).filter(
-            Faculty.TeacherId == str_teacher_id).first()
+        data_faculty = db.session.query(Faculty_Profile).filter(
+            Faculty_Profile.faculty_account_id == str_teacher_id).first()
         
         if data_faculty:
-            data_faculty.Email = email
-            data_faculty.MobileNumber = number
-            data_faculty.ResidentialAddress = residential_address
+            data_faculty.email = email
+            data_faculty.mobile_number = number
+            data_faculty.residential_address = residential_address
             db.session.commit()
 
             return {"message": "Data updated successfully", "email": email, "number": number, "residential_address": residential_address, "status": 200}
@@ -973,18 +976,18 @@ def updateFacultyData(str_teacher_id, email, number, residential_address):
 
 def updatePassword(str_teacher_id, password, new_password, confirm_password):
     try:
-        data_faculty = db.session.query(Faculty).filter(
-            Faculty.TeacherId == str_teacher_id).first()
+        data_faculty = db.session.query(Faculty_Profile).filter(
+            Faculty_Profile.faculty_account_id == str_teacher_id).first()
 
         if data_faculty:
             # Assuming 'password' is the hashed password stored in the database
-            hashed_password = data_faculty.Password
+            hashed_password = data_faculty.password
 
             if check_password_hash(hashed_password, password):
                 # If the current password matches
                 new_hashed_password = generate_password_hash(
                     new_password)
-                data_faculty.Password = new_hashed_password
+                data_faculty.password = new_hashed_password
                 db.session.commit()
                 return {"message": "Password changed successfully", "status": 200}
 

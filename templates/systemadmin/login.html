@@ -21,11 +21,7 @@
       </p>
     </div>
 
-    <form
-      class="flex flex-col gap-3"
-      method="POST"
-      action="{{ url_for('system_admin_api.login2') }}"
-    >
+    <form class="flex flex-col gap-3" id="login-form">
       <div class="">
         <label
           htmlFor="email"
@@ -82,4 +78,42 @@
   </div>
 </div>
 
-{% endblock content %}
+{% endblock content %} {% block script %}
+<script>
+  // Add event listener to the form submission
+  document
+    .getElementById('login-form')
+    .addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      // Get the form data
+      const formData = new FormData(event.target);
+      console.log(formData);
+      // Define the API URL for the login endpoint
+      const apiUrl = "{{ url_for('system_admin_api.login') }}";
+
+      // Make a POST request to the login API
+      fetch(apiUrl, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include', // Include credentials (cookies) in the request
+      })
+        .then((response) => {
+          console.log(response);
+          if (response.status == 401) {
+            // throw new Error('Invalid email or password');
+            notyf.error('Invalid email or password');
+          }
+          return response.json(); // Parse the JSON response
+        })
+        .then((data) => {
+          window.location.href = "{{ url_for('systemAdminHome') }}";
+        })
+        .catch((error) => {
+          // Handle errors
+          const messageContainer = document.getElementById('message-container');
+          messageContainer.innerHTML = `<div class="text-red-500">Login failed: ${error.message}</div>`;
+        });
+    });
+</script>
+{% endblock script %}

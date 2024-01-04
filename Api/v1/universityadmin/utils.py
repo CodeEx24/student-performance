@@ -1,4 +1,4 @@
-from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db, UniversityAdmin, ClassSubjectGrade, Metadata, Curriculum
+from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty_Profile, Student, db, UniversityAdmin, ClassSubjectGrade, Metadata, Curriculum
 from sqlalchemy import desc, distinct, func, and_
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -255,7 +255,6 @@ def getOverallCoursePerformance():
 
 def getAllClassData(skip, top, order_by, filter):
     try:
-
         class_grade_query = db.session.query(Class, Metadata,  Course, ClassGrade).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
         
         
@@ -1318,7 +1317,7 @@ def getStudentAddOptions():
 def getAllClassSubjectData():
     try:
         data_class_subject = (
-            db.session.query(ClassSubject, Subject, Class, Metadata, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).order_by(desc(Metadata.Batch),desc(Metadata.Semester), (Subject.Name)).all()
+            db.session.query(ClassSubject, Subject, Class, Metadata, Course, Faculty_Profile).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Faculty_Profile, Faculty_Profile.faculty_account_id == ClassSubject.TeacherId).order_by(desc(Metadata.Batch),desc(Metadata.Semester), (Subject.Name)).all()
         )
         
 
@@ -1329,11 +1328,13 @@ def getAllClassSubjectData():
             for class_subject in data_class_subject:
                 # Combine the course_code, year, section to class_name variable
                 class_name = f"{class_subject.Course.CourseCode} {class_subject.Metadata.Year}-{class_subject.Class.Section}"
+                middle_name = class_subject.Faculty_Profile.middle_name if class_subject.Faculty_Profile.middle_name else ""
+                full_name = f"{class_subject.Faculty_Profile.last_name}, {class_subject.Faculty_Profile.first_name} {middle_name}"
                 
                 dict_class_subject = {
                     "Section Code": class_name,
                     "Subject": class_subject.Subject.Name,
-                    "Teacher": class_subject.Faculty.Name,
+                    "Teacher":full_name,
                     "Schedule": class_subject.ClassSubject.Schedule,
                     'Batch': class_subject.Metadata.Batch,
                     'Semester': class_subject.Metadata.Semester
@@ -1372,9 +1373,9 @@ def getClassSubject(class_id):
                 if class_subject.ClassSubject.TeacherId or class_subject.ClassSubject.Schedule:
                     teacher_id = 0
                     if class_subject.ClassSubject.TeacherId:
-                        teacher = db.session.query(Faculty).filter(Faculty.TeacherId == class_subject.ClassSubject.TeacherId).first()
+                        teacher = db.session.query(Faculty_Profile).filter(Faculty_Profile.faculty_account_id == class_subject.ClassSubject.TeacherId).first()
                         if teacher:
-                            teacher_id = teacher.TeacherId
+                            teacher_id = teacher.faculty_account_id
 
                     schedule = class_subject.ClassSubject.Schedule if class_subject.ClassSubject.Schedule else None
                 else:
@@ -1812,15 +1813,18 @@ def getCurriculumSubject(metadata_id):
 
 def getActiveTeacher():
     try:
-        active_teacher = db.session.query(Faculty).filter_by(IsActive = True).all()
+        active_teacher = db.session.query(Faculty_Profile).filter_by(is_active = True).all()
         # Get the StudentClassSubjectGrade
         if active_teacher:
             list_active_teacher = []
                 # For loop the active_teacher and put it in dictionary
             for data in active_teacher:
+                middle_name = data.middle_name if data.middle_name else ""
+                full_name = f"{data.last_name}, {data.first_name} {middle_name}"
+                
                 dict_active_teacher = {
-                    "TeacherId": data.TeacherId,
-                    "TeacherName": data.Name,
+                    "TeacherId": data.faculty_account_id,
+                    "TeacherName": full_name,
                 }
                 list_active_teacher.append(dict_active_teacher)
             return  jsonify({'data': list_active_teacher})
@@ -2473,14 +2477,25 @@ def getMetadata(skip, top, order_by, filter):
         if metadata_main_query:
             for data in metadata_main_query:
                 # Check data.Course.Name, data.Metadata.Batch and data.Metadata.Semester if exist in list_metadata
-                
+                # Find a class that has the same MetadataId
+                class_data = db.session.query(Class).filter_by(MetadataId=data.Metadata.MetadataId).first()
+
+                # Check if class_data exists
+                if class_data:
+                    # Set IsGradeFinalized to its value if it exists, else set it to None
+                    is_grade_finalized = class_data.IsGradeFinalized if hasattr(class_data, 'IsGradeFinalized') else None
+                else:
+                    # Set to None if class_data doesn't exist
+                    is_grade_finalized = None
+
                 # Create a dict
                 dict_metadata = {
                     'MetadataId': data.Metadata.MetadataId,
                     'Course': data.Course.Name,
                     'CourseCode': data.Course.CourseCode,
                     'Semester': data.Metadata.Semester,
-                    'Batch': data.Metadata.Batch
+                    'Batch': data.Metadata.Batch,
+                    'IsGradeFinalized': is_grade_finalized
                 }
 
                 # Append the dict to the list_metadata
@@ -2548,7 +2563,7 @@ def finalizedGradesReport(metadata_id):
                         class_data_update.IsGradeFinalized = True
                         
                         data_class_subject = db.session.query(ClassSubject, Subject).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).filter(ClassSubject.ClassId == class_data['ClassId']).all()
-                        # data_class_subject = db.session.query(ClassSubject, Subject, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Faculty, Faculty.TeacherId == ClassSubject.TeacherId).filter(ClassSubject.ClassId == class_data['ClassId']).all()
+                       
                         
                         list_class_subject = []
                         
@@ -2906,11 +2921,53 @@ def finalizedGradesReport(metadata_id):
                                 
             else:   
                 db.session.rollback()
+                print("ERROR")
                 return jsonify({"error": "There no class yet"})
-            return jsonify({"message": "Hello"})
+            print("SUCCESS")
+            return jsonify({"success": True, "message": "Data finalized successfully"})
         else:
             return jsonify(None)
     except Exception as e:
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return jsonify(error=str(e))
+
+
+def getClassListDropdown(batch=False):
+    # Get all unique class with distinc of CourseId, Year, Section
+    if batch:
+        class_grade_query = db.session.query(Class, Metadata,  Course, ClassGrade).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId).all()
+        
+        if class_grade_query:
+            # loop the data of it
+            list_class = []
+            for data in class_grade_query:
+                section = str(data.Metadata.Year) + "-" + str(data.Class.Section)
+
+                dict_class = {
+                    "course": data.Course.CourseCode,
+                    "section": section,
+                    "batch": data.Metadata.Batch
+                }
+                # Append
+                list_class.append(dict_class)
+        
+            return list_class
+    else:
+        class_grade_query = db.session.query(Class, Metadata,  Course, ClassGrade).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId).distinct(Course.CourseId, Metadata.Year, Class.Section).all()
+        
+        if class_grade_query:
+            # loop the data of it
+            list_class = []
+            for data in class_grade_query:
+                section = str(data.Metadata.Year) + "-" + str(data.Class.Section)
+
+                dict_class = {
+                    "course": data.Course.CourseCode,
+                    "section": section
+                }
+                # Append
+                list_class.append(dict_class)
+        
+            return list_class
+

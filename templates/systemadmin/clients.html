@@ -1,0 +1,50 @@
+{% extends "systemadmin/layout.html" %}
+
+<!----------------- TITLE ----------------->
+{% block title %} SPS - Dashboard {% endblock title %} {% block styles %}
+<style>
+  /* Set the chart container to 100% width */
+  #containerChart {
+    width: 100%;
+  }
+</style>
+{% endblock styles %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+<div class="p-4 md:ml-72">
+  <div class="border-2 border-gray-200 border-dashed rounded-lg">
+    <div class="w-full bg-white p-4 mt-4">
+      <h1 class="text-2xl font-bold p-4 text-c1">Clients List</h1>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!----------------- SCRIPTS ----------------->
+{% block script %}
+
+<!-- STATISTICS DATA FETCHING (COUNT) -->
+<script>
+  console.log('HELO1');
+  async function fetchClient() {
+    try {
+      const response = await fetch(`${api_base_url}/clients`);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the admin to resolve the issue.`
+        );
+      }
+
+      const clients_data = await response.json();
+      console.log('clients_data: ', clients_data);
+      // Make a function that will display the clients list
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  fetchClient();
+</script>
+
+{% endblock script %}

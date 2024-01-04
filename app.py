@@ -7,6 +7,7 @@ from Api.v1.student.api_routes import student_api
 from Api.v1.faculty.api_routes import faculty_api
 from Api.v1.universityadmin.api_routes import university_admin_api
 from Api.v1.systemadmin.api_routes import system_admin_api
+from oauth2 import config_oauth
 
 from flask_mail import Mail, Message
 import os
@@ -18,11 +19,16 @@ from models import init_db
 from decorators.auth_decorators import preventAuthenticated, role_required
 from datetime import  timedelta
 from mail import mail  # Import mail from the mail.py module
-
+from flask_oauthlib.provider import OAuth2Provider
+from werkzeug.security import check_password_hash
+# Get models OAuth2Client
+from models import OAuth2Client, Student, OAuth2Token
 
 def create_app():
     load_dotenv()  # Load environment variables from .env file
     app = Flask(__name__)
+    
+    
 
     if __name__ == '__main__':
         app.run(debug=True)
@@ -38,7 +44,16 @@ def create_app():
         # Set the value to the default DATABASE_URI
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DEVELOPMENT_DATABASE_URI')
         
+    # Do not set this to 1 in production
+    os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
+    # Configure Flask to use HTTPS
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # or 'Strict'
+    app.config['SESSION_PERMANENT'] = True
+        
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['OAUTH2_REFRESH_TOKEN_GENERATOR'] = True
     # app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -54,7 +69,7 @@ def create_app():
 
     # jwt = JWTManager(app)
     init_db(app)
-    
+    oauth = OAuth2Provider(app)
    
     # Configure Flask-Mail for sending emails
     app.config['MAIL_SERVER'] =  os.getenv("MAIL_SERVER")
@@ -87,10 +102,14 @@ def create_app():
     @app.before_request
     def before_request():
         session.permanent=True
+       
         pass
     
     # ===========================================================================
     # ROUTING FOR THE APPLICATION (http:localhost:3000)
+
+
+
 
     @app.route('/practice')
     def practice():
@@ -268,9 +287,15 @@ def create_app():
     def systemAdminHome():
         return render_template('systemadmin/home.html', system_admin_api_base_url=system_admin_api_base_url, current_page="home")
     
+    @app.route('/system-admin/clients')
+    @role_required('systemAdmin')
+    def systemAdminClients():
+        return render_template('systemadmin/clients.html', system_admin_api_base_url=system_admin_api_base_url, current_page="clients")
+    
     
     # ========================================================================
     # Register the API blueprint
+    config_oauth(app)
     app.register_blueprint(university_admin_api, url_prefix=university_admin_api_base_url)
     app.register_blueprint(system_admin_api, url_prefix=system_admin_api_base_url)
 

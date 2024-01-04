@@ -204,11 +204,11 @@
               <ul class="text-base">
                 <li>
                   <a
-                    href="{{ url_for('facultyHome') }}"
-                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'dashboard' else 'hover:bg-gray-100 hover:text-c1' }}"
+                    href="{{ url_for('systemAdminHome') }}"
+                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'home' else 'hover:bg-gray-100 hover:text-c1' }}"
                   >
                     <svg
-                      class="w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'dashboard' else 'text-gray-500' }}"
+                      class="w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'home' else 'text-gray-500' }}"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -221,16 +221,16 @@
                         d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"
                       />
                     </svg>
-                    <span class="flex-1 ml-3 whitespace-nowrap">Dashboard</span>
+                    <span class="flex-1 ml-3 whitespace-nowrap">Home</span>
                   </a>
                 </li>
                 <li>
                   <a
-                    href="{{ url_for('facultyGrades') }}"
-                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'grades' else 'hover:bg-gray-100 hover:text-c1' }}"
+                    href="{{ url_for('systemAdminClients') }}"
+                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'clients' else 'hover:bg-gray-100 hover:text-c1' }}"
                   >
                     <svg
-                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'grades' else 'text-gray-500' }}"
+                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'clients' else 'text-gray-500' }}"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -240,7 +240,7 @@
                         d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z"
                       />
                     </svg>
-                    <span class="flex-1 ml-3 whitespace-nowrap">Grades</span>
+                    <span class="flex-1 ml-3 whitespace-nowrap">Clients</span>
                   </a>
                 </li>
 
@@ -372,6 +372,40 @@
       </div>
     </div>
 
+    <script>
+      const api_base_url = '{{ system_admin_api_base_url | default("") }}';
+    </script>
+
+    <!-- NOTYF -->
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+      const notyf = new Notyf({
+        duration: 5000,
+        position: {
+          x: 'right',
+          y: 'top',
+        },
+        types: [
+          {
+            type: 'success',
+            background: '#5EEE82', // Custom background color for success notifications (e.g., green)
+            duration: 5000,
+            dismissible: true,
+          },
+          {
+            type: 'error',
+            background: '#ef233c', // Custom background color for error notifications (e.g., orange)
+            duration: 5000,
+            dismissible: true,
+          },
+          {
+            type: 'warning',
+            background: 'orange',
+            duration: 5000,
+          },
+        ],
+      });
+    </script>
     <!-- SCRIPTS -->
     {% block script %} {% endblock script %}
   </body>
