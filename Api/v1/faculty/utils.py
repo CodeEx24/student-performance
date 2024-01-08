@@ -918,8 +918,7 @@ def getStudentPerformance(str_student_id):
 def getFacultyData(str_teacher_id):
     try:
         data_faculty = (
-            db.session.query(Faculty_Profile).filter(
-                Faculty_Profile.faculty_account_id == str_teacher_id).first()
+            db.session.query(Faculty_Profile).filter(Faculty_Profile.FacultyId == str_teacher_id).first()
         )
 
         if data_faculty:
@@ -927,7 +926,7 @@ def getFacultyData(str_teacher_id):
             full_name = f"{data_faculty.last_name}, {data_faculty.first_name} {middle_name}"
             
             dict_faculty_data = {
-                "TeacherId": data_faculty.faculty_account_id,
+                "TeacherId": data_faculty.FacultyId,
                 "TeacherNumber": data_faculty.faculty_code,
                 "Name": full_name,
                 "ResidentialAddress": data_faculty.residential_address,
@@ -956,8 +955,8 @@ def updateFacultyData(str_teacher_id, email, number, residential_address):
             return {"type": "residential", "status": 400}
         
         # Update the student data in the database
-        data_faculty = db.session.query(Faculty_Profile).filter(
-            Faculty_Profile.faculty_account_id == str_teacher_id).first()
+        data_faculty = db.session.query(Faculty_Profile).filter(Faculty_Profile.FacultyId == str_teacher_id).first()
+
         
         if data_faculty:
             data_faculty.email = email
@@ -977,8 +976,7 @@ def updateFacultyData(str_teacher_id, email, number, residential_address):
 
 def updatePassword(str_teacher_id, password, new_password, confirm_password):
     try:
-        data_faculty = db.session.query(Faculty_Profile).filter(
-            Faculty_Profile.faculty_account_id == str_teacher_id).first()
+        data_faculty = db.session.query(Faculty_Profile).filter(Faculty_Profile.FacultyId == str_teacher_id).first()
 
         if data_faculty:
             # Assuming 'password' is the hashed password stored in the database

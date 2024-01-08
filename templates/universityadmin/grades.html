@@ -1,0 +1,623 @@
+{% extends "universityadmin/layout.html" %} {% block title %}
+<title>Finalized Grades</title> {% endblock title %}
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Grades
+      </h3>
+
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white px-4 pb-4">
+          <form
+            class="bg-white rounded-lg"
+            enctype="multipart/form-data"
+            onsubmit="submitGrades(event)"
+            method="POST"
+            id="reset-form-email"
+          >
+            <div class="mb-4">
+              <label
+                for="excelFile"
+                class="block text-gray-700 font-bold text-lg mb-2"
+              >
+                Submit Grades:
+              </label>
+              <p class="font-semibold text-gray-700">
+                Column Required:
+                <span class="font-normal"
+                  >Course, Subject Code, Year, Semester, and Batch</span
+                >
+              </p>
+            </div>
+            <div class="mb-4 flex gap-4">
+              <input
+                type="file"
+                name="excelFile"
+                id="excelFile"
+                accept=".xlsx, .xls"
+                class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+              />
+
+              <button
+                type="submit"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+              >
+                Upload Excel File
+              </button>
+            </div>
+            <p id="grade-file-error" class="text-c4 text-sm"></p>
+          </form>
+
+          <div id="grid_grades"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- The Modal -->
+<div
+  id="loadingModal"
+  class="hidden modal fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- The Modal -->
+<div
+  id="myModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">Performance Details</h2>
+        <button class="modal-close" onclick="closeModal('myModal')">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 mt-4">
+        <div class="flex">
+          <h4 class="text-c1 font-bold">Student Name:&nbsp;</h4>
+          <p id="student-name">Jocarl Basco</p>
+        </div>
+        <div class="flex mb-4">
+          <h4 class="text-c1 font-bold">Student Number:&nbsp;</h4>
+          <p id="student-number">Jocarl Basco</p>
+        </div>
+        <div id="columnChartContainer" class="w-full col-span-2"></div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative"></div>
+  </div>
+</div>
+
+<!-- MODAL FOR ERROR -->
+<div
+  id="uploadGradeErrorModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div
+    class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"
+    onclick="closeModalError('uploadGradeErrorModal', 'grid-upload-grade-error-list')"
+  ></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">
+          Updating Grade Error List
+        </h2>
+        <button
+          class="modal-close"
+          onclick="closeModalError('uploadGradeErrorModal', 'grid-upload-grade-error-list')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body w-full relative mt-8">
+        <div id="grid-upload-grade-error-list" class="overflow-y-auto">
+          <!-- This is the content of modal -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+
+<!----------------- SCRIPTS ----------------->
+{% block script %}
+
+<!-- FETCHING SPECIFIC STUDENT PERFORMANCE -->
+<script>
+  // JavaScript function to show the modal
+  async function fetchStudentPerformance(
+    student_id,
+    student_name,
+    student_number
+  ) {
+    const response = await fetch(
+      `${api_base_url}/student/performance/${student_id}`
+    );
+
+    console.log('response: ', response);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
+    }
+    const data_performance = await response.json();
+
+    displayPerformance(data_performance, student_name, student_number);
+  }
+
+  // JavaScript function to close the modal
+
+  function displayPerformance(data_performance, student_name, student_number) {
+    try {
+      if (data_performance) {
+        console.log('NOT ERROR');
+        var chartData = [...data_performance];
+
+        var chart = new ej.charts.Chart({
+          primaryXAxis: {
+            title: 'Year',
+            minimum: data_performance[data_performance.length - 1].Year - 1,
+            maximum: data_performance[0].Year + 1,
+            interval: 1,
+          },
+          primaryYAxis: {
+            minimum: 20,
+            maximum: 100,
+            interval: 20,
+            title: 'Grade',
+            labelFormat: '{value}',
+          },
+          series: [
+            {
+              dataSource: chartData.filter((data) => data.Semester === 1),
+              xName: 'Year',
+              yName: 'Grade',
+              name: '1st Semester',
+              type: 'Column',
+              fill: '#6376EB',
+            },
+            {
+              dataSource: chartData.filter((data) => data.Semester === 2),
+              xName: 'Year',
+              yName: 'Grade',
+              name: '2nd Semester',
+              type: 'Column',
+              fill: '#5EEE82',
+            },
+            {
+              dataSource: chartData.filter((data) => data.Semester === 3),
+              xName: 'Year',
+              yName: 'Grade',
+              name: 'Summer Term',
+              type: 'Column',
+              fill: '#29BAF2',
+            },
+          ],
+          title: 'Performance',
+          // dataLabel: {
+          //   visible: true,
+          //   position: 'Top',
+          //   font: {
+          //     fontWeight: '600',
+          //   },
+          //   format: '${point.y}%',
+          // },
+          tooltip: {
+            enable: true,
+            format:
+              'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
+          },
+        });
+
+        // Render the chart
+        chart.appendTo('#columnChartContainer');
+      }
+    } catch (error) {
+      console.log('Cannot render');
+    }
+
+    document.getElementById('student-name').innerText = student_name;
+    document.getElementById('student-number').innerText = student_number;
+
+    // document.getElementById('myModal').classList.remove('hidden');
+    showModal('myModal');
+  }
+</script>
+
+<!-- SCRIPTS -->
+
+<script>
+  async function submitGrades(event) {
+    event.preventDefault();
+    console.log('INSIDE SUBMIT GRADES');
+
+    const fileErrorElement = document.getElementById('grade-file-error');
+    const fileInput = document.getElementById('excelFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+      fileErrorElement.innerText = 'Please choose a file.';
+      return;
+    }
+
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      fileErrorElement.innerText =
+        'Invalid file type. Please select an Excel file.';
+      return;
+    } else {
+      fileErrorElement.innerText = '';
+    }
+
+    // If file type is valid, proceed with the API request
+    const formData = new FormData();
+    formData.append('excelFile', file);
+
+    showModal('loadingModal');
+    try {
+      fetch(`${api_base_url}/submit-grades`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // Handle API response here
+          handleDataSubmitResults(
+            data,
+            fileInput,
+            displaySubmitErrorUpdatedGrades,
+            'uploadGradeErrorModal',
+            'grid_grades'
+          );
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+  }
+
+  function displaySubmitErrorUpdatedGrades(curriculum) {
+    var grid = new ej.grids.Grid({
+      dataSource: curriculum,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      pageSettings: { pageSize: 10 }, // Set the page size
+
+      // rowData: json_class['ClassSubjectGrade'],
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      columns: [
+        {
+          field: 'StudentNumber',
+          headerText: 'Student Number',
+          width: 100,
+        },
+
+        {
+          field: 'StudentName',
+          headerText: 'Name',
+          width: 100,
+        },
+        {
+          field: 'SectionCode',
+          headerText: 'Section Code',
+          width: 100,
+        },
+        {
+          field: 'SubjectCode',
+          headerText: 'Subject Code',
+          width: 100,
+        },
+        {
+          field: 'Semester',
+          headerText: 'Semester',
+          width: 100,
+        },
+        {
+          field: 'Grade',
+          headerText: 'Grade',
+          width: 100,
+        },
+        {
+          field: 'Batch',
+          headerText: 'Batch',
+          width: 100,
+        },
+        {
+          field: 'Error',
+          headerText: 'Error',
+          width: 100,
+        },
+      ],
+
+      excelExportComplete: function (args) {
+        // Exclude the 'Subject Code' column from the exported Excel file
+        // args.xlsxExportOptions.sheets[0].columns =
+        //   args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
+        //     return column.field !== 'Subject';
+        //   });
+      },
+    });
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-upload-grade-error-list_excelexport') {
+        grid.excelExport();
+      }
+    };
+
+    // Render the grid
+    grid.appendTo('#grid-upload-grade-error-list');
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
+  }
+</script>
+
+<link
+  rel="stylesheet"
+  href="https://cdn.syncfusion.com/ej2/17.3.29/material.css"
+/>
+<script src="https://cdn.syncfusion.com/ej2/17.3.29/dist/ej2.min.js"></script>
+
+<!-- Your Flask script to render configuration data -->
+<script>
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/class-subject-grade`,
+    columns: [
+      {
+        field: 'StudentId',
+        isPrimaryKey: true, // Set this as a primary key
+        visible: false, // Make this column not visible on the grid
+      },
+      {
+        field: 'ClassSubjectId',
+        isPrimaryKey: true, // Set this as a primary key
+        visible: false, // Make this column not visible on the grid
+      },
+      {
+        field: 'StudentNumber',
+        headerText: 'Student Number',
+        width: 150,
+        editType: 'dropdownedit', // Use dropdown filter for this column
+      },
+      { field: 'StudentName', headerText: 'Student Name', width: 150 },
+      {
+        field: 'Class',
+        headerText: 'Section Code',
+        width: 150,
+        // filterBarTemplate: classOptions, // Add a dropdown filter
+      },
+      {
+        field: 'SubjectCode',
+        headerText: 'SubjectCode',
+        width: 150,
+      },
+      {
+        field: 'Semester',
+        headerText: 'Semester',
+        width: 120,
+      },
+      {
+        field: 'Grade',
+        headerText: 'Grade',
+        width: 120,
+      },
+      {
+        field: 'Batch',
+        headerText: 'Batch',
+        width: 120,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Batch';
+            return dd;
+          },
+          write: function (args) {
+            var currentYear = new Date().getFullYear();
+            var years = [];
+            years.push('All');
+            for (var i = currentYear; i > currentYear - 10; i--) {
+              years.push(i.toString());
+            }
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: years,
+              fields: { text: 'Batch', value: 'Batch' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Batch');
+                } else {
+                  gridObj.filterByColumn('Batch', 'equal', parseInt(e.value));
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Batch');
+          },
+        },
+      },
+      {
+        headerText: 'Actions',
+        template:
+          '<button class="btn px-4 py-2 bg-primary text-white font-bold">Performance</button>', // Add a button to the cell
+        width: 150,
+      },
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create a DataManager with the provided API URL
+    let data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      adaptor: new ej.data.ODataAdaptor(),
+    });
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      header: true, // Include headers in the exported Excel file
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+        // Access the data returned from the server
+        console.log('Before Data bound:', args);
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+      },
+
+      actionBegin: function (args) {
+        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+    });
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid_grades_excelexport') {
+        // log the items that will be exported
+        console.log('Items to be exported:', grid.dataSource);
+        // grid.columns[7].visible = false;
+        grid.excelExport();
+      }
+    };
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              fetchStudentPerformance(
+                rowData.StudentId,
+                rowData.StudentName,
+                rowData.StudentNumber
+              );
+            }
+          }
+        }
+      }
+    });
+
+    console.log('GRID: ', grid.dataSource);
+    // Append the grid to the container
+    grid.appendTo('#grid_grades');
+  });
+</script>
+
+{% endblock script %}

@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount
 import os
 
 
@@ -141,7 +141,7 @@ def overallCoursePerformance():
         json_performance_data = getOverallCoursePerformance()
 
         if json_performance_data:
-            return jsonify({'result': json_performance_data})
+            return  json_performance_data
         else:
             return jsonify(error="No Performance data available")
     else:
@@ -336,6 +336,62 @@ def fetchStudentClassSubjectData(class_subject_id):
             return (json_class_subject_data)
         else:
             return jsonify(message="No class subject data available"), 400
+    else:
+        return render_template('404.html'), 404
+
+
+# Getting the student subject grade in a class
+@university_admin_api.route('/class-subject-grade/', methods=['GET'])
+@role_required('universityAdmin')
+def studentClassSubjectGrade():
+    universityAdmin = getCurrentUser()
+
+    if universityAdmin:
+        skip = int(request.args.get('$skip', 1))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+      
+        # json_class_subject_grade = getStudentClassSubjectGrade(
+        #     faculty.TeacherId)
+        json_class_subject_grade = getStudentClassSubjectGrade(skip, top, order_by, filter)
+
+        if json_class_subject_grade:
+            return (json_class_subject_grade)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+
+# Getting the specific student performance
+@university_admin_api.route('/student/performance/<string:id>', methods=['GET', 'POST'])
+@role_required('universityAdmin')
+def studentPerformance(id):
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_student_performance = getStudentPerformance(id)
+
+        if json_student_performance:
+            return (json_student_performance)
+        else:
+            return jsonify({'error': True, 'message': "Something went wrong. Try to contact the admin to resolve the issue."})
+    else:
+        return render_template('404.html'), 404
+
+# api_routes.py
+@university_admin_api.route('/submit-grades', methods=['POST'])
+@role_required('universityAdmin')
+def submitGrades():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        # Check if the request contains a file named 'excelFile'
+        if 'excelFile' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+
+        file = request.files['excelFile']
+
+        # Call the utility function to process the file
+        return processGradeSubmission(file)
     else:
         return render_template('404.html'), 404
 
@@ -585,5 +641,35 @@ def fetchClassDropdown():
 
     if class_list:
         return (class_list)
+    else:
+        return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+
+
+@university_admin_api.route('/statistics', methods=['GET'])
+@role_required('universityAdmin')
+def fetchStatistics():
+    university_admin = getCurrentUser()
+    if university_admin:
+        class_list = getStatistics()
+        # return class list
+        if class_list:
+            return (class_list)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    
+
+@university_admin_api.route('/listers/count', methods=['GET'])
+@role_required('universityAdmin')
+def fetchListers():
+    university_admin = getCurrentUser()
+    if university_admin:
+        listers_data = getListersCount()
+        # return class list
+        if listers_data:
+            return (listers_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")

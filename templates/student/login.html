@@ -104,12 +104,13 @@
         .then((response) => {
           if (response.status == 401) {
             throw new Error('Invalid email or password');
+            console.log('ERROR INCLIAD');
           }
           return response.json(); // Parse the JSON response
         })
         .then((data) => {
           console.log(data);
-          // window.location.href = "{{ url_for('studentHome') }}";
+          window.location.href = "{{ url_for('studentHome') }}";
         })
         .catch((error) => {
           // Handle errors

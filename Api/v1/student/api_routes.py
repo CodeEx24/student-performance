@@ -96,77 +96,140 @@ def resetPassword(token):
             return jsonify({'message': 'Invalid or expired token', 'status': 400})
 
 
-
-# ===================================================
-# Required params (#auth headers, username, password, grant_type, scope)
-@student_api.route('/oauth/token', methods=['POST'])
-def login():
-    # Get the params sessionVal in link
-    saveSession = request.args.get('saveSession')
+# # ===================================================
+# # Required params (#auth headers, username, password, grant_type, scope)
+# @student_api.route('/oauth/token', methods=['POST'])
+# def login():
+#     # Get the params sessionVal in link
+#     saveSession = request.args.get('saveSession')
     
-    data = request.form.to_dict()
-    email = data.get('username')
-    password = data.get('password')
+#     data = request.form.to_dict()
+#     email = data.get('username')
+#     password = data.get('password')
     
-    print("Email: ", email)
-    print("Password: ", password)
+#     print("Email: ", email)
+#     print("Password: ", password)
     
-    # Check the student
-    user = Student.query.filter_by(Email=email).first()
+#     # Check the student
+#     user = Student.query.filter_by(Email=email).first()
     
-    # Check if password is match
-    if user and check_password_hash(user.Password, password):
-        print("INSIDE")
-        # save user_id in session
+#     # Check if password is match
+#     if user and check_password_hash(user.Password, password):
+#         print("INSIDE")
+#         # save user_id in session
         
-        # Check if studentId already have OAuth Token
-        existing_token = OAuth2Token.query.filter_by(user_id=user.StudentId).first()
-        print("EXIST")
+#         # Check if studentId already have OAuth Token
+#         existing_token = OAuth2Token.query.filter_by(user_id=user.StudentId).first()
+#         print("EXIST")
         
-        if existing_token:
-            # Check if issued_at already reach the expires_in
-            if existing_token.issued_at + existing_token.expires_in < time.time():
-                # Update access token and issued at
-                existing_token.access_token = gen_salt(40)
-                existing_token.issued_at = time.time()
-                # Update the access_token_revoked_at in current time with additional 15 mins
-                print('existing_token.access_token_revoked_at: ', existing_token.access_token_revoked_at)
-                existing_token.access_token_revoked_at = time.time() + (15 * 60)
-                existing_token.refresh_token_revoked_at = time.time() + (24 * 60 * 60)
+#         if existing_token:
+#             # Check if issued_at already reach the expires_in
+#             if existing_token.issued_at + existing_token.expires_in < time.time():
+#                 # Update access token and issued at
+#                 existing_token.access_token = gen_salt(40)
+#                 existing_token.issued_at = time.time()
+#                 # Update the access_token_revoked_at in current time with additional 15 mins
+#                 print('existing_token.access_token_revoked_at: ', existing_token.access_token_revoked_at)
+#                 existing_token.access_token_revoked_at = time.time() + (15 * 60)
+#                 existing_token.refresh_token_revoked_at = time.time() + (24 * 60 * 60)
 
-                print("NEW REVOKE")
-                # Commit to the database
-                token = existing_token.to_token_response()
-                db.session.commit()
+#                 print("NEW REVOKE")
+#                 # Commit to the database
+#                 token = existing_token.to_token_response()
+#                 db.session.commit()
                 
-                if saveSession == "True":
-                    saveSessionValues(user.StudentId, token)
+#                 if saveSession == "True":
+#                     saveSessionValues(user.StudentId, token)
                 
-                return jsonify(token)
-            else:
-                # Update the existing access token and return it
-                existing_token.access_token = gen_salt(40)
-                existing_token.access_token_revoked_at = time.time() + (15 * 60)
-                existing_token.refresh_token_revoked_at = time.time() + (24 * 60 * 60)
+#                 return jsonify(token)
+#             else:
+#                 # Update the existing access token and return it
+#                 existing_token.access_token = gen_salt(40)
+#                 existing_token.access_token_revoked_at = time.time() + (15 * 60)
+#                 existing_token.refresh_token_revoked_at = time.time() + (24 * 60 * 60)
 
-                # Commit to the database
-                token = existing_token.to_token_response()
-                db.session.commit()
+#                 # Commit to the database
+#                 token = existing_token.to_token_response()
+#                 db.session.commit()
                 
-                if saveSession == "True":
-                    saveSessionValues(user.StudentId, token)
+#                 if saveSession == "True":
+#                     saveSessionValues(user.StudentId, token)
                     
-                return jsonify(token)
-        else:
-            token = authorization.create_token_response()
-            tokenval = token.json
-            token_resp = OAuth2Token.query.filter_by(access_token=tokenval['access_token'], refresh_token=tokenval['refresh_token']).first()
-            dict_token_resp = token_resp.to_token_response()
+#                 return jsonify(token)
+#         else:
+#             token = authorization.create_token_response()
+#             tokenval = token.json
+#             token_resp = OAuth2Token.query.filter_by(access_token=tokenval['access_token'], refresh_token=tokenval['refresh_token']).first()
+#             dict_token_resp = token_resp.to_token_response()
             
-            if saveSession == "True":
-                saveSessionValues(user.StudentId, dict_token_resp)
+#             if saveSession == "True":
+#                 saveSessionValues(user.StudentId, dict_token_resp)
             
-            return dict_token_resp
+#             return dict_token_resp
+#         # return redirect('/')
+#     else:
+#         return jsonify({'error': 'Invalid username or password'}), 401
+
+# # Make a token validator that will check whether the access token is correct
+# # Required parms (user_id, access_token)
+# @student_api.route('/oauth/validate', methods=['POST'])
+# def validateToken():
+#     access_token = request.args.get('access_token')
+#     user_id = request.args.get('user_id')
+
+#     print('acess_token: ', access_token)
+#     # Check the token
+#     token = OAuth2Token.query.filter_by(access_token=access_token, user_id=user_id).first()
+#     if token:
+#         # Token expiration check must implemented if the access_token has a value
+        
+#         return jsonify({ 'success': True, 'error': False,  'message': 'Token is valid' }), 200
+#     else:
+#         return jsonify({ 'success': False, 'error': True, 'message': 'Invalid token' }), 401
+
+
+# # Make a token refresh that will refresh token
+# # Required parms (user_id, refresh_token)
+# @student_api.route('/oauth/refresh', methods=['POST'])
+# def refreshToken():
+#     refresh_token = request.args.get('refresh_token')
+#     user_id = request.args.get('user_id')
+
+#     # Check the token
+#     token = OAuth2Token.query.filter_by(refresh_token=refresh_token, user_id=user_id).first()
+#     if token:
+#         # Check if issued at reach the time already
+#         if token.issued_at + token.expires_in < time.time():
+#             # Return refresh token is already expired. Please login again
+#             return jsonify({ 'success': False, 'error': True, 'message': 'Refresh token is already expired. Please login again' }), 401
+#         else:
+#             token.access_token = gen_salt(40)
+#             # Commit to the database
+#             db.session.commit()
+#             return jsonify(token.to_token_response())
+#     else:
+#         return jsonify({ 'success': False, 'error': True, 'message': 'Invalid token' }), 401
+
+# # Student User Log in
+@student_api.route('/login', methods=['POST'])
+def login():
+    print("HERE")
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        # Print email and pass
+        print('email: ', email)
+        print('pass: ', password)
+        # create_app.sayHello()
+        student = Student.query.filter_by(Email=email).first()
+        if student and check_password_hash(student.Password, password):
+            # Successfully authenticated
+            # access_token = create_access_token(identity=student.StudentId)
+            # refresh_token = create_refresh_token(identity=student.StudentId)
+            session['user_id'] = student.StudentId
+            session['user_role'] = 'student'
+
+            return jsonify({"message": "Login successful"}), 200
         # return redirect('/')
     else:
         return jsonify({'error': 'Invalid username or password'}), 401
@@ -237,25 +300,23 @@ def refreshToken():
 @student_api.route('/profile')
 @require_oauth('student')
 def profile():
-
-    return jsonify({"message": "Hello"}), 200
     # print('current_token: ', current_token)
-    #
-    # student = getCurrentUser()
+    student = getCurrentUser()
+    if student:
+        return jsonify(student.to_dict())
+    else:
+        flash('User not found', 'danger')
+        return redirect(url_for('student_api.login'))
     # Check the token
     # user = current_token.user
     # return jsonify(id=user.StudentId, username=user.Name)
-    # if student:
-    #     return jsonify(student.to_dict())
-    # else:
-    #     flash('User not found', 'danger')
-    #     return redirect(url_for('student_api.login'))
+
     # Return hello
 # Getting the overall GPA
 
 
-@student_api.route('/overall-gpa', methods=['GET'])
 
+@student_api.route('/overall-gpa', methods=['GET'])
 @role_required('student')
 def overallGrade():
     student = getCurrentUser()

@@ -507,6 +507,8 @@
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
       toolbar: ['ExcelExport', 'Add', 'Delete', 'Cancel'], // Add the ExcelExport button to the toolbar
+      exportSettings: { excelExportMode: 'AllPages' },
+
       editSettings: {
         allowEditing: true,
         allowAdding: true,
@@ -577,7 +579,8 @@
     });
     grid.toolbarClick = function (args) {
       if (args['item'].id === 'grid-curriculum_excelexport') {
-        grid.columns[7].visible = false;
+        // console the data source
+        console.log(grid.dataSource);
         grid.excelExport();
       }
     };

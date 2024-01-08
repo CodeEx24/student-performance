@@ -1,4 +1,5 @@
-from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty_Profile, Student, Course, Metadata, db
+from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, Metadata, db
+
 
 from sqlalchemy import desc
 import re
@@ -249,8 +250,8 @@ def getSubjectsGrade(str_student_id):
                 if student_class_subject_grade.ClassSubject.TeacherId:
                     # Query the teacher
                     data_teacher = (
-                        db.session.query(Faculty_Profile)
-                        .filter(Faculty_Profile.faculty_account_id == student_class_subject_grade.ClassSubject.TeacherId)
+                        db.session.query(Faculty)
+                        .filter(Faculty.FacultyId == student_class_subject_grade.ClassSubject.TeacherId)
                         .first()
                     )
                     teacher_name = data_teacher.Name

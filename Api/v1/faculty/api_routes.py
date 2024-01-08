@@ -21,11 +21,12 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-
-        teacher = Faculty_Profile.query.filter_by(email=email).first()
-        if teacher and check_password_hash(teacher.Password, password):
+        teacher = Faculty.query.filter_by(email=email).first()
+        if teacher and check_password_hash(teacher.password, password):
             # Successfully authenticated
-            session['user_id'] = teacher.faculty_account_id
+            print("SUCCESS LOGING")
+            session['user_id'] = teacher.FacultyId
+
             session['user_role'] = 'faculty'
             return redirect(url_for('facultyHome'))
         else:
