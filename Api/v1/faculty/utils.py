@@ -1,4 +1,4 @@
-from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty_Profile, Student, Course, ClassGrade, ClassSubjectGrade, Metadata, db
+from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, ClassGrade, ClassSubjectGrade, Metadata, db
 
 from sqlalchemy import desc, distinct, func, and_
 import re
@@ -12,7 +12,7 @@ from static.js.utils import convertGradeToPercentage, checkStatus
 
 def getCurrentUser():
     current_user_id = session.get('user_id')
-    return Faculty_Profile.query.get(current_user_id)
+    return Faculty.query.get(current_user_id)
 
 
 def getAllClassAverageWithPreviousYear(str_teacher_id):
@@ -32,7 +32,7 @@ def getAllClassAverageWithPreviousYear(str_teacher_id):
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
             .join(Course, Metadata.CourseId == Course.CourseId)
-            .filter(ClassSubject.TeacherId == str_teacher_id, Metadata.Batch == current_year-1)
+            .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == current_year-1)
             .distinct(Metadata.CourseId, Metadata.Year, Metadata.Batch)
             .order_by(desc(Metadata.Year))
             # I Limit this into 8 because teacher cannot have many classes and the data sets made are distributed almost all of them
@@ -119,7 +119,7 @@ def getHighLowAverageClass(str_teacher_id):
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
             .join(Course, Metadata.CourseId == Course.CourseId)
-            .filter(ClassSubject.TeacherId == str_teacher_id)
+            .filter(ClassSubject.FacultyId == str_teacher_id)
             .order_by(ClassGrade.Grade.desc())
             .first()
         )
@@ -136,7 +136,7 @@ def getHighLowAverageClass(str_teacher_id):
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
             .join(Course, Metadata.CourseId == Course.CourseId)
-            .filter(ClassSubject.TeacherId == str_teacher_id)
+            .filter(ClassSubject.FacultyId == str_teacher_id)
             .order_by(ClassGrade.Grade)
             .first()
         )
@@ -166,7 +166,7 @@ def getSubjectCount(str_teacher_id):
             db.session.query(
                 func.count(distinct(ClassSubject.SubjectId))
             )
-            .filter(ClassSubject.TeacherId == str_teacher_id)
+            .filter(ClassSubject.FacultyId == str_teacher_id)
             .scalar()
         )
 
@@ -191,7 +191,7 @@ def getPassFailRates(str_teacher_id):
             .join(Class, Class.ClassId == ClassSubject.ClassId)
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
-            .filter(ClassSubject.TeacherId == str_teacher_id)
+            .filter(ClassSubject.FacultyId == str_teacher_id)
             .distinct(Metadata.CourseId, Metadata.Year, Metadata.Batch)
             .order_by(desc(Metadata.Batch))
             .all()
@@ -255,7 +255,7 @@ def getTopPerformerStudent(str_teacher_id, count):
             .join(StudentClassGrade, StudentClassSubjectGrade.StudentId == StudentClassGrade.StudentId)
             .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
             .join(Course, Course.CourseId == Metadata.CourseId)
-            .filter(ClassSubject.TeacherId == str_teacher_id)
+            .filter(ClassSubject.FacultyId == str_teacher_id)
             .order_by(desc(Metadata.Batch), (StudentClassGrade.Grade))
             .all()
         )
@@ -278,7 +278,7 @@ def getTopPerformerStudent(str_teacher_id, count):
                         'Grade': top_performer_student.StudentClassGrade.Grade,
                         'Batch': top_performer_student.Metadata.Batch,
                         'Class': class_name,
-                        'TeacherNum': top_performer_student.ClassSubject.TeacherId
+                        'TeacherNum': top_performer_student.ClassSubject.FacultyId
                     }
 
                     list_data_top_performer_student.append(dict_pass_fail_rate)
@@ -318,7 +318,7 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(Course, Course.CourseId == Metadata.CourseId)
             .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
-            # .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
+            # .filter(ClassSubject.FacultyId == str_teacher_id, Class.Batch >= current_year-4)
         )
 
         # Parse and apply filters
@@ -327,7 +327,7 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
         # Split filter string by 'and'
         # append the str_teacher_id
         filter_conditions.append(
-            ClassSubject.TeacherId == str_teacher_id
+            ClassSubject.FacultyId == str_teacher_id
         )
 
         if filter:
@@ -547,7 +547,7 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
 #             .join(Course, Course.CourseId == Metadata.CourseId)
 #             .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
 #             # Student Class Grade
-#             # .filter(ClassSubject.TeacherId == str_teacher_id, Metadata.Batch >= current_year-4)
+#             # .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch >= current_year-4)
 #         )
 
 #         filter_conditions = []
@@ -717,7 +717,7 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
 #             .join(Class, Class.ClassId == ClassSubject.ClassId)
 #             .join(Course, Course.CourseId == Metadata.CourseId)
 #             .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
-#             .filter(ClassSubject.TeacherId == str_teacher_id, Metadata.Batch >= current_year-4)
+#             .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch >= current_year-4)
 #             .order_by(desc(Course.CourseCode), desc(Metadata.Batch), desc(Metadata.Year), desc(Metadata.Semester), Student.Name).count()
 #         )
 
@@ -769,7 +769,7 @@ def getAllClass(str_teacher_id):
             .join(Class, Class.ClassId == ClassSubject.ClassId)
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(Course, Course.CourseId == Metadata.CourseId)
-            .filter(ClassSubject.TeacherId == str_teacher_id, Metadata.Batch == current_year - 1)
+            .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == current_year - 1)
             .order_by(desc(Metadata.CourseId), Metadata.Year, Class.Section)
             .all()
         )
@@ -918,21 +918,21 @@ def getStudentPerformance(str_student_id):
 def getFacultyData(str_teacher_id):
     try:
         data_faculty = (
-            db.session.query(Faculty_Profile).filter(Faculty_Profile.FacultyId == str_teacher_id).first()
+            db.session.query(Faculty).filter(
+                Faculty.FacultyId == str_teacher_id).first()
         )
 
         if data_faculty:
-            middle_name = data_faculty.middle_name if data_faculty.middle_name else ""
-            full_name = f"{data_faculty.last_name}, {data_faculty.first_name} {middle_name}"
+            middle_name = data_faculty.MiddleName if data_faculty.MiddleName else ""
+            full_name = f"{data_faculty.LastName}, {data_faculty.FirstName} {middle_name}"
             
             dict_faculty_data = {
                 "TeacherId": data_faculty.FacultyId,
-                "TeacherNumber": data_faculty.faculty_code,
                 "Name": full_name,
-                "ResidentialAddress": data_faculty.residential_address,
-                "Email": data_faculty.email,
-                "MobileNumber": data_faculty.mobile_number,
-                "Gender": "Male" if data_faculty.gender == 1 else "Female",
+                "ResidentialAddress": data_faculty.ResidentialAddress,
+                "Email": data_faculty.Email,
+                "MobileNumber": data_faculty.MobileNumber,
+                "Gender": "Male" if data_faculty.Gender == 1 else "Female",
             }
 
             return (dict_faculty_data)
@@ -955,13 +955,13 @@ def updateFacultyData(str_teacher_id, email, number, residential_address):
             return {"type": "residential", "status": 400}
         
         # Update the student data in the database
-        data_faculty = db.session.query(Faculty_Profile).filter(Faculty_Profile.FacultyId == str_teacher_id).first()
-
+        data_faculty = db.session.query(Faculty).filter(
+            Faculty.FacultyId == str_teacher_id).first()
         
         if data_faculty:
-            data_faculty.email = email
-            data_faculty.mobile_number = number
-            data_faculty.residential_address = residential_address
+            data_faculty.Email = email
+            data_faculty.MobileNumber = number
+            data_faculty.ResidentialAddress = residential_address
             db.session.commit()
 
             return {"message": "Data updated successfully", "email": email, "number": number, "residential_address": residential_address, "status": 200}
@@ -976,7 +976,7 @@ def updateFacultyData(str_teacher_id, email, number, residential_address):
 
 def updatePassword(str_teacher_id, password, new_password, confirm_password):
     try:
-        data_faculty = db.session.query(Faculty_Profile).filter(Faculty_Profile.FacultyId == str_teacher_id).first()
+        data_faculty = db.session.query(Faculty).filter(Faculty.FacultyId == str_teacher_id).first()
 
         if data_faculty:
             # Assuming 'password' is the hashed password stored in the database

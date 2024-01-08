@@ -352,8 +352,6 @@ def studentClassSubjectGrade():
         order_by = (request.args.get('$orderby'))
         filter = (request.args.get('$filter'))
       
-        # json_class_subject_grade = getStudentClassSubjectGrade(
-        #     faculty.TeacherId)
         json_class_subject_grade = getStudentClassSubjectGrade(skip, top, order_by, filter)
 
         if json_class_subject_grade:

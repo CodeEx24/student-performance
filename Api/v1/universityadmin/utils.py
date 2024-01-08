@@ -1,4 +1,4 @@
-from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty_Profile, Student, db, UniversityAdmin, ClassSubjectGrade, Metadata, Curriculum
+from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, db, UniversityAdmin, ClassSubjectGrade, Metadata, Curriculum
 from sqlalchemy import desc, distinct, func, and_
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -1302,7 +1302,7 @@ def getStudentAddOptions():
 def getAllClassSubjectData():
     try:
         data_class_subject = (
-            db.session.query(ClassSubject, Subject, Class, Metadata, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Faculty, Faculty.FacultyId == ClassSubject.TeacherId).order_by(desc(Metadata.Batch),desc(Metadata.Semester), (Subject.Name)).all()
+            db.session.query(ClassSubject, Subject, Class, Metadata, Course, Faculty).join(Subject, Subject.SubjectId == ClassSubject.SubjectId).join(Class, Class.ClassId == ClassSubject.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(Faculty, Faculty.FacultyId == ClassSubject.FacultyId).order_by(desc(Metadata.Batch),desc(Metadata.Semester), (Subject.Name)).all()
         )
         
 
@@ -1354,7 +1354,7 @@ def getStudentClassSubjectGrade(skip, top, order_by, filter):
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(Course, Course.CourseId == Metadata.CourseId)
             .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
-            # .filter(ClassSubject.TeacherId == str_teacher_id, Class.Batch >= current_year-4)
+            # .filter(ClassSubject.FacultyId == str_teacher_id, Class.Batch >= current_year-4)
         )
 
         # Parse and apply filters
@@ -1363,7 +1363,7 @@ def getStudentClassSubjectGrade(skip, top, order_by, filter):
         # Split filter string by 'and'
         # append the str_teacher_id
         # filter_conditions.append(
-        #     ClassSubject.TeacherId == str_teacher_id
+        #     ClassSubject.FacultyId == str_teacher_id
         # )
 
         if filter:
@@ -1741,11 +1741,11 @@ def getClassSubject(class_id):
                 # Combine the course_code, year, section to class_name variable
                 class_name = f"{class_subject.Course.CourseCode} {class_subject.Metadata.Year}-{class_subject.Class.Section}"
 
-                # Check if the class_subject.TeacherId exists, if yes, make a query for it
-                if class_subject.ClassSubject.TeacherId or class_subject.ClassSubject.Schedule:
+                # Check if the class_subject.FacultyId exists, if yes, make a query for it
+                if class_subject.ClassSubject.FacultyId or class_subject.ClassSubject.Schedule:
                     teacher_id = 0
-                    if class_subject.ClassSubject.TeacherId:
-                        teacher = db.session.query(Faculty).filter(Faculty.FacultyId == class_subject.ClassSubject.TeacherId).first()
+                    if class_subject.ClassSubject.FacultyId:
+                        teacher = db.session.query(Faculty).filter(Faculty.FacultyId == class_subject.ClassSubject.FacultyId).first()
                         if teacher:
                             teacher_id = teacher.FacultyId
 

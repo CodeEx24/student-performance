@@ -1,6 +1,6 @@
 # api/api_routes.py
 from flask import Blueprint, jsonify, request, redirect, url_for, flash, session, render_template
-from models import Faculty_Profile
+from models import Faculty
 
 from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
@@ -54,7 +54,7 @@ def profile():
 def facultyData():
     faculty = getCurrentUser()
     if faculty:
-        json_faculty_data = getFacultyData(faculty.TeacherId)
+        json_faculty_data = getFacultyData(faculty.FacultyId)
         if json_faculty_data:
             return (json_faculty_data)
         else:
@@ -75,7 +75,7 @@ def updateDetails():
             residential_address = request.json.get('residential_address')
 
             json_result = updateFacultyData(
-                faculty.TeacherId, email, number, residential_address)
+                faculty.FacultyId, email, number, residential_address)
 
             return json_result
 
@@ -97,7 +97,7 @@ def changePassword():
             new_password = request.json.get('new_password')
             confirm_password = request.json.get('confirm_password')
 
-            json_result = updatePassword(faculty.TeacherId, password, new_password, confirm_password)
+            json_result = updatePassword(faculty.FacultyId, password, new_password, confirm_password)
 
             return json_result
 
@@ -114,8 +114,8 @@ def changePassword():
 def classAverageAndSubjectCount():
     faculty = getCurrentUser()
     if faculty:
-        json_high_low_class = getHighLowAverageClass(faculty.TeacherId)
-        json_subject_count = getSubjectCount(faculty.TeacherId)
+        json_high_low_class = getHighLowAverageClass(faculty.FacultyId)
+        json_subject_count = getSubjectCount(faculty.FacultyId)
         if json_high_low_class and json_subject_count is not None:
             return ({**json_high_low_class, **json_subject_count})
         else:
@@ -130,7 +130,7 @@ def classAverageAndSubjectCount():
 def allClassAverages():
     faculty = getCurrentUser()
     if faculty:
-        json_average_class = getAllClassAverageWithPreviousYear(faculty.TeacherId)
+        json_average_class = getAllClassAverageWithPreviousYear(faculty.FacultyId)
 
         if json_average_class:
             return (json_average_class)
@@ -146,7 +146,7 @@ def allClassAverages():
 def passFailRates():
     faculty = getCurrentUser()
     if faculty:
-        json_average_class = getPassFailRates(faculty.TeacherId)
+        json_average_class = getPassFailRates(faculty.FacultyId)
 
         if json_average_class:
             return (json_average_class)
@@ -163,7 +163,7 @@ def topPerformerStudent():
     faculty = getCurrentUser()
     if faculty:
         json_top_performer_student = getTopPerformerStudent(
-            faculty.TeacherId, 10)
+            faculty.FacultyId, 10)
 
         if json_top_performer_student:
             return (json_top_performer_student)
@@ -186,9 +186,9 @@ def studentClassSubjectGrade():
         filter = (request.args.get('$filter'))
       
         # json_class_subject_grade = getStudentClassSubjectGrade(
-        #     faculty.TeacherId)
+        #     faculty.FacultyId)
         json_class_subject_grade = getStudentClassSubjectGrade(
-            faculty.TeacherId, skip, top, order_by, filter)
+            faculty.FacultyId, skip, top, order_by, filter)
 
         if json_class_subject_grade:
             return (json_class_subject_grade)
@@ -205,7 +205,7 @@ def allClass():
     faculty = getCurrentUser()
     if faculty:
         json_class_subject_grade = getAllClass(
-            faculty.TeacherId)
+            faculty.FacultyId)
 
         if json_class_subject_grade:
             return (json_class_subject_grade)

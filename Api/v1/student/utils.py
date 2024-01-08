@@ -247,11 +247,11 @@ def getSubjectsGrade(str_student_id):
                 teacher_name = ""
                 
                 # Check if teacher exist
-                if student_class_subject_grade.ClassSubject.TeacherId:
+                if student_class_subject_grade.ClassSubject.FacultyId:
                     # Query the teacher
                     data_teacher = (
                         db.session.query(Faculty)
-                        .filter(Faculty.FacultyId == student_class_subject_grade.ClassSubject.TeacherId)
+                        .filter(Faculty.FacultyId == student_class_subject_grade.ClassSubject.FacultyId)
                         .first()
                     )
                     teacher_name = data_teacher.Name
