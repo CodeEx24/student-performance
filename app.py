@@ -239,6 +239,10 @@ def create_app():
     def universityAllClass():
         return render_template('universityadmin/all-class.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
     
+    @app.route('/university-admin/grades')
+    @role_required('universityAdmin')
+    def universityAdminGrades():
+        return render_template('universityadmin/grades.html', university_admin_api_base_url=university_admin_api_base_url, current_page="grades")
     
     @app.route('/university-admin/class/<int:class_id>')
     @role_required('universityAdmin')
