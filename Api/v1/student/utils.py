@@ -1,10 +1,30 @@
-from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, Metadata, db
+from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty_Profile, Student, Course, Metadata, db
+
 from sqlalchemy import desc
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import session
 
 from static.js.utils import convertGradeToPercentage, checkStatus
+
+def saveSessionValues(user_id, token):
+    # Create a dictionary with all session values
+    session_values = {
+        'user_id': user_id,
+        'user_role': 'student',
+        'access_token': token['access_token'],
+        'refresh_token': token['refresh_token'],
+        'expires_in': token['expires_in'],
+        'token_type': token['token_type'],
+        'scope': token['scope'],
+        'access_token_revoked_at': token['access_token_revoked_at'],
+        'refresh_token_revoked_at': token['refresh_token_revoked_at'],
+    }
+
+    # Update the session with the dictionary values
+    session.update(session_values)
+    return None
+
 
 
 def getCurrentUser():
@@ -229,8 +249,8 @@ def getSubjectsGrade(str_student_id):
                 if student_class_subject_grade.ClassSubject.TeacherId:
                     # Query the teacher
                     data_teacher = (
-                        db.session.query(Faculty)
-                        .filter(Faculty.TeacherId == student_class_subject_grade.ClassSubject.TeacherId)
+                        db.session.query(Faculty_Profile)
+                        .filter(Faculty_Profile.faculty_account_id == student_class_subject_grade.ClassSubject.TeacherId)
                         .first()
                     )
                     teacher_name = data_teacher.Name

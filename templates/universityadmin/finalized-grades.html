@@ -26,6 +26,16 @@
 
       <div class="flex items-end justify-between">
         <div class="w-full bg-white p-4 mt-4">
+          <script id="template" type="text/x-template">
+            <div class="template_checkbox">
+                ${if(IsGradeFinalized)}
+                <button class="btn-metadata px-4 py-2 bg-primary text-white font-bold opacity-70" disabled>Finalized Grades</button>
+                ${else}
+                <button class="btn-metadata px-4 py-2 bg-primary text-white font-bold" >Finalized Grades</button>
+                ${/if}
+            </div>
+          </script>
+
           <div id="grid-metadata"></div>
         </div>
       </div>
@@ -70,10 +80,12 @@
 <!-- FETCH ALL CLASS DATA (GRIDS)-->
 <script>
   // JavaScript function to show the modal
-  async function finalizedGrades(metadata_id) {
+  async function finalizedGrades(metadata_id, button) {
     console.log('metadata_id: ', metadata_id);
     // Request in api to update the data
     try {
+      // Show loading modal
+      showModal('loadingModal');
       const response = await fetch(
         `${api_base_url}/finalized/grades/${metadata_id}`
       );
@@ -85,9 +97,16 @@
       }
 
       const result = await response.json();
-      console.log('result: ', result);
+      console.log('RESULT: ', result);
+      if (result.success) {
+        // Add disable to button and opacity 50
+        button.disabled = true;
+        button.classList.add('opacity-70');
+      }
     } catch (error) {
       console.error(error);
+    } finally {
+      closeModal('loadingModal');
     }
   }
 </script>
@@ -107,7 +126,6 @@
         headerText: 'Course',
         width: 200,
       },
-
       {
         field: 'Batch',
         headerText: 'Batch',
@@ -185,9 +203,8 @@
         },
       },
       {
-        headerText: 'Actions',
-        template:
-          '<button class="btn-metadata px-4 py-2 bg-primary text-white font-bold" >Finalized Grades</button>', // Add a button to the cell
+        headerText: 'IsGradeFinalized',
+        template: '#template',
         width: 150,
       },
     ],
@@ -216,6 +233,10 @@
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
       pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      created: function () {
+        // Disable buttons based on IsGradeFinalized after rendering the grid
+        disableButtonsBasedOnGradeFinalized();
+      },
       beforeDataBound: function (args) {
         // If args action type is filter then go to page 1
 
@@ -241,6 +262,7 @@
         }
       },
     });
+
     grid.toolbarClick = function (args) {
       if (args['item'].id === 'grid-metadata_excelexport') {
         grid.excelExport();
@@ -251,12 +273,13 @@
     document.addEventListener('click', function (event) {
       if (event.target.classList.contains('btn-metadata')) {
         const cellElement = event.target.closest('.e-rowcell');
+        const button = event.target;
         if (cellElement) {
           const dataUid = cellElement.parentElement.getAttribute('data-uid');
           if (dataUid) {
             const rowData = grid.getRowObjectFromUID(dataUid).data;
             if (rowData) {
-              finalizedGrades(rowData.MetadataId);
+              finalizedGrades(rowData.MetadataId, button);
             }
           }
         }
