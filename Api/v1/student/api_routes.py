@@ -96,7 +96,6 @@ def resetPassword(token):
             return jsonify({'message': 'Invalid or expired token', 'status': 400})
 
 
-
 # # ===================================================
 # # Required params (#auth headers, username, password, grant_type, scope)
 # @student_api.route('/oauth/token', methods=['POST'])
@@ -229,12 +228,72 @@ def login():
             # refresh_token = create_refresh_token(identity=student.StudentId)
             session['user_id'] = student.StudentId
             session['user_role'] = 'student'
-            
-            # session['student_id'] = student.StudentId
+
             return jsonify({"message": "Login successful"}), 200
+        # return redirect('/')
+    else:
+        return jsonify({'error': 'Invalid username or password'}), 401
+
+# Make a token validator that will check whether the access token is correct
+# Required parms (user_id, access_token)
+@student_api.route('/oauth/validate', methods=['POST'])
+def validateToken():
+    access_token = request.args.get('access_token')
+    user_id = request.args.get('user_id')
+
+    print('acess_token: ', access_token)
+    # Check the token
+    token = OAuth2Token.query.filter_by(access_token=access_token, user_id=user_id).first()
+    if token:
+        # Token expiration check must implemented if the access_token has a value
+        
+        return jsonify({ 'success': True, 'error': False,  'message': 'Token is valid' }), 200
+    else:
+        return jsonify({ 'success': False, 'error': True, 'message': 'Invalid token' }), 401
+
+
+# Make a token refresh that will refresh token
+# Required parms (user_id, refresh_token)
+@student_api.route('/oauth/refresh', methods=['POST'])
+def refreshToken():
+    refresh_token = request.args.get('refresh_token')
+    user_id = request.args.get('user_id')
+
+    # Check the token
+    token = OAuth2Token.query.filter_by(refresh_token=refresh_token, user_id=user_id).first()
+    if token:
+        # Check if issued at reach the time already
+        if token.issued_at + token.expires_in < time.time():
+            # Return refresh token is already expired. Please login again
+            return jsonify({ 'success': False, 'error': True, 'message': 'Refresh token is already expired. Please login again' }), 401
         else:
-            return jsonify({"message": "Invalid email or password"}), 401
-    return jsonify({"message": "Method not allowed"}), 405
+            token.access_token = gen_salt(40)
+            # Commit to the database
+            db.session.commit()
+            return jsonify(token.to_token_response())
+    else:
+        return jsonify({ 'success': False, 'error': True, 'message': 'Invalid token' }), 401
+
+# # Student User Log in
+# @student_api.route('/login', methods=['POST'])
+# def login():
+#     if request.method == 'POST':
+#         email = request.form['email']
+#         password = request.form['password']
+#         # create_app.sayHello()
+#         student = Student.query.filter_by(Email=email).first()
+#         if student and check_password_hash(student.Password, password):
+#             # Successfully authenticated
+#             # access_token = create_access_token(identity=student.StudentId)
+#             # refresh_token = create_refresh_token(identity=student.StudentId)
+#             session['user_id'] = student.StudentId
+#             session['user_role'] = 'student'
+            
+#             # session['student_id'] = student.StudentId
+#             return jsonify({"message": "Login successful"}), 200
+#         else:
+#             return jsonify({"message": "Invalid email or password"}), 401
+#     return jsonify({"message": "Method not allowed"}), 405
 
 
 
@@ -254,6 +313,7 @@ def profile():
 
     # Return hello
 # Getting the overall GPA
+
 
 
 @student_api.route('/overall-gpa', methods=['GET'])

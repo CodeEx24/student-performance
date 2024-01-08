@@ -6,6 +6,7 @@ import os
 import time
 from datetime import datetime
 from sqlalchemy import text
+
 from flask_sqlalchemy import SQLAlchemy
 
 from authlib.integrations.sqla_oauth2 import (
@@ -188,7 +189,6 @@ class SystemAdmin(db.Model):
 
     def get_user_id(self):
         return self.SysAdminId
-    
     
 class Course(db.Model):
     __tablename__ = 'Course'
@@ -446,7 +446,6 @@ class Curriculum(db.Model):
     MetadataId = db.Column(db.Integer, db.ForeignKey('Metadata.MetadataId', ondelete="CASCADE"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
     
     def to_dict(self):
         return {
@@ -466,6 +465,7 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
     user = db.relationship('SystemAdmin')
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
@@ -520,7 +520,7 @@ add_data = os.getenv("ADD_DATA")
 def init_db(app):
     db.init_app(app)
     
-    if add_data=='True':
+    if add_data=='False':
         print("Adding data")
         from data.data2.student import student_data
         # from data.data2.faculty import faculty_data
@@ -631,6 +631,7 @@ def init_db(app):
     #         if add_data=='True':
     #             print("DEVELOPMENT AND ADDING DATA")
     #             create_sample_data()
+
 
     if config_mode == 'development' and add_data=='True':
         print("DEVELOPMENT AND ADDING DATA")
