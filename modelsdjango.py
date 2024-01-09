@@ -12,10 +12,9 @@ class Student(models.Model):
     PlaceOfBirth = models.CharField(max_length=50, null=True)
     ResidentialAddress = models.CharField(max_length=50, null=True)
     MobileNumber = models.CharField(max_length=11, null=True)
+    IsOfficer = models.BooleanField(default=False) # NSTP Checker
     Token = models.CharField(max_length=128, null=True)
     TokenExpiration = models.DateTimeField(null=True)
-    Dropout = models.BooleanField(default=False)
-    IsGraduated = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -32,8 +31,7 @@ class Student(models.Model):
             'PlaceOfBirth': self.PlaceOfBirth,
             'ResidentialAddress': self.ResidentialAddress,
             'MobileNumber': self.MobileNumber,
-            'Dropout': self.Dropout,
-            'IsGraduated': self.IsGraduated
+            'IsOfficer': self.Dropout
         }
 
     def get_id(self):
@@ -144,6 +142,7 @@ class Course(models.Model):
     CourseCode = models.CharField(max_length=10, unique=True) # Course Code - (BSIT, BSHM, BSCS)
     Name = models.CharField(max_length=200) # Name of Course (Bachelor of Science in Information Technology)
     Description = models.CharField(max_length=200) # Description of course
+    IsValidPUPQCCourses = models.BooleanField(default=False) # NSTP Checker
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -152,7 +151,8 @@ class Course(models.Model):
             'CourseId': self.CourseId,
             'CourseCode': self.CourseCode,
             'Name': self.Name,
-            'Description': self.Description
+            'Description': self.Description,
+            'IsValidPUPQCCourses': self.IsValidPUPQCCourses
         }
 
 # COURSE ENROLLED - Students where the students enrolled

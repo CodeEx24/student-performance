@@ -32,8 +32,9 @@ class Student(db.Model):
     PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
     ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
     MobileNumber = db.Column(db.String(11))  # MobileNumber
-    Token = db.Column(db.String(128))  # This field will store the reset token
-    TokenExpiration = db.Column(db.DateTime)
+    IsOfficer = db.Column(db.Boolean, default=False)
+    Token = db.Column(db.String(128))  # This is for handling reset password 
+    TokenExpiration = db.Column(db.DateTime) # This is for handling reset password 
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     # IsBridging
@@ -203,6 +204,7 @@ class Course(db.Model):
     CourseCode = db.Column(db.String(10), unique=True) # Course Code - (BSIT, BSHM, BSCS)
     Name = db.Column(db.String(200)) # (Name of Course (Bachelor of Science in Information Technology)
     Description = db.Column(db.String(200)) # Description of course
+    IsValidPUPQCCourses = db.Column(db.Boolean, default=True) # APMS are handling different courses so there are specific courses available in QC Only
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
