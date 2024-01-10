@@ -15,16 +15,17 @@ from authlib.integrations.sqla_oauth2 import (
     OAuth2TokenMixin,
 )
 
-
 db = SQLAlchemy()
 
 # Student Users
-class Student(db.Model):
-    __tablename__ = 'Students'
+class Student(db.Model): # (class SPSStudent) In DJANGO you must set the name directly here 
+    __tablename__ = 'SPSStudent' # Set the name of table in database (Available for FLASK framework)
 
     StudentId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     StudentNumber = db.Column(db.String(30), unique=True, nullable=False)  # UserID
-    Name = db.Column(db.String(50), nullable=False)  # Name
+    FirstName = db.Column(db.String(50), nullable=False)  # First Name
+    LastName = db.Column(db.String(50), nullable=False)  # Last Name
+    MiddleName = db.Column(db.String(50))  # Middle Name
     Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
     Password = db.Column(db.String(128), nullable=False)  # Password
     Gender = db.Column(db.Integer, nullable=True)  # Gender
@@ -43,7 +44,9 @@ class Student(db.Model):
         return {
             'StudentId': self.StudentId,
             'StudentNumber': self.StudentNumber,
-            'Name': self.Name,
+            'FirstName': self.FirstName,
+            'LastName': self.LastName,
+            'MiddleName': self.MiddleName,
             'Email': self.Email,
             'Password': self.Password,
             'Gender': self.Gender,
@@ -51,8 +54,7 @@ class Student(db.Model):
             'PlaceOfBirth': self.PlaceOfBirth,
             'ResidentialAddress': self.ResidentialAddress,
             'MobileNumber': self.MobileNumber,
-            'Dropout': self.Dropout,
-            'IsGraduated': self.IsGraduated
+            'IsOfficer': self.IsOfficer
         }
 
     def get_id(self):
@@ -63,7 +65,7 @@ class Student(db.Model):
 
 # Faculty Users
 class Faculty(db.Model):
-    __tablename__ = 'Faculty'
+    __tablename__ = 'FISFaculty' # Set the name of table in database
     FacultyId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     FacultyType = db.Column(db.String(50), nullable=False)  # Faculty Type
     Rank = db.Column(db.String(50))  # Faculty Rank
@@ -125,7 +127,7 @@ class Faculty(db.Model):
 
 # University Admin Users
 class UniversityAdmin(db.Model):
-    __tablename__ = 'UniversityAdmins'
+    __tablename__ = 'SPSUniversityAdmin'
 
     UnivAdminId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     UnivAdminNumber = db.Column(db.String(30), unique=True)  # UserID
@@ -162,7 +164,7 @@ class UniversityAdmin(db.Model):
 
 # System Admins Users
 class SystemAdmin(db.Model):
-    __tablename__ = 'SystemAdmins'
+    __tablename__ = 'SPSSystemAdmin'
 
     SysAdminId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     SysAdminNumber = db.Column(db.String(30), unique=True)  # UserID
@@ -198,7 +200,7 @@ class SystemAdmin(db.Model):
    
 # Course List
 class Course(db.Model):
-    __tablename__ = 'Course'
+    __tablename__ = 'SPSCourse'
 
     CourseId = db.Column(db.Integer, primary_key=True, autoincrement=True) # Unique Identifier
     CourseCode = db.Column(db.String(10), unique=True) # Course Code - (BSIT, BSHM, BSCS)
@@ -213,15 +215,16 @@ class Course(db.Model):
             'CourseId': self.CourseId,
             'CourseCode': self.CourseCode,
             'Name': self.Name,
-            'Description': self.Description
+            'Description': self.Description,
+            'IsValidPUPQCCourses': self.IsValidPUPQCCourses
         }
 
 # Student Enrolled in the courses
 class CourseEnrolled(db.Model):
-    __tablename__ = 'CourseEnrolled'
+    __tablename__ = 'SPSCourseEnrolled'
 
-    CourseId = db.Column(db.Integer, db.ForeignKey('Course.CourseId', ondelete="CASCADE"), primary_key=True)  # Unique Identifier
-    StudentId = db.Column(db.Integer, db.ForeignKey('Students.StudentId', ondelete="CASCADE"), primary_key=True) # Students Reference
+    CourseId = db.Column(db.Integer, db.ForeignKey('SPSCourse.CourseId', ondelete="CASCADE"), primary_key=True)  # Unique Identifier
+    StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Students Reference
     DateEnrolled = db.Column(db.Date) # Date they enrolled
     Status = db.Column(db.Integer, nullable=False)  # (0 - Not Graduated ||  1 - Graduated  ||  2 - Drop  ||  3 - Transfer Course || 4 - Transfer School)
     CurriculumYear = db.Column(db.Integer, nullable=False)  # (2019, 2020, 2021) - For checking what the subjects they should taken
@@ -233,15 +236,15 @@ class CourseEnrolled(db.Model):
         return {
             'CourseId': self.CourseId,
             'StudentId': self.StudentId,
-            'DateEnrolled': self.DateEnrolled
+            'DateEnrolled': self.DateEnrolled,
         }
 
 # Metadata containing the details of class such as Year, Semester, Batch and Course
 class Metadata(db.Model):
-    __tablename__ = 'Metadata'
+    __tablename__ = 'SPSMetadata'
 
     MetadataId = db.Column(db.Integer, primary_key=True, autoincrement=True) # Unique Identifier
-    CourseId = db.Column(db.Integer, db.ForeignKey('Course.CourseId', ondelete="CASCADE")) # Course References
+    CourseId = db.Column(db.Integer, db.ForeignKey('SPSCourse.CourseId', ondelete="CASCADE")) # Course References
     Year = db.Column(db.Integer, nullable=False) # (1, 2, 3, 4) - Current year of the class 
     Semester = db.Column(db.Integer, nullable=False) # (1, 2, 3) - Current semester of class
     Batch = db.Column(db.Integer, nullable=False) # (2019, 2020, 2021, ...) - Batch of the class
@@ -250,10 +253,10 @@ class Metadata(db.Model):
 
 # Class Details 
 class Class(db.Model):
-    __tablename__ = 'Class'
+    __tablename__ = 'SPSClass'
 
     ClassId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    MetadataId = db.Column(db.Integer, db.ForeignKey('Metadata.MetadataId', ondelete="CASCADE")) # Metadata containing details of class year, semester, batch, course
+    MetadataId = db.Column(db.Integer, db.ForeignKey('SPSMetadata.MetadataId', ondelete="CASCADE")) # Metadata containing details of class year, semester, batch, course
     Section = db.Column(db.Integer) # Section of the class
     IsGradeFinalized = db.Column(db.Boolean, default=False) # Checker if the grade is Finalized
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -273,7 +276,7 @@ class Class(db.Model):
    
 # Subject List
 class Subject(db.Model):
-    __tablename__ = 'Subject'
+    __tablename__ = 'SPSSubject'
 
     SubjectId = db.Column(db.Integer, primary_key=True, autoincrement=True)  
     SubjectCode = db.Column(db.String(20), unique=True) # Subject Code (COMP 20333, GEED 10013, ...)
@@ -297,12 +300,12 @@ class Subject(db.Model):
 
 # Class Subject contains the list of all subjects in the class
 class ClassSubject(db.Model):
-    __tablename__ = 'ClassSubject'
+    __tablename__ = 'SPSClassSubject'
 
     ClassSubjectId = db.Column(db.Integer, primary_key=True, autoincrement=True) 
-    ClassId = db.Column(db.Integer, db.ForeignKey('Class.ClassId', ondelete="CASCADE")) # Referencing to the Class
-    SubjectId = db.Column(db.Integer, db.ForeignKey('Subject.SubjectId', ondelete="CASCADE")) # Referencing to the Subject 
-    FacultyId = db.Column(db.Integer, db.ForeignKey('Faculty.FacultyId', ondelete="CASCADE"), nullable=True) # Referencing to the Faculty
+    ClassId = db.Column(db.Integer, db.ForeignKey('SPSClass.ClassId', ondelete="CASCADE")) # Referencing to the Class
+    SubjectId = db.Column(db.Integer, db.ForeignKey('SPSSubject.SubjectId', ondelete="CASCADE")) # Referencing to the Subject 
+    FacultyId = db.Column(db.Integer, db.ForeignKey('FISFaculty.FacultyId', ondelete="CASCADE"), nullable=True) # Referencing to the Faculty
     Schedule = db.Column(db.String(100), nullable=True) # Schedule of Subjects
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
@@ -322,11 +325,11 @@ class ClassSubject(db.Model):
 
 # Student Class Subject Grade contains the student Class subject that they currently taking in
 class StudentClassSubjectGrade(db.Model):
-    __tablename__ = 'StudentClassSubjectGrade'
+    __tablename__ = 'SPSStudentClassSubjectGrade'
 
     # StudentClassSubjectGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ClassSubjectId = db.Column(db.Integer, db.ForeignKey('ClassSubject.ClassSubjectId', ondelete="CASCADE"), primary_key=True) # Reference to the class subject
-    StudentId = db.Column(db.Integer, db.ForeignKey('Students.StudentId', ondelete="CASCADE"), primary_key=True) # Referencing to the student in subject taken
+    ClassSubjectId = db.Column(db.Integer, db.ForeignKey('SPSClassSubject.ClassSubjectId', ondelete="CASCADE"), primary_key=True) # Reference to the class subject
+    StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Referencing to the student in subject taken
     Grade = db.Column(db.Float) # Students Grade
     DateEnrolled = db.Column(db.Date) # Date enrolled in the subject
     AcademicStatus = db.Column(db.Integer) # (1 - Passed, 2 - Failed, 3 - Incomplete or INC,  4 - Withdrawn )
@@ -344,10 +347,10 @@ class StudentClassSubjectGrade(db.Model):
 
 # Student Class Grade contains the average grade of student in class
 class StudentClassGrade(db.Model):
-    __tablename__ = 'StudentClassGrade'
+    __tablename__ = 'SPSStudentClassGrade'
     
-    StudentId = db.Column(db.Integer, db.ForeignKey('Students.StudentId', ondelete="CASCADE"), primary_key=True) # Referencing to Student
-    ClassId = db.Column(db.Integer, db.ForeignKey('Class.ClassId', ondelete="CASCADE"), primary_key=True) # Referencing to the Class
+    StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Referencing to Student
+    ClassId = db.Column(db.Integer, db.ForeignKey('SPSClass.ClassId', ondelete="CASCADE"), primary_key=True) # Referencing to the Class
     Grade = db.Column(db.Float) # Average Grade
     Lister = db.Column(db.Integer, default=0) # 1 - President, 2 - Dean, 0 - Not Lister
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -363,10 +366,10 @@ class StudentClassGrade(db.Model):
 
 # Class Subject Grade (SPS) for Analytics Response purposes
 class ClassSubjectGrade(db.Model):
-    __tablename__ = 'ClassSubjectGrade'
+    __tablename__ = 'SPSClassSubjectGrade'
 
     ClassSubjectGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True) # Class Subject Grade
-    ClassSubjectId = db.Column(db.Integer, db.ForeignKey('ClassSubject.ClassSubjectId', ondelete="CASCADE"), unique=True) # Class Subject
+    ClassSubjectId = db.Column(db.Integer, db.ForeignKey('SPSClassSubject.ClassSubjectId', ondelete="CASCADE"), unique=True) # Class Subject
     Grade = db.Column(db.Float) # Average Grade of Class Subject
     Passed = db.Column(db.Integer) # Amount of Passed
     Failed = db.Column(db.Integer) # Amount of Failed
@@ -388,10 +391,10 @@ class ClassSubjectGrade(db.Model):
 
 # Average Grade of Class
 class ClassGrade(db.Model):
-    __tablename__ = 'ClassGrade'
+    __tablename__ = 'SPSClassGrade'
 
     ClassGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ClassId = db.Column(db.Integer, db.ForeignKey('Class.ClassId', ondelete="CASCADE"), unique=True) # Class reference
+    ClassId = db.Column(db.Integer, db.ForeignKey('SPSClass.ClassId', ondelete="CASCADE"), unique=True) # Class reference
     DeansLister = db.Column(db.Integer) # Amount of DeansLister
     PresidentsLister = db.Column(db.Integer) # Amount of PresidentsLister
     Grade = db.Column(db.Float) # Average Grade of the class
@@ -409,10 +412,10 @@ class ClassGrade(db.Model):
 
 # Average Grade of Course in specific year and semester
 class CourseGrade(db.Model):
-    __tablename__ = 'CourseGrade'
+    __tablename__ = 'SPSCourseGrade'
 
     CourseGradeId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    CourseId = db.Column(db.Integer, db.ForeignKey('Course.CourseId', ondelete="CASCADE")) # Referenccing to specific course
+    CourseId = db.Column(db.Integer, db.ForeignKey('SPSCourse.CourseId', ondelete="CASCADE")) # Referenccing to specific course
     Batch = db.Column(db.Integer, primary_key=True) # (2019, 2020, 2021, ...) - Batch course grades
     Semester = db.Column(db.Integer, primary_key=True, nullable=False) # (1, 2, 3) - Semester
     Grade = db.Column(db.Float) # Average grade of course
@@ -429,11 +432,11 @@ class CourseGrade(db.Model):
 
 # Curriculum is the list of subject that must taken of specific Course, Year, Semester and Batch. Subject automatically added in class when there is a curriculum
 class Curriculum(db.Model):
-    __tablename__ = 'Curriculum'
+    __tablename__ = 'SPSCurriculum'
 
     CurriculumId = db.Column(db.Integer, primary_key=True, autoincrement=True) 
-    SubjectId = db.Column(db.Integer, db.ForeignKey('Subject.SubjectId', ondelete="CASCADE")) # Subejct that can be added in the classes if the same year, semester, course and batch
-    MetadataId = db.Column(db.Integer, db.ForeignKey('Metadata.MetadataId', ondelete="CASCADE"), nullable=False) # Metadata contains the year, semester, course and batch
+    SubjectId = db.Column(db.Integer, db.ForeignKey('SPSSubject.SubjectId', ondelete="CASCADE")) # Subejct that can be added in the classes if the same year, semester, course and batch
+    MetadataId = db.Column(db.Integer, db.ForeignKey('SPSMetadata.MetadataId', ondelete="CASCADE"), nullable=False) # Metadata contains the year, semester, course and batch
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     
@@ -451,7 +454,7 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('SystemAdmins.SysAdminId', ondelete='CASCADE'))
+        db.Integer, db.ForeignKey('SPSSystemAdmin.SysAdminId', ondelete='CASCADE'))
     user = db.relationship('SystemAdmin')
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
@@ -463,7 +466,7 @@ class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('SystemAdmins.SysAdminId', ondelete='CASCADE'))
+        db.Integer, db.ForeignKey('SPSSystemAdmin.SysAdminId', ondelete='CASCADE'))
     user = db.relationship('SystemAdmin')
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
@@ -474,7 +477,7 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('Students.StudentId', ondelete='CASCADE'))
+        db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete='CASCADE'))
     user = db.relationship('Student')
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
@@ -510,10 +513,10 @@ add_data = os.getenv("ADD_DATA")
 def init_db(app):
     db.init_app(app)
     
-    if add_data=='True':
+    if add_data=='False':
         print("Adding data")
         from data.data2.student import student_data
-        # from data.data2.faculty import faculty_data
+        from data.data2.faculty import faculty_data
         from data.data2.universityadmin import university_admin_data
         from data.data2.systemadmin import system_admin_data
         from data.data2.course import course_data
@@ -535,9 +538,9 @@ def init_db(app):
                 student = Student(**data)
                 db.session.add(student)
 
-            # for data in faculty_data:
-            #     faculty = Faculty(**data)
-            #     db.session.add(faculty)
+            for data in faculty_data:
+                faculty = Faculty(**data)
+                db.session.add(faculty)
 
             for data in university_admin_data:
                 university_admin = UniversityAdmin(**data)
@@ -618,15 +621,15 @@ def init_db(app):
     #         inspector = inspect(db.engine)
     #         db.create_all()
 
-    #         if add_data=='True':
+    #         if add_data=='False':
     #             print("DEVELOPMENT AND ADDING DATA")
     #             create_sample_data()
 
 
-    if config_mode == 'development' and add_data=='True':
+    if config_mode == 'development' and add_data=='False':
         print("DEVELOPMENT AND ADDING DATA")
         with app.app_context():
             inspector = inspect(db.engine)
-            if not inspector.has_table('Students'):
+            if not inspector.has_table('SPSStudent'):
                 db.create_all()
                 create_sample_data()

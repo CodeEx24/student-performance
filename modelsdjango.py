@@ -31,7 +31,7 @@ class Student(models.Model):
             'PlaceOfBirth': self.PlaceOfBirth,
             'ResidentialAddress': self.ResidentialAddress,
             'MobileNumber': self.MobileNumber,
-            'IsOfficer': self.Dropout
+            'IsOfficer': self.IsOfficer
         }
 
     def get_id(self):
