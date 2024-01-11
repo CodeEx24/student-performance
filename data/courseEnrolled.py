@@ -1,1683 +1,1962 @@
-
 course_enrolled_data = [
-    {
-        "CourseId": 1,
-        "StudentId": 1,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 2,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 3,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 4,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 5,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 6,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 7,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 8,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 9,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 10,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 11,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 12,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 13,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 14,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 15,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 16,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 17,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 18,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 19,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 20,
-        "Status": 2,
-        "DateEnrolled": "2019-02-15",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 21,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 22,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 23,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 24,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 25,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 26,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 27,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 28,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 29,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 30,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 31,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 32,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 33,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 34,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 35,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 36,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 37,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 38,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 39,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 40,
-        "Status": 2,
-        "DateEnrolled": "2019-02-13",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 41,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 42,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 43,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 44,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 45,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 46,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 47,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 48,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 49,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 50,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 51,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 52,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 53,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 54,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 55,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 56,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 57,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 58,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 59,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 60,
-        "Status": 2,
-        "DateEnrolled": "2019-02-07",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 61,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 62,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 63,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 64,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 65,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 66,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 67,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 68,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 69,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 70,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 71,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 72,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 73,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 74,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 75,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 76,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 77,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 78,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 79,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 80,
-        "Status": 2,
-        "DateEnrolled": "2019-02-09",
-        "CurriculumYear": 2019
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 101,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 102,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 103,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 104,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 105,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 106,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 107,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 108,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 109,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 110,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 111,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 112,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 113,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 114,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 115,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 116,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 117,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 118,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 119,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 120,
-        "Status": 2,
-        "DateEnrolled": "2020-02-15",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 121,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 122,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 123,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 124,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 125,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 126,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 127,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 128,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 129,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 130,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 131,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 132,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 133,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 134,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 135,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 136,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 137,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 138,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 139,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 140,
-        "Status": 2,
-        "DateEnrolled": "2020-02-13",
-        "CurriculumYear": 2020
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 141,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 142,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 143,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 144,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 145,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 146,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 147,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 148,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 149,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 150,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 151,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 152,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 153,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 154,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 155,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 156,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 157,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 158,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 159,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 160,
-        "Status": 2,
-        "DateEnrolled": "2021-02-15",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 161,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 162,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 163,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 164,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 165,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 166,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 167,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 168,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 169,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 170,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 171,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 172,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 173,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 174,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 175,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 176,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 177,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 178,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 179,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 180,
-        "Status": 2,
-        "DateEnrolled": "2021-02-13",
-        "CurriculumYear": 2021
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 181,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 182,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 183,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 184,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 185,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 186,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 187,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 188,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 189,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 190,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 191,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 192,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 193,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 194,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 195,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 196,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 197,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 198,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 199,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 200,
-        "Status": 2,
-        "DateEnrolled": "2022-02-15",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 201,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 202,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 203,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 204,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 205,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 206,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 207,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 208,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 209,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 210,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 211,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 212,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 213,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 214,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 215,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 216,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 217,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 218,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 219,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 220,
-        "Status": 2,
-        "DateEnrolled": "2022-02-13",
-        "CurriculumYear": 2022
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 221,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 222,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 223,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 224,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 225,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 226,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 227,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 228,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 229,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 1,
-        "StudentId": 230,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 231,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 232,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 233,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 234,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 235,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 236,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 237,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 238,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 239,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 2,
-        "StudentId": 240,
-        "Status": 2,
-        "DateEnrolled": "2023-02-15",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 241,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 242,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 243,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 244,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 245,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 246,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 247,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 248,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 249,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 3,
-        "StudentId": 250,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 251,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 252,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 253,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 254,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 255,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 256,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 257,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 258,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 259,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    },
-    {
-        "CourseId": 7,
-        "StudentId": 260,
-        "Status": 2,
-        "DateEnrolled": "2023-02-13",
-        "CurriculumYear": 2023
-    }
+  {
+    "CourseId": 7,
+    "StudentId": 1,
+    "DateEnrolled": "2019-02-12",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 2,
+    "DateEnrolled": "2019-02-13",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 3,
+    "DateEnrolled": "2019-02-14",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 4,
+    "DateEnrolled": "2019-02-15",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 5,
+    "DateEnrolled": "2019-02-16",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 6,
+    "DateEnrolled": "2019-02-17",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 7,
+    "DateEnrolled": "2019-02-18",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 8,
+    "DateEnrolled": "2019-02-19",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 9,
+    "DateEnrolled": "2019-02-20",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 10,
+    "DateEnrolled": "2019-02-21",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 11,
+    "DateEnrolled": "2019-02-22",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 12,
+    "DateEnrolled": "2019-02-23",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 13,
+    "DateEnrolled": "2019-02-24",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 14,
+    "DateEnrolled": "2019-02-25",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 15,
+    "DateEnrolled": "2019-02-26",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 16,
+    "DateEnrolled": "2019-02-12",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 17,
+    "DateEnrolled": "2019-02-13",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 18,
+    "DateEnrolled": "2019-02-14",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 19,
+    "DateEnrolled": "2019-02-15",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 20,
+    "DateEnrolled": "2019-02-16",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 21,
+    "DateEnrolled": "2019-02-17",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 22,
+    "DateEnrolled": "2019-02-18",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 23,
+    "DateEnrolled": "2019-02-19",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 24,
+    "DateEnrolled": "2019-02-20",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 25,
+    "DateEnrolled": "2019-02-21",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 26,
+    "DateEnrolled": "2019-02-22",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 27,
+    "DateEnrolled": "2019-02-23",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 28,
+    "DateEnrolled": "2019-02-24",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 29,
+    "DateEnrolled": "2019-02-25",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 30,
+    "DateEnrolled": "2019-02-26",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 31,
+    "DateEnrolled": "2019-02-21",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 32,
+    "DateEnrolled": "2019-02-22",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 33,
+    "DateEnrolled": "2019-02-23",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 34,
+    "DateEnrolled": "2019-02-24",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 35,
+    "DateEnrolled": "2019-02-25",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 36,
+    "DateEnrolled": "2019-02-26",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 37,
+    "DateEnrolled": "2019-02-12",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 38,
+    "DateEnrolled": "2019-02-13",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 39,
+    "DateEnrolled": "2019-02-14",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 40,
+    "DateEnrolled": "2019-02-15",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 41,
+    "DateEnrolled": "2019-02-16",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 42,
+    "DateEnrolled": "2019-02-17",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 43,
+    "DateEnrolled": "2019-02-18",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 44,
+    "DateEnrolled": "2019-02-19",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 45,
+    "DateEnrolled": "2019-02-20",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 46,
+    "DateEnrolled": "2019-02-21",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 47,
+    "DateEnrolled": "2019-02-22",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 48,
+    "DateEnrolled": "2019-02-23",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 49,
+    "DateEnrolled": "2019-02-24",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 50,
+    "DateEnrolled": "2019-02-21",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 51,
+    "DateEnrolled": "2019-02-22",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 52,
+    "DateEnrolled": "2019-02-23",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 53,
+    "DateEnrolled": "2019-02-24",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 54,
+    "DateEnrolled": "2019-02-25",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 55,
+    "DateEnrolled": "2019-02-26",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 56,
+    "DateEnrolled": "2019-02-12",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 57,
+    "DateEnrolled": "2019-02-13",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 58,
+    "DateEnrolled": "2019-02-14",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 59,
+    "DateEnrolled": "2019-02-15",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 60,
+    "DateEnrolled": "2019-02-16",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 61,
+    "DateEnrolled": "2019-02-17",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 62,
+    "DateEnrolled": "2019-02-18",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 63,
+    "DateEnrolled": "2019-02-19",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 64,
+    "DateEnrolled": "2019-02-20",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 65,
+    "DateEnrolled": "2019-02-21",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 66,
+    "DateEnrolled": "2019-02-22",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 67,
+    "DateEnrolled": "2019-02-23",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 68,
+    "DateEnrolled": "2019-02-24",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 69,
+    "DateEnrolled": "2019-02-20",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 70,
+    "DateEnrolled": "2019-02-21",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 71,
+    "DateEnrolled": "2019-02-22",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 72,
+    "DateEnrolled": "2019-02-23",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 73,
+    "DateEnrolled": "2019-02-24",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 74,
+    "DateEnrolled": "2019-02-20",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 75,
+    "DateEnrolled": "2019-02-20",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 76,
+    "DateEnrolled": "2019-02-20",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 77,
+    "DateEnrolled": "2019-02-21",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 78,
+    "DateEnrolled": "2019-02-22",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 79,
+    "DateEnrolled": "2019-02-23",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 80,
+    "DateEnrolled": "2019-02-24",
+    "Status": 1,
+    "CurriculumYear": 2019
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 81,
+    "DateEnrolled": "2020-02-18",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 82,
+    "DateEnrolled": "2020-02-19",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 83,
+    "DateEnrolled": "2020-02-20",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 84,
+    "DateEnrolled": "2020-02-21",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 85,
+    "DateEnrolled": "2020-02-22",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 86,
+    "DateEnrolled": "2020-02-23",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 87,
+    "DateEnrolled": "2020-02-24",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 88,
+    "DateEnrolled": "2020-02-25",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 89,
+    "DateEnrolled": "2020-02-26",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 90,
+    "DateEnrolled": "2020-02-27",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 91,
+    "DateEnrolled": "2020-02-28",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 92,
+    "DateEnrolled": "2020-02-29",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 93,
+    "DateEnrolled": "2020-03-01",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 94,
+    "DateEnrolled": "2020-02-18",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 95,
+    "DateEnrolled": "2020-02-19",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 96,
+    "DateEnrolled": "2020-02-20",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 97,
+    "DateEnrolled": "2020-02-21",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 98,
+    "DateEnrolled": "2020-02-22",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 99,
+    "DateEnrolled": "2020-02-23",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 100,
+    "DateEnrolled": "2020-02-24",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 101,
+    "DateEnrolled": "2020-02-25",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 102,
+    "DateEnrolled": "2020-02-26",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 103,
+    "DateEnrolled": "2020-02-18",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 104,
+    "DateEnrolled": "2020-02-19",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 105,
+    "DateEnrolled": "2020-02-20",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 106,
+    "DateEnrolled": "2020-02-21",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 107,
+    "DateEnrolled": "2020-02-22",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 108,
+    "DateEnrolled": "2020-02-23",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 109,
+    "DateEnrolled": "2020-02-24",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 110,
+    "DateEnrolled": "2020-02-25",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 111,
+    "DateEnrolled": "2020-02-26",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 112,
+    "DateEnrolled": "2020-02-27",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 113,
+    "DateEnrolled": "2020-02-28",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 114,
+    "DateEnrolled": "2020-02-18",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 115,
+    "DateEnrolled": "2020-02-19",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 116,
+    "DateEnrolled": "2020-02-20",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 117,
+    "DateEnrolled": "2020-02-21",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 118,
+    "DateEnrolled": "2020-02-22",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 119,
+    "DateEnrolled": "2020-02-23",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 120,
+    "DateEnrolled": "2020-02-24",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 121,
+    "DateEnrolled": "2020-02-25",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 122,
+    "DateEnrolled": "2020-02-26",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 123,
+    "DateEnrolled": "2020-02-27",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 124,
+    "DateEnrolled": "2020-02-28",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 125,
+    "DateEnrolled": "2020-02-29",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 126,
+    "DateEnrolled": "2020-02-18",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 127,
+    "DateEnrolled": "2020-02-19",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 128,
+    "DateEnrolled": "2020-02-18",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 129,
+    "DateEnrolled": "2020-02-19",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 130,
+    "DateEnrolled": "2020-02-20",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 131,
+    "DateEnrolled": "2020-02-21",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 132,
+    "DateEnrolled": "2020-02-22",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 133,
+    "DateEnrolled": "2020-02-23",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 134,
+    "DateEnrolled": "2020-02-24",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 135,
+    "DateEnrolled": "2020-02-25",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 136,
+    "DateEnrolled": "2020-02-26",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 137,
+    "DateEnrolled": "2020-02-27",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 138,
+    "DateEnrolled": "2020-02-28",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 139,
+    "DateEnrolled": "2020-02-29",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 140,
+    "DateEnrolled": "2020-03-01",
+    "Status": 1,
+    "CurriculumYear": 2020
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 141,
+    "DateEnrolled": "2021-02-19",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 142,
+    "DateEnrolled": "2021-02-20",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 143,
+    "DateEnrolled": "2021-02-21",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 144,
+    "DateEnrolled": "2021-02-22",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 145,
+    "DateEnrolled": "2021-02-23",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 146,
+    "DateEnrolled": "2021-02-24",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 147,
+    "DateEnrolled": "2021-02-25",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 148,
+    "DateEnrolled": "2021-02-26",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 149,
+    "DateEnrolled": "2021-02-27",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 150,
+    "DateEnrolled": "2021-02-28",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 151,
+    "DateEnrolled": "2021-03-01",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 152,
+    "DateEnrolled": "2021-03-02",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 153,
+    "DateEnrolled": "2021-03-03",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 154,
+    "DateEnrolled": "2021-03-04",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 155,
+    "DateEnrolled": "2021-03-05",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 156,
+    "DateEnrolled": "2021-03-06",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 157,
+    "DateEnrolled": "2021-02-19",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 158,
+    "DateEnrolled": "2021-02-20",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 159,
+    "DateEnrolled": "2021-02-21",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 160,
+    "DateEnrolled": "2021-02-22",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 161,
+    "DateEnrolled": "2021-02-23",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 162,
+    "DateEnrolled": "2021-02-24",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 163,
+    "DateEnrolled": "2021-02-25",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 164,
+    "DateEnrolled": "2021-02-26",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 165,
+    "DateEnrolled": "2021-02-19",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 166,
+    "DateEnrolled": "2021-02-20",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 167,
+    "DateEnrolled": "2021-02-21",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 168,
+    "DateEnrolled": "2021-02-22",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 169,
+    "DateEnrolled": "2021-02-23",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 170,
+    "DateEnrolled": "2021-02-24",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 171,
+    "DateEnrolled": "2021-02-25",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 172,
+    "DateEnrolled": "2021-02-26",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 173,
+    "DateEnrolled": "2021-02-27",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 174,
+    "DateEnrolled": "2021-02-28",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 175,
+    "DateEnrolled": "2021-03-01",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 176,
+    "DateEnrolled": "2021-03-02",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 177,
+    "DateEnrolled": "2021-03-03",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 178,
+    "DateEnrolled": "2021-03-04",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 179,
+    "DateEnrolled": "2021-03-05",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 180,
+    "DateEnrolled": "2021-03-06",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 181,
+    "DateEnrolled": "2021-11-25",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 182,
+    "DateEnrolled": "2021-11-25",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 183,
+    "DateEnrolled": "2021-11-25",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 184,
+    "DateEnrolled": "2021-02-19",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 185,
+    "DateEnrolled": "2021-02-20",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 186,
+    "DateEnrolled": "2021-02-21",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 187,
+    "DateEnrolled": "2021-02-22",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 188,
+    "DateEnrolled": "2021-02-23",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 189,
+    "DateEnrolled": "2021-02-24",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 190,
+    "DateEnrolled": "2021-02-25",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 191,
+    "DateEnrolled": "2021-02-26",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 192,
+    "DateEnrolled": "2021-02-27",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 193,
+    "DateEnrolled": "2021-02-28",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 194,
+    "DateEnrolled": "2021-03-01",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 195,
+    "DateEnrolled": "2021-03-02",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 196,
+    "DateEnrolled": "2021-03-03",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 197,
+    "DateEnrolled": "2021-03-04",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 198,
+    "DateEnrolled": "2021-03-05",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 199,
+    "DateEnrolled": "2021-03-06",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 200,
+    "DateEnrolled": "2021-03-07",
+    "Status": 1,
+    "CurriculumYear": 2021
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 201,
+    "DateEnrolled": "2022-02-24",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 202,
+    "DateEnrolled": "2022-02-25",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 203,
+    "DateEnrolled": "2022-02-26",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 204,
+    "DateEnrolled": "2022-02-27",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 205,
+    "DateEnrolled": "2022-02-28",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 206,
+    "DateEnrolled": "2022-03-01",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 207,
+    "DateEnrolled": "2022-03-02",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 208,
+    "DateEnrolled": "2022-03-03",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 209,
+    "DateEnrolled": "2022-03-04",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 210,
+    "DateEnrolled": "2022-03-05",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 211,
+    "DateEnrolled": "2022-03-06",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 212,
+    "DateEnrolled": "2022-03-07",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 213,
+    "DateEnrolled": "2022-03-08",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 214,
+    "DateEnrolled": "2022-02-24",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 215,
+    "DateEnrolled": "2022-02-25",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 216,
+    "DateEnrolled": "2022-02-26",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 217,
+    "DateEnrolled": "2022-02-27",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 218,
+    "DateEnrolled": "2022-02-28",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 219,
+    "DateEnrolled": "2022-03-01",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 220,
+    "DateEnrolled": "2022-03-02",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 221,
+    "DateEnrolled": "2022-03-03",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 222,
+    "DateEnrolled": "2022-02-28",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 223,
+    "DateEnrolled": "2022-03-01",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 224,
+    "DateEnrolled": "2022-03-02",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 225,
+    "DateEnrolled": "2022-03-03",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 226,
+    "DateEnrolled": "2022-03-04",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 227,
+    "DateEnrolled": "2022-03-05",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 228,
+    "DateEnrolled": "2022-03-06",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 229,
+    "DateEnrolled": "2022-03-03",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 230,
+    "DateEnrolled": "2022-03-04",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 231,
+    "DateEnrolled": "2022-03-05",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 232,
+    "DateEnrolled": "2022-03-06",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 233,
+    "DateEnrolled": "2022-03-07",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 234,
+    "DateEnrolled": "2022-03-08",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 235,
+    "DateEnrolled": "2022-03-05",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 236,
+    "DateEnrolled": "2022-03-06",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 237,
+    "DateEnrolled": "2022-03-05",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 238,
+    "DateEnrolled": "2022-03-06",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 239,
+    "DateEnrolled": "2022-03-07",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 240,
+    "DateEnrolled": "2022-03-08",
+    "Status": 1,
+    "CurriculumYear": 2022
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 241,
+    "DateEnrolled": "2023-02-27",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 242,
+    "DateEnrolled": "2023-02-28",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 243,
+    "DateEnrolled": "2023-03-01",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 244,
+    "DateEnrolled": "2023-03-02",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 245,
+    "DateEnrolled": "2023-03-03",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 246,
+    "DateEnrolled": "2023-03-04",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 247,
+    "DateEnrolled": "2023-03-05",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 248,
+    "DateEnrolled": "2023-03-06",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 249,
+    "DateEnrolled": "2023-03-07",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 250,
+    "DateEnrolled": "2023-03-08",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 251,
+    "DateEnrolled": "2023-03-09",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 252,
+    "DateEnrolled": "2023-02-28",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 253,
+    "DateEnrolled": "2023-03-01",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 254,
+    "DateEnrolled": "2023-03-02",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 7,
+    "StudentId": 255,
+    "DateEnrolled": "2023-03-03",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 256,
+    "DateEnrolled": "2023-03-04",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 257,
+    "DateEnrolled": "2023-03-05",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 258,
+    "DateEnrolled": "2023-03-06",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 259,
+    "DateEnrolled": "2023-03-07",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 260,
+    "DateEnrolled": "2023-03-08",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 261,
+    "DateEnrolled": "2023-03-09",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 262,
+    "DateEnrolled": "2023-02-28",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 263,
+    "DateEnrolled": "2023-03-01",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 264,
+    "DateEnrolled": "2023-03-02",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 265,
+    "DateEnrolled": "2023-03-03",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 266,
+    "DateEnrolled": "2023-03-04",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 267,
+    "DateEnrolled": "2023-03-05",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 268,
+    "DateEnrolled": "2023-03-06",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 269,
+    "DateEnrolled": "2023-03-07",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 270,
+    "DateEnrolled": "2023-03-08",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 271,
+    "DateEnrolled": "2023-03-09",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 272,
+    "DateEnrolled": "2023-02-28",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 273,
+    "DateEnrolled": "2023-03-01",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 274,
+    "DateEnrolled": "2023-03-02",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 4,
+    "StudentId": 275,
+    "DateEnrolled": "2023-03-03",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 276,
+    "DateEnrolled": "2023-03-04",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 277,
+    "DateEnrolled": "2023-03-05",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 278,
+    "DateEnrolled": "2023-03-06",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 279,
+    "DateEnrolled": "2023-03-07",
+    "Status": 1,
+    "CurriculumYear": 2023
+  },
+  {
+    "CourseId": 5,
+    "StudentId": 280,
+    "DateEnrolled": "2023-03-08",
+    "Status": 1,
+    "CurriculumYear": 2023
+  }
 ]

@@ -1,2020 +1,1036 @@
 # NOTES: Any data here is a dummy only for development purposes
 
 class_data = [
-    {
-        "ClassId": 169,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 170,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 171,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 172,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 173,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 174,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 175,
-        "CourseId": 1,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 176,
-        "CourseId": 1,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 177,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 178,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 179,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 180,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 181,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 182,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 183,
-        "CourseId": 2,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 184,
-        "CourseId": 2,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 185,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 186,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 187,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 188,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 189,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 190,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 191,
-        "CourseId": 3,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 192,
-        "CourseId": 3,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 217,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 218,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 219,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 220,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 221,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 222,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 223,
-        "CourseId": 7,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 224,
-        "CourseId": 7,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 225,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 226,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 227,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 228,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 229,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 230,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 231,
-        "CourseId": 1,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 232,
-        "CourseId": 1,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 233,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 234,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 235,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 236,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 237,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 238,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 239,
-        "CourseId": 2,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 240,
-        "CourseId": 2,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 241,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 242,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 243,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 244,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 245,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 246,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 247,
-        "CourseId": 3,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 248,
-        "CourseId": 3,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 273,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 274,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 275,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 276,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 277,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 278,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 279,
-        "CourseId": 7,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 280,
-        "CourseId": 7,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2022,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 281,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 282,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 283,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 284,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 285,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 286,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 287,
-        "CourseId": 1,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 288,
-        "CourseId": 1,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 289,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 290,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 291,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 292,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 293,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 294,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 295,
-        "CourseId": 2,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 296,
-        "CourseId": 2,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 297,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 298,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 299,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 300,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 301,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 302,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 303,
-        "CourseId": 3,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 304,
-        "CourseId": 3,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 329,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 330,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 331,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 332,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 333,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 334,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 335,
-        "CourseId": 7,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 336,
-        "CourseId": 7,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 337,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 338,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 339,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 340,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 341,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 342,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 343,
-        "CourseId": 1,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 344,
-        "CourseId": 1,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 345,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 346,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 347,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 348,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 349,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 350,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 351,
-        "CourseId": 2,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 352,
-        "CourseId": 2,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 353,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 354,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 355,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 356,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 357,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 358,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 359,
-        "CourseId": 3,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 360,
-        "CourseId": 3,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 385,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 386,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 387,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 388,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 389,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 390,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 391,
-        "CourseId": 7,
-        "Year": 4,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 392,
-        "CourseId": 7,
-        "Year": 4,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2023,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 1,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 2,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 3,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 4,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 5,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 6,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 13,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 14,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 15,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 16,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 17,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 18,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 19,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 20,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 27,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 28,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2019,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 29,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 30,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 31,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 32,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 33,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 34,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 35,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 36,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 37,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 38,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 39,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 40,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 53,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 54,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 55,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 56,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 57,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 58,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 59,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 60,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 61,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 62,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 63,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 64,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 65,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 66,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 67,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 68,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 81,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 82,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 83,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 84,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2020,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 85,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 86,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 87,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 88,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 89,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 90,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 91,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 92,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 93,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 94,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 95,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 96,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 97,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 98,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 99,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 100,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 101,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 102,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 121,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 122,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 123,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 124,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 125,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 126,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 1,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 127,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 128,
-        "CourseId": 1,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 129,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 130,
-        "CourseId": 1,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 131,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 132,
-        "CourseId": 1,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 133,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 134,
-        "CourseId": 2,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 135,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 136,
-        "CourseId": 2,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 137,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 138,
-        "CourseId": 2,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 139,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 140,
-        "CourseId": 3,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 141,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 142,
-        "CourseId": 3,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 143,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 144,
-        "CourseId": 3,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 163,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 164,
-        "CourseId": 7,
-        "Year": 1,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 165,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 166,
-        "CourseId": 7,
-        "Year": 2,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 167,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 1,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    },
-    {
-        "ClassId": 168,
-        "CourseId": 7,
-        "Year": 3,
-        "Section": 2,
-        "Semester": 2,
-        "Batch": 2021,
-        "IsGradeFinalized": True
-    }
+  {
+    "ClassId": 1,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 109
+  },
+  {
+    "ClassId": 2,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 109
+  },
+  {
+    "ClassId": 3,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 110
+  },
+  {
+    "ClassId": 4,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 110
+  },
+  {
+    "ClassId": 5,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 118
+  },
+  {
+    "ClassId": 6,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 118
+  },
+  {
+    "ClassId": 7,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 108
+  },
+  {
+    "ClassId": 8,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 108
+  },
+  {
+    "ClassId": 9,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 111
+  },
+  {
+    "ClassId": 10,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 111
+  },
+  {
+    "ClassId": 125,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 9
+  },
+  {
+    "ClassId": 126,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 9
+  },
+  {
+    "ClassId": 11,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 119
+  },
+  {
+    "ClassId": 12,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 119
+  },
+  {
+    "ClassId": 13,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 84
+  },
+  {
+    "ClassId": 14,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 84
+  },
+  {
+    "ClassId": 15,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 81
+  },
+  {
+    "ClassId": 16,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 81
+  },
+  {
+    "ClassId": 17,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 85
+  },
+  {
+    "ClassId": 18,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 85
+  },
+  {
+    "ClassId": 19,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 87
+  },
+  {
+    "ClassId": 20,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 87
+  },
+  {
+    "ClassId": 21,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 93
+  },
+  {
+    "ClassId": 22,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 93
+  },
+  {
+    "ClassId": 23,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 95
+  },
+  {
+    "ClassId": 24,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 95
+  },
+  {
+    "ClassId": 25,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 83
+  },
+  {
+    "ClassId": 26,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 83
+  },
+  {
+    "ClassId": 105,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 26
+  },
+  {
+    "ClassId": 106,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 26
+  },
+  {
+    "ClassId": 27,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 82
+  },
+  {
+    "ClassId": 28,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 82
+  },
+  {
+    "ClassId": 81,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 27
+  },
+  {
+    "ClassId": 82,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 27
+  },
+  {
+    "ClassId": 79,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 28
+  },
+  {
+    "ClassId": 80,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 28
+  },
+  {
+    "ClassId": 29,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 86
+  },
+  {
+    "ClassId": 30,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 86
+  },
+  {
+    "ClassId": 103,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 29
+  },
+  {
+    "ClassId": 104,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 29
+  },
+  {
+    "ClassId": 123,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 30
+  },
+  {
+    "ClassId": 124,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 30
+  },
+  {
+    "ClassId": 31,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 88
+  },
+  {
+    "ClassId": 32,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 88
+  },
+  {
+    "ClassId": 77,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 31
+  },
+  {
+    "ClassId": 78,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 31
+  },
+  {
+    "ClassId": 101,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 32
+  },
+  {
+    "ClassId": 102,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 32
+  },
+  {
+    "ClassId": 33,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 94
+  },
+  {
+    "ClassId": 34,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 94
+  },
+  {
+    "ClassId": 99,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 33
+  },
+  {
+    "ClassId": 100,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 33
+  },
+  {
+    "ClassId": 75,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 34
+  },
+  {
+    "ClassId": 76,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 34
+  },
+  {
+    "ClassId": 35,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 96
+  },
+  {
+    "ClassId": 36,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 96
+  },
+  {
+    "ClassId": 83,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 35
+  },
+  {
+    "ClassId": 84,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 35
+  },
+  {
+    "ClassId": 107,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 36
+  },
+  {
+    "ClassId": 108,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 36
+  },
+  {
+    "ClassId": 37,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 59
+  },
+  {
+    "ClassId": 38,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 59
+  },
+  {
+    "ClassId": 85,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 37
+  },
+  {
+    "ClassId": 86,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 37
+  },
+  {
+    "ClassId": 109,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 38
+  },
+  {
+    "ClassId": 110,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 38
+  },
+  {
+    "ClassId": 39,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 56
+  },
+  {
+    "ClassId": 40,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 56
+  },
+  {
+    "ClassId": 87,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 39
+  },
+  {
+    "ClassId": 88,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 39
+  },
+  {
+    "ClassId": 111,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 40
+  },
+  {
+    "ClassId": 112,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 40
+  },
+  {
+    "ClassId": 41,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 53
+  },
+  {
+    "ClassId": 42,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 53
+  },
+  {
+    "ClassId": 89,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 41
+  },
+  {
+    "ClassId": 90,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 41
+  },
+  {
+    "ClassId": 113,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 42
+  },
+  {
+    "ClassId": 114,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 42
+  },
+  {
+    "ClassId": 43,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 60
+  },
+  {
+    "ClassId": 44,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 60
+  },
+  {
+    "ClassId": 91,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 43
+  },
+  {
+    "ClassId": 92,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 43
+  },
+  {
+    "ClassId": 115,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 44
+  },
+  {
+    "ClassId": 116,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 44
+  },
+  {
+    "ClassId": 45,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 62
+  },
+  {
+    "ClassId": 46,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 62
+  },
+  {
+    "ClassId": 93,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 45
+  },
+  {
+    "ClassId": 94,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 45
+  },
+  {
+    "ClassId": 117,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 46
+  },
+  {
+    "ClassId": 118,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 46
+  },
+  {
+    "ClassId": 47,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 64
+  },
+  {
+    "ClassId": 48,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 64
+  },
+  {
+    "ClassId": 95,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 47
+  },
+  {
+    "ClassId": 96,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 47
+  },
+  {
+    "ClassId": 119,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 48
+  },
+  {
+    "ClassId": 120,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 48
+  },
+  {
+    "ClassId": 49,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 68
+  },
+  {
+    "ClassId": 50,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 68
+  },
+  {
+    "ClassId": 97,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 49
+  },
+  {
+    "ClassId": 98,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 49
+  },
+  {
+    "ClassId": 121,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 50
+  },
+  {
+    "ClassId": 122,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 50
+  },
+  {
+    "ClassId": 51,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 70
+  },
+  {
+    "ClassId": 52,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 70
+  },
+  {
+    "ClassId": 53,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 72
+  },
+  {
+    "ClassId": 54,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 72
+  },
+  {
+    "ClassId": 59,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 54
+  },
+  {
+    "ClassId": 60,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 54
+  },
+  {
+    "ClassId": 55,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 58
+  },
+  {
+    "ClassId": 56,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 58
+  },
+  {
+    "ClassId": 73,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 55
+  },
+  {
+    "ClassId": 74,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 55
+  },
+  {
+    "ClassId": 57,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 57
+  },
+  {
+    "ClassId": 58,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 57
+  },
+  {
+    "ClassId": 61,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 61
+  },
+  {
+    "ClassId": 62,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 61
+  },
+  {
+    "ClassId": 63,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 63
+  },
+  {
+    "ClassId": 64,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 63
+  },
+  {
+    "ClassId": 65,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 65
+  },
+  {
+    "ClassId": 66,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 65
+  },
+  {
+    "ClassId": 67,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 69
+  },
+  {
+    "ClassId": 68,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 69
+  },
+  {
+    "ClassId": 69,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 71
+  },
+  {
+    "ClassId": 70,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 71
+  },
+  {
+    "ClassId": 71,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 73
+  },
+  {
+    "ClassId": 72,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 73
+  },
+  {
+    "ClassId": 127,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 6
+  },
+  {
+    "ClassId": 128,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 6
+  },
+  {
+    "ClassId": 129,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 3
+  },
+  {
+    "ClassId": 130,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 3
+  },
+  {
+    "ClassId": 131,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 2
+  },
+  {
+    "ClassId": 132,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 2
+  },
+  {
+    "ClassId": 133,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 10
+  },
+  {
+    "ClassId": 134,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 10
+  },
+  {
+    "ClassId": 135,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 12
+  },
+  {
+    "ClassId": 136,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 12
+  },
+  {
+    "ClassId": 137,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 14
+  },
+  {
+    "ClassId": 138,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 14
+  },
+  {
+    "ClassId": 139,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 16
+  },
+  {
+    "ClassId": 140,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 16
+  },
+  {
+    "ClassId": 141,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 18
+  },
+  {
+    "ClassId": 143,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 20
+  },
+  {
+    "ClassId": 144,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 20
+  },
+  {
+    "ClassId": 145,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 22
+  },
+  {
+    "ClassId": 146,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 22
+  },
+  {
+    "ClassId": 147,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 24
+  },
+  {
+    "ClassId": 148,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 24
+  },
+  {
+    "ClassId": 149,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 8
+  },
+  {
+    "ClassId": 150,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 8
+  },
+  {
+    "ClassId": 151,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 7
+  },
+  {
+    "ClassId": 152,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 7
+  },
+  {
+    "ClassId": 153,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 4
+  },
+  {
+    "ClassId": 154,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 4
+  },
+  {
+    "ClassId": 155,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 1
+  },
+  {
+    "ClassId": 156,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 1
+  },
+  {
+    "ClassId": 157,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 11
+  },
+  {
+    "ClassId": 158,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 11
+  },
+  {
+    "ClassId": 159,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 13
+  },
+  {
+    "ClassId": 160,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 13
+  },
+  {
+    "ClassId": 161,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 15
+  },
+  {
+    "ClassId": 162,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 15
+  },
+  {
+    "ClassId": 163,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 17
+  },
+  {
+    "ClassId": 164,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 17
+  },
+  {
+    "ClassId": 165,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 19
+  },
+  {
+    "ClassId": 167,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 21
+  },
+  {
+    "ClassId": 168,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 21
+  },
+  {
+    "ClassId": 169,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 23
+  },
+  {
+    "ClassId": 170,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 23
+  },
+  {
+    "ClassId": 171,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 25
+  },
+  {
+    "ClassId": 172,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 25
+  },
+  {
+    "ClassId": 173,
+    "Section": 1,
+    "IsGradeFinalized": False,
+    "MetadataId": 5
+  },
+  {
+    "ClassId": 174,
+    "Section": 2,
+    "IsGradeFinalized": False,
+    "MetadataId": 5
+  }
 ]

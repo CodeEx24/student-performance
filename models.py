@@ -513,25 +513,25 @@ add_data = os.getenv("ADD_DATA")
 def init_db(app):
     db.init_app(app)
     
-    if add_data=='False':
+    if add_data=='True':
         print("Adding data")
-        from data.data2.student import student_data
-        from data.data2.faculty import faculty_data
-        from data.data2.universityadmin import university_admin_data
-        from data.data2.systemadmin import system_admin_data
-        from data.data2.course import course_data
-        from data.data2.courseEnrolled import course_enrolled_data
-        from data.data2.subject import subject_data
-        from data.data2.classes import class_data
-        from data.data2.classSubject import class_subject_data
-        from data.data2.studentClassSubjectGrade import student_class_subject_grade_data
-        from data.data2.studentClassGrade import student_class_grade_data
-        from data.data2.classSubjectGrade import class_subject_grade_data
-        from data.data2.classGrade import class_grade_data
+        from data.student import student_data
+        from data.faculty import faculty_data
+        from data.universityadmin import university_admin_data
+        from data.systemadmin import system_admin_data
+        from data.course import course_data
+        from data.courseEnrolled import course_enrolled_data
+        from data.subject import subject_data
+        from data.classes import class_data
+        from data.classSubject import class_subject_data
+        from data.studentClassSubjectGrade import student_class_subject_grade_data
+        from data.studentClassGrade import student_class_grade_data
+        from data.classSubjectGrade import class_subject_grade_data
+        from data.classGrade import class_grade_data
         # from data.data2.courseGrade import course_grade_data
 
-        from data.data2.curriculum import curriculum_data
-        from data.data2.metadata import metadata_data
+        from data.curriculum import curriculum_data
+        from data.metadata import metadata_data
 
         def create_sample_data():
             for data in student_data:
@@ -621,12 +621,12 @@ def init_db(app):
     #         inspector = inspect(db.engine)
     #         db.create_all()
 
-    #         if add_data=='False':
+    #         if add_data=='True':
     #             print("DEVELOPMENT AND ADDING DATA")
     #             create_sample_data()
 
 
-    if config_mode == 'development' and add_data=='False':
+    if config_mode == 'development' and add_data=='True':
         print("DEVELOPMENT AND ADDING DATA")
         with app.app_context():
             inspector = inspect(db.engine)
