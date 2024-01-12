@@ -3361,6 +3361,6 @@ student_data = [
     "Gender": 1,
     "ResidentialAddress": "2650 Cedar Street, Manila",
     "MobileNumber": "09101234567",
-    "Password": generate_password_hash("Student123")
+  "Password": generate_password_hash("Student123")
   }
 ]

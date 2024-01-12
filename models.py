@@ -27,7 +27,7 @@ class Student(db.Model): # (class SPSStudent) In DJANGO you must set the name di
     LastName = db.Column(db.String(50), nullable=False)  # Last Name
     MiddleName = db.Column(db.String(50))  # Middle Name
     Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
-    Password = db.Column(db.String(128), nullable=False)  # Password
+    Password = db.Column(db.String(256), nullable=False)  # Password
     Gender = db.Column(db.Integer, nullable=True)  # Gender
     DateOfBirth = db.Column(db.Date)  # DateOfBirth
     PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
@@ -70,7 +70,6 @@ class Faculty(db.Model):
     FacultyType = db.Column(db.String(50), nullable=False)  # Faculty Type
     Rank = db.Column(db.String(50))  # Faculty Rank
     Units = db.Column(db.Numeric, nullable=False)  # Faculty Unit
-    Name = db.Column(db.String(50), nullable=False)  # Name
     FirstName = db.Column(db.String(50), nullable=False)  # First Name
     LastName = db.Column(db.String(50), nullable=False)  # Last Name
     MiddleName = db.Column(db.String(50))  # Middle Name
@@ -89,7 +88,7 @@ class Faculty(db.Model):
     MobileNumber = db.Column(db.String(11))  # MobileNumber
     Gender = db.Column(db.Integer) # Gender # 1 if Male 2 if Female
     
-    Password = db.Column(db.String(128), nullable=False)  # Password
+    Password = db.Column(db.String(256), nullable=False)  # Password
     ProfilePic= db.Column(db.String(50),default="14wkc8rPgd8NcrqFoRFO_CNyrJ7nhmU08")  # Profile Pic
     IsActive = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -103,7 +102,6 @@ class Faculty(db.Model):
             'faculty_type': self.FacultyType,
             'rank': self.Rank,
             'units': self.Units,
-            'name': self.Name,
             'first_name': self.FirstName,
             'last_name': self.LastName,
             'middle_name': self.MiddleName,
@@ -131,9 +129,11 @@ class UniversityAdmin(db.Model):
 
     UnivAdminId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     UnivAdminNumber = db.Column(db.String(30), unique=True)  # UserID
-    Name = db.Column(db.String(50), nullable=False)  # Name
+    FirstName = db.Column(db.String(50), nullable=False)  # First Name
+    LastName = db.Column(db.String(50), nullable=False)  # Last Name
+    MiddleName = db.Column(db.String(50))  # Middle Name
     Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
-    Password = db.Column(db.String(128), nullable=False)  # Password
+    Password = db.Column(db.String(256), nullable=False)  # Password
     Gender = db.Column(db.Integer)  # Gender
     DateOfBirth = db.Column(db.Date)  # DateOfBirth
     PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
@@ -147,7 +147,9 @@ class UniversityAdmin(db.Model):
         return {
             'UnivAdminId': self.UnivAdminId,
             'UnivAdminNumber': self.UnivAdminNumber,
-            'Name': self.Name,
+            'FirstName': self.FirstName,
+            'LastName': self.LastName,
+            'MiddleName': self.MiddleName,
             'Email': self.Email,
             'Password': self.Password,
             'Gender': self.Gender,
@@ -168,9 +170,11 @@ class SystemAdmin(db.Model):
 
     SysAdminId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     SysAdminNumber = db.Column(db.String(30), unique=True)  # UserID
-    Name = db.Column(db.String(50), nullable=False)  # Name
+    FirstName = db.Column(db.String(50), nullable=False)  # First Name
+    LastName = db.Column(db.String(50), nullable=False)  # Last Name
+    MiddleName = db.Column(db.String(50))  # Middle Name
     Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
-    Password = db.Column(db.String(128), nullable=False)  # Password
+    Password = db.Column(db.String(256), nullable=False)  # Password
     Gender = db.Column(db.Integer)  # Gender
     DateOfBirth = db.Column(db.Date)  # DateOfBirth
     PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
@@ -184,7 +188,9 @@ class SystemAdmin(db.Model):
         return {
             'SysAdminId': self.SysAdminId,
             'SysAdminNumber': self.SysAdminNumber,
-            'Name': self.Name,
+            'FirstName': self.FirstName,
+            'LastName': self.LastName,
+            'MiddleName': self.MiddleName,
             'Email': self.Email,
             'Password': self.Password,
             'Gender': self.Gender,
@@ -226,7 +232,7 @@ class CourseEnrolled(db.Model):
     CourseId = db.Column(db.Integer, db.ForeignKey('SPSCourse.CourseId', ondelete="CASCADE"), primary_key=True)  # Unique Identifier
     StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Students Reference
     DateEnrolled = db.Column(db.Date) # Date they enrolled
-    Status = db.Column(db.Integer, nullable=False)  # (0 - Not Graduated ||  1 - Graduated  ||  2 - Drop  ||  3 - Transfer Course || 4 - Transfer School)
+    Status = db.Column(db.Integer, nullable=False)  # (0 - Not Graduated/Continuing ||  1 - Graduated  ||  2 - Drop  ||  3 - Transfer Course || 4 - Transfer School)
     CurriculumYear = db.Column(db.Integer, nullable=False)  # (2019, 2020, 2021) - For checking what the subjects they should taken
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
@@ -447,6 +453,27 @@ class Curriculum(db.Model):
             'MetadataId': self.MetadataId
             # Add other attributes if needed
         }
+        
+
+# This table will trigger everytime there is addded new batch semester
+class LatestBatchSemester(db.Model):
+    __tablename__ = 'SPSLatestBatchSemester'
+
+    Batch = db.Column(db.Integer, primary_key=True) # (2019, 2020, 2021, ...) - Batch course grades
+    Semester = db.Column(db.Integer, primary_key=True, nullable=False) # (1, 2, 3) - Semester
+    IsEnrollmentStarted = db.Column(db.Boolean, default=False)
+    IsGradeFinalized = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    def to_dict(self):
+        return {
+            'Batch': self.Batch,
+            'Semester': self.Semester,
+            'IsEnrollmentStarted': self.IsEnrollmentStarted
+            # Add other attributes if needed
+        }
+
 
 
 class OAuth2Client(db.Model, OAuth2ClientMixin):
@@ -513,7 +540,7 @@ add_data = os.getenv("ADD_DATA")
 def init_db(app):
     db.init_app(app)
     
-    if add_data=='True':
+    if add_data=='False':
         print("Adding data")
         from data.student import student_data
         from data.faculty import faculty_data
@@ -522,16 +549,16 @@ def init_db(app):
         from data.course import course_data
         from data.courseEnrolled import course_enrolled_data
         from data.subject import subject_data
-        from data.classes import class_data
-        from data.classSubject import class_subject_data
-        from data.studentClassSubjectGrade import student_class_subject_grade_data
-        from data.studentClassGrade import student_class_grade_data
-        from data.classSubjectGrade import class_subject_grade_data
-        from data.classGrade import class_grade_data
-        # from data.data2.courseGrade import course_grade_data
+        # from data.classes import class_data
+        # from data.classSubject import class_subject_data
+        # from data.studentClassSubjectGrade import student_class_subject_grade_data
+        # from data.studentClassGrade import student_class_grade_data
+        # from data.classSubjectGrade import class_subject_grade_data
+        # from data.classGrade import class_grade_data
+        # # from data.data2.courseGrade import course_grade_data
 
-        from data.curriculum import curriculum_data
-        from data.metadata import metadata_data
+        # from data.curriculum import curriculum_data
+        # from data.metadata import metadata_data
 
         def create_sample_data():
             for data in student_data:
@@ -560,51 +587,51 @@ def init_db(app):
                 db.session.add(subject)
                 db.session.flush()
 
-            for data in metadata_data:
-                metadata = Metadata(**data)
-                db.session.add(metadata)
-                db.session.flush()
+            # for data in metadata_data:
+            #     metadata = Metadata(**data)
+            #     db.session.add(metadata)
+            #     db.session.flush()
 
-            for data in curriculum_data:
-                curriculum = Curriculum(**data)
-                db.session.add(curriculum)
-                db.session.flush()
+            # for data in curriculum_data:
+            #     curriculum = Curriculum(**data)
+            #     db.session.add(curriculum)
+            #     db.session.flush()
                 
-            for data in course_enrolled_data:
-                course_enrolled = CourseEnrolled(**data)
-                db.session.add(course_enrolled)
-                db.session.flush()
+            # for data in course_enrolled_data:
+            #     course_enrolled = CourseEnrolled(**data)
+            #     db.session.add(course_enrolled)
+            #     db.session.flush()
 
             
-            for data in class_data:
-                class_ = Class(**data)
-                db.session.add(class_)
-                db.session.flush()
+            # for data in class_data:
+            #     class_ = Class(**data)
+            #     db.session.add(class_)
+            #     db.session.flush()
 
-            for data in class_subject_data:
-                class_subject = ClassSubject(**data)
-                db.session.add(class_subject)
-                db.session.flush()
+            # for data in class_subject_data:
+            #     class_subject = ClassSubject(**data)
+            #     db.session.add(class_subject)
+            #     db.session.flush()
 
-            for data in student_class_subject_grade_data:
-                student_class_subject_grade = StudentClassSubjectGrade(**data)
-                db.session.add(student_class_subject_grade)
-                db.session.flush()
+            # for data in student_class_subject_grade_data:
+            #     student_class_subject_grade = StudentClassSubjectGrade(**data)
+            #     db.session.add(student_class_subject_grade)
+            #     db.session.flush()
 
-            for data in student_class_grade_data:
-                student_class_grade = StudentClassGrade(**data)
-                db.session.add(student_class_grade)
-                db.session.flush()
+            # for data in student_class_grade_data:
+            #     student_class_grade = StudentClassGrade(**data)
+            #     db.session.add(student_class_grade)
+            #     db.session.flush()
 
-            for data in class_subject_grade_data:
-                class_subject_grade = ClassSubjectGrade(**data)
-                db.session.add(class_subject_grade)
-                db.session.flush()
+            # for data in class_subject_grade_data:
+            #     class_subject_grade = ClassSubjectGrade(**data)
+            #     db.session.add(class_subject_grade)
+            #     db.session.flush()
 
-            for data in class_grade_data:
-                class_grade = ClassGrade(**data)
-                db.session.add(class_grade)
-                db.session.flush()
+            # for data in class_grade_data:
+            #     class_grade = ClassGrade(**data)
+            #     db.session.add(class_grade)
+            #     db.session.flush()
 
             # for data in course_grade_data:
             #     course_grade = CourseGrade(**data)
@@ -621,12 +648,12 @@ def init_db(app):
     #         inspector = inspect(db.engine)
     #         db.create_all()
 
-    #         if add_data=='True':
+    #         if add_data=='False':
     #             print("DEVELOPMENT AND ADDING DATA")
     #             create_sample_data()
 
 
-    if config_mode == 'development' and add_data=='True':
+    if config_mode == 'development' and add_data=='False':
         print("DEVELOPMENT AND ADDING DATA")
         with app.app_context():
             inspector = inspect(db.engine)
