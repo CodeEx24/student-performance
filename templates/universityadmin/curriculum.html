@@ -175,9 +175,18 @@
 
 <!-- SCRIPTS DATA -->
 {% block script %}
+<!-- ################################################################################## -->
+<!-- WEB API URL UPDATE -->
+<!-- Your Flask script to render configuration data -->
+<link
+  rel="stylesheet"
+  href="https://cdn.syncfusion.com/ej2/17.3.29/material.css"
+/>
+<script src="https://cdn.syncfusion.com/ej2/17.3.29/dist/ej2.min.js"></script>
 
 <!-- ADDING STUDENTS -->
 <script>
+  console.log('GRIDCONFIG AREA CURR');
   async function submitCurriculumSubjects(event) {
     event.preventDefault();
 
@@ -308,19 +317,10 @@
     });
   }
 </script>
-<!-- ################################################################################## -->
-<!-- WEB API URL UPDATE -->
-<!-- Your Flask script to render configuration data -->
-<link
-  rel="stylesheet"
-  href="https://cdn.syncfusion.com/ej2/17.3.29/material.css"
-/>
-<script src="https://cdn.syncfusion.com/ej2/17.3.29/dist/ej2.min.js"></script>
-
-<script></script>
 
 <script>
   // Assume your Flask route provides configuration data
+
   let gridConfig = {
     apiUrl: `${api_base_url}/curriculum`,
     insertUrl: `${api_base_url}/curriculum/insert`,
@@ -354,6 +354,11 @@
         width: 80,
         validationRules: {
           required: true,
+        },
+        open: function (args) {
+          // Set the height of the dropdown list
+          args.popup.element.querySelector('.e-ddl.e-popup').style.maxHeight =
+            '200px';
         },
         editType: 'dropdownedit',
         edit: {

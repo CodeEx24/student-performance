@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess
 import os
 
 
@@ -15,6 +15,7 @@ university_admin_api = Blueprint('university_admin_api', __name__)
 @university_admin_api.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
+      
         email = request.form['email']
         password = request.form['password']
         admin = UniversityAdmin.query.filter_by(Email=email).first()
@@ -149,12 +150,12 @@ def overallCoursePerformance():
 
 
 # Getting all the class data in current year
-@university_admin_api.route('/class/data/', methods=['GET'])
+@university_admin_api.route('/class/', methods=['GET'])
 @role_required('universityAdmin')
 def classData():
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        skip = int(request.args.get('$skip', 1))
+        skip = int(request.args.get('$skip', 0))
         top = int(request.args.get('$top', 10))
         order_by = (request.args.get('$orderby'))
         filter = (request.args.get('$filter'))
@@ -165,6 +166,17 @@ def classData():
             return (json_class_data)
         else:
             return jsonify(message="No Class data available")
+    else:
+        return render_template('404.html'), 404
+
+@university_admin_api.route('/class/delete(<int:classId>)', methods=['DELETE'])
+@role_required('universityAdmin')
+def deleteClass(classId):
+    university_admin = getCurrentUser()
+    if university_admin:
+        # result = classId
+        result = deleteClassData(classId)
+        return result
     else:
         return render_template('404.html'), 404
 
@@ -206,7 +218,7 @@ def submitClass():
 def fetchStudents():
     university_admin = getCurrentUser()
     if university_admin:
-        skip = int(request.args.get('$skip', 1))
+        skip = int(request.args.get('$skip', 0))
         top = int(request.args.get('$top', 10))
         order_by = (request.args.get('$orderby'))
         filter = (request.args.get('$filter'))
@@ -347,7 +359,7 @@ def studentClassSubjectGrade():
     universityAdmin = getCurrentUser()
 
     if universityAdmin:
-        skip = int(request.args.get('$skip', 1))
+        skip = int(request.args.get('$skip', 0))
         top = int(request.args.get('$top', 10))
         order_by = (request.args.get('$orderby'))
         filter = (request.args.get('$filter'))
@@ -423,8 +435,9 @@ def studentClassSubjectDelete(class_subject_id, student_id):
 @role_required('universityAdmin')
 def fetchCurriculum():
     universityAdmin = getCurrentUser()
+    
     if universityAdmin:
-        skip = int(request.args.get('$skip', 1))
+        skip = int(request.args.get('$skip', 0))
         top = int(request.args.get('$top', 10))
         order_by = (request.args.get('$orderby'))
         filter = (request.args.get('$filter'))
@@ -577,7 +590,7 @@ def submitStudentsClassSubject(class_subject_id):
 def fetchMetadata():
     university_admin = getCurrentUser()
     if university_admin:
-        skip = int(request.args.get('$skip', 1))
+        skip = int(request.args.get('$skip', 0))
         top = int(request.args.get('$top', 10))
         order_by = (request.args.get('$orderby'))
         filter = (request.args.get('$filter'))
@@ -590,6 +603,28 @@ def fetchMetadata():
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return render_template('404.html'), 404
+    
+
+# api_routes.py
+@university_admin_api.route('/finalized/batch/', methods=['GET'])
+@role_required('universityAdmin')
+def fetchBatchSemester():
+    university_admin = getCurrentUser()
+    if university_admin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_student_data = getBatchSemester(skip, top, order_by, filter)
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+    
     
 # api_routes.py
 @university_admin_api.route('/add/class-student/<int:class_id>', methods=['POST'])
@@ -626,6 +661,38 @@ def finalizedGrades(metadata_id):
     else:
         return render_template('404.html'), 404
 
+
+@university_admin_api.route('/finalized/grades/batch/<int:batch_semester_id>', methods=['PUT'])
+@role_required('universityAdmin')
+def finalizedGradesBatch(batch_semester_id):
+    university_admin = getCurrentUser()
+    if university_admin:
+        print("HERE IN FINALIZED GRADES: ", batch_semester_id)
+        json_student_data = finalizedGradesBatchSemester(batch_semester_id)
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+    
+    
+@university_admin_api.route('/start/enrollment/<int:batch_semester_id>', methods=['PUT'])
+@role_required('universityAdmin')
+def startEnrollment(batch_semester_id):
+    university_admin = getCurrentUser()
+    if university_admin:
+        json_student_data = startEnrollmentProcess(batch_semester_id)
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+    
+    
 # api_routes.py
 # ?batch=value
 @university_admin_api.route('/class/dropdown', methods=['GET'])
@@ -647,6 +714,7 @@ def fetchClassDropdown():
 @role_required('universityAdmin')
 def fetchStatistics():
     university_admin = getCurrentUser()
+    print("CURRENT USER: ", university_admin)
     if university_admin:
         class_list = getStatistics()
         # return class list

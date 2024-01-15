@@ -270,8 +270,15 @@
 <script>
   // Assume your Flask route provides configuration data
   let gridConfig = {
-    apiUrl: `${api_base_url}/class/data/`,
+    apiUrl: `${api_base_url}/class/`,
+    insertUrl: `${api_base_url}/class/insert`,
+    removeUrl: `${api_base_url}/class/delete`,
     columns: [
+      {
+        field: 'ClassId',
+        isPrimaryKey: true,
+        visible: false, // Set to false to hide the column
+      },
       {
         field: 'Course',
         headerText: 'Course Name',
@@ -385,7 +392,9 @@
     // Create a DataManager with the provided API URL
     let curriculum_subject_data = new ej.data.DataManager({
       url: gridConfig.apiUrl,
-      adaptor: new ej.data.WebApiAdaptor(),
+      // insertUrl: gridConfig.insertUrl,
+      removeUrl: gridConfig.removeUrl,
+      adaptor: new ej.data.ODataAdaptor(),
     });
 
     console.log(
@@ -401,9 +410,15 @@
       allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      toolbar: ['ExcelExport', 'Delete'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
       pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      editSettings: {
+        // allowEditing: true,
+        // allowAdding: true,
+        allowDeleting: true,
+        showDeleteConfirmDialog: true,
+      },
       beforeDataBound: function (args) {
         // If args action type is filter then go to page 1
 
@@ -426,6 +441,29 @@
         if (args.requestType === 'filtering') {
           // Go to page 1
           grid.goToPage(1);
+        }
+      },
+
+      actionComplete: function (args) {
+        if (args.requestType === 'save' && args.action === 'add') {
+          console.log('INSERTED ARGS: ', args);
+          onSuccess('Data inserted successfully');
+        }
+
+        if (args.requestType === 'delete') {
+          onSuccess('Data deleted successfully');
+        }
+
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+      actionFailure: function (args) {
+        if (args.error) {
+          var errorResponse = JSON.parse(args.error[0].error.response);
+
+          notyf.error(errorResponse.error);
         }
       },
     });
@@ -547,13 +585,13 @@
         },
 
         {
-          field: 'Section',
-          headerText: 'Subject Code',
+          field: 'Year',
+          headerText: 'Year',
           width: 100,
         },
         {
-          field: 'Year',
-          headerText: 'Year',
+          field: 'Section',
+          headerText: 'Section',
           width: 100,
         },
         {

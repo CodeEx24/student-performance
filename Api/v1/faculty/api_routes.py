@@ -21,8 +21,8 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        teacher = Faculty.query.filter_by(email=email).first()
-        if teacher and check_password_hash(teacher.password, password):
+        teacher = Faculty.query.filter_by(Email=email).first()
+        if teacher and check_password_hash(teacher.Password, password):
             # Successfully authenticated
             print("SUCCESS LOGING")
             session['user_id'] = teacher.FacultyId

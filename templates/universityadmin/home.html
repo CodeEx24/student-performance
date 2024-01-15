@@ -309,6 +309,47 @@
       });
       chart.appendTo('#enrollment');
       // chart.appendTo('#enrollment2');
+    } else {
+      // Get current and previous 4 years and put it in array
+      var current_year = new Date().getFullYear();
+      var year = [];
+      for (let i = 0; i < 5; i++) {
+        year.push(current_year - 5 + i);
+      }
+
+      // Make the year as datasource where year is x and y is default 0
+      var chartData = [];
+      year.forEach((year) => {
+        chartData.push({ x: year, y: 0 });
+      });
+
+      // Display chart without data or handle this case as needed
+      var chart = new ej.charts.Chart({
+        // Initializing Primary X Axis
+        primaryXAxis: {
+          interval: 1,
+          valueType: 'Category',
+        },
+        primaryYAxis: {
+          minimum: 0, // Set your desired minimum value
+          maximum: 500, // Set your desired maximum value
+          interval: 50,
+        },
+        // Sample series to be displayed when there is no data
+        series: [
+          {
+            type: 'Line',
+            dataSource: chartData,
+            xName: 'x',
+            yName: 'y',
+            name: 'No Data Available',
+          },
+        ],
+        tooltip: {
+          enable: true,
+        },
+      });
+      chart.appendTo('#enrollment');
     }
   }
 

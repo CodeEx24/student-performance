@@ -50,6 +50,7 @@
               accept=".xlsx, .xls"
               class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
             />
+            <!-- ADD CSRF /> -->
 
             <button
               type="submit"
@@ -65,6 +66,12 @@
       <hr class="mx-2" />
       <div class="flex items-end justify-between">
         <div class="w-full bg-white p-4 mt-4">
+          <input
+            type="hidden"
+            name="_ejRequestVerifyToken"
+            value="f2cd20a3-5ae1-4e19-be61-d409191be3b1"
+          />
+
           <div id="grid-students-list"></div>
         </div>
       </div>
@@ -119,6 +126,7 @@
         <h2 class="text-c1 text-2xl font-semibold">
           Adding Curriculum Error List
         </h2>
+
         <button
           class="modal-close"
           onclick="closeModalError('studentErrorModal', 'grid-error-students-list')"
@@ -137,7 +145,7 @@
           </svg>
         </button>
       </div>
-
+      <p class="text-gray-700 mt-4">Export the grid to see all the errors</p>
       <div class="modal-body w-full relative mt-8">
         <div id="grid-error-students-list" class="overflow-y-auto">
           <!-- This is the content of modal -->
@@ -169,10 +177,13 @@
 <script>
   async function submitStudents(event) {
     event.preventDefault();
+    // const csrfToken = document.getElementsByName('csrf_token')[0].value;
+    // console.log('csrfToken: ', csrfToken);
 
     const fileErrorElement = document.getElementById('students-file-error');
     const fileInput = document.getElementById('excelFile');
     const file = fileInput.files[0];
+    // Get csrf token
 
     if (!file) {
       fileErrorElement.innerText = 'Please choose a file.';
@@ -190,6 +201,7 @@
     // If file type is valid, proceed with the API request
     const formData = new FormData();
     formData.append('excelFile', file);
+    // formData.append('csrf_token', csrfToken);
 
     try {
       showModal('loadingModal');
@@ -231,11 +243,21 @@
         {
           field: 'StudentNumber',
           headerText: 'Student Number',
+          width: 120,
+        },
+        {
+          field: 'LastName',
+          headerText: 'Lastname',
           width: 100,
         },
         {
-          field: 'Name',
-          headerText: 'Name',
+          field: 'FirstName',
+          headerText: 'Firstname',
+          width: 100,
+        },
+        {
+          field: 'MiddleName',
+          headerText: 'Middlename',
           width: 100,
         },
         {
@@ -375,6 +397,11 @@
 <!-- FETCH DISTINC OPTIONS -->
 
 <script>
+  // get csrf token
+  // const csrfToken = document.getElementsByName('_ejRequestVerifyToken')[0]
+  //   .value;
+  // console.log('CSRF IN 2: ', csrfToken);
+
   // Assume your Flask route provides configuration data
   let gridConfig = {
     apiUrl: `${api_base_url}/students`,
@@ -398,13 +425,27 @@
       },
       // Student Name
       {
-        field: 'Name',
-        headerText: 'Name',
-        width: 70,
+        field: 'LastName',
+        headerText: 'LastName',
+        width: 50,
 
         validationRules: {
           required: true,
         },
+      },
+      {
+        field: 'FirstName',
+        headerText: 'FirstName',
+        width: 50,
+
+        validationRules: {
+          required: true,
+        },
+      },
+      {
+        field: 'MiddleName',
+        headerText: 'MiddleName',
+        width: 50,
       },
       // Student Email
       {
@@ -548,11 +589,11 @@
         .then((data) => {
           console.log('dTAL: ', data);
           if (data.result) {
-            gridConfig.columns[4].edit.params.dataSource =
-              data.result.genderOptions;
             gridConfig.columns[6].edit.params.dataSource =
-              data.result.courseOptions;
+              data.result.genderOptions;
             gridConfig.columns[8].edit.params.dataSource =
+              data.result.courseOptions;
+            gridConfig.columns[10].edit.params.dataSource =
               data.result.batchOptions;
           }
         })
@@ -569,12 +610,8 @@
       insertUrl: gridConfig.insertUrl,
       removeUrl: gridConfig.removeUrl,
       adaptor: new ej.data.ODataAdaptor(),
+      headers: [{ hello: 'hellothere' }],
     });
-
-    console.log(
-      'data.adaptor curriculum_subject_data: ',
-      curriculum_subject_data
-    );
 
     // Create Syncfusion Grid using the provided configuration
     let grid = new ej.grids.Grid({
@@ -605,7 +642,6 @@
       },
 
       actionBegin: function (args) {
-        console.log('args in actionBegin: ', args);
         if (args.requestType === 'paging') {
           // Handle pagination click
           console.log('Page clicked:', args.currentPage);

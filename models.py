@@ -1,6 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect
-from flask_login import UserMixin
 import os
 
 import time
@@ -338,7 +337,7 @@ class StudentClassSubjectGrade(db.Model):
     StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Referencing to the student in subject taken
     Grade = db.Column(db.Float) # Students Grade
     DateEnrolled = db.Column(db.Date) # Date enrolled in the subject
-    AcademicStatus = db.Column(db.Integer) # (1 - Passed, 2 - Failed, 3 - Incomplete or INC,  4 - Withdrawn )
+    AcademicStatus = db.Column(db.Integer) # (1 - Passed, 2 - Failed, 3 - Incomplete or INC,  4 - Withdrawn, 5 - ReEnroll )
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -459,8 +458,9 @@ class Curriculum(db.Model):
 class LatestBatchSemester(db.Model):
     __tablename__ = 'SPSLatestBatchSemester'
 
-    Batch = db.Column(db.Integer, primary_key=True) # (2019, 2020, 2021, ...) - Batch course grades
-    Semester = db.Column(db.Integer, primary_key=True, nullable=False) # (1, 2, 3) - Semester
+    LatestBatchSemesterId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Batch = db.Column(db.Integer, nullable=False) # (2019, 2020, 2021, ...) - Batch course grades
+    Semester = db.Column(db.Integer, nullable=False) # (1, 2, 3) - Semester
     IsEnrollmentStarted = db.Column(db.Boolean, default=False)
     IsGradeFinalized = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -468,9 +468,11 @@ class LatestBatchSemester(db.Model):
     
     def to_dict(self):
         return {
+            'LatestBatchSemesterId': self.LatestBatchSemesterId,
             'Batch': self.Batch,
             'Semester': self.Semester,
-            'IsEnrollmentStarted': self.IsEnrollmentStarted
+            'IsEnrollmentStarted': self.IsEnrollmentStarted,
+            'IsGradeFinalized': self.IsGradeFinalized
             # Add other attributes if needed
         }
 
@@ -540,7 +542,7 @@ add_data = os.getenv("ADD_DATA")
 def init_db(app):
     db.init_app(app)
     
-    if add_data=='False':
+    if add_data=='True':
         print("Adding data")
         from data.student import student_data
         from data.faculty import faculty_data
@@ -559,6 +561,7 @@ def init_db(app):
 
         # from data.curriculum import curriculum_data
         # from data.metadata import metadata_data
+        # from data.latestBatchSemester import batch_semester_data
 
         def create_sample_data():
             for data in student_data:
@@ -587,6 +590,13 @@ def init_db(app):
                 db.session.add(subject)
                 db.session.flush()
 
+            for data in course_enrolled_data:
+                course_enrolled = CourseEnrolled(**data)
+                db.session.add(course_enrolled)
+                db.session.flush()
+
+            #### START THE COMMENT IF TESTING
+
             # for data in metadata_data:
             #     metadata = Metadata(**data)
             #     db.session.add(metadata)
@@ -597,12 +607,6 @@ def init_db(app):
             #     db.session.add(curriculum)
             #     db.session.flush()
                 
-            # for data in course_enrolled_data:
-            #     course_enrolled = CourseEnrolled(**data)
-            #     db.session.add(course_enrolled)
-            #     db.session.flush()
-
-            
             # for data in class_data:
             #     class_ = Class(**data)
             #     db.session.add(class_)
@@ -617,6 +621,13 @@ def init_db(app):
             #     student_class_subject_grade = StudentClassSubjectGrade(**data)
             #     db.session.add(student_class_subject_grade)
             #     db.session.flush()
+                
+            # for data in batch_semester_data:
+            #     latest_batch_semester = LatestBatchSemester(**data)
+            #     db.session.add(latest_batch_semester)
+            #     db.session.flush()
+            
+            #### WITHOUT ANALYTICCS
 
             # for data in student_class_grade_data:
             #     student_class_grade = StudentClassGrade(**data)
@@ -648,12 +659,12 @@ def init_db(app):
     #         inspector = inspect(db.engine)
     #         db.create_all()
 
-    #         if add_data=='False':
+    #         if add_data=='True':
     #             print("DEVELOPMENT AND ADDING DATA")
     #             create_sample_data()
 
 
-    if config_mode == 'development' and add_data=='False':
+    if config_mode == 'development' and add_data=='True':
         print("DEVELOPMENT AND ADDING DATA")
         with app.app_context():
             inspector = inspect(db.engine)
