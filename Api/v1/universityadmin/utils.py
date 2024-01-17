@@ -956,12 +956,11 @@ def processClassStudents(file, class_id):
         
         # Check if latest_batch_semester.IsStartEnrollment is False
         if not latest_batch_semester.IsEnrollmentStarted:
-            print("NOT STARTED")
             return jsonify({'error': 'Cannot add students. Enrollment is not yet started.'}), 400
         
-        if class_data.IsGradeFinalized:
-            return jsonify({'error': 'Cannot add student. Grade is already finalized'}), 400
-        
+        if class_data.Class.IsGradeFinalized:
+                return jsonify({'error': 'Cannot add student. Grade is already finalized'}), 400
+            
         if class_data:
             # Check for student first if exist in df
             for index, row in df.iterrows():
@@ -999,7 +998,6 @@ def processClassStudents(file, class_id):
                 student_data = db.session.query(Student).filter_by(StudentNumber=student_number).first()
 
                 if not student_data:
-                    
                     errors.append({
                         'StudentNumber': student_number,
                         'DateEnrolled': student_date_enrolled,
@@ -1012,6 +1010,30 @@ def processClassStudents(file, class_id):
                     if class_subject_data:
                         # for loop of it
                         for class_subject in class_subject_data:
+                            # Find class subject that has the same SubjectId and StudentId
+                            student_class_subject_grade = db.session.query(StudentClassSubjectGrade).filter_by(StudentId=student_data.StudentId, ClassSubjectId=class_subject.ClassSubjectId).first()
+                            
+                            if student_class_subject_grade:
+                                # Check if student Class Subject Grade Academic Status is 1
+                                if student_class_subject_grade.AcademicStatus == 1:
+                                    # Append errors
+                                    errors.append({
+                                        'StudentNumber': student_number,
+                                        'DateEnrolled': student_date_enrolled,
+                                        'Error': 'Student already taken and passed the subject'
+                                    })
+                                    # Go to next loop
+                                    continue
+                                
+                                # Check if Academic Status is none then tell that already enrolled
+                                if student_class_subject_grade.AcademicStatus is None:
+                                    errors.append({
+                                        'StudentNumber': student_number,
+                                        'DateEnrolled': student_date_enrolled,
+                                        'Error': 'Student already enrolled'
+                                    })
+                                    # Go to next loop
+                                    continue
                         
                             # Check if not class_grade_exist then create and set it to True
                             if not student_class_grade_exist:
@@ -1184,8 +1206,10 @@ def processClassStudents(file, class_id):
 def getStudentData(skip, top, order_by, filter):
     try:
         student_query = (
-            db.session.query(Student, CourseEnrolled, Course).join(CourseEnrolled, CourseEnrolled.StudentId == Student.StudentId).join(Course, Course.CourseId == CourseEnrolled.CourseId)
+            db.session.query(CourseEnrolled, Student, Course).join(Student, Student.StudentId == CourseEnrolled.StudentId).join(Course, Course.CourseId == CourseEnrolled.CourseId)
         )
+        
+        
         
         filter_conditions = []
         if filter:
@@ -1276,6 +1300,7 @@ def getStudentData(skip, top, order_by, filter):
             else:
                 order_query = filter_query.order_by(order_attr)
         else:
+            print("ELSE")
             # Apply default sorting
             order_query = filter_query.order_by(desc(CourseEnrolled.CurriculumYear), desc(Course.CourseCode), desc(Student.StudentNumber))
         
@@ -1285,7 +1310,7 @@ def getStudentData(skip, top, order_by, filter):
         print("total_count: ", total_count)
         # Limitized query = 
         student_limit_offset_query = order_query.offset(skip).limit(top).all()
-        print("student_limit_offset_query: ", student_limit_offset_query)
+        print('student_limit_offset_query: ', student_limit_offset_query)
         print("AFTER SKIP")
         if student_limit_offset_query:
              # For loop the student_query and put it in dictionary
@@ -1685,19 +1710,21 @@ def processGradeSubmission(file):
         for index, row in df.iterrows():
             # Extract the values from the DataFrame
             student_number = row['Student Number'] # OK
-            student_name = row['Student Name']
+            student_lastname = row['LastName']
+            student_firstname = row['FirstName']
+            student_middlename = row['MiddleName']
             section_code = row['Section Code']
             subject_code = row['SubjectCode'] # OK
             semester = row['Semester'] # OK
             grade = row['Grade']
             batch = row['Batch'] # OK
             
+            
             # Split the section_code by the last space and keep the first part
             course_code = section_code.rsplit(' ', 1)[0] 
             
             # Split the section_code by space, get the last part, and split it by hyphen '-' to extract year and section
             year, section = section_code.split(' ')[-1].split('-')
-            print("BEFORE")
             # Now you can use the modified_section_code as needed in your code
             student_data = (
                 db.session.query(Student,  StudentClassSubjectGrade, ClassSubject, Class, Subject, Course, Metadata)
@@ -1712,10 +1739,6 @@ def processGradeSubmission(file):
                 .first()
             )
             if(student_data.Class.IsGradeFinalized==False):
-                # Check if grade is int
-                # Print the type of grade
-                print("TYPE: ", type(grade))
-                
                 
                 if isinstance(grade, int) or isinstance(grade, float):
                     if grade <= 3: # PASSED
@@ -1745,7 +1768,9 @@ def processGradeSubmission(file):
                 # Append the object to list_finalized_grade
                 list_finalized_grade.append({
                     "StudentNumber": student_number,
-                    "StudentName": student_name,
+                    "StudentLastName": student_lastname,
+                    "StudentFirstName": student_firstname,
+                    "StudentMiddleName": student_middlename,
                     "SectionCode": section_code,
                     "SubjectCode": subject_code,
                     "Semester": semester,
@@ -4269,11 +4294,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                                         'Status': 1
                                     })
                                     db.session.commit()
-                else:   
-                    db.session.rollback()
-                    # return jsonify({"error": "There no class yet"})
-                print("SUCCESS")
-            
             
             # Check if course_grade_info_list have data
             if course_grade_info_list:
@@ -4323,9 +4343,8 @@ def finalizedGradesBatchSemester(batch_semester_id):
                 })
                 db.session.commit()
                 # Set the IsGradeFinalized to True
-                
-            print("SUCCESS IN FINALIZING GRADES ALL")
-            #     return jsonify({"success": True, "message": "Data finalized successfully"})
+            # Return succcess
+            return jsonify({'success': True, 'message':'Successfully updated grades.'}), 201
             # else:
             #     return jsonify(None)
     except Exception as e:
