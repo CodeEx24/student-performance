@@ -35,6 +35,7 @@ def login():
 def profile():
     universityAdmin = getCurrentUser()
     if universityAdmin:
+        print('universityAdmin.to_dict(): ', universityAdmin.to_dict())
         return jsonify(universityAdmin.to_dict())
     else:
         flash('User not found', 'danger')

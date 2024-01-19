@@ -90,7 +90,7 @@
     </div>
     <div class="lg:w-3/12 lg:grow w-screen rounded-lg p-6 shadow-md bg-white">
       <h3 class="text-2xl text-c1 font-bold mb-3">Previous Grade</h3>
-      <div id="grid"></div>
+      <div id="previous-grade"></div>
     </div>
   </div>
 
@@ -282,47 +282,42 @@
 
     const course_performance_data = await response.json();
 
-    displayCoursePerformance(
-      course_performance_data.List,
-      course_performance_data.Course
-    );
+    displayCoursePerformance(course_performance_data);
   }
 
   fetchCoursePerformanceOvertime();
 
-  function displayCoursePerformance(course_performance_data, course_name) {
-    var data = [...course_performance_data];
+  function displayCoursePerformance(json_course_performance) {
+    var chartData = json_course_performance.course_performance;
+    var list_course = json_course_performance.list_course;
+
+    var series = list_course.map(function (course) {
+      return {
+        dataSource: chartData.map(function (item) {
+          return { x: item.x, y: item[course] };
+        }),
+        marker: { visible: true },
+        dashArray: '5, 1',
+        xName: 'x',
+        yName: 'y',
+        name: course,
+      };
+    });
 
     var chart = new ej.charts.Chart({
-      target: '#lineChart',
-      series: [
-        {
-          type: 'Line',
-          dataSource: data,
-          xName: 'Year',
-          yName: 'Grade',
-          marker: {
-            visible: true,
-            width: 10,
-            height: 10,
-          },
-        },
-      ],
+      // Initializing Primary X Axis
       primaryXAxis: {
-        title: 'Year',
-        minimum:
-          course_performance_data[course_performance_data.length - 1].Year,
-        maximum: course_performance_data[0].Year + 1,
-        interval: 1,
+        valueType: 'Category',
       },
+      // Initializing Primary Y Axis
       primaryYAxis: {
-        minimum: 20,
+        minimum: 0,
         maximum: 100,
         interval: 20,
-        title: 'Grade',
-        labelFormat: '{value}%',
       },
-      title: 'Course Performance',
+      // Initializing Chart Series
+      series: series,
+      // Initializing User Interaction Tooltip
       tooltip: {
         enable: true,
       },
@@ -338,6 +333,7 @@
     const response = await fetch(`${api_base_url}/previous-grade`);
 
     if (!response.ok) {
+      displayPreviousSubjectGrade();
       throw new Error(
         `Failed to fetch data. Try to contact the admin to resolve the issue.`
       );
@@ -350,16 +346,32 @@
   fetchPreviousSubjectGrade();
 
   function displayPreviousSubjectGrade(list_previous_subject_grade) {
-    var data = [...list_previous_subject_grade];
-    var grid = new ej.grids.Grid({
-      dataSource: data,
-      columns: [
-        { field: 'Code', headerText: 'Subject Code', width: 140 },
-        { field: 'Units', headerText: 'Units', width: 90 },
-        { field: 'Grade', headerText: 'Grade', width: 90 },
-      ],
-    });
-    grid.appendTo('#grid');
+    console.log('list_previous_subject_grade: ', list_previous_subject_grade);
+    if (list_previous_subject_grade.success) {
+      var data = [...list_previous_subject_grade.data];
+      var grid = new ej.grids.Grid({
+        dataSource: data,
+        columns: [
+          { field: 'Code', headerText: 'Subject Code', width: 140 },
+          { field: 'Units', headerText: 'Units', width: 90 },
+          { field: 'Grade', headerText: 'Grade', width: 90 },
+        ],
+      });
+      grid.appendTo('#previous-grade');
+    } else {
+      console.log('ELSE PART');
+      // Make a none data
+      var grid = new ej.grids.Grid({
+        dataSource: [],
+        columns: [
+          { field: 'Code', headerText: 'Subject Code', width: 140 },
+          { field: 'Units', headerText: 'Units', width: 90 },
+          { field: 'Grade', headerText: 'Grade', width: 90 },
+        ],
+      });
+
+      grid.appendTo('#previous-grade');
+    }
   }
 </script>
 

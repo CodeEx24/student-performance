@@ -238,8 +238,8 @@
 
 <!-- FETCHING USER DETAILS -->
 <script>
-  async function fetchStudentDetails() {
-    const response = await fetch(`${api_base_url}/`);
+  async function fetchUserDetails() {
+    const response = await fetch(`${api_base_url}/profile`);
 
     if (!response.ok) {
       throw new Error(
@@ -275,7 +275,7 @@
     text_gender.innerHTML = data.Gender;
   }
 
-  fetchStudentDetails();
+  fetchUserDetails();
 </script>
 
 {% endblock script %}

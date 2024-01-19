@@ -9,7 +9,7 @@ from Api.v1.universityadmin.api_routes import university_admin_api
 from Api.v1.systemadmin.api_routes import system_admin_api
 from oauth2 import config_oauth
 
-from flask_mail import Mail, Message
+# from flask_mail import Mail, Message
 import os
 from dotenv import load_dotenv
 
@@ -17,18 +17,25 @@ from models import init_db
 # from flask_jwt_extended import JWTManager
 
 from decorators.auth_decorators import preventAuthenticated, role_required
+
 from datetime import  timedelta
 from mail import mail  # Import mail from the mail.py module
-from flask_oauthlib.provider import OAuth2Provider
+# from flask_oauthlib.provider import OAuth2Provider
 from werkzeug.security import check_password_hash
 # Get models OAuth2Client
-from models import OAuth2Client, Student, OAuth2Token
+# from models import OAuth2Client, Student, OAuth2Token
+# from flask_talisman import Talisman
+# from flask_wtf.csrf import CSRFProtect
+from datetime import datetime
+
 
 def create_app():
     load_dotenv()  # Load environment variables from .env file
     app = Flask(__name__)
-    
-    
+
+    # talisman = Talisman(app)
+    # csrf = CSRFProtect(app)
+
 
     if __name__ == '__main__':
         app.run(debug=True)
@@ -69,7 +76,7 @@ def create_app():
 
     # jwt = JWTManager(app)
     init_db(app)
-    oauth = OAuth2Provider(app)
+    # oauth = OAuth2Provider(app)
    
     # Configure Flask-Mail for sending emails
     app.config['MAIL_SERVER'] =  os.getenv("MAIL_SERVER")
@@ -138,6 +145,23 @@ def create_app():
     @preventAuthenticated
     def studentLogin():
         return render_template('student/login.html')
+    
+    @app.route('/student/otp')
+    @preventAuthenticated
+    def studentOtp():
+        # Check if user_id exist and otp
+        if 'user_id' in session and 'otp' in session:
+            # Check if otp_expired_at already expired
+            if session['otp_expired_at'] < datetime.now():
+                session.clear()
+                return handle_404_error(None)
+            else:
+                return render_template('student/login_otp.html')
+        else:
+            session.clear()
+            # Return 404
+            return handle_404_error(None)
+        
     
 
     @app.route('/student/reset-request')
@@ -274,10 +298,15 @@ def create_app():
         return render_template('universityadmin/change-password.html', university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
     
     
+    # @app.route('/university-admin/finalized-grades')
+    # @role_required('universityAdmin')
+    # def universityFinalizedGrades():
+    #     return render_template('universityadmin/finalized-grades.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
+    
     @app.route('/university-admin/finalized-grades')
     @role_required('universityAdmin')
     def universityFinalizedGrades():
-        return render_template('universityadmin/finalized-grades.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
+        return render_template('universityadmin/finalized-grade2.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
 
     # ========================================================================
     # ALL SYSTEM ADMIN ROUTES HERE

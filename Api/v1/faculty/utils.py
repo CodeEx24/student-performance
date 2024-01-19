@@ -34,13 +34,14 @@ def getAllClassAverageWithPreviousYear(str_teacher_id):
             .join(Course, Metadata.CourseId == Course.CourseId)
             .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == current_year-1)
             .distinct(Metadata.CourseId, Metadata.Year, Metadata.Batch)
-            .order_by(desc(Metadata.Year))
+            .order_by(desc(Metadata.Year)).limit(5).all()
             # I Limit this into 8 because teacher cannot have many classes and the data sets made are distributed almost all of them
-            .limit(5)
+            
             # Once the data sets is fixed this can replace the previous line
             # .all()
         )
 
+        print('data_class_grade_handle: ', data_class_grade_handle)
         if data_class_grade_handle:
             list_data_class_grade = []
 
@@ -271,10 +272,10 @@ def getTopPerformerStudent(str_teacher_id, count):
                 # Check if we have already seen this student number
                 if student_number not in seen_student_numbers:
                     class_name = f"{top_performer_student.Course.CourseCode} {top_performer_student.Metadata.Year}-{top_performer_student.Class.Section}"
-
+                    full_name = f"{top_performer_student.Student.LastName}, {top_performer_student.Student.FirstName} {top_performer_student.Student.MiddleName}"
                     dict_pass_fail_rate = {
                         'StudentNumber': student_number,
-                        'StudentName': top_performer_student.Student.Name,
+                        'StudentName': full_name,
                         'Grade': top_performer_student.StudentClassGrade.Grade,
                         'Batch': top_performer_student.Metadata.Batch,
                         'Class': class_name,
@@ -300,6 +301,7 @@ def getTopPerformerStudent(str_teacher_id, count):
 
 
 def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
+    print('str_teacher_id: ', str_teacher_id)
     try:
         # Initial query
         query = (
@@ -320,6 +322,7 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
             .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
             # .filter(ClassSubject.FacultyId == str_teacher_id, Class.Batch >= current_year-4)
         )
+        
 
         # Parse and apply filters
         
@@ -401,8 +404,12 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
                                     column_arr_3 == int(section)
                                 )
                             continue
-                    elif column_name.strip() == 'StudentName':
-                        column_str = getattr(Student, 'Name')
+                    elif column_name.strip() == 'LastName':
+                        column_str = getattr(Student, 'LastName')
+                    elif column_name.strip() == 'FirstName':
+                        column_str = getattr(Student, 'FirstName')
+                    elif column_name.strip() == 'MiddleName':
+                        column_str = getattr(Student, 'MiddleName')
                     elif column_name.strip() == 'StudentNumber':
                         column_str =  getattr(Student, 'StudentNumber')     
                     elif column_name.strip() == 'SubjectCode':
@@ -449,8 +456,12 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
             # Determine the order attribute
             if order_by.split(' ')[0] == 'StudentNumber':
                 order_attr = getattr(Student, order_by.split(' ')[0])
-            elif order_by.split(' ')[0] == "StudentName":
-                order_attr = getattr(Student, 'Name')
+            elif order_by.split(' ')[0] == "LastName":
+                order_attr = getattr(Student, 'LastName')
+            elif order_by.split(' ')[0] == "FirstName":
+                order_attr = getattr(Student, 'FirstName')
+            elif order_by.split(' ')[0] == "MiddleName":
+                order_attr = getattr(Student, 'MiddleName')
             elif order_by.split(' ')[0] == 'Grade':
                 order_attr = getattr(StudentClassSubjectGrade, order_by.split(' ')[0])
             elif order_by.split(' ')[0] == 'SubjectCode':
@@ -480,16 +491,21 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
         else:
             # Apply default sorting
             order_query = filter_query.order_by(
-                desc(Course.CourseCode), desc(Metadata.Batch), desc(Metadata.Year), desc(Metadata.Semester), Student.Name
+                desc(Course.CourseCode), desc(Metadata.Batch), desc(Metadata.Year), desc(Metadata.Semester), Student.LastName
             )
 
         # Check if order_query and filter query exists:
 
-        # Apply skip and top
-        result_all = order_query.all()
-        # print('result_all: ', result_all)
-        result = result_all[skip: skip + top]
+        # # Apply skip and top
+        # result_all = order_query.all()
+        # # print('result_all: ', result_all)
+        # result = result_all[skip: skip + top]
+        # total_count = order_query.count()
+        
         total_count = order_query.count()
+        result = order_query.offset(skip).limit(top).all()
+        
+        print('result: ', result)
         
 
         if result:
@@ -503,7 +519,9 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
                 dict_class_subject_grade = {
                     'StudentId': class_subject_grade.Student.StudentId,
                     'StudentNumber': class_subject_grade.Student.StudentNumber,
-                    'StudentName': class_subject_grade.Student.Name,
+                    'LastName': class_subject_grade.Student.LastName,
+                    'FirstName': class_subject_grade.Student.FirstName,
+                    'MiddleName': class_subject_grade.Student.MiddleName,
                     'Class': class_name,
                     'Batch': class_subject_grade.Metadata.Batch,
                     'Semester': class_subject_grade.Metadata.Semester,
@@ -522,6 +540,7 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
             return {'ClassSubjectGrade': [], 'Classes': [], 'currentPage': 1, 'totalPages': 0, 'totalItems': 0}
 
     except Exception as e:
+        print("ERROR: ", e)
         # Log the exception or handle it appropriately
         return None
 
@@ -928,6 +947,7 @@ def getFacultyData(str_teacher_id):
             
             dict_faculty_data = {
                 "TeacherId": data_faculty.FacultyId,
+                'FacultyType': data_faculty.FacultyType,
                 "Name": full_name,
                 "ResidentialAddress": data_faculty.ResidentialAddress,
                 "Email": data_faculty.Email,

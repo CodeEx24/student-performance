@@ -201,34 +201,47 @@ def getCurrentGpaGiven():
         # Handle the exception here, e.g., log it or return an error response
         return None
 
-
 def getOverallCoursePerformance():
     try:
         data_course_grade = db.session.query(
-            CourseGrade, Course).join(Course, Course.CourseId == CourseGrade.CourseId).order_by(CourseGrade.Batch, CourseGrade.CourseId).all()
-        
+            Course.CourseId,
+            Course.CourseCode,
+            CourseGrade.Batch,
+            func.avg(CourseGrade.Grade).label('average_grade')
+        ).join(
+            Course, Course.CourseId == CourseGrade.CourseId
+        ).group_by(
+            Course.CourseId, CourseGrade.Batch
+        ).order_by(
+            CourseGrade.Batch, Course.CourseId
+        ).all()
+
+        print('data_course_grade: ', data_course_grade)
         list_course = []
-        
+
         if data_course_grade:
             course_year_grades = defaultdict(dict)
 
             for course_grade in data_course_grade:
-                # Check if course_grade.Course.CourseCode existing in list_course
-                if course_grade.Course.CourseCode not in list_course:
-                    list_course.append(course_grade.Course.CourseCode)
+                course_code = course_grade.CourseCode
+                year = course_grade.Batch
+                course_id = course_grade.CourseId
                 
-                year = course_grade.CourseGrade.Batch
-                course_id = course_grade.Course.CourseCode
-                
-                grade = convertGradeToPercentage(course_grade.CourseGrade.Grade)
+                # Check if course_code is not in list_course
+                if course_code not in list_course:
+                    list_course.append(course_code)
+
+                grade = round(convertGradeToPercentage(course_grade.average_grade), 2)
 
                 if year not in course_year_grades:
                     course_year_grades[year] = {"x": year}
 
-                course_year_grades[year][course_id] = grade
+                course_year_grades[year][course_code] = grade
 
             # Convert the data into a list of dictionaries
             formatted_data = list(course_year_grades.values())
+            print('formatted_data: ', formatted_data)
+            print('list_course: ', list_course)
             return jsonify({'success': True, 'list_course': list_course, 'course_performance': formatted_data})
         else:
             return None
@@ -236,8 +249,8 @@ def getOverallCoursePerformance():
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return e
-
-
+    
+    
 def getAllClassData(skip, top, order_by, filter):
     try:
         class_grade_query = db.session.query(Class, Metadata,  Course, ClassGrade).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).join(ClassGrade, ClassGrade.ClassId == Class.ClassId)

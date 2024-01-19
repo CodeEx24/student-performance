@@ -243,14 +243,12 @@
     }`;
 
     student_course.innerHTML = `${
-      data.Course
-        ? data.Course
-        : 'Bachelor of Science in Information Technology'
+      data.CourseName ? data.CourseName : 'None Course'
     }`;
 
     name_number.innerHTML = `${
-      data.Name && data.StudentNumber
-        ? `${data.Name} <br class="md:hidden" /> (${data.StudentNumber})`
+      data.CourseName && data.StudentNumber
+        ? `${data.CourseName} <br class="md:hidden" /> (${data.StudentNumber})`
         : 'No Data Available'
     }`;
   }

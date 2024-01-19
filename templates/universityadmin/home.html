@@ -583,70 +583,42 @@
   }
 
   function displayCoursePerformance(json_course_performance) {
-    var chartData = [...json_course_performance];
+    var chartData = json_course_performance.course_performance;
+    var list_course = json_course_performance.list_course;
+
+    var series = list_course.map(function (course) {
+      return {
+        dataSource: chartData.map(function (item) {
+          return { x: item.x, y: item[course] };
+        }),
+        marker: { visible: true },
+        dashArray: '5, 1',
+        xName: 'x',
+        yName: 'y',
+        name: course,
+      };
+    });
 
     var chart = new ej.charts.Chart({
-      //Initializing Primary X Axis
+      // Initializing Primary X Axis
       primaryXAxis: {
-        interval: 1,
         valueType: 'Category',
       },
+      // Initializing Primary Y Axis
       primaryYAxis: {
         minimum: 0,
         maximum: 100,
         interval: 20,
       },
-      //Initializing Primary Y Axis
-      // primaryYAxis: {
-      //   interval: 100,
-      // },
-      // chartArea: { border: { width: 0 } },
-      //Initializing Chart Series
-      series: [
-        {
-          dataSource: chartData,
-          marker: { visible: true },
-          dashArray: '5, 1',
-          xName: 'x',
-          width: 2,
-          yName: 'BBA',
-          name: 'BBA',
-        },
-        {
-          dataSource: chartData,
-          marker: { visible: true },
-          dashArray: '5, 1',
-          xName: 'x',
-          width: 2,
-          yName: 'BBTE',
-          name: 'BBTE',
-        },
-        {
-          dataSource: chartData,
-          marker: { visible: true },
-          dashArray: '5, 1',
-          xName: 'x',
-          width: 2,
-          yName: 'BPAM',
-          name: 'BPAM',
-        },
-        {
-          dataSource: chartData,
-          marker: { visible: true },
-          dashArray: '5, 1',
-          xName: 'x',
-          width: 2,
-          yName: 'BSIT',
-          name: 'BSIT',
-        },
-      ],
-      //Initializing User Interaction Tooltip
+      // Initializing Chart Series
+      series: series,
+      // Initializing User Interaction Tooltip
       tooltip: {
         enable: true,
       },
     });
+
     chart.appendTo('#course-performance');
-    // chart.appendTo('#enrollment2');
   }
 
   fetchCoursePerformance();

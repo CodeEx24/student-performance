@@ -1,0 +1,128 @@
+{% extends "main/base.html" %} {% block content %}
+
+<div
+  class="flex h-screen w-screen items-center px-6 py-20 md:px-28 lg:w-[42rem] lg:pr-0"
+>
+  <div class="bg-black bg-opacity-80 p-10 text-center rounded-lg">
+    <div>
+      <img
+        src="{{ url_for('static', filename='images/pup.png') }}"
+        alt="Logo"
+        class="object-cover object-center rounded-lg mx-auto w-16 md:w-28 lg:w-32"
+      />
+
+      <h1
+        class="text-white font-poppins text-2xl font-extrabold mt-3 md:text-4xl md:mt-8"
+      >
+        Verify your OTP
+      </h1>
+      <p class="text-white text-md font-poppins mt-3 mb-8 md:text-lg">
+        Put the OTP provided in email
+      </p>
+    </div>
+
+    <form id="otp-form">
+      <div class="flex flex-col space-y-8">
+        <div class="flex flex-row justify-between w-full gap-4">
+          {% for i in range(6) %}
+          <div class="w-14 h-16">
+            <input
+              class="otp-input w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700 text-black font-bold text-2xl"
+              type="text"
+              name="otp{{ i }}"
+              maxlength="1"
+              oninput="moveToNextInput(this.name)"
+            />
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="flex flex-col space-y-5">
+          <button
+            type="submit"
+            class="text-white bg-sky-700 hover:bg-sky-600 focus:ring-4 focus:outline-none mt-4 focus:ring-sky-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+          >
+            Verify Account
+          </button>
+
+          <div
+            class="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-white"
+          >
+            <p>Didn't receive code?</p>
+
+            <button
+              class="flex flex-row items-center text-blue-600"
+              onclick="resendOtp(event)"
+            >
+              Resend
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div>
+      <p class="text-sm text-white mt-3">
+        By using this service, you understood and agree to the PUP Online
+        Services Terms of Use and Privacy Statement
+      </p>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- SCRIPTS -->
+{% block script %}
+<script>
+  function moveToNextInput(currentInputName) {
+    console.log('currentInputName: ', currentInputName);
+    var lastInput = currentInputName[currentInputName.length - 1];
+    // Get the next element by name
+    var nextInput = document.getElementsByName(
+      'otp' + (parseInt(lastInput) + 1)
+    )[0];
+
+    // If there is a next input, focus on it
+    if (nextInput !== undefined) {
+      nextInput.focus();
+    }
+  }
+</script>
+
+<script>
+  document
+    .getElementById('otp-form')
+    .addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      console.log('SUBMITTING FORM');
+    });
+</script>
+
+<script>
+  async function resendOtp() {
+    event.preventDefault();
+    console.log('RESENDING OTP');
+    // Post request to resendOtp
+    const response = await fetch(`/api/v1/student/otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Check if response is ok then throw response json and notyf.success it
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      notyf.success(data.message);
+    } else {
+      // Else throw response json and notyf.error it
+      const data = await response.json();
+      console.log(data);
+      notyf.error(data.message);
+    }
+  }
+</script>
+
+{% endblock script %}

@@ -24,14 +24,14 @@
     <form class="flex flex-col gap-3" method="POST" id="login-form">
       <div class="">
         <label
-          htmlFor="username"
+          htmlFor="email"
           class="flex text-left mb-2 font-medium text-white"
         >
           Your email
         </label>
         <input
-          id="username"
-          name="username"
+          id="email"
+          name="email"
           placeholder="username@gmail.com"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
         />
@@ -83,40 +83,40 @@
 <!-- SCRIPTS -->
 {% block script %}
 <script>
-  // Add event listener to the form submission
   document
     .getElementById('login-form')
     .addEventListener('submit', function (event) {
-      event.preventDefault(); // Prevent the default form submission
+      event.preventDefault();
 
-      // Get the form data
       const formData = new FormData(event.target);
+      const apiUrl = '/api/v1/student/login';
 
-      // Define the API URL for the login endpoint
-      const apiUrl = "{{ url_for('student_api.login') }}";
-
-      // Make a POST request to the login API
       fetch(apiUrl, {
         method: 'POST',
         body: formData,
-        credentials: 'include', // Include credentials (cookies) in the request
+        credentials: 'include',
       })
         .then((response) => {
-          if (response.status == 401) {
-            throw new Error('Invalid email or password');
-            console.log('ERROR INCLIAD');
-          }
-          return response.json(); // Parse the JSON response
+          return response.json();
         })
         .then((data) => {
-          console.log(data);
-          window.location.href = "{{ url_for('studentHome') }}";
+          // CCheck if data.sucess throw message
+          if (data.success) {
+            // Redirect to dashboard
+            console.log(data.message);
+            window.location.href = '/student/home';
+          } else if (data.error) {
+            // Thrown error
+            const messageContainer =
+              document.getElementById('message-container');
+            messageContainer.innerHTML = `<div class="text-red-500">${data.message}</div>`;
+          }
         })
         .catch((error) => {
-          // Handle errors
           const messageContainer = document.getElementById('message-container');
-          messageContainer.innerHTML = `<div class="text-red-500">Login failed: ${error.message}</div>`;
+          messageContainer.innerHTML = `<div class="text-red-500">${error.message}</div>`;
         });
     });
 </script>
+
 {% endblock script %}

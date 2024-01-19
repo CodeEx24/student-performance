@@ -3,26 +3,120 @@ from flask import jsonify
 from flask import Blueprint, jsonify, request, redirect, url_for, flash, session, render_template
 from sqlalchemy import desc
 from werkzeug.security import check_password_hash, gen_salt
-from models import Student, db, OAuth2Token
+from models import Student, db, OAuth2Token, CourseEnrolled, Course
 from oauth2 import authorization, require_oauth
 import os
 import time
 from authlib.integrations.flask_oauth2 import current_token
 
 from decorators.auth_decorators import preventAuthenticated, role_required
+# from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
 from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, getStudentData, updateStudentData, updatePassword, getCurrentUser, saveSessionValues
 from werkzeug.security import generate_password_hash
 
+import random
 from flask_mail import Message
 from mail import mail  # Import mail from the mail.py module
 import secrets
 from datetime import datetime, timedelta
+
+
 student_api_base_url = os.getenv("STUDENT_API_BASE_URL")
 student_api = Blueprint('student_api', __name__)
 # from app import create_app
 # Api/v1/student/api_routes.py
+
+MAX_LOGIN_ATTEMPTS = 3
+
+# MAIN LOGIN
+
+@student_api.route('/login', methods=['POST'])
+# @login_decorator("Too many login attempts. Please try again later")
+def login():
+    print("HERE")
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        # Print email and pass
+        # create_app.sayHello()
+        student = Student.query.filter_by(Email=email).first()
+        if student and check_password_hash(student.Password, password):
+            # Successfully authenticated
+            # access_token = create_access_token(identity=student.StudentId)
+            # refresh_token = create_refresh_token(identity=student.StudentId)
+            session['user_id'] = student.StudentId
+            session['user_role'] = 'student'
+
+            return jsonify({"success": True, "message": "Login successful"}), 200
+        else:
+            # Return
+            return jsonify({"error": True, "message": "Invalid email or password"}), 401
+        # return redirect('/')
+    else:
+        return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
+
+# @student_api.route('/verify-otp', methods=['POST'])
+# def verifyOtp():
+#     if request.method == 'POST':
+#         # Get the user id in session
+#         # return jsonify success
+#         session['user_role'] = 'student'
+#         return jsonify({'success': True, "message": "OTP verified"}), 200
+#     else:
+#         return jsonify({'error': True, "message": 'Invalid request method'}), 400
+    
+    
+# @student_api.route('/resend-otp', methods=['POST'])
+# @resend_otp_decorator("Too many request")
+# def resendOtp():
+#     if request.method == 'POST':
+#         # Check if user_id have value in session
+#         user_id = session.get('user_id')
+#         if user_id:
+#             session['otp'] = ''.join([str(random.randint(0, 9)) for i in range(6)])
+#             session['otp_expired_at'] = time.time() + (5 * 60)
+#             # Print the otp resend
+#             print('OTP Resend: ', session.get('otp'))
+#             return jsonify({'success': True, "message": "OTP sent successfully"}), 200
+#     else:
+#         return jsonify({'error': True, 'message': 'Invalid request method'}), 400
+
+
+
+# @student_api.route('/login', methods=['POST'])
+# def login():
+#     if request.method == 'POST':
+#         if 'login_attempts' not in session:
+#             session['login_attempts'] = 0
+
+#         if session['login_attempts'] >= MAX_LOGIN_ATTEMPTS:
+#             print("LOGIN REACH")
+#             flash('Too many login attempts. Please try again later.')
+#             return jsonify({'error': 'Too many login attempts. Please try again later.'}), 429  # 429 Too Many Requests
+
+        
+#         email = request.form['email']
+#         password = request.form['password']
+        
+#         student = Student.query.filter_by(Email=email).first()
+#         if student and check_password_hash(student.Password, password):
+#             session['user_id'] = student.StudentId
+#             session.pop('login_attempts', None)  # Reset login attempts upon successful login
+
+#             # Generate an otp with 6 length and save to session. Numbers only
+#             session['otp'] = ''.join([str(random.randint(0, 9)) for i in range(6)])
+#             session['otp_expired_at'] = time.time() + (5 * 60)
+#             print('OTP: ', session.get('otp'))
+            
+#             return jsonify({"message": "Login successful"}), 200
+#         else:
+#             session['login_attempts'] += 1
+#             return jsonify({"message": "Invalid email or password"}), 401
+#     else:
+#         return jsonify({'error': 'Invalid request method'}), 400
+    
 
 # ===================================================
 # TESTING AREA
@@ -210,29 +304,6 @@ def resetPassword(token):
 #     else:
 #         return jsonify({ 'success': False, 'error': True, 'message': 'Invalid token' }), 401
 
-# # Student User Log in
-@student_api.route('/login', methods=['POST'])
-def login():
-    print("HERE")
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        # Print email and pass
-        print('email: ', email)
-        print('pass: ', password)
-        # create_app.sayHello()
-        student = Student.query.filter_by(Email=email).first()
-        if student and check_password_hash(student.Password, password):
-            # Successfully authenticated
-            # access_token = create_access_token(identity=student.StudentId)
-            # refresh_token = create_refresh_token(identity=student.StudentId)
-            session['user_id'] = student.StudentId
-            session['user_role'] = 'student'
-
-            return jsonify({"message": "Login successful"}), 200
-        # return redirect('/')
-    else:
-        return jsonify({'error': 'Invalid username or password'}), 401
 
 # Make a token validator that will check whether the access token is correct
 # Required parms (user_id, access_token)
@@ -338,11 +409,23 @@ def overallGrade():
 def studentData():
     student = getCurrentUser()
     if student:
-        json_student_data = getStudentData(student.StudentId)
-        if json_student_data:
-            return (json_student_data)
-        else:
-            return jsonify(message="No data available")
+        dict_student = student.to_dict()  # Assuming to_dict() returns a dictionary
+        print('dict_student: ', dict_student['StudentId'])
+
+        # Find course enrolled
+        data_course_enrolled = (
+            db.session.query(CourseEnrolled, Course)
+            .join(Course, Course.CourseId == CourseEnrolled.CourseId)
+            .filter(CourseEnrolled.StudentId == dict_student['StudentId'])
+            .order_by(desc(CourseEnrolled.created_at))
+            .first()
+        )
+        
+        dict_student['CourseName'] = data_course_enrolled.Course.Name
+        
+        # print('data_course_enrolled: ', data_course_enrolled)
+        # return student to_dict
+        return jsonify(dict_student)
     else:
         return render_template('404.html'), 404
 
@@ -435,9 +518,9 @@ def previousGrade():
         json_previous_grade = getLatestSubjectGrade(student.StudentId)
 
         if json_previous_grade:
-            return (json_previous_grade)
+            return ({'success': True, 'data':json_previous_grade})
         else:
-            return jsonify(message="No Grades data available")
+            return jsonify({'error': True, 'message':'No Grades data available'})
     else:
         return render_template('404.html'), 404
 
@@ -447,7 +530,7 @@ def previousGrade():
 def coursePerformance():
     student = getCurrentUser()
     if student:
-        json_course_performance = getCoursePerformance(student.StudentId)
+        json_course_performance = getCoursePerformance()
 
         if json_course_performance:
             return (json_course_performance)

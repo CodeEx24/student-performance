@@ -35,9 +35,9 @@ def login():
             session['user_role'] = 'systemAdmin'
             user = current_user()
             print('session: ', session)
-            return jsonify({"message": "Login successful"}), 200
+            return jsonify({"success": True, "message": "Login successful"}), 200
         else:
-            return jsonify({"message": "Invalid email or password"}), 401
+            return jsonify({"error": False, "message": "Invalid email or password"}), 401
 
 # Make a client list route
 @system_admin_api.route('/clients', methods=['GET'])

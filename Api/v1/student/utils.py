@@ -1,10 +1,10 @@
 from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, Metadata, db
 
-
-from sqlalchemy import desc
+from sqlalchemy import desc, func
+from collections import defaultdict
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import session
+from flask import session, jsonify
 
 from static.js.utils import convertGradeToPercentage, checkStatus
 
@@ -36,7 +36,8 @@ def getCurrentUser():
 def getStudentGpa(studentId):
     try:
         gpa = StudentClassGrade.query.filter_by(
-            StudentId=studentId).join(Class, StudentClassGrade.ClassId == Class.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).order_by(desc(Metadata.Batch), desc(Metadata.Semester)).first()
+            StudentId=studentId).join(Class, StudentClassGrade.ClassId == Class.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).filter(Class.IsGradeFinalized == True).order_by(desc(Metadata.Batch), desc(Metadata.Semester)).first()
+        
         if gpa:
             dict_gpa = gpa.to_dict()
             return dict_gpa
@@ -53,23 +54,22 @@ def getStudentPerformance(str_student_id):
             db.session.query(StudentClassGrade, Class, Metadata)
             .join(Class, StudentClassGrade.ClassId == Class.ClassId)
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
-            .filter(StudentClassGrade.StudentId == str_student_id)
+            .filter(StudentClassGrade.StudentId == str_student_id, StudentClassGrade.Grade != None)
             .order_by(desc(Metadata.Batch), desc(Metadata.Semester))
             .all()
         )
-
+        
         if list_student_performance:
             list_performance_data = []  # Initialize a list to store dictionary data
             for gpa in list_student_performance:
-
-                gpa_dict = {
-                    'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
-                    'Semester': gpa.Metadata.Semester,
-                    'Year': gpa.Metadata.Batch,
-                }
-                # Append the dictionary to the list
-                list_performance_data.append(gpa_dict)
-
+                if gpa.StudentClassGrade.Grade != None or gpa.StudentClassGrade.Grade != 0:
+                    gpa_dict = {
+                        'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
+                        'Semester': gpa.Metadata.Semester,
+                        'Year': gpa.Metadata.Batch,
+                    }
+                    # Append the dictionary to the list
+                    list_performance_data.append(gpa_dict)
             # Check for missing entries
             batch_semester_map = {(gpa_dict["Year"], semester): False for semester in range(
                 1, 4) for gpa_dict in list_performance_data}
@@ -99,33 +99,35 @@ def getStudentPerformance(str_student_id):
             return None
 
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
 
 def getLatestSubjectGrade(str_student_id):
     try:
         data_latest_class_subject = (
-            db.session.query(StudentClassSubjectGrade, ClassSubject, Class)
+            db.session.query(StudentClassSubjectGrade, ClassSubject, Class, Metadata)
             .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
             .join(Class, ClassSubject.ClassId == Class.ClassId)
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
-            .filter(StudentClassSubjectGrade.StudentId == str_student_id)
+            .filter(StudentClassSubjectGrade.StudentId == str_student_id, Class.IsGradeFinalized == False)
             .order_by(desc(Metadata.Batch), desc(Metadata.Semester))
             .first()
         )
         
+        
         if data_latest_class_subject:
 
             data_class_subject_grade = (
-                db.session.query(
-                    ClassSubject, StudentClassSubjectGrade, Subject, Class, Metadata)
+                db.session.query(ClassSubject, StudentClassSubjectGrade, Class, Metadata, Subject)
                 .join(StudentClassSubjectGrade, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
                 .join(Class, Class.ClassId == ClassSubject.ClassId)
                 .join(Metadata, Metadata.MetadataId == Class.MetadataId)
                 .join(Subject, ClassSubject.SubjectId == Subject.SubjectId)
-                .filter(StudentClassSubjectGrade.StudentId == str_student_id, ClassSubject.ClassId == data_latest_class_subject.Class.ClassId, Metadata.Semester == data_latest_class_subject.Metadata.Semester)
-                .all()
+                .filter(StudentClassSubjectGrade.StudentId == str_student_id, ClassSubject.ClassId == data_latest_class_subject.Class.ClassId, Metadata.Semester == data_latest_class_subject.Metadata.Semester).all()
+                # .all()
             )
+            
             if data_class_subject_grade:
                 list_class_subject_grade = []
 
@@ -150,49 +152,52 @@ def getLatestSubjectGrade(str_student_id):
         # Handle the exception here, e.g., log it or return an error response
         return None
 
-def getCoursePerformance(str_student_id):
+def getCoursePerformance():
     try:
-        data_course_enrolled = (
-            db.session.query(CourseEnrolled)
-            .filter(CourseEnrolled.StudentId == str_student_id)
-            .order_by(desc(CourseEnrolled.DateEnrolled))
-            .first()
-        )
+        data_course_grade = db.session.query(
+            Course.CourseId,
+            Course.CourseCode,
+            CourseGrade.Batch,
+            func.avg(CourseGrade.Grade).label('average_grade')
+        ).join(
+            Course, Course.CourseId == CourseGrade.CourseId
+        ).group_by(
+            Course.CourseId, CourseGrade.Batch
+        ).order_by(
+            CourseGrade.Batch, Course.CourseId
+        ).all()
 
-        
-        if data_course_enrolled:
-            data_course_performance = (
-                db.session.query(CourseGrade)
-                .filter(CourseGrade.CourseId == data_course_enrolled.CourseId)
-                .order_by(desc(CourseGrade.Year))
-                .limit(10)
-                # .all()
-            )
+        list_course = []
 
-            if data_course_performance:
-                list_course_performance = []
-                data_course = {
-                    "Course": data_course_enrolled.CourseId, "List": []
-                }
+        if data_course_grade:
+            course_year_grades = defaultdict(dict)
 
-                for course_performance in data_course_performance:
-                    dict_course_performance = {
-                        'Grade': convertGradeToPercentage(course_performance.Grade),
-                        'Year': course_performance.Year
-                    }
+            for course_grade in data_course_grade:
+                course_code = course_grade.CourseCode
+                year = course_grade.Batch
+                course_id = course_grade.CourseId
+                
+                # Check if course_code is not in list_course
+                if course_code not in list_course:
+                    list_course.append(course_code)
 
-                    list_course_performance.append(dict_course_performance)
+                grade = round(convertGradeToPercentage(course_grade.average_grade), 2)
 
-                data_course["List"] = list_course_performance
-                return data_course
-            else:
-                return None
+                if year not in course_year_grades:
+                    course_year_grades[year] = {"x": year}
+
+                course_year_grades[year][course_code] = grade
+
+            # Convert the data into a list of dictionaries
+            formatted_data = list(course_year_grades.values())
+            return jsonify({'success': True, 'list_course': list_course, 'course_performance': formatted_data})
         else:
             return None
-
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
-        return None
+        return e
+
 
 
 def getOverallGrade(str_student_id):
@@ -205,14 +210,14 @@ def getOverallGrade(str_student_id):
             grade_count = 0
 
             for overall_class_grade in data_overall_class_grade:
-
-                total_grade += overall_class_grade.Grade
-                grade_count += 1
+                if isinstance(overall_class_grade.Grade, float) or isinstance(overall_class_grade.Grade, int):
+                    total_grade += overall_class_grade.Grade
+                    grade_count += 1
 
             total_average_grade = total_grade / grade_count
 
             dict_total_average_grade = {"Grade": total_average_grade}
-
+            
             return (dict_total_average_grade)
 
         else:
@@ -254,7 +259,7 @@ def getSubjectsGrade(str_student_id):
                         .filter(Faculty.FacultyId == student_class_subject_grade.ClassSubject.FacultyId)
                         .first()
                     )
-                    teacher_name = data_teacher.Name
+                    teacher_name = data_teacher.LastName + ', ' + data_teacher.FirstName + ' ', data_teacher.MiddleName
                 
                 
                 class_combination = (
@@ -298,19 +303,17 @@ def getSubjectsGrade(str_student_id):
         else:
             return None
     except Exception as e:
-        print("ERRIR: ", e)
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
 
 
 def getStudentData(student_id):
     try:
-        print("HERE IN GETTING")
         data_student = (
             db.session.query(Student).filter(
                 Student.StudentId == student_id).first()
         )
-        print("data_student: ", data_student)
         if data_student:
             #  data_course_enrolled = (
             #     db.session.query(Course, CourseEnrolled)
@@ -329,7 +332,6 @@ def getStudentData(student_id):
                 "Gender": "Male" if data_student.Gender == 1 else "Female",
                 # "Course": data_course_enrolled.Course.CourseCode if data_course_enrolled else "None"
             }
-            print('dict_student_data: ', dict_student_data)
             return (dict_student_data)
         else:
             return None

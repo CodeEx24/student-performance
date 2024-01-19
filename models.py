@@ -40,15 +40,13 @@ class Student(db.Model): # (class SPSStudent) In DJANGO you must set the name di
     # IsBridging
     
     def to_dict(self):
+        full_name = self.LastName + ', ' + self.FirstName + ' ' + self.MiddleName
         return {
             'StudentId': self.StudentId,
             'StudentNumber': self.StudentNumber,
-            'FirstName': self.FirstName,
-            'LastName': self.LastName,
-            'MiddleName': self.MiddleName,
+            'Name': full_name,
             'Email': self.Email,
-            'Password': self.Password,
-            'Gender': self.Gender,
+            'Gender': "Male" if self.Gender == 1 else "Female",
             'DateOfBirth': self.DateOfBirth,
             'PlaceOfBirth': self.PlaceOfBirth,
             'ResidentialAddress': self.ResidentialAddress,
@@ -114,7 +112,7 @@ class Faculty(db.Model):
             'honorific': self.Honorific,
             'age': self.Age,
             'email': self.Email,
-            # 'password': self.password,
+    
             'profile_pic': self.ProfilePic,
             'is_active': self.IsActive,
         }
@@ -143,15 +141,13 @@ class UniversityAdmin(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     def to_dict(self):
+        full_name = self.LastName + ', ' + self.FirstName + ' ' + self.MiddleName
         return {
             'UnivAdminId': self.UnivAdminId,
             'UnivAdminNumber': self.UnivAdminNumber,
-            'FirstName': self.FirstName,
-            'LastName': self.LastName,
-            'MiddleName': self.MiddleName,
+            'Name': full_name,
             'Email': self.Email,
-            'Password': self.Password,
-            'Gender': self.Gender,
+            'Gender': "Male" if self.Gender == 1 else "Female",
             'DateOfBirth': self.DateOfBirth,
             'PlaceOfBirth': self.PlaceOfBirth,
             'ResidentialAddress': self.ResidentialAddress,
@@ -191,7 +187,6 @@ class SystemAdmin(db.Model):
             'LastName': self.LastName,
             'MiddleName': self.MiddleName,
             'Email': self.Email,
-            'Password': self.Password,
             'Gender': self.Gender,
             'DateOfBirth': self.DateOfBirth,
             'PlaceOfBirth': self.PlaceOfBirth,
