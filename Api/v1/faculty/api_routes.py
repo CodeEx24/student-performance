@@ -70,12 +70,12 @@ def updateDetails():
     faculty = getCurrentUser()
     if faculty:
         if request.method == 'POST':
-            email = request.json.get('email')
+            # email = request.json.get('email')
             number = request.json.get('number')
             residential_address = request.json.get('residential_address')
 
             json_result = updateFacultyData(
-                faculty.FacultyId, email, number, residential_address)
+                faculty.FacultyId, number, residential_address)
 
             return json_result
 
@@ -157,13 +157,17 @@ def passFailRates():
 
 
 # Getting the top performer student
-@faculty_api.route('/top-student', methods=['GET'])
+@faculty_api.route('/top-student/', methods=['GET'])
 @role_required('faculty')
 def topPerformerStudent():
     faculty = getCurrentUser()
     if faculty:
-        json_top_performer_student = getTopPerformerStudent(
-            faculty.FacultyId, 10)
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_top_performer_student = getTopPerformerStudent(skip, top, order_by, filter)
 
         if json_top_performer_student:
             return (json_top_performer_student)
@@ -180,7 +184,7 @@ def studentClassSubjectGrade():
     faculty = getCurrentUser()
     
     if faculty:
-        skip = int(request.args.get('$skip', 1))
+        skip = int(request.args.get('$skip', 0))
         top = int(request.args.get('$top', 10))
         order_by = (request.args.get('$orderby'))
         filter = (request.args.get('$filter'))

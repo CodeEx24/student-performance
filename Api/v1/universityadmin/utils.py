@@ -3833,8 +3833,7 @@ def finalizedGradesBatchSemester(batch_semester_id):
                     list_grade_analytics_details = [] # For details of analytics (Lister, Passed, Failed, Incomplete etc.)
                     
                     all_class_list = []
-                    
-                   
+                            
                     # print('data_of_metadata.Metadata.MetadataId: ', data_of_metadata.Metadata.MetadataId)
                     # print('count_nstp: ', count_nstp)
                     # print('count_subject: ', count_subject)

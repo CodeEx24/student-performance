@@ -1,4 +1,4 @@
-from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, ClassGrade, ClassSubjectGrade, Metadata, db
+from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, ClassGrade, ClassSubjectGrade, Metadata, db, LatestBatchSemester
 
 from sqlalchemy import desc, distinct, func, and_
 import re
@@ -17,78 +17,124 @@ def getCurrentUser():
 
 def getAllClassAverageWithPreviousYear(str_teacher_id):
     try:
-        # This could be dynamic depending on the needs/whats the best
-        current_year = datetime.datetime.now().year
+        #  # Get LatestBatchSemester.IsGradeFinalized == True
+        # latest_batch_semester = db.session.query(LatestBatchSemester).filter(LatestBatchSemester.IsGradeFinalized == False, LatestBatchSemester.IsEnrollmentStarted == True).order_by(desc(LatestBatchSemester.created_at)).first()
+        
+        # print('latest_batch_semester: ', latest_batch_semester.Batch)
+        
+        # # current_year = datetime.datetime.now().year
 
-        data_class_grade_handle = (
-            db.session.query(
-                ClassSubject,
-                Class,
-                Metadata,
-                ClassGrade,
-                Course,
-            )
-            .join(Class, ClassSubject.ClassId == Class.ClassId)
-            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
-            .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
-            .join(Course, Metadata.CourseId == Course.CourseId)
-            .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == current_year-1)
-            .distinct(Metadata.CourseId, Metadata.Year, Metadata.Batch)
-            .order_by(desc(Metadata.Year)).limit(5).all()
-            # I Limit this into 8 because teacher cannot have many classes and the data sets made are distributed almost all of them
+        # data_class_subject_grade_handle = (
+        #     db.session.query(
+        #         ClassSubject,
+        #         Class, Course, Metadata
+        #     )
+        #     .join(Class, Class.ClassId == ClassSubject.ClassId)
+        #     .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+        #     .join(Course, Course.CourseId == Metadata.CourseId)
+        #     .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == latest_batch_semester.Batch)
+        #     .order_by(desc(Metadata.CourseId), Metadata.Year, Class.Section)
+        #     .all()
+        # )
+
+        # if data_class_subject_grade_handle:
+        #     list_classes = []
+        #     seen_class_name = set()  # Initialize a set to track seen ClassIds
+
+        #     for class_subject_grade in data_class_subject_grade_handle:
+        #         class_name = f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Metadata.Year}-{class_subject_grade.Class.Section}"
+
+        #         # Check if the ClassId is not in the seen_class_name set
+        #         if class_name not in seen_class_name:
+        #             # Get the class name
+        #             class_obj = {
+        #                 'ClassId': class_subject_grade.Class.ClassId,
+        #                 'ClassName': class_name
+        #             }
+
+        #             # Add class_name to the seen_class_name set
+        #             seen_class_name.add(class_name)
+
+        #             # Add class_obj to the list_classes
+        #             list_classes.append(class_obj)
+
+        #     # Return the list of class objects
+        #     return {'Classes': list_classes}
+# data_class_grade_handle = (
+#             db.session.query(
+#                 ClassSubject,
+#                 Class,
+#                 Metadata,
+#                 ClassGrade,
+#                 Course,
+#             )
+#             .join(Class, ClassSubject.ClassId == Class.ClassId)
+#             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+#             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
+#             .join(Course, Metadata.CourseId == Course.CourseId)
+#             .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == latest_batch_semester.Batch)
+#             .distinct(Metadata.CourseId, Metadata.Year, Metadata.Batch)
+#             .order_by(desc(Metadata.Year)).all()
+#             # I Limit this into 8 because teacher cannot have many classes and the data sets made are distributed almost all of them
             
-            # Once the data sets is fixed this can replace the previous line
-            # .all()
-        )
+#             # Once the data sets is fixed this can replace the previous line
+#             # .all()
+#         )
+        
+        # Get LatestBatchSemester.IsGradeFinalized == True
+        latest_batch_semester = db.session.query(LatestBatchSemester).filter(LatestBatchSemester.IsGradeFinalized == False, LatestBatchSemester.IsEnrollmentStarted == True).order_by(desc(LatestBatchSemester.created_at)).first()
+        
+        print('latest_batch_semester: ', latest_batch_semester.Batch)
+        
+       # Get all class subjects taught by a specific faculty member in the latest batch and semester
+        data_class_subject_grade_handle = db.session.query( ClassSubject.FacultyId, Class.ClassId, Metadata.Batch, Metadata.CourseId, Course.CourseCode, Metadata.Year, Class.Section, func.count(ClassSubject.ClassSubjectId).label('CountClassSubject'), ) .join(Class, Class.ClassId == ClassSubject.ClassId) .join(Metadata, Metadata.MetadataId == Class.MetadataId) .join(Course, Metadata.CourseId == Course.CourseId) .filter( ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == latest_batch_semester.Batch, Class.IsGradeFinalized == False ) .group_by( ClassSubject.FacultyId, Class.ClassId, Metadata.Batch, Metadata.CourseId, Course.CourseCode, Metadata.Year, Class.Section, ) .all()
 
-        print('data_class_grade_handle: ', data_class_grade_handle)
-        if data_class_grade_handle:
+        print('data_class_subject_grade_handle: ', data_class_subject_grade_handle)
+        if data_class_subject_grade_handle:
             list_data_class_grade = []
+            for data in data_class_subject_grade_handle:
+                
 
-            for class_grade_handle in data_class_grade_handle:
-                # Calculate class name
-                class_name = f"{class_grade_handle.Course.CourseCode} {class_grade_handle.Metadata.Year}-{class_grade_handle.Class.Section} ({class_grade_handle.Metadata.Batch})"
-
-                num_class_batch = class_grade_handle.Metadata.Batch
-                num_class_section = class_grade_handle.Class.Section
+                class_batch = data[2]
+                class_section = data[6]
+                class_year = data[5]
+                course_code = data[4]
+                
+                class_name = f"{course_code} {class_year}-{class_section} ({class_batch})"
 
                 dict_class_grade_handle = {
                     'Class': class_name,
-                    'AYear': class_grade_handle.Metadata.Year,
-                    'BSection': num_class_section,
-                    'Batch': num_class_batch,
+                    'AYear': class_year,
+                    'BSection': class_section,
+                    'Batch': class_batch,
                     'ListGrade': []
                 }
 
                 list_grade = []
-                # 2022 - 4-i = 3 = 2019 1st Year
-                #       4-2 = 2 = 2020 2nd Year
-                # 4th year 2022 -
-                # 3rd year 2021
-                # 2nd year 2020
-                # 1st year 2019
-                for i in range(1, class_grade_handle.Metadata.Year+1):
+                print('class_name: ', class_name)
+                for i in range(1, class_year+1):
 
-                    batch = class_grade_handle.Metadata.Batch - class_grade_handle.Metadata.Year + i
+                    batch = class_batch - class_year + i
 
                     class_grade_result = (
                         db.session.query(
-                            Class,
-                            Metadata,
-                            ClassGrade,
+                            Class.ClassId,
+                            Metadata.Batch,
+                            (func.avg(func.nullif(ClassGrade.Grade, 0))).label("Avg"),
                         )
                         .join(Metadata, Metadata.MetadataId == Class.MetadataId)
                         .join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
-                        .filter(Metadata.Year == i, Metadata.Batch == batch, Class.Section == num_class_section)
+                        .filter(Metadata.Year == i, Metadata.Batch == batch, Class.Section == class_section)
+                        .group_by(Class.ClassId, Metadata.Batch)
                         # I Limit this into 8 because teacher cannot have many classes and the data sets made are distributed almost all of them
                         .first()
                         # Once the data sets is fixed this can replace the previous line
                         # .all()
                     )
-
+                    print('class_grade_result.ClassGrade.Grade: ', class_grade_result[0])
+                    print('class_grade_result.ClassGrade.COUNT: ', class_grade_result[1])
                     list_grade.append(
-                        {'x': class_grade_result.Metadata.Batch, 'y': convertGradeToPercentage(class_grade_result.ClassGrade.Grade)})
-
+                        {'x': class_grade_result[1], 'y': convertGradeToPercentage(class_grade_result[2])})
                 dict_class_grade_handle['ListGrade'].extend(list_grade)
 
                 list_data_class_grade.append(dict_class_grade_handle)
@@ -97,8 +143,73 @@ def getAllClassAverageWithPreviousYear(str_teacher_id):
             return (list_data_class_grade)
         else:
             return None
+                # dict_class_grade_handle['ListGrade'].extend(list_grade)
+
+                # list_data_class_grade.append(dict_class_grade_handle)
+
+            # Return the list of class grades and the lowest/highest grades dictionary
+            # return (list_data_class_grade)
+        
+
+        # print('str_teacher_id: ', str_teacher_id)
+        # if data_class_grade_handle:
+        #     list_data_class_grade = []
+
+        #     for class_grade_handle in data_class_grade_handle:
+        #         # Calculate class name
+        #         class_name = f"{class_grade_handle.Course.CourseCode} {class_grade_handle.Metadata.Year}-{class_grade_handle.Class.Section} ({class_grade_handle.Metadata.Batch})"
+
+        #         num_class_batch = class_grade_handle.Metadata.Batch
+        #         num_class_section = class_grade_handle.Class.Section
+
+        #         dict_class_grade_handle = {
+        #             'Class': class_name,
+        #             'AYear': class_grade_handle.Metadata.Year,
+        #             'BSection': num_class_section,
+        #             'Batch': num_class_batch,
+        #             'ListGrade': []
+        #         }
+
+        #         list_grade = []
+        #         # 2022 - 4-i = 3 = 2019 1st Year
+        #         #       4-2 = 2 = 2020 2nd Year
+        #         # 4th year 2022 -
+        #         # 3rd year 2021
+        #         # 2nd year 2020
+        #         # 1st year 2019
+        #         for i in range(1, class_grade_handle.Metadata.Year+1):
+
+        #             batch = class_grade_handle.Metadata.Batch - class_grade_handle.Metadata.Year + i
+
+        #             class_grade_result = (
+        #                 db.session.query(
+        #                     Class,
+        #                     Metadata,
+        #                     ClassGrade,
+        #                 )
+        #                 .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+        #                 .join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
+        #                 .filter(Metadata.Year == i, Metadata.Batch == batch, Class.Section == num_class_section)
+        #                 # I Limit this into 8 because teacher cannot have many classes and the data sets made are distributed almost all of them
+        #                 .first()
+        #                 # Once the data sets is fixed this can replace the previous line
+        #                 # .all()
+        #             )
+
+        #             list_grade.append(
+        #                 {'x': class_grade_result.Metadata.Batch, 'y': convertGradeToPercentage(class_grade_result.ClassGrade.Grade)})
+
+        #         dict_class_grade_handle['ListGrade'].extend(list_grade)
+
+        #         list_data_class_grade.append(dict_class_grade_handle)
+
+            # Return the list of class grades and the lowest/highest grades dictionary
+            # return (list_data_class_grade)
+        # else:
+        #     return None
 
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
 
@@ -120,7 +231,7 @@ def getHighLowAverageClass(str_teacher_id):
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
             .join(Course, Metadata.CourseId == Course.CourseId)
-            .filter(ClassSubject.FacultyId == str_teacher_id)
+            .filter(ClassSubject.FacultyId == str_teacher_id, Class.IsGradeFinalized == True)
             .order_by(ClassGrade.Grade.desc())
             .first()
         )
@@ -137,7 +248,7 @@ def getHighLowAverageClass(str_teacher_id):
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(ClassGrade, Class.ClassId == ClassGrade.ClassId)
             .join(Course, Metadata.CourseId == Course.CourseId)
-            .filter(ClassSubject.FacultyId == str_teacher_id)
+            .filter(ClassSubject.FacultyId == str_teacher_id, Class.IsGradeFinalized == True)
             .order_by(ClassGrade.Grade)
             .first()
         )
@@ -163,11 +274,16 @@ def getHighLowAverageClass(str_teacher_id):
 
 def getSubjectCount(str_teacher_id):
     try:
+        # Get Latest Batch Semester where IsGradeFinalized is False and IsEnrollmentStarted to True
+        latest_batch_semester = db.session.query(LatestBatchSemester).filter(LatestBatchSemester.IsGradeFinalized == False, LatestBatchSemester.IsEnrollmentStarted == True).order_by(desc(LatestBatchSemester.created_at)).first()
+        
         data_subject_amount = (
             db.session.query(
                 func.count(distinct(ClassSubject.SubjectId))
             )
-            .filter(ClassSubject.FacultyId == str_teacher_id)
+            .join(Class, Class.ClassId == ClassSubject.ClassId)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+            .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == latest_batch_semester.Batch, Metadata.Semester == latest_batch_semester.Semester)
             .scalar()
         )
 
@@ -237,67 +353,242 @@ def getPassFailRates(str_teacher_id):
         return None
 
 
-def getTopPerformerStudent(str_teacher_id, count):
+def getTopPerformerStudent(skip, top, order_by, filter):
     try:
 
         data_top_performer_student = (
             db.session.query(
-                ClassSubject,
-                StudentClassSubjectGrade,
-                StudentClassGrade,
-                Student,
-                Course,
-                Class,
-                Metadata
+                Student.StudentId,
+                Student.StudentNumber,
+                Student.LastName,
+                Student.FirstName,
+                Student.MiddleName,
+                Metadata.Batch,
+                func.avg(StudentClassGrade.Grade).label('average_grade'),
             )
-            .join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
-            .join(Class, Class.ClassId == ClassSubject.ClassId)
+            .join(Student, Student.StudentId == StudentClassGrade.StudentId)
+            .join(Class, Class.ClassId == StudentClassGrade.ClassId)
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
-            .join(StudentClassGrade, StudentClassSubjectGrade.StudentId == StudentClassGrade.StudentId)
-            .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
-            .join(Course, Course.CourseId == Metadata.CourseId)
-            .filter(ClassSubject.FacultyId == str_teacher_id)
-            .order_by(desc(Metadata.Batch), (StudentClassGrade.Grade))
-            .all()
+           
+            # .group_by(Student.StudentId, Metadata.Batch)
+            # .limit(10)
+            # .all()
         )
+        
+        # DEWFAULT:
+        #  .filter(Class.IsGradeFinalized == True)
+        #  .order_by(desc(Metadata.Batch), ('average_grade'))  # Order by average_grade in descending order
+        
+        print('data_top_performer_student: ', data_top_performer_student)
+        
+        filter_conditions = []
+        
+        filter_conditions.append(
+            Class.IsGradeFinalized == True
+        )
+        
+        if filter:
+            filter_parts = filter.split(' and ')
+            for part in filter_parts:
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(")[3].split("),'")[0]
+                    value = part.split("'")[1]
+                    column_str = None
+                    
+                    if column_name.strip() == 'StudentNumber':
+                        column_str = getattr(Student, 'StudentNumber')
+                    elif column_name.strip() == 'LastName':
+                        column_str = getattr(Student, 'LastName')
+                    elif column_name.strip() == 'FirstName':
+                        column_str = getattr(Student, 'FirstName')
+                    elif column_name.strip() == 'MiddleName':
+                        column_str = getattr(Student, 'MiddleName') 
+                    elif column_name.strip() == 'Grade':
+                        filter_conditions.append(
+                            ClassGrade.Grade == value
+                        )
+                        continue
+                    # elif column_name.strip() == 'Batch':
+                    #     filter_conditions.append(
+                    #         Metadata.Batch == value
+                    #     )
+                    #     continue
+                 
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).like(f'%{value}%')
+                        )
+                else:
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    column_num = None
+                    int_value = value.strip(')')
+                    
+                    # Check for column name 
+                    if column_name.strip() == 'Batch':
+                        column_num = Metadata.Batch
+                    elif column_name.strip() == 'Semester':
+                        column_num = Metadata.Semester
+               
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                # END OF ELSE PART
+            # END OF FOR LOOP
+        else:
+            print("NO FILTER")
+        
+        # Apply all filter conditions with 'and'
+  
+        filter_query = data_top_performer_student.filter(and_(*filter_conditions))
+        # print('FILTER: ', filter_query.statement.compile().params)
+        
+        
+         # Apply sorting logic
+        if order_by:
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'StudentNumber':
+                order_attr = getattr(Student, 'StudentNumber')
+            elif order_by.split(' ')[0] == "LastName":
+                order_attr = getattr(Student, "LastName")
+            elif order_by.split(' ')[0] == 'FirstName':
+                order_attr = getattr(Student, 'FirstName')
+            elif order_by.split(' ')[0] == 'MiddleName':
+                order_attr = getattr(Student, 'MiddleName')
+            elif order_by.split(' ')[0] == 'Grade':
+                order_attr = getattr(ClassGrade, 'Grade')
+            elif order_by.split(' ')[0] == 'Batch':
+                order_attr = getattr(ClassGrade, 'Batch')
+            # else:
+            #     if ' ' in order_by:
+            #         order_query = filter_query.order_by(desc(Course.CourseCode), desc(Metadata.Year), desc(Class.Section))
+            #     else:
+            #         order_query = filter_query.order_by(Course.CourseCode, Metadata.Year, Class.Section)
 
-        if data_top_performer_student:
+            # # Check if order_by contains space
+            # if not order_by.split(' ')[0] == "ClassName":
+            #     if ' ' in order_by:
+            #         order_query = filter_query.order_by(desc(order_attr))
+            #     else:
+            #         order_query = filter_query.order_by(order_attr)
+        else:
+            print("NO ORDER")
+            # Apply default sorting
+            order_query = filter_query.order_by(desc(Metadata.Batch), ('average_grade'))
+        
+        total_count = order_query.group_by(Student.StudentId, Metadata.Batch).count()
+        student_grade_main_query = order_query.group_by(Student.StudentId, Metadata.Batch).offset(skip).limit(top).all()
+        
+        print('student_grade_main_query: ', student_grade_main_query)
+        
+
+        if student_grade_main_query:
             list_data_top_performer_student = []
-            seen_student_numbers = set()  # To keep track of seen student numbers
-            added_count = 0  # To count the number of added objects
 
-            for top_performer_student in data_top_performer_student:
-                student_number = top_performer_student.Student.StudentNumber
+            for data in student_grade_main_query:
+                print("PER data", data)
+                dict_student_class_grade = {
+                    'StudentId': data[0],
+                    'StudentNumber': data[1],
+                    'LastName': data[2],
+                    'FirstName': data[3],
+                    'MiddleName': data[4],
+                    'Batch': data[5],
+                    'Grade': round(data[6], 2)
+                }
 
-                # Check if we have already seen this student number
-                if student_number not in seen_student_numbers:
-                    class_name = f"{top_performer_student.Course.CourseCode} {top_performer_student.Metadata.Year}-{top_performer_student.Class.Section}"
-                    full_name = f"{top_performer_student.Student.LastName}, {top_performer_student.Student.FirstName} {top_performer_student.Student.MiddleName}"
-                    dict_pass_fail_rate = {
-                        'StudentNumber': student_number,
-                        'StudentName': full_name,
-                        'Grade': top_performer_student.StudentClassGrade.Grade,
-                        'Batch': top_performer_student.Metadata.Batch,
-                        'Class': class_name,
-                        'TeacherNum': top_performer_student.ClassSubject.FacultyId
-                    }
-
-                    list_data_top_performer_student.append(dict_pass_fail_rate)
+                list_data_top_performer_student.append(dict_student_class_grade)
 
                     # Add the student number to the set of seen numbers
-                    seen_student_numbers.add(student_number)
-
-                    added_count += 1  # Increment the added count
-
-                    # Check if we have added the desired number of objects
-                    if added_count >= count:
-                        break  # Exit the loop if count is reached
-
-            return list_data_top_performer_student
-
+        return  jsonify({'result': list_data_top_performer_student, 'count': total_count})
+        # else:
+        #     return None
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
+
+    #     if data_top_performer_student:
+    #         list_top_performer = []
+    #         for data in data_top_performer_student:
+                
+    #             dict_student_class_grade = {
+    #                 'StudentId': data[0],
+    #                 'StudentNumber': data[1],
+    #                 'LastName': data[2],
+    #                 'FirstName': data[3],
+    #                 'MiddleName': data[4],
+    #                 'Batch': data[5],
+    #                 'Grade': round(data[6], 2)
+    #             }
+                
+    #             print('dict_student_class_grade: ', dict_student_class_grade)
+    #             list_top_performer.append(dict_student_class_grade)
+            
+    #         return jsonify(list_top_performer)
+    
+    #     # data_top_performer_student = (
+    #     #     db.session.query(
+    #     #         ClassSubject,
+    #     #         StudentClassSubjectGrade,
+    #     #         StudentClassGrade,
+    #     #         Student,
+    #     #         Course,
+    #     #         Class,
+    #     #         Metadata
+    #     #     )
+    #     #     .join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+    #     #     .join(Class, Class.ClassId == ClassSubject.ClassId)
+    #     #     .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+    #     #     .join(StudentClassGrade, StudentClassSubjectGrade.StudentId == StudentClassGrade.StudentId)
+    #     #     .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+    #     #     .join(Course, Course.CourseId == Metadata.CourseId)
+    #     #     .filter(ClassSubject.FacultyId == str_teacher_id)
+    #     #     .order_by(desc(Metadata.Batch), (StudentClassGrade.Grade))
+    #     #     .limit(20).all()
+    #     # )
+
+    #     # if data_top_performer_student:
+    #     #     list_data_top_performer_student = []
+    #     #     seen_student_numbers = set()  # To keep track of seen student numbers
+    #     #     added_count = 0  # To count the number of added objects
+
+    #     #     for top_performer_student in data_top_performer_student:
+    #     #         student_number = top_performer_student.Student.StudentNumber
+
+    #     #         # Check if we have already seen this student number
+    #     #         if student_number not in seen_student_numbers:
+    #     #             class_name = f"{top_performer_student.Course.CourseCode} {top_performer_student.Metadata.Year}-{top_performer_student.Class.Section}"
+    #     #             full_name = f"{top_performer_student.Student.LastName}, {top_performer_student.Student.FirstName} {top_performer_student.Student.MiddleName}"
+    #     #             dict_pass_fail_rate = {
+    #     #                 'StudentNumber': student_number,
+    #     #                 'StudentName': full_name,
+    #     #                 'Grade': top_performer_student.StudentClassGrade.Grade,
+    #     #                 'Batch': top_performer_student.Metadata.Batch,
+    #     #                 'Class': class_name,
+    #     #                 'TeacherNum': top_performer_student.ClassSubject.FacultyId
+    #     #             }
+
+    #     #             list_data_top_performer_student.append(dict_pass_fail_rate)
+
+    #     #             # Add the student number to the set of seen numbers
+    #     #             seen_student_numbers.add(student_number)
+
+    #     #             added_count += 1  # Increment the added count
+
+    #     #             # Check if we have added the desired number of objects
+    #     #             if added_count >= count:
+    #     #                 break  # Exit the loop if count is reached
+
+            
+
 
 
 def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
@@ -778,7 +1069,12 @@ def getStudentClassSubjectGrade(str_teacher_id, skip, top, order_by, filter):
 
 def getAllClass(str_teacher_id):
     try:
-        current_year = datetime.datetime.now().year
+        # Get LatestBatchSemester.IsGradeFinalized == True
+        latest_batch_semester = db.session.query(LatestBatchSemester).filter(LatestBatchSemester.IsGradeFinalized == False, LatestBatchSemester.IsEnrollmentStarted == True).order_by(desc(LatestBatchSemester.created_at)).first()
+        
+        print('latest_batch_semester: ', latest_batch_semester.Batch)
+        
+        # current_year = datetime.datetime.now().year
 
         data_class_subject_grade_handle = (
             db.session.query(
@@ -788,7 +1084,7 @@ def getAllClass(str_teacher_id):
             .join(Class, Class.ClassId == ClassSubject.ClassId)
             .join(Metadata, Metadata.MetadataId == Class.MetadataId)
             .join(Course, Course.CourseId == Metadata.CourseId)
-            .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == current_year - 1)
+            .filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == latest_batch_semester.Batch, Class.IsGradeFinalized == False)
             .order_by(desc(Metadata.CourseId), Metadata.Year, Class.Section)
             .all()
         )
@@ -836,6 +1132,8 @@ def getClassPerformance(class_id):
             .filter(ClassGrade.ClassId == class_id)
             .first()
         )
+        
+        print('class_grade: ', class_grade)
         if class_grade:
             class_name = f"{class_grade.Course.CourseCode} {class_grade.Metadata.Year}-{class_grade.Class.Section} ({class_grade.Metadata.Batch})"
             
@@ -849,7 +1147,7 @@ def getClassPerformance(class_id):
                 'PresidentLister': class_grade.ClassGrade.PresidentsLister,
                 'DeanLister': class_grade.ClassGrade.DeansLister
             }
-            
+            print('dict_class_grade: ', dict_class_grade)
             list_grade = []
             for i in range(1, class_grade.Metadata.Year+1):
 
@@ -859,8 +1157,10 @@ def getClassPerformance(class_id):
                     db.session.query(
                         Class,
                         ClassGrade,
+                        Metadata
                     )
                     .join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
+                    .join(Metadata, Metadata.MetadataId == Class.MetadataId)
                     .filter(Metadata.Year == i, Metadata.Batch == batch, Class.Section == num_class_section)
                     .first()
 
@@ -874,6 +1174,7 @@ def getClassPerformance(class_id):
         else:
             return None
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
 
@@ -892,14 +1193,17 @@ def getStudentPerformance(str_student_id):
         if list_student_performance:
             list_performance_data = []  # Initialize a list to store dictionary data
             for gpa in list_student_performance:
-
-                gpa_dict = {
-                    'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
-                    'Semester': gpa.Metadata.Semester,
-                    'Year': gpa.Metadata.Batch,
-                }
-                # Append the dictionary to the list
-                list_performance_data.append(gpa_dict)
+                # Check if Grade is not 0 or NoneTypew
+                if gpa.StudentClassGrade.Grade == 0 or gpa.StudentClassGrade.Grade is None:
+                    continue
+                else:
+                    gpa_dict = {
+                        'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
+                        'Semester': gpa.Metadata.Semester,
+                        'Year': gpa.Metadata.Batch,
+                    }
+                    # Append the dictionary to the list
+                    list_performance_data.append(gpa_dict)
 
             # Check for missing entries
             batch_semester_map = {(gpa_dict["Year"], semester): False for semester in range(
@@ -930,6 +1234,7 @@ def getStudentPerformance(str_student_id):
             return None
 
     except Exception as e:
+        print("ERROR: ", e )
         # Handle the exception here, e.g., log it or return an error response
         return None
 
@@ -963,10 +1268,10 @@ def getFacultyData(str_teacher_id):
         return None
 
 
-def updateFacultyData(str_teacher_id, email, number, residential_address):
+def updateFacultyData(str_teacher_id, number, residential_address):
     try:
-        if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
-            return {"type": "email", "status": 400}
+        # if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
+        #     return {"type": "email", "status": 400}
 
         if not re.match(r'^09\d{9}$', number):
             return {"type": "mobile", "status": 400}
@@ -979,12 +1284,12 @@ def updateFacultyData(str_teacher_id, email, number, residential_address):
             Faculty.FacultyId == str_teacher_id).first()
         
         if data_faculty:
-            data_faculty.Email = email
+            # data_faculty.Email = email
             data_faculty.MobileNumber = number
             data_faculty.ResidentialAddress = residential_address
             db.session.commit()
 
-            return {"message": "Data updated successfully", "email": email, "number": number, "residential_address": residential_address, "status": 200}
+            return {"message": "Data updated successfully", "number": number, "residential_address": residential_address, "status": 200}
         else:
             return {"message": "Something went wrong", "status": 404}
 

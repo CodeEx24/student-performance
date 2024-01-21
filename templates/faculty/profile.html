@@ -45,7 +45,7 @@
                   <p class="text-c1 opacity-90 font-normal" id="name">Name</p>
                 </div>
                 <div>
-                  <p class="text-c1 font-extrabold">Faculty Number:</p>
+                  <p class="text-c1 font-extrabold">Faculty Type:</p>
                   <p class="text-c1 opacity-90 font-normal" id="faculty-type">
                     Number
                   </p>
@@ -76,6 +76,7 @@
                     name="email"
                     placeholder="username@gmail.com"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+                    disabled
                   />
                   <p id="error-email" class="text-c4 text-sm"></p>
                 </div>
@@ -133,7 +134,7 @@
 <script>
   async function submitForm(event) {
     event.preventDefault();
-    const email = document.getElementById('email-input').value;
+    // const email = document.getElementById('email-input').value;
     const number = document.getElementById('number-input').value;
     const residential_address = document.getElementById(
       'residential-address-input'
@@ -145,7 +146,7 @@
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, number, residential_address }),
+      body: JSON.stringify({ number, residential_address }),
     });
 
     const data_faculty_details = await response.json();
