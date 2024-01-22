@@ -39,12 +39,17 @@
     <style>
       .e-toolbar-item,
       #Grid_toolbarItems,
+      #grid-class_toolbarItems,
       .e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn.e-btn,
       .e-toolbar .e-toolbar-items,
       .e-pager .e-currentitem,
       .e-pager .e-currentitem:hover {
-        background-color: #9d1d1d;
+        background-color: #9d1d1d !important;
         font-weight: bold;
+      }
+
+      #grid-class-subject_update {
+        z-index: 99 !important;
       }
 
       .e-input-group:not(.e-float-icon-left):not(.e-float-input)::before,
@@ -62,7 +67,9 @@
       .e-input-group.e-control-wrapper.e-float-icon-left:not(.e-float-input)
         .e-input-in-wrap::before,
       .e-input-group.e-control-wrapper.e-float-icon-left:not(.e-float-input)
-        .e-input-in-wrap::after {
+        .e-input-in-wrap::after,
+      .e-grid .e-toolbar,
+      .e-toolbar .e-toolbar-items .e-toolbar-item.e-overlay {
         background-color: #9d1d1d;
       }
 
@@ -71,8 +78,18 @@
         .e-toolbar-items
         .e-toolbar-item
         .e-tbar-btn.e-btn.e-tbtn-txt
-        .e-icons.e-btn-icon {
+        .e-icons.e-btn-icon,
+      .e-btn-icon e-update e-icons e-icon-left {
         color: white;
+      }
+
+      .e-toolbar .e-toolbar-items .e-toolbar-item.e-overlay .e-tbar-btn-text {
+        /* The value should be between 0 (completely transparent) and 1 (completely opaque) */
+        color: white;
+      }
+
+      .e-overlay {
+        background-color: #9d1d1d !important;
       }
 
       .e-headertext {
@@ -85,6 +102,7 @@
         margin-top: 80px;
       }
     </style>
+
     {% block styles %} {% endblock styles %}
   </head>
   <body class="bg-slate-200">
@@ -405,6 +423,20 @@
           },
         ],
       });
+
+      // Opening specific Modal
+      function showModal(elemetId) {
+        const loadingModal = document.getElementById(elemetId);
+        loadingModal.classList.add('flex');
+        loadingModal.classList.remove('hidden');
+      }
+
+      // Closing specific Modal
+      function closeModal(elemetId) {
+        const loadingModal = document.getElementById(elemetId);
+        loadingModal.classList.add('hidden');
+        loadingModal.classList.remove('flex');
+      }
     </script>
     <!-- SCRIPTS -->
     {% block script %} {% endblock script %}

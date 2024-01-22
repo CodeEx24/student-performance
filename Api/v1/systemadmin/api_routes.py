@@ -9,6 +9,8 @@ import time
 from werkzeug.security import gen_salt
 from oauth2 import authorization
 
+from .utils import getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, getClientList, getClientsData
+
 import os
 
 system_admin_api = Blueprint('system_admin_api', __name__)
@@ -40,26 +42,37 @@ def login():
             return jsonify({"error": False, "message": "Invalid email or password"}), 401
 
 # Make a client list route
-@system_admin_api.route('/clients', methods=['GET'])
+@system_admin_api.route('/clients/', methods=['GET'])
 def clients():
     user = current_user()
     if user:
-        # Get all clients list
-        clients = OAuth2Client.query.all()
-        list_client = []
-        for client in clients:
-            print(client.client_metadata)
-            list_client.append({"metadata": client.client_metadata, 'client_id': client.client_id, 'client_secret': client.client_secret})
-            
-        if clients:
-            return jsonify(list_client)
+        
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+      
+        json_class_subject_grade = getClientList(skip, top, order_by, filter)
+
+        if json_class_subject_grade:
+            return (json_class_subject_grade)
         else:
-            return jsonify({"message": "No clients found"}), 404
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
-        clients = []
-    return jsonify({"message": "No clients found"}), 404
+        return jsonify({"message": "No clients found"}), 404
 
-
+@system_admin_api.route('/client/<int:Id>', methods=['GET'])
+def clientData(Id):
+    user = current_user()
+    if user:
+        json_class_subject_grade = getClientsData(Id)
+ 
+        if json_class_subject_grade:
+            return (json_class_subject_grade)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return jsonify({"message": "No clients found"}), 404
     
     
     
