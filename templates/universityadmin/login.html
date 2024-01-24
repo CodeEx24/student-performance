@@ -21,11 +21,7 @@
       </p>
     </div>
 
-    <form
-      class="flex flex-col gap-3"
-      method="POST"
-      action="{{ url_for('university_admin_api.login') }}"
-    >
+    <form class="flex flex-col gap-3" id="login-form">
       <!-- ADD CSRF /> -->
 
       <div class="">
@@ -65,13 +61,14 @@
       >
         Sign In
       </button>
-      {% with messages = get_flashed_messages() %} {% if messages %}
+      <a
+        href="{{ url_for('studentResetRequest') }}"
+        class="text-c5 font-semibold"
+        >Forgot Password?</a
+      >
       <ul class="messages text-red-500">
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
+        <li id="message-container"></li>
       </ul>
-      {% endif %} {% endwith %}
     </form>
 
     <div>
@@ -95,5 +92,44 @@
     </div>
   </div>
 </div>
-
 {% endblock content %}
+<!-- SCRIPTS -->
+{% block script %}
+<script>
+  document
+    .getElementById('login-form')
+    .addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const apiUrl = '/api/v1/university-admin/login';
+
+      fetch(apiUrl, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          // CCheck if data.sucess throw message
+          if (data.success) {
+            // Redirect to dashboard
+            console.log(data.message);
+            window.location.href = "{{ url_for('universityAdminHome') }}";
+          } else if (data.error) {
+            // Thrown error
+            const messageContainer =
+              document.getElementById('message-container');
+            messageContainer.innerHTML = `<div class="text-red-500">${data.message}</div>`;
+          }
+        })
+        .catch((error) => {
+          const messageContainer = document.getElementById('message-container');
+          messageContainer.innerHTML = `<div class="text-red-500">${error.message}</div>`;
+        });
+    });
+</script>
+
+{% endblock script %}

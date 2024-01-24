@@ -4,6 +4,7 @@ from models import Faculty
 
 from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
+from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 from .utils import getSubjectCount, getHighLowAverageClass, getAllClassAverageWithPreviousYear, getPassFailRates, getTopPerformerStudent, getStudentClassSubjectGrade, getAllClass, getClassPerformance, updateFacultyData, getFacultyData, updatePassword, getStudentPerformance, getCurrentUser, processGradeSubmission
 
@@ -17,6 +18,7 @@ faculty_api = Blueprint('faculty_api', __name__)
 
 
 @faculty_api.route('/login', methods=['GET', 'POST'])
+@login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -28,10 +30,13 @@ def login():
             session['user_id'] = teacher.FacultyId
 
             session['user_role'] = 'faculty'
-            return redirect(url_for('facultyHome'))
+            return jsonify({"success": True, "message": "Login successful"}), 200
         else:
-            flash('Invalid email or password', 'danger')
-            return redirect(url_for('facultyLogin'))
+            # Return
+            return jsonify({"error": True, "message": "Invalid email or password"}), 401
+        # return redirect('/')
+    else:
+        return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
 
 
 # ===================================================

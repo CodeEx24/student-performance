@@ -10,6 +10,7 @@ from werkzeug.security import gen_salt
 from oauth2 import authorization
 
 from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades
+from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 import os
 
@@ -24,6 +25,7 @@ def current_user():
 
 # Login
 @system_admin_api.route('/login', methods=['POST'])
+@login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -37,10 +39,13 @@ def login():
             print("LOGIN : ", user.SysAdminId)
             session['user_role'] = 'systemAdmin'
             user = current_user()
-            print('session: ', session)
             return jsonify({"success": True, "message": "Login successful"}), 200
         else:
-            return jsonify({"error": False, "message": "Invalid email or password"}), 401
+            # Return
+            return jsonify({"error": True, "message": "Invalid email or password"}), 401
+        # return redirect('/')
+    else:
+        return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
 
 
 # Make a client list route

@@ -250,37 +250,6 @@
       }
     </script>
 
-    <script>
-      // Function to check JWT expiration and refresh if necessary
-      async function checkAndRefreshJWT() {
-        try {
-          const response = await fetch('/api/check-jwt-expiration');
-          if (response.status === 200) {
-            const newAccessToken = response.headers.get('New-Access-Token');
-            if (newAccessToken) {
-              // Update the JWT in your frontend
-              // You can store it in a variable or browser storage
-              updateJWT(newAccessToken);
-            }
-          } else {
-            // Handle other response statuses (e.g., JWT expired)
-          }
-        } catch (error) {
-          console.error('Error checking JWT expiration:', error);
-        }
-      }
-
-      // Function to update the JWT in your frontend
-      function updateJWT(newAccessToken) {
-        // Update your JWT in your preferred storage (variable, localStorage, etc.)
-        // Example if using a variable:
-        accessToken = newAccessToken;
-      }
-
-      // Example: Periodically check and refresh the JWT (e.g., every 5 minutes)
-      setInterval(checkAndRefreshJWT, 5 * 60 * 1000); // 5 minutes in milliseconds
-    </script>
-
     {% block script %} {% endblock script %}
   </body>
 </html>

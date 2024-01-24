@@ -4,6 +4,7 @@ from models import UniversityAdmin
 
 from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
+from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
 from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess
@@ -13,6 +14,7 @@ import os
 university_admin_api = Blueprint('university_admin_api', __name__)
 
 @university_admin_api.route('/login', methods=['POST'])
+@login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
       
@@ -22,11 +24,13 @@ def login():
         if admin and check_password_hash(admin.Password, password):
             session['user_id'] = admin.UnivAdminId
             session['user_role'] = 'universityAdmin'
-            return redirect(url_for('universityAdminHome'))
+            return jsonify({"success": True, "message": "Login successful"}), 200
         else:
-            flash('Invalid email or password', 'danger')
-            return redirect(url_for('universityAdminLogin'))
-    return redirect(url_for('universityAdminLogin'))
+            # Return
+            return jsonify({"error": True, "message": "Invalid email or password"}), 401
+        # return redirect('/')
+    else:
+        return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
 
 # ===================================================
 # TESTING AREA
