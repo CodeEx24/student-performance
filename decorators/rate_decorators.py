@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from datetime import datetime, timedelta
 from functools import wraps
 from models import db, RateLimit
+from werkzeug.wrappers import Request
 
 request_history = {}
 
@@ -21,8 +22,10 @@ def rate_limit_decorator(limit, period, message):
         def wrapper(*args, **kwargs):
             # Clean up expired IP addresses
             cleanup_expired_ips()
-
-            ip_address = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)   
+            # Get remote_addr
+            
+            
+            ip_address = Request.remote_addr
 
             print('IP ADD: ', ip_address)
 

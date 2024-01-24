@@ -195,29 +195,6 @@
             <ul class="text-base">
               <li>
                 <a
-                  href="{{ url_for('systemAdminHome') }}"
-                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'home' else 'hover:bg-gray-100 hover:text-c1' }}"
-                >
-                  <svg
-                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'home' else 'text-gray-500' }}"
-                    xmlns="http://www.w3.org/2000/svg"
-                    x="0px"
-                    y="0px"
-                    width="100"
-                    height="100"
-                    viewBox="0 0 50 50"
-                  >
-                    <path
-                      d="M 25 1.0507812 C 24.7825 1.0507812 24.565859 1.1197656 24.380859 1.2597656 L 1.3808594 19.210938 C 0.95085938 19.550938 0.8709375 20.179141 1.2109375 20.619141 C 1.5509375 21.049141 2.1791406 21.129062 2.6191406 20.789062 L 4 19.710938 L 4 46 C 4 46.55 4.45 47 5 47 L 19 47 L 19 29 L 31 29 L 31 47 L 45 47 C 45.55 47 46 46.55 46 46 L 46 19.710938 L 47.380859 20.789062 C 47.570859 20.929063 47.78 21 48 21 C 48.3 21 48.589063 20.869141 48.789062 20.619141 C 49.129063 20.179141 49.049141 19.550938 48.619141 19.210938 L 25.619141 1.2597656 C 25.434141 1.1197656 25.2175 1.0507812 25 1.0507812 z M 35 5 L 35 6.0507812 L 41 10.730469 L 41 5 L 35 5 z"
-                      fill="currentColor"
-                    ></path>
-                  </svg>
-                  <span class="flex-1 ml-3 whitespace-nowrap">Home</span>
-                </a>
-              </li>
-
-              <li>
-                <a
                   href="{{ url_for('systemAdminClients') }}"
                   class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'clients' else 'hover:bg-gray-100 hover:text-c1' }}"
                 >
@@ -292,13 +269,13 @@
                   class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'faculty' else 'hover:bg-gray-100 hover:text-c1' }}"
                 >
                   <svg
-                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'faculty' else 'text-gray-500' }}"
                     fill="currentColor"
+                    class="w-5 h-5"
                     version="1.1"
-                    id="Capa_1"
+                    id="Layer_1"
                     xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink"
-                    viewBox="0 0 420.609 420.609"
+                    viewBox="0 0 512.001 512.001"
                     xml:space="preserve"
                   >
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -310,67 +287,22 @@
                     <g id="SVGRepo_iconCarrier">
                       <g>
                         <g>
-                          <path
-                            d="M350.035,275.014c-3.38-8.072-11.508-13.254-19.263-16.434l-25.851-11.898c-0.028-18.977-0.207-113.495-0.101-123.436 c0.153-15.465-1.69-29.278-5.754-41.227l32.188-11.63l0.074,29.738l-2.188-0.001c-1.521-0.134-2.865,0.96-3.04,2.478 l-2.833,24.559c-0.088,0.747,0.135,1.493,0.609,2.081c0.473,0.585,1.166,0.963,1.914,1.026l22.482-0.008 c0.756-0.085,1.445-0.446,1.912-1.034c0.48-0.586,0.693-1.344,0.609-2.094c-0.567-4.823-1.132-9.639-1.693-14.462l-1.174-10.095 c-0.179-1.505-1.526-2.601-3.044-2.466l-2.188,0.003l0.047-33.883l1.144-0.415l3.806-1.375c3.227-1.164,5.372-4.225,5.372-7.65 c0-3.427-2.146-6.488-5.372-7.653L213.071,0.488c-1.789-0.65-3.744-0.65-5.531,0L72.915,49.139 c-3.227,1.165-5.374,4.227-5.374,7.653s2.147,6.486,5.374,7.65l48.819,17.644c-4.263,12.257-6.203,26.431-6.044,42.259 l0.002,122.333L89.837,258.58c-7.757,3.18-15.383,8.016-19.263,16.434c0,0-56.998,145.596-26.081,145.596h331.62 C407.034,420.607,350.035,275.014,350.035,275.014z M262.119,262.51c0,0-43.391,14.377-51.748,64.875 c-0.022,0.133-0.106,0.133-0.129,0c-8.359-50.498-51.748-64.875-51.748-64.875l28.439-28.242 c-40.093-17.982-50.755-79.127-50.755-79.127c-2.266-8.839-2.539-14.885-2.539-14.885c20.073-1.367,90.128-7.401,94.917-30.111 c6.603,12.2,41.561,42.857,55.705,45.185c0,0-13.729,60.463-51.229,78.895L262.119,262.51z"
-                          ></path>
+                          <g>
+                            <path
+                              d="M167.331,277.436c-3.694,2.138-4.406,7.163-1.388,10.181l85.499,85.499c2.52,2.52,6.603,2.52,9.123,0l85.499-85.499 c3.018-3.018,2.304-8.043-1.388-10.181C289.939,245.762,222.163,245.706,167.331,277.436z"
+                            ></path>
+                            <path
+                              d="M377.312,301.682c-2.54-2.379-6.518-2.304-8.979,0.156L265.125,405.046c-5.04,5.038-13.206,5.038-18.247,0 L143.67,301.838c-2.46-2.46-6.438-2.535-8.979-0.156c-34.619,32.427-56.286,78.522-56.286,129.585v61.38 c0,10.688,8.665,19.353,19.353,19.353h316.485c10.688,0,19.353-8.665,19.353-19.353v-61.38 C433.597,380.204,411.931,334.109,377.312,301.682z"
+                            ></path>
+                            <path
+                              d="M156.128,238.41c8.766,0,190.985,0,199.749,0c10.688,0,19.353-8.665,19.353-19.353v-99.875c0-0.001,0-0.001,0-0.003 c0-59.951-44.512-109.95-102.162-118.001h0.001C200.133-8.925,136.775,47.24,136.775,119.179c0,0.001,0,0.001,0,0.003v99.875 C136.775,229.745,145.438,238.41,156.128,238.41z M194.516,67.249c28.69,48.508,88.914,70.303,142.006,51.506 c0.001,0.141,0.001,0.283,0.001,0.424c0,44.4-36.122,80.521-80.521,80.521c-44.4,0-80.522-36.122-80.522-80.521 C175.481,99.842,182.474,81.523,194.516,67.249z"
+                            ></path>
+                          </g>
                         </g>
                       </g>
                     </g>
                   </svg>
-                  <span class="flex-1 ml-3 whitespace-nowrap">Faculty2</span>
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href="{{ url_for('systemAdminClass') }}"
-                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'class' else 'hover:bg-gray-100 hover:text-c1' }}"
-                >
-                  <svg
-                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'class' else 'text-gray-500' }}"
-                    fill="currentColor"
-                    version="1.1"
-                    id="Capa_1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    viewBox="0 0 31.662 31.662"
-                    xml:space="preserve"
-                  >
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <g>
-                        <g>
-                          <path
-                            d="M13.193,13.308h4.496c0.23-1.27,0.906-2.364,1.863-3.159c0.004,0,0.009,0,0.015,0c0.797-0.027,1.836-0.237,2.821-0.966 c0.121-0.089,0.238-0.185,0.351-0.284c1.412-1.252,2.187-3.332,2.292-6.192c0.025-0.758-0.564-1.396-1.32-1.425 c-0.826-0.042-1.396,0.562-1.425,1.322c-0.084,2.161-0.602,3.664-1.506,4.349c-0.196,0.151-0.405,0.254-0.606,0.323 c-0.006,0.002-0.015,0.003-0.021,0.005c-0.595-0.568-1.418-0.845-1.974-0.845h-3.398h-3.397c-1.246,0-2.237,1.251-2.259,2.624 C11.201,9.567,12.811,11.246,13.193,13.308z"
-                          ></path>
-                          <ellipse
-                            cx="14.78"
-                            cy="3.195"
-                            rx="3.261"
-                            ry="3.195"
-                          ></ellipse>
-                          <path
-                            d="M14.359,21.546c0-2.479-1.068-3.526-2.55-3.526h-0.081H8.373c1.854-0.271,3.275-1.834,3.275-3.728 c0-2.08-1.72-3.768-3.847-3.768c-2.123,0-3.844,1.688-3.844,3.768c0,1.894,1.421,3.456,3.276,3.728H3.877H3.795 c-1.484,0-2.688,1.588-2.688,3.229v5.02h13.252V21.546z"
-                          ></path>
-                          <path
-                            d="M19.101,14.292c0,1.894,1.422,3.456,3.274,3.728h-3.22h-0.219c-1.485,0-2.618,1.588-2.618,3.229v5.02h13.15v-4.72 c0-2.45-1.029-3.481-2.481-3.506c-0.021,0-0.019-0.021-0.037-0.021h-3.438c1.855-0.271,3.277-1.834,3.277-3.729 c0-2.08-1.722-3.768-3.846-3.768C20.821,10.524,19.101,12.212,19.101,14.292z"
-                          ></path>
-                          <rect
-                            x="0.029"
-                            y="28.423"
-                            width="31.604"
-                            height="3.239"
-                          ></rect>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                  <span class="flex-1 ml-3 whitespace-nowrap">Class</span>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Faculty</span>
                 </a>
               </li>
 
@@ -411,46 +343,7 @@
 
               <li>
                 <a
-                  href="{{ url_for('universityFinalizedGrades') }}"
-                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'finalized-grades' else 'hover:bg-gray-100 hover:text-c1' }}"
-                >
-                  <svg
-                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'finalized-grades' else 'text-gray-500' }}"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 100 100"
-                    xml:space="preserve"
-                  >
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <g>
-                        <g>
-                          <path
-                            d="M30,20h-2c-3.3,0-6,3-6,6v4v8v8v8v8v8v4c0,3,2.7,6,6,6h2c1.1,0,2-0.9,2-2V22C32,20.9,31.1,20,30,20z"
-                          ></path>
-                        </g>
-                        <g>
-                          <path
-                            d="M72,20H40c-1.1,0-2,0.9-2,2v56c0,1.1,0.9,2,2,2h32c3.3,0,6-2.7,6-6V26C78,22.7,75.3,20,72,20z M69.8,46.8 l-5.2,5.3c-0.1,0.1-0.2,0.4-0.2,0.6l1.2,7.5c0.1,0.5-0.4,0.9-0.9,0.7l-6.5-3.6c-0.2-0.1-0.4-0.1-0.6,0l-6.5,3.6 c-0.5,0.2-1-0.2-0.9-0.7l1.2-7.5c0-0.2,0-0.4-0.2-0.6l-5.2-5.3c-0.4-0.4-0.2-1,0.3-1.1l7.2-1.1c0.2,0,0.4-0.2,0.5-0.4l3.2-6.9 c0.2-0.5,0.9-0.5,1.1,0l3.2,6.9c0.1,0.2,0.3,0.3,0.5,0.4l7.2,1.1C70,45.8,70.2,46.4,69.8,46.8z"
-                          ></path>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                  <span class="flex-1 ml-3 whitespace-nowrap"
-                    >Finalized Grades</span
-                  >
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href="{{ url_for('universityProfile') }}"
+                  href="{{ url_for('systemAdminProfile') }}"
                   class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'profile' else 'hover:bg-gray-100 hover:text-c1' }}"
                 >
                   <svg
@@ -470,7 +363,7 @@
 
               <li>
                 <a
-                  href="{{ url_for('universityChangePassword') }}"
+                  href="{{ url_for('systemAdminChangePassword') }}"
                   class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'change-password' else 'hover:bg-gray-100 hover:text-c1' }}"
                 >
                   <svg

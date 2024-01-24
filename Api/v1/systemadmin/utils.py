@@ -113,7 +113,7 @@ def getClientList(skip, top, order_by, filter):
         if clients:
             return jsonify({ 'result': list_client, 'count': total_count})
         else:
-            return jsonify({"message": "No clients found"}), 404
+            return jsonify({"result": [], 'count': 0})
     except Exception as e:
         print("ERROR: ", e)
         db.session.rollback()  # Rollback the transaction in case of an error

@@ -382,9 +382,9 @@ def getAllClassData(skip, top, order_by, filter):
                 order_attr = getattr(ClassGrade, 'Grade')
             else:
                 if ' ' in order_by:
-                    order_query = filter_query.order_by(desc(Course.CourseCode), desc(Metadata.Year), desc(Class.Section))
+                    order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.Semester), desc(Course.CourseCode), desc(Class.Section))
                 else:
-                    order_query = filter_query.order_by(Course.CourseCode, Metadata.Year, Class.Section)
+                    order_query = filter_query.order_by(Metadata.Batch, Metadata.Semester, Course.CourseCode, Class.Section)
 
             # Check if order_by contains space
             if not order_by.split(' ')[0] == "ClassName":
@@ -394,7 +394,7 @@ def getAllClassData(skip, top, order_by, filter):
                     order_query = filter_query.order_by(order_attr)
         else:
             # Apply default sorting
-            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.CourseId), Metadata.Year, Class.Section)
+            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.CourseId), desc(Metadata.CourseId), Metadata.Year, Class.Section)
         
         total_count = order_query.count()
         class_grade_main_query = order_query.offset(skip).limit(top).all()
@@ -827,7 +827,17 @@ def processAddingClass(file):
             if not course:
                 errors.append({"CourseCode": course_code, "Section": section, "Year": year, "Semester": semester, "Batch": batch, "Error": "Course Not Exist"})
                 continue
-                    
+            
+            # Check if LatestBatchSemester
+            latest_batch_semester = db.session.query(LatestBatchSemester).filter_by(Batch=batch, Semester=semester).first()
+            
+            # Check if IsEnrollmentStarted and IsGradeFinalized
+            if latest_batch_semester:
+                if latest_batch_semester.IsEnrollmentStarted and latest_batch_semester.IsGradeFinalized:
+                    errors.append({"CourseCode": course_code, "Section": section, "Year": year, "Semester": semester, "Batch": batch, "Error": "Batch and semester are already done"})
+                    continue
+                
+            
             metadata = db.session.query(Metadata).filter_by(CourseId=course.CourseId, Year=year, Semester=semester, Batch=batch).first()
 
             if metadata:
@@ -2407,9 +2417,17 @@ def processAddingCurriculumSubjects(data, excelType=False):
             year_level = row['Year']
             semester = row['Semester']
             batch = row['Batch']
-        
-            course = db.session.query(Course).filter_by(CourseCode = course_code).first()
+            print("DONE GETTING")
+            
+            # Check if all field have value
+            if not course_code and not subject_code and not year_level and not semester and not batch:
+                # End the loop
+                break
+            
+            if course_code:
+                course = db.session.query(Course).filter_by(CourseCode = course_code).first()
                 
+            print("AFTER GETTING")
             # Check if course existing
             if not course:
                 errors.append({

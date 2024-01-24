@@ -38,7 +38,7 @@ def create_app():
 
 
     if __name__ == '__main__':
-        app.run(debug=False)
+        app.run(debug=True)
     
     # SETUP YOUR POSTGRE DATABASE HERE
     # Check if CONFIG_MODE is set to development
@@ -315,10 +315,10 @@ def create_app():
     def systemAdminLogin():
         return render_template('systemadmin/login.html')
 
-    @app.route('/system-admin/home')
-    @role_required('systemAdmin')
-    def systemAdminHome():
-        return render_template('systemadmin/home.html', system_admin_api_base_url=system_admin_api_base_url, current_page="home")
+    # @app.route('/system-admin/home')
+    # @role_required('systemAdmin')
+    # def systemAdminHome():
+    #     return render_template('systemadmin/home.html', system_admin_api_base_url=system_admin_api_base_url, current_page="home")
     
     @app.route('/system-admin/clients')
     @role_required('systemAdmin')
@@ -346,6 +346,17 @@ def create_app():
     @role_required('systemAdmin')
     def systemAdminFaculties():
         return render_template('systemadmin/faculty.html', system_admin_api_base_url=system_admin_api_base_url, current_page="faculty")
+    
+    
+    @app.route('/system-admin/profile')
+    @role_required('systemAdmin')
+    def systemAdminProfile():
+        return render_template('systemadmin/profile.html', system_admin_api_base_url=system_admin_api_base_url, current_page="profile")
+    
+    @app.route('/system-admin/change-password')
+    @role_required('systemAdmin')
+    def systemAdminChangePassword():
+        return render_template('systemadmin/change-password.html', system_admin_api_base_url=system_admin_api_base_url, current_page="change-password")
     
     # ========================================================================
     # Register the API blueprint
