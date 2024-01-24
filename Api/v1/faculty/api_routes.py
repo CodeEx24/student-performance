@@ -18,7 +18,7 @@ faculty_api = Blueprint('faculty_api', __name__)
 
 
 @faculty_api.route('/login', methods=['GET', 'POST'])
-@login_decorator("Too many login attempts. Please try again later")
+# @login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
         email = request.form['email']

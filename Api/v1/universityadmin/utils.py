@@ -562,7 +562,6 @@ def processAddingStudents(data, excelType=False):
                     # Check if it is in date format then convert it into YYYY-MM-DD
                     if isinstance(student_date_enrolled, datetime):
                         student_date_enrolled = student_date_enrolled.strftime("%Y-%m-%d")
-                        print('student_date_enrolled: ', student_date_enrolled)
                     else:
                         errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Date Enrolled format']))
                         continue
@@ -685,7 +684,6 @@ def processAddingStudents(data, excelType=False):
             else:        
                 return  jsonify({'result': 'Data added successfully', 'data': list_student_data}), 200
         else:
-            print('data: ', data)
             if data:
                 student_number = data['StudentNumber'].strip()
                 student_lastname = data['LastName']
@@ -698,7 +696,6 @@ def processAddingStudents(data, excelType=False):
                 student_date_enrolled = data['DateEnrolled']
                 student_batch = data['Batch'] # OK
                 
-                print('student_middlename: ', student_middlename)
                 
                 if student_mobile:
                     # Check for length of phone number if 10 add 0 in first
@@ -715,7 +712,6 @@ def processAddingStudents(data, excelType=False):
                         # Extract only the date part
                         student_date_enrolled = student_date_enrolled.date()
                         
-                        print('student_date_enrolled: ', student_date_enrolled)
                     except Exception as e:
                         return jsonify({'error': 'Invalid Date Enrolled format'}), 400
               
@@ -723,22 +719,17 @@ def processAddingStudents(data, excelType=False):
                 if not type(student_batch) == int:
                     # Return error
                     # print
-                    print("BATCH IS NOT NUMERIC")
                     return jsonify({'error': 'Invalid Batch format'}), 400
                 
-                print("AFTER BAATCH")
                 # Check if Email is a valid format
                 if not is_valid_email(student_email):
                     # Return error
                     # print
-                    print("INVALID EMAIL")
                     return jsonify({'error': 'Invalid Email format'}), 400
-                print("AFTER EMAIL")
                 # Check if Phone Number is a valid format
                 if student_mobile and not is_valid_phone_number(student_mobile):
                     # Return error
                     # print
-                    print("INVALID PHONE NUMBER")
                     return jsonify({'error': 'Invalid Phone Number format'}), 400
 
                 
@@ -764,7 +755,6 @@ def processAddingStudents(data, excelType=False):
                     if not student_mobile.startswith('0'):
                         student_mobile = '0' + student_mobile
                     
-                    print("VALID USER: ", student_number, student_firstname, student_email, student_mobile, gender, password)
                     new_student = Student(
                         StudentNumber=student_number,
                         LastName=student_lastname,
@@ -776,11 +766,8 @@ def processAddingStudents(data, excelType=False):
                         Password=generate_password_hash(password)
                     )
                     
-                    print("AFTER")
-                    print('new_student.StudentId: ', new_student)
                     db.session.add(new_student)
                     db.session.flush()
-                    print('new_student: ', new_student)
                     new_course_enrolled = CourseEnrolled(
                         CourseId=course.CourseId,
                         StudentId=new_student.StudentId,
@@ -788,7 +775,6 @@ def processAddingStudents(data, excelType=False):
                         Status=1,
                         CurriculumYear=student_batch
                     )
-                    print("AFTER 2")
                     # # Add the new course enrolled to the session
                     db.session.add(new_course_enrolled)
                     db.session.commit()
@@ -800,19 +786,14 @@ def processAddingStudents(data, excelType=False):
                     
                     mail.send(msg)
                     # Return data added success
-                    # print
                     
-                    print("DATA ADDED SUCCESSFULLY")
                     return jsonify({'result': 'Data added successfully'}), 200
                     
                 else:
                     if student_number_data:
-                        print("STUDENT NUMBER ALREADY EXIST")
                         return jsonify({'error': 'Student Number already exist'}), 400
                     else:
                         # Return email already exist
-                        # print
-                        print("EMAIL ALREADY EXIST")
                         return jsonify({'error': 'Email already exist'}), 400
                     
 
@@ -949,7 +930,6 @@ def processAddingClass(file):
 
 def processClassStudents(file, class_id):
     try:
-        print("HERE IN processClassStudents")
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
         if not file.filename.endswith(('.xlsx', '.xls')):
@@ -1282,7 +1262,6 @@ def getStudentData(skip, top, order_by, filter):
                         )
                         
         filter_query = student_query.filter(and_(*filter_conditions))
-        print("BEFORE OREDER")
         if order_by:
             # Determine the order attribute
             if order_by.split(' ')[0] == 'StudentNumber':
@@ -1312,23 +1291,18 @@ def getStudentData(skip, top, order_by, filter):
             else:
                 order_query = filter_query.order_by(order_attr)
         else:
-            print("ELSE")
             # Apply default sorting
             order_query = filter_query.order_by(desc(CourseEnrolled.CurriculumYear), desc(Course.CourseCode), desc(Student.StudentNumber))
         
         
         # Query for counting all records
         total_count = order_query.count()
-        print("total_count: ", total_count)
         # Limitized query = 
         student_limit_offset_query = order_query.offset(skip).limit(top).all()
-        print('student_limit_offset_query: ', student_limit_offset_query)
-        print("AFTER SKIP")
         if student_limit_offset_query:
              # For loop the student_query and put it in dictionary
             list_student_data = []
             for data in student_limit_offset_query:
-                print('data: ', data)
                 dict_student = {
                     "StudentId": data.Student.StudentId,
                     "StudentNumber": data.Student.StudentNumber,
@@ -1344,7 +1318,6 @@ def getStudentData(skip, top, order_by, filter):
                 }
                 # Append the data
                 list_student_data.append(dict_student)
-            print('list_student_data: ', list_student_data)
             return jsonify({"result": list_student_data, "count":total_count})
         else:
             return None
@@ -1583,7 +1556,6 @@ def getStudentClassSubjectGrade(skip, top, order_by, filter):
             elif order_by.split(' ')[0] == 'Semester':
                 order_attr = getattr(Metadata, order_by.split(' ')[0])
             else:
-                print("CLASS ORDER BY: ", order_by)
 
                 if ' ' in order_by:
                     order_query = filter_query.order_by(desc(Course.CourseCode), desc(Metadata.Year), desc(Class.Section))
@@ -1886,7 +1858,6 @@ def getClassDetails(class_id):
 # DOING HERE
 def getStudentClassSubjectData(classSubjectId, skip, top, order_by, filter):
     try:
-        print('skip, top, order_by, filter: ', skip, top, order_by, filter)
         data_class_details = db.session.query(ClassSubject).filter_by(ClassSubjectId = classSubjectId).first()
         
         # Get the StudentClassSubjectGrade
@@ -1911,8 +1882,6 @@ def getStudentClassSubjectData(classSubjectId, skip, top, order_by, filter):
                         # Extracting column name and value
                         column_name = part.split("(")[3].split("),'")[0]
                         value = part.split("'")[1]
-                        # print column name and value
-                        print('column_name, value: ', column_name, value)
                         column_str = None
                         if column_name.strip() == 'StudentNumber':
                             column_str = getattr(Student, 'StudentNumber')
@@ -1934,9 +1903,6 @@ def getStudentClassSubjectData(classSubjectId, skip, top, order_by, filter):
                         # column_name = part[0][1:]  # Remove the opening '('
                         column_name, value = [x.strip() for x in part[:-1].split("eq")]
                         column_name = column_name[1:]
-                        
-                        # print column name and value
-                        print('column_name, value: ', column_name, value)
                         
                         column_num = None
                         int_value = value.strip(')')
@@ -2184,7 +2150,6 @@ def getCurriculumData(skip, top, order_by, filter):
             return jsonify({'result': list_metadata, 'count': total_count})
 
         else:
-            print("NO METADA FOUND")
             return jsonify({'result': [], 'count': 0})
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
@@ -2309,7 +2274,6 @@ def getActiveTeacher():
 def processAddingCurriculumSubjects(data, excelType=False):
     # MANUAL ADDING DATA
     if excelType == False:
-        # print("DATA: ", data,Cours)
         course_code = data['CourseCode']
         subject_code = data['SubjectCode']
         year_level = data['Year']
@@ -2325,7 +2289,6 @@ def processAddingCurriculumSubjects(data, excelType=False):
         # Check if course existing
         if not course:
             
-            print("INVALID COURSE")
             # Return cannot added data. Course already exist
             return jsonify({'error': 'Invalid Course'}), 400
         else:
@@ -2357,8 +2320,6 @@ def processAddingCurriculumSubjects(data, excelType=False):
                         db.session.commit()                        
                         
                         dict_subject = subject.to_dict()
-                        
-                        print('dict_subject:: ', dict_subject)
                         
                         # Return data added successfully
                         return jsonify({'success': 'Data added successfully'}), 200
@@ -2423,7 +2384,6 @@ def processAddingCurriculumSubjects(data, excelType=False):
             
     # EXCEL TYPE
     if excelType == True:
-        print("SUBMITTING EXCEL")
         # Check if the file is empty
         if data.filename == '':
             return jsonify({'error': 'No selected file'}), 400
@@ -2613,7 +2573,6 @@ def deleteCurriculumSubjectData(curriculumId):
         curriculum = db.session.query(Curriculum, Metadata, Subject).join(Metadata, Metadata.MetadataId == Curriculum.MetadataId).join(Subject, Subject.SubjectId == Curriculum.SubjectId).filter(Curriculum.CurriculumId == curriculumId).first()
       
         if curriculum:
-            print("EXIST")
             # Find a class that has the same metadata value which is CourseId, Year, Semester, Batch
             class_data = db.session.query(Class, Metadata).join(Metadata, Metadata.MetadataId == Class.MetadataId).filter(Metadata.CourseId == curriculum.Metadata.CourseId, Metadata.Year == curriculum.Metadata.Year, Metadata.Semester == curriculum.Metadata.Semester, Metadata.Batch == curriculum.Metadata.Batch).first()
             
@@ -2842,7 +2801,6 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
                     # Extract only the date part
                     student_date_enrolled = student_date_enrolled.date()
                     
-                    print('student_date_enrolled: ', student_date_enrolled)
                 except Exception as e:
                     return jsonify({'error': 'Invalid Date Enrolled format'}), 400
             
@@ -2969,7 +2927,6 @@ def getMetadata(skip, top, order_by, filter):
         if order_by:
             # Determine the order attribute
             if order_by.split(' ')[0] == 'CourseCode':
-                print('IN COURSE CODE')
                 order_attr = getattr(Course, 'CourseCode')
             elif order_by.split(' ')[0] == "Course":
                 order_attr = getattr(Course, 'Name')
@@ -2981,7 +2938,6 @@ def getMetadata(skip, top, order_by, filter):
             if ' ' in order_by:
                 order_query = filter_query.order_by(desc(order_attr))
             else:
-                print("IN QUERY")
                 order_query = filter_query.order_by(order_attr)
         else:
             # Apply default sorting
@@ -3247,7 +3203,6 @@ def getListersCount():
             )
             
         current_year = datetime.now().year
-        print('current_year:', current_year)
 
         # Get classes query for the current year
         classes_query = get_classes_query(current_year)
@@ -3261,7 +3216,6 @@ def getListersCount():
 
         for result in classes_query:
             course_id, course_code, deans_lister_count, presidents_lister_count = result
-            print(f"Course ID: {course_id}, Course Code: {course_code}, Deans Lister Count: {deans_lister_count}, Presidents Lister Count: {presidents_lister_count}")
 
             # Make a dictionary for it
             dict_lister_data = {
@@ -3317,10 +3271,8 @@ def deleteClassData(classId):
             if class_count > 1 :
                 # Delete the class from database
                 db.session.query(Class).filter_by(ClassId = classId).delete()
-                print("CLASS DELETED")
                 # Check count of class_metadata_count
                 if class_metadata_count == 1:
-                    print("CLASS METADATA DELETED")
                     # Delete the metadata
                     db.session.query(Metadata).filter_by(MetadataId = class_data.Metadata.MetadataId).delete()
                 # commit

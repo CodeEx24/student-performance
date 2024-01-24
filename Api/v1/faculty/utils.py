@@ -463,9 +463,9 @@ def getTopPerformerStudent(skip, top, order_by, filter):
             elif order_by.split(' ')[0] == 'MiddleName':
                 order_attr = getattr(Student, 'MiddleName')
             elif order_by.split(' ')[0] == 'Grade':
-                order_attr = getattr(ClassGrade, 'Grade')
+                order_attr = getattr('average_grade')
             elif order_by.split(' ')[0] == 'Batch':
-                order_attr = getattr(ClassGrade, 'Batch')
+                order_attr = getattr(Metadata, 'Batch')
             # else:
             #     if ' ' in order_by:
             #         order_query = filter_query.order_by(desc(Course.CourseCode), desc(Metadata.Year), desc(Class.Section))
@@ -474,10 +474,10 @@ def getTopPerformerStudent(skip, top, order_by, filter):
 
             # # Check if order_by contains space
             # if not order_by.split(' ')[0] == "ClassName":
-            #     if ' ' in order_by:
-            #         order_query = filter_query.order_by(desc(order_attr))
-            #     else:
-            #         order_query = filter_query.order_by(order_attr)
+            if ' ' in order_by:
+                order_query = filter_query.order_by(desc(order_attr))
+            else:
+                order_query = filter_query.order_by(order_attr)
         else:
             print("NO ORDER")
             # Apply default sorting
@@ -486,14 +486,10 @@ def getTopPerformerStudent(skip, top, order_by, filter):
         total_count = order_query.group_by(Student.StudentId, Metadata.Batch).count()
         student_grade_main_query = order_query.group_by(Student.StudentId, Metadata.Batch).offset(skip).limit(top).all()
         
-        print('student_grade_main_query: ', student_grade_main_query)
-        
-
         if student_grade_main_query:
             list_data_top_performer_student = []
 
             for data in student_grade_main_query:
-                print("PER data", data)
                 dict_student_class_grade = {
                     'StudentId': data[0],
                     'StudentNumber': data[1],

@@ -38,7 +38,7 @@ def create_app():
 
 
     if __name__ == '__main__':
-        app.run(debug=True)
+        app.run(debug=False)
     
     # SETUP YOUR POSTGRE DATABASE HERE
     # Check if CONFIG_MODE is set to development
@@ -49,7 +49,7 @@ def create_app():
     else:
         print("USING DEVELOPMENT")
         # Set the value to the default DATABASE_URI
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DEVELOPMENT_DATABASE_URI')
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://pupqc_cloud_user:1r7kf1cJ41wPBAfm88mF77LJNIUuW9jG@dpg-cme4jv6n7f5s73f44qi0-a.singapore-postgres.render.com/pupqc_cloud'
         
     # Do not set this to 1 in production
     os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'

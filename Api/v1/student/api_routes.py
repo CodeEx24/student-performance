@@ -33,7 +33,7 @@ MAX_LOGIN_ATTEMPTS = 3
 # MAIN LOGIN
 
 @student_api.route('/login', methods=['POST'])
-@login_decorator("Too many login attempts. Please try again later")
+# @login_decorator("Too many login attempts. Please try again later")
 def login():
     print("HERE")
     if request.method == 'POST':

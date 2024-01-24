@@ -22,7 +22,8 @@ def rate_limit_decorator(limit, period, message):
             # Clean up expired IP addresses
             cleanup_expired_ips()
 
-            ip_address = request.remote_addr
+            ip_address = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)   
+
             print('IP ADD: ', ip_address)
 
             # Check if the IP address is in the database

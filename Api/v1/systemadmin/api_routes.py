@@ -25,7 +25,7 @@ def current_user():
 
 # Login
 @system_admin_api.route('/login', methods=['POST'])
-@login_decorator("Too many login attempts. Please try again later")
+# @login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
         email = request.form.get('email')

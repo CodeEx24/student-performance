@@ -14,7 +14,7 @@ import os
 university_admin_api = Blueprint('university_admin_api', __name__)
 
 @university_admin_api.route('/login', methods=['POST'])
-@login_decorator("Too many login attempts. Please try again later")
+# @login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
       

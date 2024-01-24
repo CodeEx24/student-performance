@@ -13,4 +13,4 @@ package-lock.json
 tailwind.config.js
 /static/dist
 /static/src
-*data
+# *data
