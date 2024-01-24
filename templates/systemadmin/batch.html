@@ -1,0 +1,395 @@
+{% extends "systemadmin/layout.html" %} {% block title %}
+<title>Batch Semester List</title> {% endblock title %}
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Batch Semester List
+      </h3>
+
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <script id="template" type="text/x-template">
+            <div class="template_checkbox flex gap-4">
+
+                ${if(IsGradeFinalized)}
+                <button class="btn-revert px-4 py-2 bg-primary text-white font-bold ">Revert Finalized Grades</button>
+                ${else}
+                <button class="btn-revert px-4 py-2 bg-primary text-white font-bold opacity-70" disabled>Revert Finalized Grades</button>
+                ${/if}
+            </div>
+          </script>
+
+          <div id="grid-metadata"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- The Modal -->
+<div
+  id="loadingModal"
+  class="hidden modal fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+{% block script %}
+
+<!-- FETCH ALL CLASS DATA (GRIDS)-->
+<script>
+  // JavaScript function to show the modal
+  async function finalizedGrades(batchSemesterId, button) {
+    console.log('FINALIZED GRADES: ', batchSemesterId);
+    try {
+      showModal('loadingModal');
+
+      console.log('INSIDE BEFORE PUT');
+      const response = await fetch(
+        `${api_base_url}/finalized/grades/batch/${batchSemesterId}`,
+        {
+          method: 'PUT',
+        }
+      );
+
+      const result = await response.json();
+      console.log('RESULT: ', result);
+
+      if (result.success) {
+        button.disabled = true;
+        button.classList.add('opacity-70');
+        // notyf the message
+        notyf.success(result.message);
+      } else if (result.error) {
+        // notyg message
+        notyf.error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      closeModal('loadingModal');
+    }
+  }
+
+  async function startEnrollment(batchSemesterId, button, btnFinalized) {
+    console.log('START ENROLLMENT: ', batchSemesterId);
+    try {
+      showModal('loadingModal');
+
+      const response = await fetch(
+        `${api_base_url}/start/enrollment/${batchSemesterId}`,
+        {
+          method: 'PUT',
+        }
+      );
+
+      const result = await response.json();
+      console.log('RESULT: ', result);
+
+      if (result.success) {
+        button.disabled = true;
+        button.classList.add('opacity-70');
+        btnFinalized.disabled = false;
+        btnFinalized.classList.remove('opacity-70');
+        // notyf the message
+        notyf.success(result.message);
+      } else if (result.error) {
+        console.log('ERROR');
+        // notyf error
+        notyf.error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      closeModal('loadingModal');
+    }
+  }
+</script>
+
+<script>
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/finalized/batch`,
+    columns: [
+      {
+        field: 'LatestBatchSemesterId',
+        isPrimaryKey: true,
+        visible: false, // Set to false to hide the column
+      },
+      {
+        field: 'Batch',
+        headerText: 'Batch',
+        width: 100,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Batch';
+            return dd;
+          },
+          write: function (args) {
+            var currentYear = new Date().getFullYear();
+            var years = [];
+            years.push('All');
+            // Add 2 future years and, current year,  Add 10 past years
+            for (var i = currentYear + 2; i >= currentYear - 10; i--) {
+              years.push(i.toString());
+            }
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: years,
+              fields: { text: 'Batch', value: 'Batch' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Batch');
+                } else {
+                  gridObj.filterByColumn('Batch', 'equal', parseInt(e.value));
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Batch');
+          },
+        },
+      },
+      {
+        field: 'Semester',
+        headerText: 'Semester',
+        width: 70,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Semester';
+            return dd;
+          },
+          write: function (args) {
+            var semester = ['All', '1', '2', '3'];
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: semester,
+              fields: { text: 'Semester', value: 'Semester' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Semester');
+                } else {
+                  gridObj.filterByColumn(
+                    'Semester',
+                    'equal',
+                    parseInt(e.value)
+                  );
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Semester');
+          },
+        },
+      },
+      {
+        headerText: 'Actions',
+        template: '#template',
+        width: 50,
+        textAlign: 'Left',
+      },
+      //   {
+      //     headerText: 'IsGradeFinalized',
+      //     template: '#finalized-template',
+      //     width: 50,
+      //     textAlign: 'Left',
+      //   },
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create a DataManager with the provided API URL
+    let curriculum_subject_data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      adaptor: new ej.data.WebApiAdaptor(),
+    });
+
+    console.log(
+      'data.adaptor curriculum_subject_data: ',
+      curriculum_subject_data
+    );
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: curriculum_subject_data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      created: function () {
+        // Disable buttons based on IsGradeFinalized after rendering the grid
+        disableButtonsBasedOnGradeFinalized();
+      },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+    });
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-metadata_excelexport') {
+        grid.excelExport();
+      }
+    };
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn-finalized')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        const button = event.target;
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              finalizedGrades(rowData.LatestBatchSemesterId, button);
+            }
+          }
+        }
+      }
+
+      if (event.target.classList.contains('btn-revert')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        const button = event.target;
+
+        // get the btn-finalized closest to button
+        const btnFinalized = button
+          .closest('.template_checkbox')
+          .querySelector('.btn-finalized');
+
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              revertFinalizedGrades(rowData.LatestBatchSemesterId, button);
+            }
+          }
+        }
+      }
+    });
+
+    // Render the grid
+    grid.appendTo('#grid-metadata');
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
+  });
+
+  async function revertFinalizedGrades(latestBatchSemesterId, button) {
+    console.log('REVVERTING: ', latestBatchSemesterId);
+
+    // PUT request to /revert/finalizedGrades/<int:latestBatchSemesterId>
+    try {
+      showModal('loadingModal');
+
+      const response = await fetch(
+        `${api_base_url}/revert/finalized/grades/${latestBatchSemesterId}`,
+        {
+          method: 'PUT',
+        }
+      );
+
+      const result = await response.json();
+      console.log('RESULT: ', result);
+
+      if (result.success) {
+        button.disabled = true;
+        button.classList.add('opacity-70');
+        // notyf the message
+        notyf.success(result.message);
+      } else if (result.error) {
+        console.log('ERROR');
+        // notyf error
+        notyf.error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      closeModal('loadingModal');
+    }
+  }
+</script>
+
+{% endblock script %}

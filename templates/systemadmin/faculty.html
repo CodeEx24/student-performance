@@ -1,0 +1,361 @@
+{% extends "systemadmin/layout.html" %} {% block title %}
+<title>Students</title> {% endblock title %}
+<!----------------- STYLE ----------------->
+{% block style %} {% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Students
+      </h3>
+
+      <hr class="mx-2" />
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <input
+            type="hidden"
+            name="_ejRequestVerifyToken"
+            value="f2cd20a3-5ae1-4e19-be61-d409191be3b1"
+          />
+
+          <div id="grid-students-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="studentErrorModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div
+    class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"
+    onclick="closeModalError('studentErrorModal', 'grid-error-students-list')"
+  ></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">
+          Adding Curriculum Error List
+        </h2>
+
+        <button
+          class="modal-close"
+          onclick="closeModalError('studentErrorModal', 'grid-error-students-list')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <p class="text-gray-700 mt-4">Export the grid to see all the errors</p>
+      <div class="modal-body w-full relative mt-8">
+        <div id="grid-error-students-list" class="overflow-y-auto">
+          <!-- This is the content of modal -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+{% block script %}
+
+<script>
+  function closeModalCurriculumSubjects(modalElementId, listElementId) {
+    // Get the #grid-student-list element
+    var gridErrorList = document.getElementById(listElementId);
+
+    // Remove all child nodes (content) inside #grid-student-list
+    while (gridErrorList.firstChild) {
+      gridErrorList.removeChild(gridErrorList.firstChild);
+    }
+
+    closeModal(modalElementId);
+  }
+</script>
+
+<!-- FETCH DISTINC OPTIONS -->
+<script>
+  // get csrf token
+  // const csrfToken = document.getElementsByName('_ejRequestVerifyToken')[0]
+  //   .value;
+  // console.log('CSRF IN 2: ', csrfToken);
+
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/faculty`,
+    insertUrl: `${api_base_url}/faculty/insert`,
+    removeUrl: `${api_base_url}/faculty/delete`,
+    columns: [
+      {
+        field: '<FacultyId></FacultyId>',
+        isPrimaryKey: true,
+        visible: false, // Set to false to hide the column
+      },
+      // Studen Number
+
+      // Student Name
+      {
+        field: 'LastName',
+        headerText: 'LastName',
+        width: 50,
+        validationRules: {
+          required: true,
+        },
+        allowEditing: true,
+      },
+      {
+        field: 'FirstName',
+        headerText: 'FirstName',
+        width: 50,
+        validationRules: {
+          required: true,
+        },
+        allowEditing: true,
+      },
+      {
+        field: 'MiddleName',
+        headerText: 'MiddleName',
+        width: 50,
+        allowEditing: true,
+      },
+      // Student Email
+      {
+        field: 'Email',
+        headerText: 'Email',
+        width: 100,
+        validationRules: {
+          required: true,
+        },
+        allowEditing: true,
+      },
+      // Gender
+      {
+        field: 'Gender',
+        headerText: 'Gender',
+        width: 50,
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+          },
+        },
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Gender';
+            return dd;
+          },
+          write: function (args) {
+            gender = ['All', 'Male', 'Female'];
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: gender,
+              fields: { text: 'Gender', value: 'Gender' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Gender');
+                } else {
+                  gridObj.filterByColumn('Gender', 'startswith', e.value);
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Gender');
+          },
+        },
+        allowEditing: true,
+      },
+      // Mobile Number
+      {
+        field: 'MobileNumber',
+        headerText: 'Mobile Number',
+        width: 80,
+        allowEditing: true,
+      },
+      // Course Code
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    try {
+      await fetch(`${api_base_url}/student/options`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('dTAL: ', data);
+          if (data.result) {
+            gridConfig.columns[6].edit.params.dataSource =
+              data.result.genderOptions;
+            gridConfig.columns[8].edit.params.dataSource =
+              data.result.courseOptions;
+            gridConfig.columns[10].edit.params.dataSource =
+              data.result.batchOptions;
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+
+    // Create a DataManager with the provided API URL
+    let curriculum_subject_data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      insertUrl: gridConfig.insertUrl,
+      removeUrl: gridConfig.removeUrl,
+      adaptor: new ej.data.ODataAdaptor(),
+      headers: [{ hello: 'hellothere' }],
+    });
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: curriculum_subject_data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      toolbar: ['ExcelExport', 'Edit'],
+      editSettings: {
+        allowEditing: true,
+        allowAdding: false,
+        allowDeleting: false,
+        allowExcelExport: true,
+        mode: 'Normal', // Set the edit mode to 'Batch'
+      },
+
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+
+      actionComplete: function (args) {
+        if (args.requestType === 'save' && args.action === 'add') {
+          console.log('INSERTED ARGS: ', args);
+          onSuccess('Data inserted successfully');
+        }
+
+        if (args.requestType === 'delete') {
+          onSuccess('Data deleted successfully');
+        }
+
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+      actionFailure: function (args) {
+        if (args.error) {
+          var errorResponse = JSON.parse(args.error[0].error.response);
+
+          notyf.error(errorResponse.error);
+        }
+      },
+    });
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-students-list_excelexport') {
+        grid.columns[7].visible = false;
+        grid.excelExport();
+      }
+    };
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              fetchStudentPerformance(
+                rowData.StudentId,
+                rowData.StudentName,
+                rowData.StudentNumber
+              );
+            }
+          }
+        }
+      }
+    });
+
+    console.log('GRID: ', grid.dataSource);
+    // Append the grid to the container
+    grid.appendTo('#grid-students-list');
+  });
+</script>
+{% endblock script %}
