@@ -1,0 +1,637 @@
+{% extends "systemadmin/layout.html" %} {% block title %}
+<title>Class List</title> {% endblock title %}
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Classes
+      </h3>
+
+      <div>
+        <form
+          class="bg-white p-4 rounded-lg"
+          enctype="multipart/form-data"
+          onsubmit="submitClass(event)"
+          method="POST"
+          id="reset-form-email"
+        >
+          <div class="mb-4">
+            <label
+              for="excelFile"
+              class="block text-gray-700 font-bold text-lg mb-2"
+            >
+              Add Class:
+            </label>
+            <p class="font-semibold text-gray-700">
+              Column Required:
+              <span class="font-normal"
+                >Course Code (BSBA), Year Level, Section, Semester, Batch</span
+              >
+            </p>
+          </div>
+          <div class="mb-4 flex gap-4">
+            <input
+              type="file"
+              name="excelFile"
+              id="excelFile"
+              accept=".xlsx, .xls"
+              class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+            />
+
+            <button
+              type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+            >
+              Upload Excel File
+            </button>
+          </div>
+          <p id="class-file-error" class="text-c4 text-sm"></p>
+        </form>
+      </div>
+
+      <hr class="mx-2" />
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <div id="grid-class"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR ERROR -->
+<div
+  id="allClassErrorModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div
+    class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"
+    onclick="closeModalError('allClassErrorModal', 'grid-error-all-class-list')"
+  ></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">
+          Adding Classes Error List
+        </h2>
+        <button
+          class="modal-close"
+          onclick="closeModalError('allClassErrorModal', 'grid-error-all-class-list')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body w-full relative mt-8">
+        <div id="grid-error-all-class-list" class="overflow-y-auto">
+          <!-- This is the content of modal -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- The Modal -->
+<div
+  id="myModal"
+  class="modal hidden fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">Performance Details</h2>
+        <button class="modal-close" onclick="closeModal('myModal')">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 mt-4">
+        <div class="flex">
+          <h4 class="text-c1 font-bold">Class Name:&nbsp;</h4>
+          <p id="class-name">...</p>
+        </div>
+        <div class="flex mb-4">
+          <h4 class="text-c1 font-bold">Course:&nbsp;</h4>
+          <p id="course-name">...</p>
+        </div>
+
+        <div
+          id="columnChartClassPerformance"
+          class="w-full col-span-full z-10"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative"></div>
+  </div>
+</div>
+
+<div
+  id="loadingModal"
+  class="hidden modal flex fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+{% block script %}
+
+<!-- FETCH CLASS PERFORMANCE (CHART) -->
+<script>
+  // JavaScript function to show the modal
+  async function fetchClassPerformance(class_id, course, class_name) {
+    const response = await fetch(
+      `${api_base_url}/class/performance/${class_id}`
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
+    }
+
+    const data_performance = await response.json();
+    displayClassPerformance(data_performance, course, class_name);
+  }
+
+  function displayClassPerformance(json_class_performance, course, class_name) {
+    var chartData = [...json_class_performance['ListGrade']];
+
+    // Create the chart
+    var chart = new ej.charts.Chart({
+      primaryXAxis: {
+        title: 'Year',
+        minimum: json_class_performance.Batch - 4,
+        maximum: json_class_performance.Batch + 1,
+        interval: 1,
+      },
+      primaryYAxis: {
+        title: 'Grade',
+        minimum: 0,
+        maximum: 100,
+        interval: 20,
+      },
+      series: [
+        {
+          dataSource: chartData,
+          xName: 'x',
+          yName: 'y',
+          name: 'Average',
+          type: 'Column',
+          fill: '#FFA434',
+        },
+      ],
+      title: `${class_name} - Average Class Grade`,
+      tooltip: {
+        enable: true,
+        format: 'Year: ${point.x}<br>Count: ${point.y}%',
+      },
+    });
+
+    document.getElementById('course-name').innerText = course;
+    document.getElementById('class-name').innerText = class_name;
+
+    // Render the chart
+    chart.appendTo(`#columnChartClassPerformance`);
+
+    document.getElementById('myModal').classList.remove('hidden');
+    document.getElementById('myModal').classList.add('flex');
+  }
+</script>
+
+<script>
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/class/`,
+    insertUrl: `${api_base_url}/class/insert`,
+    removeUrl: `${api_base_url}/class/delete`,
+    columns: [
+      {
+        field: 'ClassId',
+        isPrimaryKey: true,
+        visible: false, // Set to false to hide the column
+      },
+      {
+        field: 'Course',
+        headerText: 'Course Name',
+        width: 250,
+      },
+      {
+        field: 'ClassName',
+        headerText: 'Section Code',
+        width: 150,
+      },
+      {
+        field: 'Batch',
+        headerText: 'Batch',
+        width: 100,
+        validationRules: {
+          required: true,
+        },
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Batch';
+            return dd;
+          },
+          write: function (args) {
+            var currentYear = new Date().getFullYear();
+            var years = [];
+            years.push('All');
+            for (var i = currentYear; i > currentYear - 10; i--) {
+              years.push(i.toString());
+            }
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: years,
+              fields: { text: 'Batch', value: 'Batch' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Batch');
+                } else {
+                  gridObj.filterByColumn('Batch', 'equal', parseInt(e.value));
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Batch');
+          },
+        },
+      },
+      {
+        field: 'Semester',
+        headerText: 'Semester',
+        width: 100,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Semester';
+            return dd;
+          },
+          write: function (args) {
+            var semester = ['All', '1', '2', '3'];
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: semester,
+              fields: { text: 'Semester', value: 'Semester' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Semester');
+                } else {
+                  gridObj.filterByColumn(
+                    'Semester',
+                    'equal',
+                    parseInt(e.value)
+                  );
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Semester');
+          },
+        },
+      },
+      {
+        field: 'Grade',
+        headerText: 'Grade',
+        width: 100,
+      },
+
+      {
+        headerText: 'Actions',
+        template:
+          '<button class="btn px-4 py-2 bg-primary text-white font-bold" >Performance</button>', // Add a button to the cell
+        width: 150,
+      },
+      {
+        headerText: 'Link',
+        template:
+          '<a href="#" onclick="redirectToClass(${ClassId})" class="underline">Class Details</a>',
+        width: 150,
+      },
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create a DataManager with the provided API URL
+    let curriculum_subject_data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      // insertUrl: gridConfig.insertUrl,
+      removeUrl: gridConfig.removeUrl,
+      adaptor: new ej.data.ODataAdaptor(),
+    });
+
+    console.log(
+      'data.adaptor curriculum_subject_data: ',
+      curriculum_subject_data
+    );
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: curriculum_subject_data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      toolbar: ['ExcelExport', 'Delete'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      editSettings: {
+        // allowEditing: true,
+        // allowAdding: true,
+        allowDeleting: true,
+        showDeleteConfirmDialog: true,
+      },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+
+      actionComplete: function (args) {
+        if (args.requestType === 'save' && args.action === 'add') {
+          console.log('INSERTED ARGS: ', args);
+          onSuccess('Data inserted successfully');
+        }
+
+        if (args.requestType === 'delete') {
+          onSuccess('Data deleted successfully');
+        }
+
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+      actionFailure: function (args) {
+        if (args.error) {
+          var errorResponse = JSON.parse(args.error[0].error.response);
+
+          notyf.error(errorResponse.error);
+        }
+      },
+    });
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-class_excelexport') {
+        grid.excelExport();
+      }
+    };
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              fetchClassPerformance(
+                rowData.ClassId,
+                rowData.Course,
+                rowData.ClassName
+              );
+            }
+          }
+        }
+      }
+    });
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
+
+    console.log('GRID: ', grid.dataSource);
+    // Append the grid to the container
+    grid.appendTo('#grid-class');
+  });
+</script>
+
+<!-- ADDING STUDENTS -->
+<script>
+  function redirectToClass(id) {
+    // Open link in a new tab
+    window.open(`/university-admin/class/${id}`, '_blank');
+  }
+
+  async function submitClass(event) {
+    event.preventDefault();
+
+    const fileErrorElement = document.getElementById('class-file-error');
+    const fileInput = document.getElementById('excelFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+      fileErrorElement.innerText = 'Please choose a file.';
+      return;
+    }
+
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      fileErrorElement.innerText =
+        'Invalid file type. Please select an Excel file.';
+      return;
+    } else {
+      fileErrorElement.innerText = '';
+    }
+
+    // If file type is valid, proceed with the API request
+    const formData = new FormData();
+    formData.append('excelFile', file);
+
+    try {
+      const apiUrlSubmitClass =
+        "{{ url_for('university_admin_api.submitClass') }}";
+
+      showModal('loadingModal');
+      await fetch(apiUrlSubmitClass, {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          handleDataSubmitResults(
+            data,
+            fileInput,
+            displaySubmitErrorAllClass,
+            'allClassErrorModal',
+            'grid-class'
+          );
+        })
+        .catch((error) => {
+          notyf.error(error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function displaySubmitErrorAllClass(classData) {
+    var grid = new ej.grids.Grid({
+      dataSource: classData,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      pageSettings: { pageSize: 10 }, // Set the page size
+      // rowData: json_class['ClassSubjectGrade'],
+      columns: [
+        {
+          field: 'CourseCode',
+          headerText: 'Course',
+          width: 100,
+        },
+
+        {
+          field: 'Year',
+          headerText: 'Year',
+          width: 100,
+        },
+        {
+          field: 'Section',
+          headerText: 'Section',
+          width: 100,
+        },
+        {
+          field: 'Semester',
+          headerText: 'Semester',
+          width: 100,
+        },
+        {
+          field: 'Batch',
+          headerText: 'Batch',
+          width: 100,
+        },
+        {
+          field: 'Error',
+          headerText: 'Error',
+          width: 100,
+        },
+      ],
+
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+    });
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-error-all-class-list_excelexport') {
+        grid.excelExport();
+      }
+    };
+
+    // Render the grid
+    grid.appendTo('#grid-error-all-class-list');
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
+  }
+</script>
+
+{% endblock script %}

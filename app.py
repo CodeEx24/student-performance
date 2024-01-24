@@ -326,6 +326,27 @@ def create_app():
         return render_template('systemadmin/clients.html', system_admin_api_base_url=system_admin_api_base_url, current_page="clients")
     
     
+    @app.route('/system-admin/class')
+    @role_required('systemAdmin')
+    def systemAdminClass():
+        return render_template('systemadmin/class.html', system_admin_api_base_url=system_admin_api_base_url, current_page="class")
+    
+    @app.route('/system-admin/batch')
+    @role_required('systemAdmin')
+    def systemAdminBatch():
+        return render_template('systemadmin/batch.html', system_admin_api_base_url=system_admin_api_base_url, current_page="batch")
+
+    @app.route('/system-admin/students')
+    @role_required('systemAdmin')
+    def systemAdminStudents():
+        return render_template('systemadmin/students.html', system_admin_api_base_url=system_admin_api_base_url, current_page="students")
+    
+    
+    @app.route('/system-admin/faculties')
+    @role_required('systemAdmin')
+    def systemAdminFaculties():
+        return render_template('systemadmin/faculty.html', system_admin_api_base_url=system_admin_api_base_url, current_page="faculty")
+    
     # ========================================================================
     # Register the API blueprint
     config_oauth(app)

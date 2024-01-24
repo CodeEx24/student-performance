@@ -10,7 +10,7 @@ import time
 from authlib.integrations.flask_oauth2 import current_token
 
 from decorators.auth_decorators import preventAuthenticated, role_required
-# from decorators.rate_decorators import login_decorator, resend_otp_decorator
+from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
 from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, getStudentData, updateStudentData, updatePassword, getCurrentUser, saveSessionValues
@@ -33,7 +33,7 @@ MAX_LOGIN_ATTEMPTS = 3
 # MAIN LOGIN
 
 @student_api.route('/login', methods=['POST'])
-# @login_decorator("Too many login attempts. Please try again later")
+@login_decorator("Too many login attempts. Please try again later")
 def login():
     print("HERE")
     if request.method == 'POST':
@@ -68,20 +68,19 @@ def login():
 #         return jsonify({'error': True, "message": 'Invalid request method'}), 400
     
     
-# @student_api.route('/resend-otp', methods=['POST'])
-# @resend_otp_decorator("Too many request")
-# def resendOtp():
-#     if request.method == 'POST':
-#         # Check if user_id have value in session
-#         user_id = session.get('user_id')
-#         if user_id:
-#             session['otp'] = ''.join([str(random.randint(0, 9)) for i in range(6)])
-#             session['otp_expired_at'] = time.time() + (5 * 60)
-#             # Print the otp resend
-#             print('OTP Resend: ', session.get('otp'))
-#             return jsonify({'success': True, "message": "OTP sent successfully"}), 200
-#     else:
-#         return jsonify({'error': True, 'message': 'Invalid request method'}), 400
+@student_api.route('/resend-otp', methods=['POST'])
+def resendOtp():
+    if request.method == 'POST':
+        # Check if user_id have value in session
+        user_id = session.get('user_id')
+        if user_id:
+            session['otp'] = ''.join([str(random.randint(0, 9)) for i in range(6)])
+            session['otp_expired_at'] = time.time() + (5 * 60)
+            # Print the otp resend
+            print('OTP Resend: ', session.get('otp'))
+            return jsonify({'success': True, "message": "OTP sent successfully"}), 200
+    else:
+        return jsonify({'error': True, 'message': 'Invalid request method'}), 400
 
 
 

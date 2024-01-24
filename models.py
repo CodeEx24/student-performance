@@ -472,6 +472,13 @@ class LatestBatchSemester(db.Model):
         }
 
 
+class RateLimit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip_address = db.Column(db.String(45), nullable=False, unique=True)
+    request_count = db.Column(db.Integer, default=0)
+    last_request_timestamp = db.Column(db.DateTime, default=datetime.now)
+    expiration_timestamp = db.Column(db.DateTime)
+
 
 class OAuth2Client(db.Model, OAuth2ClientMixin):
     __tablename__ = 'oauth2_client'

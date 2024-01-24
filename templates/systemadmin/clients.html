@@ -1,7 +1,8 @@
 {% extends "systemadmin/layout.html" %}
 
 <!----------------- TITLE ----------------->
-{% block title %} SPS - Dashboard {% endblock title %} {% block styles %}
+{% block title %} <title>Dashboard</title>{% endblock title %} {% block styles
+%}
 <style>
   /* Set the chart container to 100% width */
   #containerChart {
@@ -12,95 +13,96 @@
 
 <!----------------- CONTENT ----------------->
 {% block content %}
-<div class="p-4 md:ml-72">
-  <div class="border-2 border-gray-200 border-dashed rounded-lg">
-    <div class="w-full bg-white p-4 mt-4">
-      <h1 class="text-2xl font-bold p-4 text-c1">Clients</h1>
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div class="rounded-lg">
+      <div class="w-full bg-white p-4">
+        <h1 class="text-2xl font-bold p-4 text-c1">Clients</h1>
 
-      <form
-        action="{{ url_for('system_admin_api.createClient') }}"
-        method="post"
-        class="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 pb-4"
-      >
-        <label class="flex flex-col">
-          <span>Client Name</span>
-          <input
-            type="text"
-            name="client_name"
-            class="border-solid border-2 border-gray-300 rounded-md p-1"
-          />
-        </label>
-        <label class="flex flex-col">
-          <span>Client URI</span>
-          <input
-            type="url"
-            name="client_uri"
-            class="border-solid border-2 border-gray-300 rounded-md p-1"
-          />
-        </label>
-        <label class="flex flex-col">
-          <span>Allowed Scope</span>
-          <input
-            type="text"
-            name="scope"
-            class="border-solid border-2 border-gray-300 rounded-md p-1"
-          />
-        </label>
-        <label class="flex flex-col">
-          <span>Redirect URIs</span>
-          <textarea
-            name="redirect_uri"
-            cols="30"
-            rows="1"
-            class="border-solid border-2 border-gray-300 rounded-md p-1"
-          ></textarea>
-        </label>
-        <label class="flex flex-col">
-          <span>Allowed Grant Types</span>
-          <textarea
-            name="grant_type"
-            cols="30"
-            rows="1"
-            class="border-solid border-2 border-gray-300 rounded-md p-1"
-          ></textarea>
-        </label>
-        <label class="flex flex-col">
-          <span>Allowed Response Types</span>
-          <textarea
-            name="response_type"
-            cols="30"
-            rows="1"
-            class="border-solid border-2 border-gray-300 rounded-md p-1"
-          ></textarea>
-        </label>
-        <label class="flex flex-col">
-          <span>Token Endpoint Auth Method</span>
-          <select
-            name="token_endpoint_auth_method"
-            class="border-solid border-2 border-gray-300 rounded-md p-1"
-          >
-            <option value="client_secret_basic">client_secret_basic</option>
-            <option value="client_secret_post">client_secret_post</option>
-            <option value="none">none</option>
-          </select>
-        </label>
-        <div class="flex flex-col">
-          <button
-            class="bg-primary border-2 border-gray-300 rounded-md mt-6 px-4 py-1 font-bold text-white"
-          >
-            Submit
-          </button>
+        <form
+          action="{{ url_for('system_admin_api.createClient') }}"
+          method="post"
+          class="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 pb-4"
+        >
+          <label class="flex flex-col">
+            <span>Client Name</span>
+            <input
+              type="text"
+              name="client_name"
+              class="border-solid border-2 border-gray-300 rounded-md p-1"
+            />
+          </label>
+          <label class="flex flex-col">
+            <span>Client URI</span>
+            <input
+              type="url"
+              name="client_uri"
+              class="border-solid border-2 border-gray-300 rounded-md p-1"
+            />
+          </label>
+          <label class="flex flex-col">
+            <span>Allowed Scope</span>
+            <input
+              type="text"
+              name="scope"
+              class="border-solid border-2 border-gray-300 rounded-md p-1"
+            />
+          </label>
+          <label class="flex flex-col">
+            <span>Redirect URIs</span>
+            <textarea
+              name="redirect_uri"
+              cols="30"
+              rows="1"
+              class="border-solid border-2 border-gray-300 rounded-md p-1"
+            ></textarea>
+          </label>
+          <label class="flex flex-col">
+            <span>Allowed Grant Types</span>
+            <textarea
+              name="grant_type"
+              cols="30"
+              rows="1"
+              class="border-solid border-2 border-gray-300 rounded-md p-1"
+            ></textarea>
+          </label>
+          <label class="flex flex-col">
+            <span>Allowed Response Types</span>
+            <textarea
+              name="response_type"
+              cols="30"
+              rows="1"
+              class="border-solid border-2 border-gray-300 rounded-md p-1"
+            ></textarea>
+          </label>
+          <label class="flex flex-col">
+            <span>Token Endpoint Auth Method</span>
+            <select
+              name="token_endpoint_auth_method"
+              class="border-solid border-2 border-gray-300 rounded-md p-1"
+            >
+              <option value="client_secret_basic">client_secret_basic</option>
+              <option value="client_secret_post">client_secret_post</option>
+              <option value="none">none</option>
+            </select>
+          </label>
+          <div class="flex flex-col">
+            <button
+              class="bg-primary border-2 border-gray-300 rounded-md mt-6 px-4 py-1 font-bold text-white"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+
+        <div class="p-4">
+          <h1 class="text-2xl font-bold p-4 text-c1">Client List</h1>
+          <div id="client-list"></div>
         </div>
-      </form>
-
-      <div class="p-4">
-        <h1 class="text-2xl font-bold p-4 text-c1">Client List</h1>
-        <div id="client-list"></div>
       </div>
     </div>
   </div>
 </div>
-
 <!-- The Modal -->
 <div
   id="client-modal"
@@ -115,7 +117,7 @@
     <div class="modal-header">
       <div class="flex justify-between">
         <h2 class="text-c1 text-2xl font-semibold">Performance Details</h2>
-        <button class="modal-close" onclick="closeModal('performanceModal')">
+        <button class="modal-close" onclick="closeModal('client-modal')">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"

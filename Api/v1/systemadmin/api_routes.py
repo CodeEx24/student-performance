@@ -9,7 +9,7 @@ import time
 from werkzeug.security import gen_salt
 from oauth2 import authorization
 
-from .utils import getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, getClientList, getClientsData
+from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades
 
 import os
 
@@ -33,7 +33,8 @@ def login():
         print('user: ', user)
         # Check for password
         if user and check_password_hash(user.Password, password):
-            session['id'] = user.SysAdminId
+            session['user_id'] = user.SysAdminId
+            print("LOGIN : ", user.SysAdminId)
             session['user_role'] = 'systemAdmin'
             user = current_user()
             print('session: ', session)
@@ -41,12 +42,12 @@ def login():
         else:
             return jsonify({"error": False, "message": "Invalid email or password"}), 401
 
+
 # Make a client list route
 @system_admin_api.route('/clients/', methods=['GET'])
 def clients():
-    user = current_user()
+    user = getCurrentUser()
     if user:
-        
         skip = int(request.args.get('$skip', 0))
         top = int(request.args.get('$top', 10))
         order_by = (request.args.get('$orderby'))
@@ -60,11 +61,35 @@ def clients():
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return jsonify({"message": "No clients found"}), 404
+    
+    
+# Getting all the class data in current year
+@system_admin_api.route('/class/', methods=['GET'])
+@role_required('systemAdmin')
+def classData():
+    systemAdmin = getCurrentUser()
+    print('systemAdmin: ', systemAdmin)
+    if systemAdmin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_class_data = getAllClassData(skip, top, order_by, filter)
+
+        if json_class_data:
+            return (json_class_data)
+        else:
+            return jsonify(message="No Class data available")
+    else:
+        return render_template('404.html'), 404
+
 
 @system_admin_api.route('/client/<int:Id>', methods=['GET'])
+@role_required('systemAdmin')
 def clientData(Id):
-    user = current_user()
-    if user:
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
         json_class_subject_grade = getClientsData(Id)
  
         if json_class_subject_grade:
@@ -74,12 +99,132 @@ def clientData(Id):
     else:
         return jsonify({"message": "No clients found"}), 404
     
+
+# api_routes.py
+@system_admin_api.route('/finalized/batch/', methods=['GET'])
+@role_required('systemAdmin')
+def fetchBatchSemester():
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_student_data = getBatchSemester(skip, top, order_by, filter)
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
     
+    
+# api_routes.py
+@system_admin_api.route('/students/', methods=['GET'])
+@role_required('systemAdmin')
+def fetchStudents():
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_student_data = getStudentData(skip, top, order_by, filter)
+
+        if json_student_data:
+            return (json_student_data)
+        else:
+            return jsonify(error="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+    
+@system_admin_api.route('/faculty/', methods=['GET'])
+@role_required('systemAdmin')
+def fetchFaculty():
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_faculty_data = getFacultyData(skip, top, order_by, filter)
+
+        if json_faculty_data:
+            return (json_faculty_data)
+        else:
+            return jsonify(error="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
     
     # Check if token
     # token = authorization.create_token_response()
     # print(token)
     # return token
+
+
+@system_admin_api.route('/students/update(<int:studentId>)', methods=['PUT'])
+@role_required('systemAdmin')
+def deleteStudent(studentId):
+    university_admin = getCurrentUser()
+    if university_admin:
+        updated_data = request.json
+
+        
+        result = updateStudentData(studentId, updated_data)
+        print('result: ', result)
+        return result
+    else:
+        return render_template('404.html'), 404
+
+
+# api_routes.py
+@system_admin_api.route('/student/options', methods=['GET'])
+@role_required('systemAdmin')
+def fetchStudentDataOptions():
+    university_admin = getCurrentUser()
+    if university_admin:
+        
+        json_student_data_options = getStudentAddOptions()
+
+        if json_student_data_options:
+            return json_student_data_options
+        else:
+            return jsonify(error="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+
+
+@system_admin_api.route('/revert/finalized/grades/<int:latestBatchSemesterId>', methods=['PUT'])
+@role_required('systemAdmin')
+def updateFinalizedGrades(latestBatchSemesterId):
+    print('latestBatchSemesterId: ', latestBatchSemesterId)
+    university_admin = getCurrentUser()
+    if university_admin:
+        
+        json_student_data_options = revertFinalizedGrades(latestBatchSemesterId)
+
+        if json_student_data_options:
+            return json_student_data_options
+        else:
+            return jsonify(error="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @system_admin_api.route('/oauth/authorize', methods=['GET', 'POST'])

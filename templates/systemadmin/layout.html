@@ -3,16 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <meta name="description" content="" />
+
+    <!-- CDN TAILWIND -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- LOCAL TAILWIND -->
+    <!-- <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='dist/css/output.css')}}"
+    /> -->
+
+    <!-- SYNCFUSION -->
     <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
+
     <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
     <!-- Notyf -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
     />
-    <title>{% block title %} {% endblock title %}</title>
-    <!-- DESIGN STANDARDS -->
+    {% block title %} {% endblock title %}
+
     <script>
       tailwind.config = {
         theme: {
@@ -103,292 +117,535 @@
       }
     </style>
 
-    {% block styles %} {% endblock styles %}
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Karla:400,700&display=swap');
+      .font-family-karla {
+        font-family: karla;
+      }
+      .bg-sidebar {
+        background: #3d68ff;
+      }
+      .cta-btn {
+        color: #3d68ff;
+      }
+      .upgrade-btn {
+        background: #1947ee;
+      }
+      .upgrade-btn:hover {
+        background: #0038fd;
+      }
+      .active-nav-link {
+        background: #1947ee;
+      }
+      .nav-item:hover {
+        background: #1947ee;
+      }
+      .account-link:hover {
+        background: #3d68ff;
+      }
+    </style>
+    {% block style %} {% endblock style %}
   </head>
-  <body class="bg-slate-200">
-    <div class="h-screen flex flex-col justify-between">
+  <body class="bg-gray-100 font-family-karla flex">
+    <aside class="relative bg-white h-screen w-72 hidden sm:block shadow-xl">
+      <!-- Add a close (X) icon in the sidebar header -->
       <div
-        id="sidebar-overlay"
-        class="fixed inset-0 bg-gray-800 opacity-50 z-30 hidden md:hidden"
-      ></div>
-      <div class="flex bg-white lg:p-0 p-4 md:ml-72 shadow-md">
-        <div class="flex items-center justify-center md:gap-4 lg:gap-0 lg:ml-2">
-          <div
-            class="rounded-full lg:w-[100px] lg:h-[100px] md:w-[80] md:h-[80px] flex items-center justify-center md:mr-0 mr-4"
-          >
-            <img
-              src="{{ url_for('static', filename='images/faculty/user.jpg') }}"
-              alt=""
-              class="md:h-[60px] md:w-[60px] h-[40px] w-[40px] rounded-full"
-            />
-          </div>
-          <div>
-            <div class="w-full flex items-center">
-              <p class="font-extrabold text-c1 md:text-2xl text-md">
-                Welcome Back, &nbsp;
-              </p>
-              <p
-                class="font-semibold text-c1 flex text-md md:text-2xl"
-                id="user-name"
-              >
-                <span class="md:hidden">&nbsp;</span>
-                <!-- <img
-                  src="{{ url_for('static', filename='images/wave.png') }}"
-                  alt=""
-                  class="h-[24px] w-[24px] md:h-[30px] md:w-[30px]"
-                /> -->
-              </p>
-            </div>
-            <div>
-              <p class="text-start text-sm text-c2 font-semibold opacity-75">
-                PUPQC Professor
-              </p>
-            </div>
-          </div>
-        </div>
-        <button
-          data-drawer-target="default-sidebar"
-          data-drawer-open="default-sidebar"
-          aria-controls="default-sidebar"
-          type="button"
-          class="text-gray-600 hover:text-gray-800 focus:outline-none ml-auto md:hidden"
-        >
-          <span class="sr-only">Open sidebar</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            stroke="black"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-            class="w-[20px] h-[20px]"
-          >
-            <path d="M3 12h18M3 6h18M3 18h18" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- SIDEBAR -->
-      <aside
-        id="default-sidebar"
-        class="fixed top-0 md:left-0 right-0 z-40 w-72 h-screen transition-transform translate-x-full md:translate-x-0 bg-white shadow-md"
-        aria-label="Sidebar"
+        class="flex flex-col justify-between items-center w-full h-screen p-4"
       >
-        <!-- Add a close (X) icon in the sidebar header -->
-        <div
-          class="flex flex-col justify-between items-center w-full h-screen p-4"
-        >
-          <div class="w-full">
-            <button
-              data-drawer-target="default-sidebar"
-              data-drawer-close="default-sidebar"
-              aria-controls="default-sidebar"
-              type="button"
-              class="text-gray-600 hover:text-gray-800 focus:outline-none float-right md:hidden"
+        <div class="w-full">
+          <button
+            data-drawer-target="default-sidebar"
+            data-drawer-close="default-sidebar"
+            aria-controls="default-sidebar"
+            type="button"
+            class="text-gray-600 hover:text-gray-800 focus:outline-none float-right md:hidden"
+          >
+            <span class="sr-only">Close sidebar</span>
+            <svg
+              class="w-6 h-6"
+              aria-hidden="true"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <span class="sr-only">Close sidebar</span>
-              <svg
-                class="w-6 h-6"
-                aria-hidden="true"
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M14.293 5.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 11-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 111.414-1.414L10 8.586l4.293-4.293z"
                 fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M14.293 5.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 11-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 111.414-1.414L10 8.586l4.293-4.293z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </button>
+              ></path>
+            </svg>
+          </button>
 
-            <div class="flex items-center md:mt-0 mt-2">
-              <a
-                href="{{ url_for('facultyHome') }}"
-                class="my-2 flex items-center"
-              >
-                <img
-                  class="w-auto h-14"
-                  src="{{ url_for('static', filename='images/pup.png') }}"
-                  alt=""
-                />
-
-                <h4 class="font-extrabold ml-4 text-3xl text-black">PUP SPS</h4>
-              </a>
-            </div>
-            <div class="h-full mt-4 overflow-y-auto flex flex-col">
-              <ul class="text-base">
-                <li>
-                  <a
-                    href="{{ url_for('systemAdminHome') }}"
-                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'home' else 'hover:bg-gray-100 hover:text-c1' }}"
-                  >
-                    <svg
-                      class="w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'home' else 'text-gray-500' }}"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 22 21"
-                    >
-                      <path
-                        d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"
-                      />
-                      <path
-                        d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"
-                      />
-                    </svg>
-                    <span class="flex-1 ml-3 whitespace-nowrap">Home</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="{{ url_for('systemAdminClients') }}"
-                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'clients' else 'hover:bg-gray-100 hover:text-c1' }}"
-                  >
-                    <svg
-                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'clients' else 'text-gray-500' }}"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 18 18"
-                    >
-                      <path
-                        d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z"
-                      />
-                    </svg>
-                    <span class="flex-1 ml-3 whitespace-nowrap">Clients</span>
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    href="{{ url_for('facultyClassComparison') }}"
-                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'class-comparison' else 'hover:bg-gray-100 hover:text-c1' }}"
-                  >
-                    <svg
-                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'class-comparison' else 'text-gray-500' }}"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 18 20"
-                    >
-                      <path
-                        d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z"
-                      />
-                    </svg>
-                    <span class="flex-1 ml-3 whitespace-nowrap"
-                      >Class Comparison</span
-                    >
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    href="{{ url_for('facultyProfile') }}"
-                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'profile' else 'hover:bg-gray-100 hover:text-c1' }}"
-                  >
-                    <svg
-                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'profile' else 'text-gray-500' }}"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 18"
-                    >
-                      <path
-                        d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z"
-                      />
-                    </svg>
-                    <span class="flex-1 ml-3 whitespace-nowrap">Profile</span>
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    href="{{ url_for('facultyChangePassword') }}"
-                    class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold py-2 px-4 rounded shadow-md' if current_page == 'change-password' else 'hover:bg-gray-100 hover:text-c1' }}"
-                  >
-                    <svg
-                      class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'change-password' else 'text-gray-500' }}"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
-                      />
-                      <path
-                        d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
-                      />
-                      <path
-                        d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
-                      />
-                    </svg>
-                    <span class="flex-1 ml-3 whitespace-nowrap"
-                      >Change Password</span
-                    >
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- NAVIGATION LINKS -->
-          <div class="w-full">
+          <div class="flex items-center md:mt-0 mt-2">
             <a
-              class="flex items-center px-4 py-4 transition-colors duration-300 transform rounded-lg bg-gradient-to-r from-red-800 to-red-500 hover:from-red-900 hover:to-red-600 text-white font-bold py-2 px-4 rounded shadow-md"
-              href="{{ url_for('logout') }}"
+              href="{{ url_for('facultyHome') }}"
+              class="my-2 flex items-center"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="w-5 h-5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-                />
-              </svg>
+              <img
+                class="w-auto h-14"
+                src="{{ url_for('static', filename='images/pup.png') }}"
+                alt=""
+              />
 
-              <span class="mx-2 text-sm font-medium">Log Out</span>
+              <h4 class="font-extrabold ml-4 text-3xl text-black">PUP SPS</h4>
             </a>
           </div>
-        </div>
-      </aside>
+          <div class="h-full mt-4 overflow-y-auto flex flex-col">
+            <ul class="text-base">
+              <li>
+                <a
+                  href="{{ url_for('systemAdminHome') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'home' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'home' else 'text-gray-500' }}"
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    width="100"
+                    height="100"
+                    viewBox="0 0 50 50"
+                  >
+                    <path
+                      d="M 25 1.0507812 C 24.7825 1.0507812 24.565859 1.1197656 24.380859 1.2597656 L 1.3808594 19.210938 C 0.95085938 19.550938 0.8709375 20.179141 1.2109375 20.619141 C 1.5509375 21.049141 2.1791406 21.129062 2.6191406 20.789062 L 4 19.710938 L 4 46 C 4 46.55 4.45 47 5 47 L 19 47 L 19 29 L 31 29 L 31 47 L 45 47 C 45.55 47 46 46.55 46 46 L 46 19.710938 L 47.380859 20.789062 C 47.570859 20.929063 47.78 21 48 21 C 48.3 21 48.589063 20.869141 48.789062 20.619141 C 49.129063 20.179141 49.049141 19.550938 48.619141 19.210938 L 25.619141 1.2597656 C 25.434141 1.1197656 25.2175 1.0507812 25 1.0507812 z M 35 5 L 35 6.0507812 L 41 10.730469 L 41 5 L 35 5 z"
+                      fill="currentColor"
+                    ></path>
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Home</span>
+                </a>
+              </li>
 
-      <!-- CONTENT -->
-      {% block content %} {% endblock content %}
+              <li>
+                <a
+                  href="{{ url_for('systemAdminClients') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'clients' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'clients' else 'text-gray-500' }}"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M4 4.69434V18.6943C4 20.3512 5.34315 21.6943 7 21.6943H17C18.6569 21.6943 20 20.3512 20 18.6943V8.69434C20 7.03748 18.6569 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434ZM7.25 11.6943C7.25 11.2801 7.58579 10.9443 8 10.9443H16C16.4142 10.9443 16.75 11.2801 16.75 11.6943C16.75 12.1085 16.4142 12.4443 16 12.4443H8C7.58579 12.4443 7.25 12.1085 7.25 11.6943ZM7.25 15.1943C7.25 14.7801 7.58579 14.4443 8 14.4443H13.5C13.9142 14.4443 14.25 14.7801 14.25 15.1943C14.25 15.6085 13.9142 15.9443 13.5 15.9443H8C7.58579 15.9443 7.25 15.6085 7.25 15.1943Z"
+                        fill="currentColor"
+                      ></path>
+                      <path
+                        opacity="0.5"
+                        d="M18 4.00038V5.86504C17.6872 5.75449 17.3506 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434V4.62329C4 4.09027 4.39193 3.63837 4.91959 3.56299L15.7172 2.02048C16.922 1.84835 18 2.78328 18 4.00038Z"
+                        fill="currentColor"
+                      ></path>
+                    </g>
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Clients</span>
+                </a>
+              </li>
 
-      <!----------------- FOOTER CONTENTS ----------------->
-      <div class="bg-white lg:px-40 shadow-md md:ml-64 md:px-8 lg:px-0 mt-auto">
-        <footer class="items-center justify-between mx-auto lg:px-0 px-8 py-8">
-          <h1 class="text-c1 text-2xl mb-2 font-bold">Contact Information</h1>
-          <div class="flex flex-wrap lg:flex-nowrap gap-4">
-            <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
-              <h5 class="text-lg font-semibold md:font-bold">Email:</h5>
-              <p class="text-lg">quezoncity@pup.edu.ph</p>
-            </div>
-            <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
-              <h5 class="text-lg font-semibold md:font-bold">Postal Mail:</h5>
-              <p class="text-lg">PUP Quezon City Branch</p>
-              <p class="text-lg">Don Fabian St., Commonwealth</p>
-              <p class="text-lg">Quezon City Philippines</p>
-            </div>
-            <div class="w-screen md:w-5/12 md:grow lg:w-4/12">
-              <h5 class="text-lg font-semibold md:font-bold">Telephone:</h5>
-              <p class="text-lg">(632) 8952-7818</p>
-              <p class="text-lg">(632) 8287-8204</p>
-            </div>
+              <li>
+                <a
+                  href="{{ url_for('systemAdminStudents') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'students' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'students' else 'text-gray-500' }}"
+                    fill="currentColor"
+                    version="1.1"
+                    id="Capa_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 420.609 420.609"
+                    xml:space="preserve"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g>
+                        <g>
+                          <path
+                            d="M350.035,275.014c-3.38-8.072-11.508-13.254-19.263-16.434l-25.851-11.898c-0.028-18.977-0.207-113.495-0.101-123.436 c0.153-15.465-1.69-29.278-5.754-41.227l32.188-11.63l0.074,29.738l-2.188-0.001c-1.521-0.134-2.865,0.96-3.04,2.478 l-2.833,24.559c-0.088,0.747,0.135,1.493,0.609,2.081c0.473,0.585,1.166,0.963,1.914,1.026l22.482-0.008 c0.756-0.085,1.445-0.446,1.912-1.034c0.48-0.586,0.693-1.344,0.609-2.094c-0.567-4.823-1.132-9.639-1.693-14.462l-1.174-10.095 c-0.179-1.505-1.526-2.601-3.044-2.466l-2.188,0.003l0.047-33.883l1.144-0.415l3.806-1.375c3.227-1.164,5.372-4.225,5.372-7.65 c0-3.427-2.146-6.488-5.372-7.653L213.071,0.488c-1.789-0.65-3.744-0.65-5.531,0L72.915,49.139 c-3.227,1.165-5.374,4.227-5.374,7.653s2.147,6.486,5.374,7.65l48.819,17.644c-4.263,12.257-6.203,26.431-6.044,42.259 l0.002,122.333L89.837,258.58c-7.757,3.18-15.383,8.016-19.263,16.434c0,0-56.998,145.596-26.081,145.596h331.62 C407.034,420.607,350.035,275.014,350.035,275.014z M262.119,262.51c0,0-43.391,14.377-51.748,64.875 c-0.022,0.133-0.106,0.133-0.129,0c-8.359-50.498-51.748-64.875-51.748-64.875l28.439-28.242 c-40.093-17.982-50.755-79.127-50.755-79.127c-2.266-8.839-2.539-14.885-2.539-14.885c20.073-1.367,90.128-7.401,94.917-30.111 c6.603,12.2,41.561,42.857,55.705,45.185c0,0-13.729,60.463-51.229,78.895L262.119,262.51z"
+                          ></path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Students</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="{{ url_for('systemAdminFaculties') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'faculty' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'faculty' else 'text-gray-500' }}"
+                    fill="currentColor"
+                    version="1.1"
+                    id="Capa_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 420.609 420.609"
+                    xml:space="preserve"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g>
+                        <g>
+                          <path
+                            d="M350.035,275.014c-3.38-8.072-11.508-13.254-19.263-16.434l-25.851-11.898c-0.028-18.977-0.207-113.495-0.101-123.436 c0.153-15.465-1.69-29.278-5.754-41.227l32.188-11.63l0.074,29.738l-2.188-0.001c-1.521-0.134-2.865,0.96-3.04,2.478 l-2.833,24.559c-0.088,0.747,0.135,1.493,0.609,2.081c0.473,0.585,1.166,0.963,1.914,1.026l22.482-0.008 c0.756-0.085,1.445-0.446,1.912-1.034c0.48-0.586,0.693-1.344,0.609-2.094c-0.567-4.823-1.132-9.639-1.693-14.462l-1.174-10.095 c-0.179-1.505-1.526-2.601-3.044-2.466l-2.188,0.003l0.047-33.883l1.144-0.415l3.806-1.375c3.227-1.164,5.372-4.225,5.372-7.65 c0-3.427-2.146-6.488-5.372-7.653L213.071,0.488c-1.789-0.65-3.744-0.65-5.531,0L72.915,49.139 c-3.227,1.165-5.374,4.227-5.374,7.653s2.147,6.486,5.374,7.65l48.819,17.644c-4.263,12.257-6.203,26.431-6.044,42.259 l0.002,122.333L89.837,258.58c-7.757,3.18-15.383,8.016-19.263,16.434c0,0-56.998,145.596-26.081,145.596h331.62 C407.034,420.607,350.035,275.014,350.035,275.014z M262.119,262.51c0,0-43.391,14.377-51.748,64.875 c-0.022,0.133-0.106,0.133-0.129,0c-8.359-50.498-51.748-64.875-51.748-64.875l28.439-28.242 c-40.093-17.982-50.755-79.127-50.755-79.127c-2.266-8.839-2.539-14.885-2.539-14.885c20.073-1.367,90.128-7.401,94.917-30.111 c6.603,12.2,41.561,42.857,55.705,45.185c0,0-13.729,60.463-51.229,78.895L262.119,262.51z"
+                          ></path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Faculty2</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="{{ url_for('systemAdminClass') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'class' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'class' else 'text-gray-500' }}"
+                    fill="currentColor"
+                    version="1.1"
+                    id="Capa_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 31.662 31.662"
+                    xml:space="preserve"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g>
+                        <g>
+                          <path
+                            d="M13.193,13.308h4.496c0.23-1.27,0.906-2.364,1.863-3.159c0.004,0,0.009,0,0.015,0c0.797-0.027,1.836-0.237,2.821-0.966 c0.121-0.089,0.238-0.185,0.351-0.284c1.412-1.252,2.187-3.332,2.292-6.192c0.025-0.758-0.564-1.396-1.32-1.425 c-0.826-0.042-1.396,0.562-1.425,1.322c-0.084,2.161-0.602,3.664-1.506,4.349c-0.196,0.151-0.405,0.254-0.606,0.323 c-0.006,0.002-0.015,0.003-0.021,0.005c-0.595-0.568-1.418-0.845-1.974-0.845h-3.398h-3.397c-1.246,0-2.237,1.251-2.259,2.624 C11.201,9.567,12.811,11.246,13.193,13.308z"
+                          ></path>
+                          <ellipse
+                            cx="14.78"
+                            cy="3.195"
+                            rx="3.261"
+                            ry="3.195"
+                          ></ellipse>
+                          <path
+                            d="M14.359,21.546c0-2.479-1.068-3.526-2.55-3.526h-0.081H8.373c1.854-0.271,3.275-1.834,3.275-3.728 c0-2.08-1.72-3.768-3.847-3.768c-2.123,0-3.844,1.688-3.844,3.768c0,1.894,1.421,3.456,3.276,3.728H3.877H3.795 c-1.484,0-2.688,1.588-2.688,3.229v5.02h13.252V21.546z"
+                          ></path>
+                          <path
+                            d="M19.101,14.292c0,1.894,1.422,3.456,3.274,3.728h-3.22h-0.219c-1.485,0-2.618,1.588-2.618,3.229v5.02h13.15v-4.72 c0-2.45-1.029-3.481-2.481-3.506c-0.021,0-0.019-0.021-0.037-0.021h-3.438c1.855-0.271,3.277-1.834,3.277-3.729 c0-2.08-1.722-3.768-3.846-3.768C20.821,10.524,19.101,12.212,19.101,14.292z"
+                          ></path>
+                          <rect
+                            x="0.029"
+                            y="28.423"
+                            width="31.604"
+                            height="3.239"
+                          ></rect>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Class</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="{{ url_for('systemAdminBatch') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'batch' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'batch' else 'text-gray-500' }}"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M4 4.69434V18.6943C4 20.3512 5.34315 21.6943 7 21.6943H17C18.6569 21.6943 20 20.3512 20 18.6943V8.69434C20 7.03748 18.6569 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434ZM7.25 11.6943C7.25 11.2801 7.58579 10.9443 8 10.9443H16C16.4142 10.9443 16.75 11.2801 16.75 11.6943C16.75 12.1085 16.4142 12.4443 16 12.4443H8C7.58579 12.4443 7.25 12.1085 7.25 11.6943ZM7.25 15.1943C7.25 14.7801 7.58579 14.4443 8 14.4443H13.5C13.9142 14.4443 14.25 14.7801 14.25 15.1943C14.25 15.6085 13.9142 15.9443 13.5 15.9443H8C7.58579 15.9443 7.25 15.6085 7.25 15.1943Z"
+                        fill="currentColor"
+                      ></path>
+                      <path
+                        opacity="0.5"
+                        d="M18 4.00038V5.86504C17.6872 5.75449 17.3506 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434V4.62329C4 4.09027 4.39193 3.63837 4.91959 3.56299L15.7172 2.02048C16.922 1.84835 18 2.78328 18 4.00038Z"
+                        fill="currentColor"
+                      ></path>
+                    </g>
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Batch</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="{{ url_for('universityFinalizedGrades') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'finalized-grades' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'finalized-grades' else 'text-gray-500' }}"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 100 100"
+                    xml:space="preserve"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g>
+                        <g>
+                          <path
+                            d="M30,20h-2c-3.3,0-6,3-6,6v4v8v8v8v8v8v4c0,3,2.7,6,6,6h2c1.1,0,2-0.9,2-2V22C32,20.9,31.1,20,30,20z"
+                          ></path>
+                        </g>
+                        <g>
+                          <path
+                            d="M72,20H40c-1.1,0-2,0.9-2,2v56c0,1.1,0.9,2,2,2h32c3.3,0,6-2.7,6-6V26C78,22.7,75.3,20,72,20z M69.8,46.8 l-5.2,5.3c-0.1,0.1-0.2,0.4-0.2,0.6l1.2,7.5c0.1,0.5-0.4,0.9-0.9,0.7l-6.5-3.6c-0.2-0.1-0.4-0.1-0.6,0l-6.5,3.6 c-0.5,0.2-1-0.2-0.9-0.7l1.2-7.5c0-0.2,0-0.4-0.2-0.6l-5.2-5.3c-0.4-0.4-0.2-1,0.3-1.1l7.2-1.1c0.2,0,0.4-0.2,0.5-0.4l3.2-6.9 c0.2-0.5,0.9-0.5,1.1,0l3.2,6.9c0.1,0.2,0.3,0.3,0.5,0.4l7.2,1.1C70,45.8,70.2,46.4,69.8,46.8z"
+                          ></path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap"
+                    >Finalized Grades</span
+                  >
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="{{ url_for('universityProfile') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'profile' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'profile' else 'text-gray-500' }}"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 18"
+                  >
+                    <path
+                      d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z"
+                    />
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Profile</span>
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="{{ url_for('universityChangePassword') }}"
+                  class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'change-password' else 'hover:bg-gray-100 hover:text-c1' }}"
+                >
+                  <svg
+                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'change-password' else 'text-gray-500' }}"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
+                    />
+                    <path
+                      d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
+                    />
+                    <path
+                      d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"
+                    />
+                  </svg>
+                  <span class="flex-1 ml-3 whitespace-nowrap"
+                    >Change Password</span
+                  >
+                </a>
+              </li>
+            </ul>
           </div>
-        </footer>
+        </div>
+        <div class="w-full">
+          <a
+            class="flex items-center px-4 py-4 transition-colors duration-300 transform rounded-lg bg-gradient-to-r from-red-800 to-red-500 hover:from-red-900 hover:to-red-600 text-white font-bold py-2 px-4 rounded shadow-md"
+            href="{{ url_for('logout') }}"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'class-performance' else 'text-gray-500' }}"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+              />
+            </svg>
+
+            <span class="mx-2 text-sm font-medium">Log Out</span>
+          </a>
+        </div>
       </div>
+    </aside>
+
+    <div class="w-full flex flex-col h-screen overflow-y-hidden">
+      <!-- Desktop Header -->
+      <header class="w-full items-center bg-white py-2 px-6 hidden sm:flex">
+        <div class="w-1/2 py-6"></div>
+      </header>
+
+      <!-- Mobile Header & Nav -->
+      <header
+        x-data="{ isOpen: false }"
+        class="w-full bg-c5 py-5 px-6 sm:hidden"
+      >
+        <div class="flex items-center justify-between">
+          <a
+            href="index.html"
+            class="text-white text-3xl font-semibold uppercase hover:text-c2"
+            >Admin</a
+          >
+          <button
+            @click="isOpen = !isOpen"
+            class="text-white text-3xl focus:outline-none"
+          >
+            <i x-show="!isOpen" class="fas fa-bars"></i>
+            <i x-show="isOpen" class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Dropdown Nav -->
+        <nav :class="isOpen ? 'flex': 'hidden'" class="flex flex-col pt-4">
+          <a
+            href="index.html"
+            class="flex items-center bg-warning hover:bg-yellow-400 text-white py-2 pl-4 nav-item font-bold"
+          >
+            <i class="fas fa-tachometer-alt mr-3"></i>
+            Dashboard
+          </a>
+          <a
+            href="blank.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-sticky-note mr-3"></i>
+            Blank Page
+          </a>
+          <a
+            href="tables.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-table mr-3"></i>
+            Tables
+          </a>
+          <a
+            href="forms.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-align-left mr-3"></i>
+            Forms
+          </a>
+          <a
+            href="tabs.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-tablet-alt mr-3"></i>
+            Tabbed Content
+          </a>
+          <a
+            href="calendar.html"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-calendar mr-3"></i>
+            Calendar
+          </a>
+          <a
+            href="#"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-cogs mr-3"></i>
+            Support
+          </a>
+          <a
+            href="#"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-user mr-3"></i>
+            My Account
+          </a>
+          <a
+            href="#"
+            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+          >
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Sign Out
+          </a>
+          <button
+            class="w-full bg-white cta-btn font-semibold py-2 mt-3 rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-300 flex items-center justify-center"
+          >
+            <i class="fas fa-arrow-circle-up mr-3"></i> Log Out
+          </button>
+        </nav>
+        <!-- <button class="w-full bg-white cta-btn font-semibold py-2 mt-5 rounded-br-lg rounded-bl-lg rounded-tr-lg shadow-lg hover:shadow-xl hover:bg-gray-300 flex items-center justify-center">
+                <i class="fas fa-plus mr-3"></i> New Report
+            </button> -->
+      </header>
+
+      {% block content %} {% endblock content %}
     </div>
+
+    <!-- AlpineJS -->
+    <script
+      src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
+      defer
+    ></script>
+    <!-- Font Awesome -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"
+      integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs="
+      crossorigin="anonymous"
+    ></script>
+    <!-- ChartJS -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+      integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI="
+      crossorigin="anonymous"
+    ></script>
 
     <script>
       const api_base_url = '{{ system_admin_api_base_url | default("") }}';
@@ -423,7 +680,9 @@
           },
         ],
       });
+    </script>
 
+    <script>
       // Opening specific Modal
       function showModal(elemetId) {
         const loadingModal = document.getElementById(elemetId);
@@ -437,8 +696,83 @@
         loadingModal.classList.add('hidden');
         loadingModal.classList.remove('flex');
       }
+
+      // Adding Data in the Grids
+      function handleAddData(elementId, data) {
+        const grid = document.getElementById(elementId).ej2_instances[0];
+        // Refresh the grid
+        grid.refresh();
+      }
+
+      function closeModalError(modalElementId, listElementId) {
+        var gridErrorList = document.getElementById(listElementId);
+
+        while (gridErrorList.firstChild) {
+          gridErrorList.removeChild(gridErrorList.firstChild);
+        }
+
+        closeModal(modalElementId);
+      }
+
+      // Handling for results of submission of data
+      function handleDataSubmitResults(
+        data,
+        fileInput,
+        displayData,
+        ModalId,
+        gridId = ''
+      ) {
+        console.log('data: ', data);
+        if (data.result) {
+          console.log('data.result: ', data.result);
+          if (gridId != '') {
+            handleAddData(gridId, data);
+          }
+          notyf.success(data.result);
+          fileInput.value = '';
+        }
+
+        if (data.warning) {
+          if (gridId) {
+            handleAddData(gridId, data);
+          }
+          notyf.open({
+            type: 'warning',
+            message: data.warning,
+          });
+          fileInput.value = '';
+          displayData(data.errors);
+          showModal(ModalId);
+        }
+
+        if (data.error) {
+          if (data.errorLast) {
+            notyf.error(data.errorLast);
+            return;
+          }
+
+          notyf.error(data.error);
+          fileInput.value = '';
+          if (data.errors) {
+            displayData(data.errors);
+            showModal(ModalId);
+          }
+        }
+
+        if (data.errorException) {
+          notyf.error(data.errorException);
+        }
+      }
+
+      function onSuccess(message) {
+        notyf.success(message);
+      }
+
+      function onError(message) {
+        notyf.error(message);
+      }
     </script>
-    <!-- SCRIPTS -->
+
     {% block script %} {% endblock script %}
   </body>
 </html>

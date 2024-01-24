@@ -15,7 +15,6 @@ import pandas as pd
 import random
 import string
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 
 from collections import defaultdict
