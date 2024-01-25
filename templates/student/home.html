@@ -65,13 +65,11 @@
     <div
       class="bg-white lg:w-4/12 md:w-6/12 md:flex-1 w-screen md:mb-0 mb-4 rounded-lg p-6 shadow-md"
     >
-      <p class="font-bold text-c1 opacity-80">Risk of Failing</p>
+      <p class="font-bold text-c1 opacity-80">Current Units Taken</p>
       <div class="flex justify-between">
-        <p class="font-bold text-c1 text-4xl">
-          7% <span class="text-c1 text-base">Percent</span>
-        </p>
+        <p id="units-taken" class="font-bold text-c1 text-4xl"></p>
         <p class="bg-info mt-2 text-white px-2 py-1 rounded-md font-bold">
-          Percentage
+          Units Taken
         </p>
       </div>
     </div>
@@ -178,6 +176,34 @@
   }
 
   fetchStudentOverallGpa();
+</script>
+
+<!-- FETCH STUDENT OVERALL GPA -->
+<script>
+  async function fetchUnitsTaken() {
+    const response = await fetch(`${api_base_url}/units`);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
+    }
+
+    const data = await response.json();
+    console.log('GET DATA: ', data);
+    displayUnits(data);
+  }
+
+  function displayUnits(data) {
+    console.log('Units: ', data);
+    const units = document.getElementById('units-taken');
+
+    units.innerHTML = `${
+      data.Units ? data.Units : '0'
+    }<span class="text-c1 text-base ml-2 mb-1">Units</span>`;
+  }
+
+  fetchUnitsTaken();
 </script>
 
 <!-- STUDENT PERFORMANCE OVER TIME -->
@@ -346,7 +372,6 @@
   fetchPreviousSubjectGrade();
 
   function displayPreviousSubjectGrade(list_previous_subject_grade) {
-    console.log('list_previous_subject_grade: ', list_previous_subject_grade);
     if (list_previous_subject_grade.success) {
       var data = [...list_previous_subject_grade.data];
       var grid = new ej.grids.Grid({

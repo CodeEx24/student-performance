@@ -1,4 +1,4 @@
-from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, Metadata, db
+from models import StudentClassGrade, Class, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, Student, Course, Metadata, db, LatestBatchSemester
 
 from sqlalchemy import desc, func
 from collections import defaultdict
@@ -223,6 +223,46 @@ def getOverallGrade(str_student_id):
         else:
             return None
     except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+    
+
+def getUnitsTaken(str_student_id):
+    try:
+        # Get the latest batch semester where IsEnrollmentStarted is True and IsGradeFinalized is False
+        data_latest_batch_semester = db.session.query(LatestBatchSemester).filter_by(IsEnrollmentStarted = True, IsGradeFinalized = False).order_by(desc(LatestBatchSemester.created_at)).first()
+        
+        # Get all class subject of student in which Subject.Units is sum
+        data_student_class_subject = (
+            db.session.query(
+                StudentClassSubjectGrade.StudentId,
+                func.sum(Subject.Units).label('total_units')
+            )
+            .join(ClassSubject, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+            .join(Class, ClassSubject.ClassId == Class.ClassId)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+            .join(Subject, ClassSubject.SubjectId == Subject.SubjectId)
+            .filter(
+                StudentClassSubjectGrade.StudentId == str_student_id,
+                Metadata.Batch == data_latest_batch_semester.Batch,
+                Metadata.Semester == data_latest_batch_semester.Semester
+            )
+            .group_by(StudentClassSubjectGrade.StudentId)
+            .first()
+        )
+        
+        print('data_student_class_subject: ', data_student_class_subject)
+
+        if data_student_class_subject:
+            
+            dict_total_average_grade = {"Units": data_student_class_subject.total_units}
+            
+            return (dict_total_average_grade)
+
+        else:
+            return None
+    except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
 

@@ -13,7 +13,7 @@ from decorators.auth_decorators import preventAuthenticated, role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, getStudentData, updateStudentData, updatePassword, getCurrentUser, saveSessionValues
+from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, getStudentData, updateStudentData, updatePassword, getCurrentUser, saveSessionValues, getUnitsTaken
 from werkzeug.security import generate_password_hash
 
 import random
@@ -399,6 +399,21 @@ def overallGrade():
             return jsonify(message="No data available")
     else:
         return render_template('404.html'), 404
+    
+    
+@student_api.route('/units', methods=['GET'])
+@role_required('student')
+def fetchUnitsTaken():
+    student = getCurrentUser()
+    if student:
+        json_overall_gpa = getUnitsTaken(student.StudentId)
+
+        if json_overall_gpa:
+            return (json_overall_gpa)
+        else:
+            return jsonify(message="No data available")
+    else:
+        return render_template('404.html'), 404
 
 # ============================================================
 
@@ -505,6 +520,7 @@ def performance():
             return jsonify(error="No data available")
     else:
         return render_template('404.html'), 404
+
 
 
 # Getting Previous Subjects Grade
