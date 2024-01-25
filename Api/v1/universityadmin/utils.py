@@ -72,6 +72,7 @@ def getUniversityAdminData(str_univ_admin_id):
 
 def updateUniversityAdminData(str_univ_admin_id, email, number, residentialAddress):
     try:
+        print("HERE INSIDE UDPATE")
         if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
             return {"type": "email", "status": 400}
 
@@ -82,13 +83,12 @@ def updateUniversityAdminData(str_univ_admin_id, email, number, residentialAddre
             return {"type": "residential", "status": 400}
 
         # Update the student data in the database
-        data_student = db.session.query(UniversityAdmin).filter(
-            UniversityAdmin.UnivAdminId == str_univ_admin_id).first()
+        data_univ_admin = db.session.query(UniversityAdmin).filter(UniversityAdmin.UnivAdminId == str_univ_admin_id).first()
         
-        if data_student:
-            data_student.Email = email
-            data_student.MobileNumber = number
-            data_student.ResidentialAddress = residentialAddress
+        if data_univ_admin:
+            data_univ_admin.Email = email
+            data_univ_admin.MobileNumber = number
+            data_univ_admin.ResidentialAddress = residentialAddress
             db.session.commit()
                         
             return {"message": "Data updated successfully", "email": email, "number": number, "residentialAddress": residentialAddress, "status": 200}
@@ -96,6 +96,7 @@ def updateUniversityAdminData(str_univ_admin_id, email, number, residentialAddre
             return {"message": "Something went wrong", "status": 404}
 
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         db.session.rollback()  # Rollback the transaction in case of an error
         return {"message": "An error occurred", "status": 500}
@@ -2695,8 +2696,9 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
                 return jsonify({'error': 'Cannot add students. Enrollment is not yet started.'}), 400
             
             # Check if grade is already finalized
-            if class_data.IsGradeFinalized:
-                return jsonify({'error': True, 'errorLast': 'Cannot add student. Grade is already finalized'}), 400
+            if class_data:
+                if class_data.Class.IsGradeFinalized:
+                    return jsonify({'error': True, 'errorLast': 'Cannot add student. Grade is already finalized'}), 400
             
             if class_subject:
 
@@ -2732,7 +2734,7 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
                         })
                         continue
                     
-                
+                    
                     student = db.session.query(Student).filter_by(StudentNumber = student_number).first()
                 
                     if student:
@@ -2746,12 +2748,12 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
                             })
                         else:
                             # Check if student has already studentClassGrade
-                            student_class_grade = db.session.query(StudentClassGrade).filter_by(StudentId = student.StudentId, ClassId = class_subject.ClassId).first()
+                            student_class_grade = db.session.query(StudentClassGrade).filter_by(StudentId = student.StudentId, ClassId = class_subject.Class.ClassId).first()
                             if not student_class_grade:
                                 # Create StudentClassGrade
                                 new_student_class_grade = StudentClassGrade(
                                     StudentId=student.StudentId,
-                                    ClassId=class_subject.ClassId,
+                                    ClassId=class_subject.Class.ClassId,
                                     Grade=0.00
                                 )
                                 
@@ -2769,11 +2771,12 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
                             db.session.add(new_student_class_subject_grade)
                             db.session.commit()
                             
+                            full_name = student.LastName + ', ' + student.FirstName + ' ' + student.MiddleName
                             dict_student_class_subject_grade = {
                                 "ClassSubjectId": class_subject_id,
                                 "StudentId": student.StudentId,
                                 "StudentNumber": student.StudentNumber,
-                                "Name": student.Name,
+                                "Name": full_name,
                                 "Email": student.Email,
                                 "Grade": new_student_class_subject_grade.Grade
                             }
@@ -2787,7 +2790,7 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
                             'DateEnrolled': student_date_enrolled,
                             'Error': 'Student Number does not exist'
                         })
-                        
+                
                 if errors and len(list_students_added) > 0:
                     db.session.rollback()
                     return jsonify({'warning': 'Some data added successfully', 'errors': errors, 'data': list_students_added}), 500
@@ -2831,8 +2834,9 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
             # Get the class
             class_data = db.session.query(Class).filter_by(ClassId = class_subject.ClassId).first()
             # Check if grade is already finalized
-            if class_data.IsGradeFinalized:
-                return jsonify({'error': 'Cannot add student. Grade is already finalized'}), 400
+            if class_data:
+                if class_data.IsGradeFinalized:
+                    return jsonify({'error': 'Cannot add student. Grade is already finalized'}), 400
             
             # Check if student_number is existing
             student = db.session.query(Student).filter_by(StudentNumber = student_number).first()

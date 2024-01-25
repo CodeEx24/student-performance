@@ -37,11 +37,7 @@
         <hr class="mx-2" />
         <div class="flex items-end justify-between">
           <div class="w-full bg-white p-4">
-            <form
-              class="w-full mt-4"
-              method="POST"
-              onsubmit="submitForm(event)"
-            >
+            <form class="w-full mt-4">
               <div class="grid gap-6 mb-6 md:grid-cols-2">
                 <div>
                   <p class="text-c1 font-extrabold">Name:</p>
@@ -114,7 +110,7 @@
                 </div>
               </div>
               <button
-                type="submit"
+                onclick="submitForm(event)"
                 class="text-white bg-c4 hover:bg-c5 transition duration-300 font-bold text-sm sm:w-auto px-5 px-5 py-2 text-center"
               >
                 Submit
@@ -161,12 +157,12 @@
 
   async function submitForm(event) {
     event.preventDefault();
+    console.log('INSIDE SUBMIT HERE');
     const email = document.getElementById('email-input').value;
     const number = document.getElementById('number-input').value;
     const residentialAddress =
       document.getElementById('residential-input').value;
 
-    // Send data to the API
     const response = await fetch(`${api_base_url}/details/update`, {
       method: 'POST',
       headers: {
@@ -174,6 +170,7 @@
       },
       body: JSON.stringify({ email, number, residentialAddress }),
     });
+    // Send data to the API
 
     const data_university_admin_details = await response.json();
 

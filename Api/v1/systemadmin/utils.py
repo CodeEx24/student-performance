@@ -764,7 +764,7 @@ def revertFinalizedGrades(latestBatchSemesterId):
                 # Loop and change the value of Class.IsGradeFinalized to False
                 for cls in classes:
                     cls.Class.IsGradeFinalized = False
-            # db.session.commit()
+                    db.session.commit()
             # rollbacck
             db.session.rollback()
             return jsonify({"success": True, "message": "Successfully reverted the grades"})

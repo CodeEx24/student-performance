@@ -253,6 +253,7 @@
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
       pageSettings: { pageSize: 10 }, // Set the page size
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       // rowData: json_class['ClassSubjectGrade'],
       columns: [
         {
@@ -288,7 +289,6 @@
         },
       ],
 
-      // toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
       excelExportComplete: function (args) {
         // Exclude the 'Subject Code' column from the exported Excel file
@@ -515,7 +515,7 @@
       exportSettings: { excelExportMode: 'AllPages' },
 
       editSettings: {
-        allowEditing: true,
+        // allowEditing: true,
         allowAdding: true,
         allowDeleting: true,
         showDeleteConfirmDialog: true,

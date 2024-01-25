@@ -39,7 +39,6 @@ def login():
 def profile():
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        print('universityAdmin.to_dict(): ', universityAdmin.to_dict())
         return jsonify(universityAdmin.to_dict())
     else:
         flash('User not found', 'danger')
@@ -66,17 +65,15 @@ def universityAdminData():
 @role_required('universityAdmin')
 def updateDetails():
     universityAdmin = getCurrentUser()
+    print("ACCEPTED HERE")
     if universityAdmin:
         if request.method == 'POST':
             email = request.json.get('email')
             number = request.json.get('number')
             residentialAddress = request.json.get('residentialAddress')
 
-            json_result = updateUniversityAdminData(
-                universityAdmin.UnivAdminId, email, number, residentialAddress)
-
+            json_result = updateUniversityAdminData(universityAdmin.UnivAdminId, email, number, residentialAddress)
             return json_result
-
         else:
             flash('Invalid email or password', 'danger')
             return redirect(url_for('studentLogin'))
