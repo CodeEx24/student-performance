@@ -250,6 +250,22 @@
       }
     </script>
 
+    <script>
+      // Opening specific Modal
+      function showModal(elemetId) {
+        const loadingModal = document.getElementById(elemetId);
+        loadingModal.classList.add('flex');
+        loadingModal.classList.remove('hidden');
+      }
+
+      // Closing specific Modal
+      function closeModal(elemetId) {
+        const loadingModal = document.getElementById(elemetId);
+        loadingModal.classList.add('hidden');
+        loadingModal.classList.remove('flex');
+      }
+    </script>
+
     {% block script %} {% endblock script %}
   </body>
 </html>

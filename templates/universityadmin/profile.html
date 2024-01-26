@@ -52,36 +52,20 @@
                   </p>
                 </div>
                 <div>
+                  <p class="text-c1 font-extrabold">Email:</p>
+                  <p class="text-c1 opacity-90 font-normal" id="email">
+                    {{ universityAdmin.Email }}
+                  </p>
+                </div>
+                <div>
                   <p class="text-c1 font-extrabold">Gender:</p>
                   <p class="text-c1 opacity-90 font-normal" id="gender">
                     {{ universityAdmin.Gender }}
                   </p>
                 </div>
-                <div>
-                  <!-- <p class="text-c1 font-extrabold">Course Taken:</p>
-                    <p class="text-c1 opacity-90 font-normal" id="course">
-                      Course Taken
-                    </p> -->
-                </div>
 
                 <!-- INPUTS HERE -->
-                <div>
-                  <label
-                    for="email-input"
-                    class="block mb-2 text-c1 font-extrabold"
-                    >Email</label
-                  >
-                  <input
-                    type="email"
-                    id="email-input"
-                    name="email"
-                    value=" {{ universityAdmin.Email }}"
-                    placeholder="username@gmail.com"
-                    class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
-                    disabled
-                  />
-                  <p id="error-email" class="text-c4 text-sm"></p>
-                </div>
+
                 <div>
                   <label
                     for="number-input"
@@ -217,10 +201,6 @@
         .then((response) => response.json())
         .then((data) => {
           const errorDetails = {
-            email: {
-              id: 'error-email',
-              message: 'Please provide a valid email address',
-            },
             mobile: {
               id: 'error-mobile',
               message: 'Mobile must be in "09XXXXXXXXX" format',

@@ -71,6 +71,35 @@ def updateSystemAdminData(str_univ_admin_id, number, residentialAddress):
         db.session.rollback()  # Rollback the transaction in case of an error
         return {"message": "An error occurred", "status": 500}
 
+
+def updatePassword(system_admin_id, password, new_password, confirm_password):
+    try:
+        data_admin = db.session.query(SystemAdmin).filter(
+            SystemAdmin.SysAdminId == system_admin_id).first()
+
+        if data_admin:
+            # Assuming 'password' is the hashed password stored in the database
+            hashed_password = data_admin.Password
+
+            if check_password_hash(hashed_password, password):
+                # If the current password matches
+                new_hashed_password = generate_password_hash(
+                    new_password)
+                data_admin.Password = new_hashed_password
+                db.session.commit()
+                return {"message": "Password changed successfully", "status": 200}
+
+            else:
+                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 400}
+        else:
+            return {"message": "Something went wrong", "status": 404}
+
+    except Exception as e:
+        # Handle the exception here, e.g., log it or return an error response
+        db.session.rollback()  # Rollback the transaction in case of an error
+        return {"message": "An error occurred", "status": 500}
+
+
 def updatePassword(str_university_admin_id, password, new_password, confirm_password):
     try:
         data_student = db.session.query(UniversityAdmin).filter(
@@ -86,14 +115,15 @@ def updatePassword(str_university_admin_id, password, new_password, confirm_pass
                     new_password)
                 data_student.Password = new_hashed_password
                 db.session.commit()
-                return {"message": "Password changed successfully", "status": 200}
+                return {"message": "Password changed successfully", "status": 200, 'success': True}
 
             else:
-                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 400}
+                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 400, 'error': True}
         else:
-            return {"message": "Something went wrong", "status": 404}
+            return {"message": "Something went wrong", "status": 404, 'error': True}
 
     except Exception as e:
+        print('ERROR: ', e)
         # Handle the exception here, e.g., log it or return an error response
         db.session.rollback()  # Rollback the transaction in case of an error
         return {"message": "An error occurred", "status": 500}

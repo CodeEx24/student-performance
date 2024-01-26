@@ -451,12 +451,11 @@ def updateDetails():
     student = getCurrentUser()
     if student:
         if request.method == 'POST':
-            email = request.json.get('email')
             number = request.json.get('number')
             residentialAddress = request.json.get('residentialAddress')
 
             json_result = updateStudentData(
-                student.StudentId, email, number, residentialAddress)
+                student.StudentId, number, residentialAddress)
 
             return json_result
 

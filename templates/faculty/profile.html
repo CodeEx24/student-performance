@@ -53,36 +53,18 @@
                   </p>
                 </div>
                 <div>
+                  <p class="text-c1 font-extrabold">Email:</p>
+                  <p class="text-c1 opacity-90 font-normal" id="gender">
+                    {{ faculty.Email }}
+                  </p>
+                </div>
+                <div>
                   <p class="text-c1 font-extrabold">Gender:</p>
                   <p class="text-c1 opacity-90 font-normal" id="gender">
                     {{ faculty.Gender }}
                   </p>
                 </div>
-                <div>
-                  <!-- <p class="text-c1 font-extrabold">Course Taken:</p>
-                  <p class="text-c1 opacity-90 font-normal" id="course">
-                    Course Taken
-                  </p> -->
-                </div>
 
-                <!-- INPUTS HERE -->
-                <div>
-                  <label
-                    for="email-input"
-                    class="block mb-2 text-c1 font-extrabold"
-                    >Email</label
-                  >
-                  <input
-                    type="email"
-                    id="email-input"
-                    name="email"
-                    placeholder="username@gmail.com"
-                    value="{{ faculty.Email }}"
-                    class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
-                    disabled
-                  />
-                  <p id="error-email" class="text-c4 text-sm"></p>
-                </div>
                 <div>
                   <label
                     for="number-input"
@@ -130,6 +112,34 @@
   </div>
 </div>
 
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 
 <!----------------- SCRIPTS ----------------->
@@ -146,6 +156,7 @@
     ).value;
 
     // Send data to the API
+    showModal('loadingModal');
     const response = await fetch(`${api_base_url}/details/update`, {
       method: 'POST',
       headers: {
@@ -153,14 +164,10 @@
       },
       body: JSON.stringify({ number, residential_address }),
     });
-
+    closeModal('loadingModal');
     const data_faculty_details = await response.json();
 
     const errorDetails = {
-      email: {
-        id: 'error-email',
-        message: 'Please provide a valid email address',
-      },
       mobile: {
         id: 'error-mobile',
         message: 'Mobile must be in "09XXXXXXXXX" format',
@@ -231,7 +238,6 @@
   }
 
   function displayDetails2(data) {
-    const input_email = document.getElementById('email-input');
     const input_number = document.getElementById('number-input');
     const input_residential_address = document.getElementById(
       'residential-address-input'
@@ -241,8 +247,6 @@
     const text_faculty_type = document.getElementById('faculty-type');
     const text_gender = document.getElementById('gender');
     const text_course = document.getElementById('course');
-
-    input_email.value = `${data.Email ? data.Email : ''}`;
 
     input_number.value = `${data.MobileNumber ? data.MobileNumber : ''}`;
 

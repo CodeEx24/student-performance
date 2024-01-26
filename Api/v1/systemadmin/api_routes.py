@@ -9,7 +9,7 @@ import time
 from werkzeug.security import gen_salt
 from oauth2 import authorization
 
-from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData
+from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData, updatePassword
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 import os
@@ -18,8 +18,8 @@ system_admin_api = Blueprint('system_admin_api', __name__)
 
 
 def current_user():
-    if 'id' in session:
-        uid = session['id']
+    if 'user_id' in session:
+        uid = session['user_id']
         return SystemAdmin.query.get(uid)
     return None
 
@@ -48,8 +48,34 @@ def login():
         return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
 
 
+# Changing the password of the user
+@system_admin_api.route('/change/password', methods=['POST'])
+@role_required('systemAdmin')
+def changePassword():
+    print("ENTERING")
+    
+    system_admin = getCurrentUser()
+    
+    if system_admin:
+        if request.method == 'POST':
+            password = request.json.get('password')
+            new_password = request.json.get('new_password')
+            confirm_password = request.json.get('confirm_password')
+            print("HGOUING")
+            json_result = updatePassword(
+                system_admin.SysAdminId, password, new_password, confirm_password)
+
+            return json_result
+
+        else:
+            flash('Invalid email or password', 'danger')
+            return redirect(url_for('studentLogin'))
+    else:
+        return render_template('404.html'), 404
+
 # Make a client list route
 @system_admin_api.route('/clients/', methods=['GET'])
+@role_required('systemAdmin')
 def clients():
     user = getCurrentUser()
     if user:
@@ -70,41 +96,48 @@ def clients():
     
 
 @system_admin_api.route('/create_client', methods=['POST'])
+@role_required('systemAdmin')
 def createClient():
     systemAdmin = current_user()
-    print('form: ', form)
+    print("CREATING CLIENT: ", systemAdmin)
     if request.method == "POST":
-        if not systemAdmin:
-            return redirect(url_for('systemAdminLogin'))
-        
-        client_id = gen_salt(24)
-        client_id_issued_at = int(time.time())
-        client = OAuth2Client(
-            client_id=client_id,
-            client_id_issued_at=client_id_issued_at,
-            user_id=systemAdmin.SysAdminId,
-        )
+        try:
+            print("SUPPOSED TO BE HERE2")
+            if not systemAdmin:
+                return redirect(url_for('systemAdminLogin'))
+            print("SUPPOSED TO BE HERE1")
+            client_id = gen_salt(24)
+            client_id_issued_at = int(time.time())
+            client = OAuth2Client(
+                client_id=client_id,
+                client_id_issued_at=client_id_issued_at,
+                user_id=systemAdmin.SysAdminId,
+            )
+            print("SUPPOSED TO BE HERE")
+            form = request.form
+            print('form: ', form)
+            client_metadata = {
+                "client_name": form["client_name"],
+                "client_uri": form["client_uri"],
+                "grant_types": split_by_crlf(form["grant_type"]),
+                "redirect_uris": split_by_crlf(form["redirect_uri"]),
+                "response_types": split_by_crlf(form["response_type"]),
+                "scope": form["scope"],
+                "token_endpoint_auth_method": form["token_endpoint_auth_method"]
+            }
+            client.set_client_metadata(client_metadata)
 
-        form = request.form
-        client_metadata = {
-            "client_name": form["client_name"],
-            "client_uri": form["client_uri"],
-            "grant_types": split_by_crlf(form["grant_type"]),
-            "redirect_uris": split_by_crlf(form["redirect_uri"]),
-            "response_types": split_by_crlf(form["response_type"]),
-            "scope": form["scope"],
-            "token_endpoint_auth_method": form["token_endpoint_auth_method"]
-        }
-        client.set_client_metadata(client_metadata)
+            if form['token_endpoint_auth_method'] == 'none':
+                client.client_secret = ''
+            else:
+                client.client_secret = gen_salt(48)
 
-        if form['token_endpoint_auth_method'] == 'none':
-            client.client_secret = ''
-        else:
-            client.client_secret = gen_salt(48)
-
-        db.session.add(client)
-        db.session.commit()
-        return redirect(url_for('systemAdminClients'))
+            db.session.add(client)
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Adding client successfully'})
+        except Exception as e:
+            
+          print('Error: ', e)
         
     
 # Updating the user details
@@ -139,7 +172,7 @@ def login2():
             session['user_id'] = systemAdmin.SysAdminId
             session['user_role'] = 'systemAdmin'
             print("SUCCESSFUL LOGIN")
-            return redirect(url_for('systemAdminHome'))
+            return redirect(url_for('systemAdminClients'))
         else:
             flash('Invalid email or password', 'danger')
             print("FAILED LOGIN")

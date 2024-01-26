@@ -186,13 +186,14 @@ def create_app():
     @role_required('student')
     def studentProfile():
         student = getCurrentUser('student')
-        return render_template('student/profile.html', student_api_base_url=student_api_base_url, current_page="profile", student=student)
+        return render_template('student/profile.html', student_api_base_url=student_api_base_url, current_page="profile", student=student.to_dict())
 
 
     @app.route('/student/change-password')
     @role_required('student')
     def changePassword():
-        return render_template('student/change_password.html', student_api_base_url=student_api_base_url,  current_page="change-password")
+        student = getCurrentUser('student')
+        return render_template('student/change_password.html', student_api_base_url=student_api_base_url,  current_page="change-password", student=student.to_dict())
 
 
     # ========================================================================
@@ -320,10 +321,10 @@ def create_app():
     def systemAdminLogin():
         return render_template('systemadmin/login.html')
 
-    # @app.route('/system-admin/home')
-    # @role_required('systemAdmin')
-    # def systemAdminHome():
-    #     return render_template('systemadmin/home.html', system_admin_api_base_url=system_admin_api_base_url, current_page="home")
+    @app.route('/system-admin/home')
+    @role_required('systemAdmin')
+    def systemAdminHome():
+        return render_template('systemadmin/home.html', system_admin_api_base_url=system_admin_api_base_url, current_page="home")
     
     @app.route('/system-admin/clients')
     @role_required('systemAdmin')
@@ -357,7 +358,6 @@ def create_app():
     @role_required('systemAdmin')
     def systemAdminProfile():
         systemAdmin = getCurrentUser('systemAdmin')
-        print('systemAdmin.to_dict(): ', systemAdmin.to_dict())
         return render_template('systemadmin/profile.html', system_admin_api_base_url=system_admin_api_base_url, current_page="profile", systemAdmin=systemAdmin.to_dict())
     
     @app.route('/system-admin/change-password')

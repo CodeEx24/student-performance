@@ -94,27 +94,15 @@ class Faculty(db.Model):
     
 
     def to_dict(self):
+        full_name = self.LastName + ', ' + self.FirstName + ' ' + self.MiddleName
         return {
-            'faculty_account_id': self.FacultyId,
-            'faculty_type': self.FacultyType,
-            'rank': self.Rank,
-            'units': self.Units,
-            'first_name': self.FirstName,
-            'last_name': self.LastName,
-            'middle_name': self.MiddleName,
-            'middle_initial': self.MiddleInitial,
-            'name_extension': self.NameExtension,
-            'birth_date': self.BirthDate,
-            'date_hired': self.DateHired,
-            'degree': self.Degree,
-            'remarks': self.Remarks,
-            'faculty_code': self.FacultyCode,
-            'honorific': self.Honorific,
-            'age': self.Age,
-            'email': self.Email,
-    
-            'profile_pic': self.ProfilePic,
-            'is_active': self.IsActive,
+            'FacultyId': self.FacultyId,
+            'FacultyType': self.FacultyType,
+            'Name': full_name,
+            'Email': self.Email,
+            'Gender': "Male" if self.Gender == 1 else "Female",
+            'ResidentialAddress': self.ResidentialAddress,
+            'MobileNumber': self.MobileNumber,
         }
         
     def get_id(self):

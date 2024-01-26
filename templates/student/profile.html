@@ -20,11 +20,10 @@
 <!----------------- CONTENTS ----------------->
 {% block content %}
 <div class="lg:px-40 md:px-16 py-4 w-screen px-8 mb-8">
-  <h3 class="text-3xl font-bold text-c4 mb-4">Personal Data</h3>
   <div class="flex gap-3">
     <div class="bg-white w-screen shadow-md rounded-lg flex p-4">
       <div class="w-full lg:w-full md:w-full p-2">
-        <h3 class="text-2xl font-bold text-c4 mb-3" id="name"></h3>
+        <h3 class="text-3xl font-bold text-c4 mb-4">Personal Data</h3>
         <hr />
 
         <form class="w-full mt-4" method="POST" onsubmit="submitForm(event)">
@@ -42,34 +41,27 @@
               </p>
             </div>
             <div>
+              <p class="text-c1 font-extrabold">Email:</p>
+              <p class="text-c1 opacity-90 font-normal" id="email">
+                {{ student.Email }}
+              </p>
+            </div>
+            <div>
               <p class="text-c1 font-extrabold">Gender:</p>
               <p class="text-c1 opacity-90 font-normal" id="gender">
                 {{ student.Gender }}
               </p>
             </div>
-            <div>
+
+            <!-- <div>
               <p class="text-c1 font-extrabold">Course Taken:</p>
               <p class="text-c1 opacity-90 font-normal" id="course">
                 {{ student.CourseName }}
               </p>
-            </div>
+            </div> -->
 
             <!-- INPUTS HERE -->
-            <div>
-              <label for="email-input" class="block mb-2 text-c1 font-extrabold"
-                >Email</label
-              >
-              <input
-                type="email"
-                id="email-input"
-                name="email"
-                placeholder="username@gmail.com"
-                value="{{ student.Email }}"
-                class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
-                disabled
-              />
-              <p id="error-email" class="text-c4 text-sm"></p>
-            </div>
+
             <div>
               <label
                 for="number-input"
@@ -139,6 +131,34 @@
   </footer>
 </div>
 
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 <!----------------- SCRIPTS ----------------->
@@ -172,27 +192,23 @@
 
   async function submitForm(event) {
     event.preventDefault();
-    const email = document.getElementById('email-input').value;
     const number = document.getElementById('number-input').value;
     const residentialAddress =
       document.getElementById('residential-input').value;
 
     // Send data to the API
+    showModal('loadingModal');
     const response = await fetch(`${api_base_url}/details/update`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, number, residentialAddress }),
+      body: JSON.stringify({ number, residentialAddress }),
     });
 
     const data_student_details = await response.json();
 
     const errorDetails = {
-      email: {
-        id: 'error-email',
-        message: 'Please provide a valid email address',
-      },
       mobile: {
         id: 'error-mobile',
         message: 'Mobile must be in "09XXXXXXXXX" format',
@@ -228,7 +244,7 @@
     } else {
       notyf.error('Something went wrong');
     }
-
+    closeModal('loadingModal');
     if (!response.ok) {
       throw new Error(
         `Failed to fetch data. Try to contact the admin to resolve the issue.`
@@ -237,11 +253,9 @@
   }
 
   function updateDetails(data_student_details) {
-    const input_email = document.getElementById('email-input');
     const input_number = document.getElementById('number-input');
     const input_residential = document.getElementById('residential-input');
 
-    input_email.value = data_student_details.email;
     input_number.value = data_student_details.number;
     input_residential.value = data_student_details.residentialAddress;
   }

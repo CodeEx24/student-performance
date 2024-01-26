@@ -380,10 +380,8 @@ def getStudentData(student_id):
         return None
 
 
-def updateStudentData(str_student_id, email, number, residentialAddress):
+def updateStudentData(str_student_id, number, residentialAddress):
     try:
-        if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
-            return {"type": "email", "status": 400}
 
         if not re.match(r'^09\d{9}$', number):
             return {"type": "mobile", "status": 400}
@@ -396,12 +394,11 @@ def updateStudentData(str_student_id, email, number, residentialAddress):
             Student.StudentId == str_student_id).first()
         
         if data_student:
-            data_student.Email = email
             data_student.MobileNumber = number
             data_student.ResidentialAddress = residentialAddress
             db.session.commit()
                         
-            return {"message": "Data updated successfully", "email": email, "number": number, "residentialAddress": residentialAddress, "status": 200}
+            return {"message": "Data updated successfully", "number": number, "residentialAddress": residentialAddress, "status": 200}
         else:
             return {"message": "Something went wrong", "status": 404}
 

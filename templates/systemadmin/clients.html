@@ -192,6 +192,35 @@
     <div class="modal-body w-full relative"></div>
   </div>
 </div>
+
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 
 <!----------------- SCRIPTS ----------------->
@@ -206,7 +235,7 @@
       console.log('HERE IN CLIENT FORM');
       // Get form data
       const formData = new FormData(this);
-      console.log('FORM DATA: ', new FormData(this));
+      console.log('FORM DATA: ', formData);
       console.log('api_base_url: ', api_base_url);
       // Make a POST request using the Fetch API
       showModal('loadingModal');
@@ -216,7 +245,13 @@
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log('SUCCESS: ', data);
+          if (data.success) {
+            notyf.success(data.message);
+          }
+
+          if (data.error) {
+            notyf.error(data.message);
+          }
         })
         .catch((error) => {
           // Handle errors
@@ -322,11 +357,9 @@
       allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
-      toolbar: ['ExcelExport', 'Add', 'Delete', 'Cancel'], // Add the ExcelExport button to the toolbar
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       editSettings: {
-        // allowEditing: true,
-        allowAdding: true,
-        allowDeleting: true,
+        // allowDeleting: true,
         showDeleteConfirmDialog: true,
       },
       pageSettings: { pageSize: 10, totalRecordsCount: 10 },
