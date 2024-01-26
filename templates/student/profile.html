@@ -31,19 +31,27 @@
           <div class="grid gap-6 mb-6 md:grid-cols-2">
             <div>
               <p class="text-c1 font-extrabold">Name:</p>
-              <p class="text-c1 opacity-90 font-normal" id="name2"></p>
+              <p class="text-c1 opacity-90 font-normal" id="name2">
+                {{ student.Name }}
+              </p>
             </div>
             <div>
               <p class="text-c1 font-extrabold">Student Number:</p>
-              <p class="text-c1 opacity-90 font-normal" id="student-number"></p>
+              <p class="text-c1 opacity-90 font-normal" id="student-number">
+                {{ student.StudentNumber }}
+              </p>
             </div>
             <div>
               <p class="text-c1 font-extrabold">Gender:</p>
-              <p class="text-c1 opacity-90 font-normal" id="gender"></p>
+              <p class="text-c1 opacity-90 font-normal" id="gender">
+                {{ student.Gender }}
+              </p>
             </div>
             <div>
               <p class="text-c1 font-extrabold">Course Taken:</p>
-              <p class="text-c1 opacity-90 font-normal" id="course"></p>
+              <p class="text-c1 opacity-90 font-normal" id="course">
+                {{ student.CourseName }}
+              </p>
             </div>
 
             <!-- INPUTS HERE -->
@@ -56,7 +64,9 @@
                 id="email-input"
                 name="email"
                 placeholder="username@gmail.com"
+                value="{{ student.Email }}"
                 class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+                disabled
               />
               <p id="error-email" class="text-c4 text-sm"></p>
             </div>
@@ -70,6 +80,7 @@
                 type="text"
                 id="number-input"
                 name="number"
+                value="{{ student.MobileNumber }}"
                 class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                 placeholder="09XXXXXXXXX"
               />
@@ -85,6 +96,7 @@
                 type="text"
                 id="residential-input"
                 name="residentialAddress"
+                value="{{ student.ResidentialAddress }}"
                 class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                 placeholder="Unit No/Brgy/Municipality/City"
               />
@@ -233,51 +245,6 @@
     input_number.value = data_student_details.number;
     input_residential.value = data_student_details.residentialAddress;
   }
-</script>
-
-<!-- FETCHING USER DETAILS -->
-<script>
-  async function fetchStudentDetails() {
-    const response = await fetch(`${api_base_url}/`);
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch data. Try to contact the admin to resolve the issue.`
-      );
-    }
-
-    const data_student_details = await response.json();
-    displayDetails(data_student_details);
-  }
-
-  function displayDetails(data) {
-    const input_email = document.getElementById('email-input');
-    const input_number = document.getElementById('number-input');
-    const input_residential_address =
-      document.getElementById('residential-input');
-
-    const text_name = document.getElementById('name');
-    const text_name2 = document.getElementById('name2');
-    const text_student_number = document.getElementById('student-number');
-    const text_gender = document.getElementById('gender');
-    const text_course = document.getElementById('course');
-
-    input_email.value = `${data.Email ? data.Email : ''}`;
-
-    input_number.value = `${data.MobileNumber ? data.MobileNumber : ''}`;
-
-    input_residential_address.value = `${
-      data.ResidentialAddress ? data.ResidentialAddress : ''
-    }`;
-
-    text_name.innerHTML = data.Name;
-    text_name2.innerHTML = data.Name;
-    text_student_number.innerHTML = data.StudentNumber;
-    text_gender.innerHTML = data.Gender;
-    text_course.innerHTML = data.CourseName;
-  }
-
-  fetchStudentDetails();
 </script>
 
 {% endblock script %}

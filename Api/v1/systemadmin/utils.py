@@ -44,11 +44,8 @@ def getUniversityAdminData(str_univ_admin_id):
         return None
 
 
-def updateUniversityAdminData(str_univ_admin_id, email, number, residentialAddress):
+def updateSystemAdminData(str_univ_admin_id, number, residentialAddress):
     try:
-        if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
-            return {"type": "email", "status": 400}
-
         if not re.match(r'^09\d{9}$', number):
             return {"type": "mobile", "status": 400}
 
@@ -56,20 +53,20 @@ def updateUniversityAdminData(str_univ_admin_id, email, number, residentialAddre
             return {"type": "residential", "status": 400}
 
         # Update the student data in the database
-        data_student = db.session.query(UniversityAdmin).filter(
-            UniversityAdmin.UnivAdminId == str_univ_admin_id).first()
+        data_systemAdmin = db.session.query(SystemAdmin).filter(
+            SystemAdmin.SysAdminId == str_univ_admin_id).first()
         
-        if data_student:
-            data_student.Email = email
-            data_student.MobileNumber = number
-            data_student.ResidentialAddress = residentialAddress
+        if data_systemAdmin:
+            data_systemAdmin.MobileNumber = number
+            data_systemAdmin.ResidentialAddress = residentialAddress
             db.session.commit()
                         
-            return {"message": "Data updated successfully", "email": email, "number": number, "residentialAddress": residentialAddress, "status": 200}
+            return {"message": "Data updated successfully", "number": number, "residentialAddress": residentialAddress, "status": 200}
         else:
             return {"message": "Something went wrong", "status": 404}
 
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         db.session.rollback()  # Rollback the transaction in case of an error
         return {"message": "An error occurred", "status": 500}

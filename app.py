@@ -9,6 +9,8 @@ from Api.v1.universityadmin.api_routes import university_admin_api
 from Api.v1.systemadmin.api_routes import system_admin_api
 from oauth2 import config_oauth
 
+from utils import getOverallCoursePerformance, getCurrentUser
+
 # from flask_mail import Mail, Message
 import os
 from dotenv import load_dotenv
@@ -109,7 +111,6 @@ def create_app():
     @app.before_request
     def before_request():
         session.permanent=True
-       
         pass
     
     # ===========================================================================
@@ -132,7 +133,6 @@ def create_app():
 
     @app.route('/logout')
     def logout():
-
         session.clear()
         return redirect(url_for('home'))  # Redirect to home or appropriate route
 
@@ -185,7 +185,8 @@ def create_app():
     @app.route('/student/profile')
     @role_required('student')
     def studentProfile():
-        return render_template('student/profile.html', student_api_base_url=student_api_base_url, current_page="profile")
+        student = getCurrentUser('student')
+        return render_template('student/profile.html', student_api_base_url=student_api_base_url, current_page="profile", student=student)
 
 
     @app.route('/student/change-password')
@@ -230,7 +231,8 @@ def create_app():
     @app.route('/faculty/profile')
     @role_required('faculty')
     def facultyProfile():
-        return render_template('faculty/profile.html', faculty_api_base_url=faculty_api_base_url, current_page="profile")
+        faculty = getCurrentUser('faculty')
+        return render_template('faculty/profile.html', faculty_api_base_url=faculty_api_base_url, current_page="profile", faculty=faculty.to_dict())
 
 
     @app.route('/faculty/change-password')
@@ -250,6 +252,8 @@ def create_app():
     @app.route('/university-admin/home')
     @role_required('universityAdmin')
     def universityAdminHome():
+        # json_performance_data = getOverallCoursePerformance()
+        # json_performance_data=json_performance_data.get_json()
         return render_template('universityadmin/home.html', university_admin_api_base_url=university_admin_api_base_url, current_page="home")
     
     @app.route('/university-admin/students')
@@ -289,7 +293,8 @@ def create_app():
     @app.route('/university-admin/profile')
     @role_required('universityAdmin')
     def universityProfile():
-        return render_template('universityadmin/profile.html', university_admin_api_base_url=university_admin_api_base_url, current_page="profile")
+        universityAdmin = getCurrentUser('universityAdmin')
+        return render_template('universityadmin/profile.html', university_admin_api_base_url=university_admin_api_base_url, current_page="profile", universityAdmin=universityAdmin.to_dict())
 
 
     @app.route('/university-admin/change-password')
@@ -351,7 +356,9 @@ def create_app():
     @app.route('/system-admin/profile')
     @role_required('systemAdmin')
     def systemAdminProfile():
-        return render_template('systemadmin/profile.html', system_admin_api_base_url=system_admin_api_base_url, current_page="profile")
+        systemAdmin = getCurrentUser('systemAdmin')
+        print('systemAdmin.to_dict(): ', systemAdmin.to_dict())
+        return render_template('systemadmin/profile.html', system_admin_api_base_url=system_admin_api_base_url, current_page="profile", systemAdmin=systemAdmin.to_dict())
     
     @app.route('/system-admin/change-password')
     @role_required('systemAdmin')

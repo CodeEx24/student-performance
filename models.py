@@ -180,14 +180,14 @@ class SystemAdmin(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     def to_dict(self):
+        full_name = f"{self.LastName} {self.FirstName} {self.MiddleName}" if self.MiddleName else f"{self.LastName} {self.FirstName}"
+        
         return {
             'SysAdminId': self.SysAdminId,
             'SysAdminNumber': self.SysAdminNumber,
-            'FirstName': self.FirstName,
-            'LastName': self.LastName,
-            'MiddleName': self.MiddleName,
+            'Name': full_name,
             'Email': self.Email,
-            'Gender': self.Gender,
+            'Gender': "Male" if self.Gender == 1 else "Female",
             'DateOfBirth': self.DateOfBirth,
             'PlaceOfBirth': self.PlaceOfBirth,
             'ResidentialAddress': self.ResidentialAddress,

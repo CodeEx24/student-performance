@@ -17,78 +17,105 @@
   <div class="p-4 col-span-full">
     <div class="rounded-lg">
       <div class="w-full bg-white p-4">
-        <h1 class="text-2xl font-bold p-4 text-c1">Clients</h1>
+        <h1 class="text-2xl font-bold p-4 text-c1">
+          Clients (Authorization Purposes)
+        </h1>
 
         <form
-          action="{{ url_for('system_admin_api.createClient') }}"
-          method="post"
+          id="client-form"
           class="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 pb-4"
         >
-          <label class="flex flex-col">
-            <span>Client Name</span>
+          <div class="flex flex-col">
+            <label for="client-name" class="block mb-2 text-c1 font-extrabold"
+              >Client Name</label
+            >
             <input
               type="text"
               name="client_name"
-              class="border-solid border-2 border-gray-300 rounded-md p-1"
+              id="client-name"
+              class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+              placeholder="System Name"
             />
-          </label>
-          <label class="flex flex-col">
-            <span>Client URI</span>
+          </div>
+          <div class="flex flex-col">
+            <label for="client-uri" class="block mb-2 text-c1 font-extrabold"
+              >Client URI</label
+            >
             <input
               type="url"
               name="client_uri"
-              class="border-solid border-2 border-gray-300 rounded-md p-1"
+              id="client-uri"
+              class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+              placeholder="https://website.com/"
             />
-          </label>
-          <label class="flex flex-col">
-            <span>Allowed Scope</span>
+          </div>
+          <div class="flex flex-col">
+            <label for="scope" class="block mb-2 text-c1 font-extrabold"
+              >Allowed Scope</label
+            >
             <input
               type="text"
               name="scope"
-              class="border-solid border-2 border-gray-300 rounded-md p-1"
+              id="scope"
+              class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+              placeholder="student, faculty, etc... (Resources Owner)"
             />
-          </label>
-          <label class="flex flex-col">
-            <span>Redirect URIs</span>
-            <textarea
+          </div>
+          <div class="flex flex-col">
+            <label for="redirect" class="block mb-2 text-c1 font-extrabold"
+              >Redirect URIs</label
+            >
+            <input
+              type="text"
               name="redirect_uri"
-              cols="30"
-              rows="1"
-              class="border-solid border-2 border-gray-300 rounded-md p-1"
-            ></textarea>
-          </label>
-          <label class="flex flex-col">
-            <span>Allowed Grant Types</span>
-            <textarea
+              id="redirect"
+              class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+              placeholder="https://website.com/ (Website Portal)"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="grant-type" class="block mb-2 text-c1 font-extrabold"
+              >Allowed Grant Types (password, authorization_code)</label
+            >
+            <input
+              type="text"
               name="grant_type"
-              cols="30"
-              rows="1"
-              class="border-solid border-2 border-gray-300 rounded-md p-1"
-            ></textarea>
-          </label>
-          <label class="flex flex-col">
-            <span>Allowed Response Types</span>
-            <textarea
+              id="grant-type"
+              class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+              placeholder="password"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="response-type" class="block mb-2 text-c1 font-extrabold"
+              >Allowed Response Types (token, code)</label
+            >
+            <input
+              type="text"
               name="response_type"
-              cols="30"
-              rows="1"
-              class="border-solid border-2 border-gray-300 rounded-md p-1"
-            ></textarea>
-          </label>
-          <label class="flex flex-col">
-            <span>Token Endpoint Auth Method</span>
+              id="response-type"
+              class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+              placeholder="password"
+            />
+          </div>
+
+          <div class="flex flex-col">
+            <label for="method" class="block mb-2 text-c1 font-extrabold"
+              >Token Endpoint Auth Method</label
+            >
             <select
+              id="method"
               name="token_endpoint_auth_method"
-              class="border-solid border-2 border-gray-300 rounded-md p-1"
+              class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
             >
               <option value="client_secret_basic">client_secret_basic</option>
               <option value="client_secret_post">client_secret_post</option>
               <option value="none">none</option>
             </select>
-          </label>
+          </div>
           <div class="flex flex-col">
             <button
-              class="bg-primary border-2 border-gray-300 rounded-md mt-6 px-4 py-1 font-bold text-white"
+              type="submit"
+              class="text-white bg-[#9D1D1D] border border-gray-300 hover:bg-c5 transition duration-300 font-bold text-sm sm:w-auto px-5 px-5 py-[4px] mt-8 text-center"
             >
               Submit
             </button>
@@ -171,6 +198,40 @@
 {% block script %}
 
 <!-- FETCH DISTINC OPTIONS -->
+<script>
+  document
+    .getElementById('client-form')
+    .addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevents the default form submission
+      console.log('HERE IN CLIENT FORM');
+      // Get form data
+      const formData = new FormData(this);
+      console.log('FORM DATA: ', new FormData(this));
+      console.log('api_base_url: ', api_base_url);
+      // Make a POST request using the Fetch API
+      showModal('loadingModal');
+      fetch(`${api_base_url}/create_client`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('SUCCESS: ', data);
+        })
+        .catch((error) => {
+          // Handle errors
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch data. Try to contact the admin to resolve the issue.`
+            );
+          }
+          console.error('Error:', error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    });
+</script>
 
 <script>
   // get csrf token

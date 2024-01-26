@@ -32,27 +32,29 @@
         class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
       >
         <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
-          System Admin Profile
+          University Admin Profile
         </h3>
         <hr class="mx-2" />
         <div class="flex items-end justify-between">
           <div class="w-full bg-white p-4">
-            <form class="w-full mt-4">
+            <form id="profileForm" class="w-full mt-4">
               <div class="grid gap-6 mb-6 md:grid-cols-2">
                 <div>
                   <p class="text-c1 font-extrabold">Name:</p>
-                  <p class="text-c1 opacity-90 font-normal" id="name">Name</p>
+                  <p class="text-c1 opacity-90 font-normal" id="name">
+                    {{ universityAdmin.Name }}
+                  </p>
                 </div>
                 <div>
                   <p class="text-c1 font-extrabold">Admin Number:</p>
                   <p class="text-c1 opacity-90 font-normal" id="admin-number">
-                    Number
+                    {{ universityAdmin.UnivAdminNumber }}
                   </p>
                 </div>
                 <div>
                   <p class="text-c1 font-extrabold">Gender:</p>
                   <p class="text-c1 opacity-90 font-normal" id="gender">
-                    Gender
+                    {{ universityAdmin.Gender }}
                   </p>
                 </div>
                 <div>
@@ -73,8 +75,10 @@
                     type="email"
                     id="email-input"
                     name="email"
+                    value=" {{ universityAdmin.Email }}"
                     placeholder="username@gmail.com"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
+                    disabled
                   />
                   <p id="error-email" class="text-c4 text-sm"></p>
                 </div>
@@ -88,6 +92,7 @@
                     type="text"
                     id="number-input"
                     name="number"
+                    value=" {{ universityAdmin.MobileNumber }}"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     placeholder="09XXXXXXXXX"
                   />
@@ -103,6 +108,7 @@
                     type="text"
                     id="residential-input"
                     name="residential-address"
+                    value=" {{ universityAdmin.ResidentialAddress }}"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     placeholder="Unit No/Brgy/Municipality/City"
                   />
@@ -110,7 +116,7 @@
                 </div>
               </div>
               <button
-                onclick="submitForm(event)"
+                type="submit"
                 class="text-white bg-c4 hover:bg-c5 transition duration-300 font-bold text-sm sm:w-auto px-5 px-5 py-2 text-center"
               >
                 Submit
@@ -118,6 +124,34 @@
             </form>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
       </div>
     </div>
   </div>
@@ -155,124 +189,87 @@
     ],
   });
 
-  async function submitForm(event) {
-    event.preventDefault();
-    console.log('INSIDE SUBMIT HERE');
-    const email = document.getElementById('email-input').value;
-    const number = document.getElementById('number-input').value;
-    const residentialAddress =
-      document.getElementById('residential-input').value;
-
-    const response = await fetch(`${api_base_url}/details/update`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, number, residentialAddress }),
-    });
-    // Send data to the API
-
-    const data_university_admin_details = await response.json();
-
-    const errorDetails = {
-      email: {
-        id: 'error-email',
-        message: 'Please provide a valid email address',
-      },
-      mobile: {
-        id: 'error-mobile',
-        message: 'Mobile must be in "09XXXXXXXXX" format',
-      },
-      residential: {
-        id: 'error-residential',
-        message: 'Residential address must not be empty',
-      },
-    };
-
-    const status = data_university_admin_details.status;
-    const errorType = data_university_admin_details.type;
-
-    if (status === 400 || status === 404 || status === 500) {
-      if (errorDetails[errorType]) {
-        const { id, message } = errorDetails[errorType];
-        const errorElement = document.getElementById(id);
-        errorElement.innerText = message;
-        errorElement.classList.add('mt-2');
-      } else {
-        notyf.error(data_university_admin_details.message);
-      }
-    } else if (status === 200) {
-      for (const key in errorDetails) {
-        const { id } = errorDetails[key];
-        const errorElement = document.getElementById(id);
-        errorElement.innerText = '';
-        errorElement.classList.remove('mt-2');
-      }
-
-      notyf.success(data_university_admin_details.message);
-      updateDetails(data_university_admin_details);
-    } else {
-      notyf.error('Something went wrong');
-    }
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch data. Try to contact the admin to resolve the issue.`
-      );
-    }
-  }
-
   function updateDetails(data_university_admin_details) {
-    const input_email = document.getElementById('email-input');
     const input_number = document.getElementById('number-input');
     const input_residential = document.getElementById('residential-input');
 
-    input_email.value = data_university_admin_details.email;
     input_number.value = data_university_admin_details.number;
     input_residential.value = data_university_admin_details.residentialAddress;
   }
 </script>
 
-<!-- FETCHING USER DETAILS -->
 <script>
-  async function fetchUserDetails() {
-    const response = await fetch(`${api_base_url}/profile`);
+  document
+    .getElementById('profileForm')
+    .addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevents the default form submission
+      console.log('HERE IN PROFILE FORM');
+      // Get form data
+      const formData = new FormData(this);
+      console.log('FORM DATA: ', formData);
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch data. Try to contact the admin to resolve the issue.`
-      );
-    }
+      // Make a POST request using the Fetch API
+      showModal('loadingModal');
+      fetch(`${api_base_url}/details/update`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const errorDetails = {
+            email: {
+              id: 'error-email',
+              message: 'Please provide a valid email address',
+            },
+            mobile: {
+              id: 'error-mobile',
+              message: 'Mobile must be in "09XXXXXXXXX" format',
+            },
+            residential: {
+              id: 'error-residential',
+              message: 'Residential address must not be empty',
+            },
+          };
 
-    const data_university_admin_details = await response.json();
-    displayDetails(data_university_admin_details);
-  }
+          const status = data.status;
+          const errorType = data.type;
 
-  function displayDetails(data) {
-    const input_email = document.getElementById('email-input');
-    const input_number = document.getElementById('number-input');
-    const input_residential_address =
-      document.getElementById('residential-input');
+          if (status === 400 || status === 404 || status === 500) {
+            if (errorDetails[errorType]) {
+              const { id, message } = errorDetails[errorType];
+              const errorElement = document.getElementById(id);
+              errorElement.innerText = message;
+              errorElement.classList.add('mt-2');
+            } else {
+              notyf.error(data.message);
+            }
+          } else if (status === 200) {
+            for (const key in errorDetails) {
+              const { id } = errorDetails[key];
+              const errorElement = document.getElementById(id);
+              errorElement.innerText = '';
+              errorElement.classList.remove('mt-2');
+            }
 
-    const text_name = document.getElementById('name');
-
-    const text_student_number = document.getElementById('admin-number');
-    const text_gender = document.getElementById('gender');
-
-    input_email.value = `${data.Email ? data.Email : ''}`;
-
-    input_number.value = `${data.MobileNumber ? data.MobileNumber : ''}`;
-
-    input_residential_address.value = `${
-      data.ResidentialAddress ? data.ResidentialAddress : ''
-    }`;
-
-    text_name.innerHTML = data.Name;
-    text_student_number.innerHTML = data.UnivAdminNumber;
-    text_gender.innerHTML = data.Gender;
-  }
-
-  fetchUserDetails();
+            notyf.success(data.message);
+            updateDetails(data);
+          } else {
+            notyf.error('Something went wrong');
+          }
+        })
+        .catch((error) => {
+          // Handle errors
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch data. Try to contact the admin to resolve the issue.`
+            );
+          }
+          console.error('Error:', error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    });
 </script>
 
 {% endblock script %}

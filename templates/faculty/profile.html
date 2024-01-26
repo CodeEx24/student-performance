@@ -42,18 +42,20 @@
               <div class="grid gap-6 mb-6 md:grid-cols-2">
                 <div>
                   <p class="text-c1 font-extrabold">Name:</p>
-                  <p class="text-c1 opacity-90 font-normal" id="name">Name</p>
+                  <p class="text-c1 opacity-90 font-normal" id="name">
+                    {{ faculty.Name }}
+                  </p>
                 </div>
                 <div>
                   <p class="text-c1 font-extrabold">Faculty Type:</p>
                   <p class="text-c1 opacity-90 font-normal" id="faculty-type">
-                    Number
+                    {{ faculty.FacultyType }}
                   </p>
                 </div>
                 <div>
                   <p class="text-c1 font-extrabold">Gender:</p>
                   <p class="text-c1 opacity-90 font-normal" id="gender">
-                    Gender
+                    {{ faculty.Gender }}
                   </p>
                 </div>
                 <div>
@@ -75,6 +77,7 @@
                     id="email-input"
                     name="email"
                     placeholder="username@gmail.com"
+                    value="{{ faculty.Email }}"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     disabled
                   />
@@ -90,6 +93,7 @@
                     type="text"
                     id="number-input"
                     name="number"
+                    value="{{ faculty.MobileNumber }}"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     placeholder="09XXXXXXXXX"
                   />
@@ -105,6 +109,7 @@
                     type="text"
                     id="residential-address-input"
                     name="residential-address"
+                    value="{{ faculty.ResidentialAddress }}"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     placeholder="Unit No/Brgy/Municipality/City"
                   />
@@ -200,13 +205,11 @@
   }
 
   function updateDetails(data_faculty_details) {
-    const input_email = document.getElementById('email-input');
     const input_number = document.getElementById('number-input');
     const input_residential_address = document.getElementById(
       'residential-address-input'
     );
 
-    input_email.value = data_faculty_details.email;
     input_number.value = data_faculty_details.number;
     input_residential_address.value = data_faculty_details.residential_address;
   }

@@ -70,13 +70,14 @@ def getUniversityAdminData(str_univ_admin_id):
         return None
 
 
-def updateUniversityAdminData(str_univ_admin_id, email, number, residentialAddress):
+def updateUniversityAdminData(str_univ_admin_id, number, residentialAddress):
     try:
-        print("HERE INSIDE UDPATE")
-        if not re.match(r'^[\w\.-]+@[\w\.-]+$', email):
-            return {"type": "email", "status": 400}
+        print('number:', number)
+        number = re.sub(r'\D', '', number)  # Remove non-digit characters
+        number_pattern = re.compile(r'^09\d{9}$')
 
-        if not re.match(r'^09\d{9}$', number):
+        if not number_pattern.match(number):
+            print("ERROR HSADSAD")
             return {"type": "mobile", "status": 400}
 
         if residentialAddress is None or residentialAddress.strip() == "":
@@ -86,12 +87,11 @@ def updateUniversityAdminData(str_univ_admin_id, email, number, residentialAddre
         data_univ_admin = db.session.query(UniversityAdmin).filter(UniversityAdmin.UnivAdminId == str_univ_admin_id).first()
         
         if data_univ_admin:
-            data_univ_admin.Email = email
             data_univ_admin.MobileNumber = number
             data_univ_admin.ResidentialAddress = residentialAddress
             db.session.commit()
                         
-            return {"message": "Data updated successfully", "email": email, "number": number, "residentialAddress": residentialAddress, "status": 200}
+            return {"message": "Data updated successfully", "number": number, "residentialAddress": residentialAddress, "status": 200}
         else:
             return {"message": "Something went wrong", "status": 404}
 
@@ -1703,6 +1703,7 @@ def processGradeSubmission(file):
         # Now you can access and manipulate the data in the DataFrame
         # For example, you can iterate through rows and access columns like this:
         for index, row in df.iterrows():
+            print("HERE")
             # Extract the values from the DataFrame
             student_number = row['Student Number'] # OK
             student_lastname = row['LastName']
@@ -1714,7 +1715,8 @@ def processGradeSubmission(file):
             grade = row['Grade']
             batch = row['Batch'] # OK
             
-            
+            # print full name
+            print(f"{student_lastname}, {student_firstname} {student_middlename}")
             # Split the section_code by the last space and keep the first part
             course_code = section_code.rsplit(' ', 1)[0] 
             
@@ -1733,8 +1735,9 @@ def processGradeSubmission(file):
                 .order_by(desc(Student.LastName), desc(Metadata.Year), desc(Class.Section), desc(Metadata.Batch))
                 .first()
             )
+            print('student_data.Class.IsGradeFinalized: ', student_data.Class.IsGradeFinalized)
             if(student_data.Class.IsGradeFinalized==False):
-                
+                print('student_data.Class.IsGradeFinalized: ', student_data.Class.IsGradeFinalized)
                 if isinstance(grade, int) or isinstance(grade, float):
                     if grade <= 3: # PASSED
                         student_data.StudentClassSubjectGrade.Grade = grade
@@ -1763,9 +1766,9 @@ def processGradeSubmission(file):
                 # Append the object to list_finalized_grade
                 list_finalized_grade.append({
                     "StudentNumber": student_number,
-                    "StudentLastName": student_lastname,
-                    "StudentFirstName": student_firstname,
-                    "StudentMiddleName": student_middlename,
+                    "LastName": student_lastname,
+                    "FirstName": student_firstname,
+                    "MiddleName": student_middlename,
                     "SectionCode": section_code,
                     "SubjectCode": subject_code,
                     "Semester": semester,
@@ -1777,9 +1780,9 @@ def processGradeSubmission(file):
         db.session.commit()
         
         if list_finalized_grade and is_some_submitted:
-            return jsonify({'error': 'Some data cannot be updated', 'errors': list_finalized_grade}), 400
-        elif list_finalized_grade and is_some_submitted == True:
-            return jsonify({'error': 'All data are already finalized', 'errors': list_finalized_grade}), 400
+            return jsonify({'warning': 'Some data cannot be updated', 'errors': list_finalized_grade}), 400
+        elif list_finalized_grade and not is_some_submitted:
+            return jsonify({'error': 'All data are already finalized or not existing', 'errors': list_finalized_grade}), 400
         else:
             return jsonify({'result': 'File uploaded and data processed successfully'}), 200
 

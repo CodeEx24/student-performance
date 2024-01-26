@@ -68,11 +68,10 @@ def updateDetails():
     print("ACCEPTED HERE")
     if universityAdmin:
         if request.method == 'POST':
-            email = request.json.get('email')
-            number = request.json.get('number')
-            residentialAddress = request.json.get('residentialAddress')
-
-            json_result = updateUniversityAdminData(universityAdmin.UnivAdminId, email, number, residentialAddress)
+            number = request.form.get('number')
+            residential_address = request.form.get('residential-address')
+          
+            json_result = updateUniversityAdminData(universityAdmin.UnivAdminId, number, residential_address)
             return json_result
         else:
             flash('Invalid email or password', 'danger')

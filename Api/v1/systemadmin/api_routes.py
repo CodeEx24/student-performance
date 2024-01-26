@@ -9,7 +9,7 @@ import time
 from werkzeug.security import gen_salt
 from oauth2 import authorization
 
-from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades
+from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 import os
@@ -67,6 +67,91 @@ def clients():
     else:
         return jsonify({"message": "No clients found"}), 404
     
+    
+
+@system_admin_api.route('/create_client', methods=['POST'])
+def createClient():
+    systemAdmin = current_user()
+    print('form: ', form)
+    if request.method == "POST":
+        if not systemAdmin:
+            return redirect(url_for('systemAdminLogin'))
+        
+        client_id = gen_salt(24)
+        client_id_issued_at = int(time.time())
+        client = OAuth2Client(
+            client_id=client_id,
+            client_id_issued_at=client_id_issued_at,
+            user_id=systemAdmin.SysAdminId,
+        )
+
+        form = request.form
+        client_metadata = {
+            "client_name": form["client_name"],
+            "client_uri": form["client_uri"],
+            "grant_types": split_by_crlf(form["grant_type"]),
+            "redirect_uris": split_by_crlf(form["redirect_uri"]),
+            "response_types": split_by_crlf(form["response_type"]),
+            "scope": form["scope"],
+            "token_endpoint_auth_method": form["token_endpoint_auth_method"]
+        }
+        client.set_client_metadata(client_metadata)
+
+        if form['token_endpoint_auth_method'] == 'none':
+            client.client_secret = ''
+        else:
+            client.client_secret = gen_salt(48)
+
+        db.session.add(client)
+        db.session.commit()
+        return redirect(url_for('systemAdminClients'))
+        
+    
+# Updating the user details
+@system_admin_api.route('/details/update', methods=['POST'])
+@role_required('systemAdmin')
+def updateDetails():
+    print("HERE IN DETAILS UPDATE")
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
+        if request.method == 'POST':
+            number = request.form.get('number')
+            residential_address = request.form.get('residential-address')
+            print('NUMBER: ', number)
+            print('residential_address: ', residential_address)
+            json_result = updateSystemAdminData(systemAdmin.SysAdminId, number, residential_address)
+            return json_result
+        else:
+            flash('Invalid email or password', 'danger')
+            return redirect(url_for('studentLogin'))  
+
+# Create token checker
+    
+@system_admin_api.route('/login2', methods=['POST'])
+def login2():
+    print("CHECKING SYSTEM LOGIN")
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        print("CHECKING SYSTEM LOGIN")
+        systemAdmin = SystemAdmin.query.filter_by(Email=email).first()
+        if systemAdmin and check_password_hash(systemAdmin.Password, password):
+            session['user_id'] = systemAdmin.SysAdminId
+            session['user_role'] = 'systemAdmin'
+            print("SUCCESSFUL LOGIN")
+            return redirect(url_for('systemAdminHome'))
+        else:
+            flash('Invalid email or password', 'danger')
+            print("FAILED LOGIN")
+            return redirect(url_for('systemAdminLogin'))
+    return redirect(url_for('systemAdminLogin'))
+
+
+@system_admin_api.route('/ads', methods=['GET'])
+def helo():
+    print("CHECKING SYSTEM LOGIN")
+    return ({"message": " HELLO THERE FROM RTHIS"})
+
     
 # Getting all the class data in current year
 @system_admin_api.route('/class/', methods=['GET'])
@@ -257,68 +342,3 @@ def authorize():
 def split_by_crlf(s):
     return [v for v in s.splitlines() if v]
 
-
-@system_admin_api.route('/create_client', methods=('GET', 'POST'))
-def createClient():
-    user = current_user()
-    if not user:
-        return redirect(url_for('systemAdminLogin'))
-    if request.method == 'GET':
-        return render_template('create_client.html')
-
-    client_id = gen_salt(24)
-    client_id_issued_at = int(time.time())
-    client = OAuth2Client(
-        client_id=client_id,
-        client_id_issued_at=client_id_issued_at,
-        user_id=user.SysAdminId,
-    )
-
-    form = request.form
-    client_metadata = {
-        "client_name": form["client_name"],
-        "client_uri": form["client_uri"],
-        "grant_types": split_by_crlf(form["grant_type"]),
-        "redirect_uris": split_by_crlf(form["redirect_uri"]),
-        "response_types": split_by_crlf(form["response_type"]),
-        "scope": form["scope"],
-        "token_endpoint_auth_method": form["token_endpoint_auth_method"]
-    }
-    client.set_client_metadata(client_metadata)
-
-    if form['token_endpoint_auth_method'] == 'none':
-        client.client_secret = ''
-    else:
-        client.client_secret = gen_salt(48)
-
-    db.session.add(client)
-    db.session.commit()
-    return redirect(url_for('systemAdminClients'))
-    
-    
-# Create token checker
-    
-@system_admin_api.route('/login2', methods=['POST'])
-def login2():
-    print("CHECKING SYSTEM LOGIN")
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        print("CHECKING SYSTEM LOGIN")
-        systemAdmin = SystemAdmin.query.filter_by(Email=email).first()
-        if systemAdmin and check_password_hash(systemAdmin.Password, password):
-            session['user_id'] = systemAdmin.SysAdminId
-            session['user_role'] = 'systemAdmin'
-            print("SUCCESSFUL LOGIN")
-            return redirect(url_for('systemAdminHome'))
-        else:
-            flash('Invalid email or password', 'danger')
-            print("FAILED LOGIN")
-            return redirect(url_for('systemAdminLogin'))
-    return redirect(url_for('systemAdminLogin'))
-
-
-@system_admin_api.route('/ads', methods=['GET'])
-def helo():
-    print("CHECKING SYSTEM LOGIN")
-    return ({"message": " HELLO THERE FROM RTHIS"})
