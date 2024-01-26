@@ -40,7 +40,7 @@ def create_app():
 
 
     if __name__ == '__main__':
-        app.run(debug=True)
+        app.run(debug=False)
     
     # SETUP YOUR POSTGRE DATABASE HERE
     # Check if CONFIG_MODE is set to development
@@ -373,6 +373,7 @@ def create_app():
 
     app.register_blueprint(faculty_api, url_prefix=faculty_api_base_url)
     app.register_blueprint(student_api, url_prefix=student_api_base_url)
+
 
 
     @app.route('/page_not_found')  # Define an actual route

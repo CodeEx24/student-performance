@@ -648,7 +648,7 @@ def processAddingStudents(data, excelType=False):
                     # The message body should be the credentials details
                     msg.body = f"Your current PUP Account has been granted. \n\n Email: {str(new_student.Email)} \n Password: {str(password)} \n\n Please change your password after you log in. \n\n Thank you."
                     
-                    # mail.send(msg)
+                    mail.send(msg)
                     
                     if not gender:
                         list_student_data.append({
@@ -3785,19 +3785,14 @@ def finalizedGradesBatchSemester(batch_semester_id):
         # Find all metadata with same batch and semester
         metadata_course = db.session.query(Metadata, Course).join(Course, Course.CourseId == Metadata.CourseId).filter(Metadata.Batch == latest_batch_semester.Batch, Metadata.Semester == latest_batch_semester.Semester).all()
         
-        print('metadata_course: ', metadata_course)
-        
         if metadata_course:
             # for loop metadata
             
             course_grade_info_list = []
             
             for data_of_metadata in metadata_course:
-                print('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ')
-                print('data_of_metadata: ', data_of_metadata)
                 # Select class that has the same Batch, Semester and Course
                 data_course_class = db.session.query(Class, Metadata, Course).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Course.CourseId == Metadata.CourseId).filter(Metadata.Batch == data_of_metadata.Metadata.Batch, Metadata.Year == data_of_metadata.Metadata.Year, Metadata.Semester == data_of_metadata.Metadata.Semester, Metadata.CourseId == data_of_metadata.Course.CourseId).order_by(Metadata.Year, Class.Section).all()
-                print('data_course_class: ', data_course_class)
                 # if data class 
                 if data_course_class:
                     student_class_grade_list = [] # For list of grade in class subject (Object - Lister, StudentId, ClassId etc...)
@@ -3848,7 +3843,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                         # for loop it
                         for class_data in list_class:
                             # Get the class_subject
-                            print('class_data: ', class_data)
                             # Make a dict containing CourseId, Year, Semester, Batch and Grades Array
                             # dict_class_data = {
                             #     'ClassId': class_data['ClassId'],
@@ -4129,8 +4123,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                         
                         # ANALYTICS FOR CLASS (Updating data in the database)
                         for data in class_grade_list:
-                            print("CLASS ANALYTICS: ", data)
-                            
                             # Check if grade is more than or equal to 1
                             if len(data['Grade']) >= 1:
                                 # Get the sum of grade
@@ -4146,9 +4138,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                                 
                             class_grade = db.session.query(ClassGrade).filter_by(ClassId = data['ClassId']).first()
                             
-                            # print('DEANLISTER: ', data['DeansLister'])
-                            # print('PRESIDENTSLISTER: ', data['PresidentsLister'])
-                            # CLASS GRADE - Analytics for Class Grade Report
                             if class_grade:
                                 # Update the class_grade
                                 db.session.query(ClassGrade).filter_by(ClassId = data['ClassId']).update({
@@ -4168,10 +4157,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                                 db.session.add(new_class_grade)
                                 db.session.flush()
 
-                            # Update the course grade by average of all class grade
-                            # Check if course_grade is existing
-                            print("UPDATED CLASS ANALYTICS: ", data)
-                            # Make an object contianing course id, batch, semester
                             # Check if courseid, batch, semester already exist in the course_grade_info_list
                             found_entry = next((entry for entry in course_grade_info_list if entry["CourseId"] == data_of_metadata.Course.CourseId and entry["Batch"] == data_of_metadata.Metadata.Batch and entry["Semester"] == data_of_metadata.Metadata.Semester), None)
                             
@@ -4187,7 +4172,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                                     'Grade': [data['Grade']]
                                 })
                             
-                        print('course_grade_info_list: ', course_grade_info_list)
                         # course_grade_list = [{
                         #     'CourseId': course_grade_data['CourseId'],
                         #     'Batch': course_grade_data['Batch'],
@@ -4289,7 +4273,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                 for data in course_grade_info_list:
                     # Get the course grade
                     course_grade = db.session.query(CourseGrade).filter_by(CourseId = data['CourseId'], Batch = data['Batch'], Semester = data['Semester']).first()
-                    print('course_grade: ', course_grade)
                     # Check if course grade is existing
                     # sum of data['Grade'] divided by its length
                     average_course_grade = sum(data['Grade']) / len(data['Grade'])
@@ -4300,12 +4283,12 @@ def finalizedGradesBatchSemester(batch_semester_id):
                         course_grade.Grade == round(average_course_grade, 2)
                         
                         # # COURSE GRADE CHECKER
-                        print("UPDATED COURSE GRADE: " + str({
-                            'CourseId': data['CourseId'],
-                            'Batch': data['Batch'],
-                            'Semester': data['Semester'],
-                            'Grade': round(average_course_grade, 2)
-                        }))
+                        # print("UPDATED COURSE GRADE: " + str({
+                        #     'CourseId': data['CourseId'],
+                        #     'Batch': data['Batch'],
+                        #     'Semester': data['Semester'],
+                        #     'Grade': round(average_course_grade, 2)
+                        # }))
                     else:
                         # Create a course_grade
                         new_course_grade = CourseGrade(
@@ -4319,12 +4302,12 @@ def finalizedGradesBatchSemester(batch_semester_id):
                         db.session.flush()
                         
                         # # COURSE GRADE CHECKER
-                        print("\nUPDATED COURSE GRADE: " + str({
-                            'CourseId': data['CourseId'],
-                            'Batch': data['Batch'],
-                            'Semester': data['Semester'],
-                            'Grade': round(average_course_grade, 2)
-                        }))
+                        # print("\nUPDATED COURSE GRADE: " + str({
+                        #     'CourseId': data['CourseId'],
+                        #     'Batch': data['Batch'],
+                        #     'Semester': data['Semester'],
+                        #     'Grade': round(average_course_grade, 2)
+                        # }))
                         
                 db.session.query(LatestBatchSemester).filter_by(LatestBatchSemesterId = batch_semester_id).update({
                     'IsGradeFinalized': True
