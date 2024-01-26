@@ -395,7 +395,7 @@ def getAllClassData(skip, top, order_by, filter):
                     order_query = filter_query.order_by(order_attr)
         else:
             # Apply default sorting
-            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.CourseId), desc(Metadata.CourseId), Metadata.Year, Class.Section)
+            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.CourseId), desc(Metadata.Year), Class.Section, desc(Metadata.Semester))
         
         total_count = order_query.count()
         class_grade_main_query = order_query.offset(skip).limit(top).all()
@@ -4282,13 +4282,7 @@ def finalizedGradesBatchSemester(batch_semester_id):
                         # Update course grade value
                         course_grade.Grade == round(average_course_grade, 2)
                         
-                        # # COURSE GRADE CHECKER
-                        # print("UPDATED COURSE GRADE: " + str({
-                        #     'CourseId': data['CourseId'],
-                        #     'Batch': data['Batch'],
-                        #     'Semester': data['Semester'],
-                        #     'Grade': round(average_course_grade, 2)
-                        # }))
+
                     else:
                         # Create a course_grade
                         new_course_grade = CourseGrade(
@@ -4300,14 +4294,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                         
                         db.session.add(new_course_grade)
                         db.session.flush()
-                        
-                        # # COURSE GRADE CHECKER
-                        # print("\nUPDATED COURSE GRADE: " + str({
-                        #     'CourseId': data['CourseId'],
-                        #     'Batch': data['Batch'],
-                        #     'Semester': data['Semester'],
-                        #     'Grade': round(average_course_grade, 2)
-                        # }))
                         
                 db.session.query(LatestBatchSemester).filter_by(LatestBatchSemesterId = batch_semester_id).update({
                     'IsGradeFinalized': True
