@@ -648,7 +648,7 @@ def processAddingStudents(data, excelType=False):
                     # The message body should be the credentials details
                     msg.body = f"Your current PUP Account has been granted. \n\n Email: {str(new_student.Email)} \n Password: {str(password)} \n\n Please change your password after you log in. \n\n Thank you."
                     
-                    # mail.send(msg)
+                    mail.send(msg)
                     
                     if not gender:
                         list_student_data.append({
