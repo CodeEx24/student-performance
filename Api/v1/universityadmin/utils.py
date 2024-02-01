@@ -4309,3 +4309,191 @@ def finalizedGradesBatchSemester(batch_semester_id):
         # Handle the exception here, e.g., log it or return an error response
         return jsonify(error=str(e))
 
+
+
+
+def getListerStudent(skip, top, order_by, filter):
+    try:
+        student_lister_query = db.session.query(StudentClassGrade, Class, Student, Metadata, Course).join(Class, Class.ClassId == StudentClassGrade.ClassId).join(Student, Student.StudentId == StudentClassGrade.StudentId).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Metadata.CourseId == Course.CourseId)
+        
+        filter_conditions = []
+        
+        filter_conditions.append(
+            StudentClassGrade.Lister != 0
+        )
+        
+        if filter:
+            filter_parts = filter.split(' and ')
+            for part in filter_parts:
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(")[3].split("),'")[0]
+                    value = part.split("'")[1]
+                    column_str = None
+                    
+                    if column_name.strip() == 'ClassName':
+                        split_values = value.split(' ')
+                        
+                        if len(split_values) >= 2:
+                            # Check split values if have a number
+                            if any(char.isdigit() for char in split_values[-1]):
+                                batch_section = split_values[-1]
+                                course_code = ' '.join(split_values[:-1])
+                                column_arr_1 = getattr(Course, 'CourseCode')
+                                year, section = None, None
+                                
+                                if '-' in batch_section:
+                                    year, section = batch_section.split('-')
+                                    if section:
+                                        column_arr_3 = getattr(Class, 'Section')
+                                    column_arr_2 = getattr(Metadata, 'Year')
+                                else:
+                                    year = batch_section
+                                    column_arr_2 = getattr(Metadata, 'Year')
+                            else:
+                                course_code = ' '.join(split_values)
+                                year, section = None, None
+                                column_arr_1 = getattr(Course, 'CourseCode')
+
+                            # Append column_arr_1
+                            filter_conditions.append(
+                                func.lower(column_arr_1).like(f'%{split_values[0]}%')
+                            )
+                            # Check if year then append
+                            if year:
+                                filter_conditions.append(Metadata.Year == int(year))
+                                
+                            if section:
+                                filter_conditions.append(
+                                    Class.Section == int(section)
+                                )
+                            continue
+                        elif len(split_values) == 1:
+                            course_code, year, section = None, None, None
+                            # check if value contains "-" and digit in it
+                            if '-' in value and any(x.isdigit() for x in value):
+                                year, section = value.split('-')
+                                column_arr_2 = Metadata.Year
+                                column_arr_3 = Class.Section
+                            else:
+                                course_code = value
+                                column_arr_1 = getattr(Course, 'CourseCode')
+                            
+                            if course_code:
+                                filter_conditions.append(column_arr_1.like(f'%{course_code.upper()}%'))
+
+                            if year:
+                                filter_conditions.append(
+                                    column_arr_2 == int(year)
+                                )
+                            
+                            if section:
+                                filter_conditions.append(
+                                    column_arr_3 == int(section)
+                                )
+                            continue
+                    elif column_name.strip() == 'Course':
+                        column_str = getattr(Course, 'Name')
+                    elif column_name.strip() == 'Grade':
+                        filter_conditions.append(
+                            ClassGrade.Grade == value
+                        )
+                        continue
+                 
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).like(f'%{value}%')
+                        )
+                else:
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    column_num = None
+                    int_value = value.strip(')')
+                    
+                    # Check for column name 
+                    if column_name.strip() == 'Batch':
+                        column_num = Metadata.Batch
+                    elif column_name.strip() == 'Semester':
+                        column_num = Metadata.Semester
+               
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                # END OF ELSE PART
+            # END OF FOR LOOP
+                
+        
+        # Apply all filter conditions with 'and'
+  
+        filter_query = student_lister_query.filter(and_(*filter_conditions))
+        # print('FILTER: ', filter_query.statement.compile().params)
+        
+         # Apply sorting logic
+        if order_by:
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'StudentNumber':
+                order_attr = getattr(Student, 'StudentNumber')
+            elif order_by.split(' ')[0] == 'StudentName':
+                order_attr = getattr(Student, 'LastName')
+            elif order_by.split(' ')[0] == "Batch":
+                order_attr = getattr(Metadata, "Batch")
+            elif order_by.split(' ')[0] == "Lister":
+                order_attr = getattr(StudentClassGrade, "Lister")
+            elif order_by.split(' ')[0] == 'Semester':
+                order_attr = getattr(Metadata, 'Semester')
+            else:
+                if ' ' in order_by:
+                    order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.Semester), desc(Course.CourseCode), desc(Class.Section))
+                else:
+                    order_query = filter_query.order_by(Metadata.Batch, Metadata.Semester, Course.CourseCode, Class.Section)
+
+            # Check if order_by contains space
+            if not order_by.split(' ')[0] == "ClassName":
+                if ' ' in order_by:
+                    order_query = filter_query.order_by(desc(order_attr))
+                else:
+                    order_query = filter_query.order_by(order_attr)
+        else:
+            # Apply default sorting
+            order_query = filter_query.order_by(desc(Metadata.Batch), desc(Metadata.CourseId), desc(Metadata.Year), Class.Section, desc(Metadata.Semester))
+        
+        total_count = order_query.count()
+        student_lister_main_query = order_query.offset(skip).limit(top).all()
+        
+        
+        
+        # student_lister_count = student_lister_query.count()
+        # student_lister = student_lister_query.all()
+        
+        # Get the StudentClassSubjectGrade
+        if student_lister_main_query:
+            list_metadata = []
+                # For loop the data_student and put it in dictionary
+            for data in student_lister_main_query:
+                full_name = f"{data.Student.LastName}, {data.Student.FirstName} {data.Student.MiddleName}"
+                class_name = f"{data.Course.CourseCode} {data.Metadata.Year}-{data.Class.Section}"
+                lister = "President Lister" if data.StudentClassGrade.Lister == 2 else "Dean Lister"
+                dict_metadata = {
+                    "StudentNumber": data.Student.StudentNumber,
+                    "StudentName": full_name,
+                    "Batch": data.Metadata.Batch,
+                    "Semester": data.Metadata.Semester,
+                    "ClassName": class_name,
+                    "Lister": lister,
+                }
+                list_metadata.append(dict_metadata)
+            
+            return jsonify({'result': list_metadata, 'count': total_count})
+
+        else:
+            return jsonify({'result': [], 'count': 0})
+    except Exception as e:
+        print("ERROR: ", e)
+        # Handle the exception here, e.g., log it or return an error response
+        return None

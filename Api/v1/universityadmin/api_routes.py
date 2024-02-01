@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent
 import os
 
 
@@ -740,3 +740,27 @@ def fetchListers():
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+
+
+# Get enc STATIC_TOKEN
+STATIC_TOKEN = "1b20e3f9-8d44-45b7-96da-02e8001d73e8"
+
+@university_admin_api.route('/student/achievement/', methods=['GET'])
+def studentAchievement():
+    # Check if the 'Authorization' header is present
+    if 'X-API-Key' not in request.headers:
+        return "API key is missing", 401
+    # Get the token from the 'Authorization' header
+    token = request.headers['X-API-Key']
+    
+    if token != STATIC_TOKEN:
+        return "Invalid token", 403
+    
+    skip = int(request.args.get('$skip', 0))
+    top = int(request.args.get('$top', 10))
+    order_by = request.args.get('$orderby')
+    filter = request.args.get('$filter')
+    
+    student_achievement_list = getListerStudent(skip, top, order_by, filter)
+    
+    return (student_achievement_list)
