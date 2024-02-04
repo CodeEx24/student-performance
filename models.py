@@ -146,7 +146,74 @@ class UniversityAdmin(db.Model):
     def get_id(self):
         # Convert to string to ensure compatibility
         return str(self.UnivAdminId)
+    
+# University Admin Users
+class Registrar(db.Model):
+    __tablename__ = 'SPSRegistrar'
 
+    RegistrarId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    RegistrarNumber = db.Column(db.String(30), unique=True)  # UserID
+    FirstName = db.Column(db.String(50), nullable=False)  # First Name
+    LastName = db.Column(db.String(50), nullable=False)  # Last Name
+    MiddleName = db.Column(db.String(50))  # Middle Name
+    Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
+    Password = db.Column(db.String(256), nullable=False)  # Password
+    Gender = db.Column(db.Integer)  # Gender
+    DateOfBirth = db.Column(db.Date)  # DateOfBirth
+    PlaceOfBirth = db.Column(db.String(50))  # PlaceOfBirth
+    ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
+    MobileNumber = db.Column(db.String(11))  # MobileNumber
+    IsActive = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    def to_dict(self):
+        full_name = self.LastName + ', ' + self.FirstName + ' ' + self.MiddleName
+        return {
+            'RegistrarId': self.RegistrarId,
+            'RegistrarNumber': self.RegistrarNumber,
+            'Name': full_name,
+            'Email': self.Email,
+            'Gender': "Male" if self.Gender == 1 else "Female",
+            'DateOfBirth': self.DateOfBirth,
+            'PlaceOfBirth': self.PlaceOfBirth,
+            'ResidentialAddress': self.ResidentialAddress,
+            'MobileNumber': self.MobileNumber,
+            'IsActive': self.IsActive
+        }
+
+    def get_id(self):
+        # Convert to string to ensure compatibility
+        return str(self.UnivAdminId)
+    
+# University Admin Users
+class StudentRequirements(db.Model):
+    __tablename__ = 'SPSStudentRequirements'
+
+    StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Students Reference
+    F_137 = db.Column(db.Boolean, default=False)
+    F_138 = db.Column(db.Boolean, default=False)
+    GoodMoralSeal    = db.Column(db.Boolean, default=False)
+    Grade12 = db.Column(db.Boolean, default=False)
+    Grade11 = db.Column(db.Boolean, default=False)
+    SARForm = db.Column(db.Boolean, default=False)
+    PSA = db.Column(db.Boolean, default=False)
+    Diploma = db.Column(db.Boolean, default=False)
+    Grade10WithoutSeal = db.Column(db.Boolean, default=False)
+
+    def to_dict(self):
+        return {
+            'F_137': self.F_137,
+            'F_138': self.F_138,
+            'GoodMoralSeal': self.GoodMoralSeal,
+            'Grade12': self.Grade12,
+            'Grade11': self.Grade11,
+            'SARForm': self.SARForm,
+            'PSA': self.PSA,
+            'Diploma': self.Diploma,
+            'Grade10WithoutSeal': self.Grade10WithoutSeal
+        }
+        
 # System Admins Users
 class SystemAdmin(db.Model):
     __tablename__ = 'SPSSystemAdmin'
@@ -538,6 +605,8 @@ def init_db(app):
         print("Adding data")
         from data.student import student_data
         from data.faculty import faculty_data
+        from data.registrar import registrar_data
+        from data.studentRequirements import student_requirements_data
         from data.universityadmin import university_admin_data
         from data.systemadmin import system_admin_data
         from data.course import course_data
@@ -556,9 +625,17 @@ def init_db(app):
         from data.latestBatchSemester import batch_semester_data
 
         def create_sample_data():
+            for data in registrar_data:
+                registrar = Registrar(**data)
+                db.session.add(registrar)
+            
             for data in student_data:
                 student = Student(**data)
                 db.session.add(student)
+                
+            for data in student_requirements_data:
+                student_requirements = StudentRequirements(**data)
+                db.session.add(student_requirements)
 
             # for data in faculty_data:
             #     faculty = Faculty(**data)

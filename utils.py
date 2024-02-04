@@ -1,4 +1,4 @@
-from models import CourseGrade, Course, UniversityAdmin, Faculty, Student, SystemAdmin, db
+from models import CourseGrade, Course, UniversityAdmin, Faculty, Student, SystemAdmin, Registrar, db
 from collections import defaultdict
 from sqlalchemy import func
 from static.js.utils import convertGradeToPercentage
@@ -63,3 +63,5 @@ def getCurrentUser(role):
         return UniversityAdmin.query.get(current_user_id)
     elif role == 'systemAdmin':
         return SystemAdmin.query.get(current_user_id)
+    elif role == 'registrar':
+        return Registrar.query.get(current_user_id)

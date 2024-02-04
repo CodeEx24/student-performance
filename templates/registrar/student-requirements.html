@@ -1,0 +1,778 @@
+{% extends "registrar/layout.html" %} {% block title %}
+<title>Students</title> {% endblock title %}
+<!----------------- STYLE ----------------->
+{% block style %} {% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Students
+      </h3>
+
+      <div>
+        <form
+          class="bg-white p-4 rounded-lg"
+          enctype="multipart/form-data"
+          onsubmit="submitStudentsRequirements(event)"
+        >
+          <div class="mb-4">
+            <label
+              for="excelFile"
+              class="block text-gray-700 font-bold text-lg mb-2"
+            >
+              Add Students
+            </label>
+            <p class="block text-gray-700 font-bold text-md mb-2">
+              Column Required:
+              <span class="font-normal"
+                >StudentNumber, F-137, F-138, Good Moral(Seal), Grade 12, Grade
+                11, SAR Form, PSA, Diploma, Grade 10(Without Seal)
+              </span>
+            </p>
+          </div>
+          <div class="mb-4 flex gap-4">
+            <input
+              type="file"
+              name="excelFile"
+              id="excelFile"
+              accept=".xlsx, .xls"
+              class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+            />
+            <!-- ADD CSRF /> -->
+
+            <button
+              type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+            >
+              Upload Excel File
+            </button>
+          </div>
+          <p id="students-file-error" class="text-c4 text-sm"></p>
+        </form>
+      </div>
+
+      <hr class="mx-2" />
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <div id="grid-student_requirements"></div>
+          <script id="template" type="text/x-template">
+            <div class="template_checkbox flex gap-4 ">
+                ${if(Completed)}
+                <button class=" px-2 py-1 bg-success text-white font-bold rounded-md">Completed</button>
+                ${else}
+                <button class=" px-2 py-1 bg-red-500 text-white font-bold rounded-md" >Incomplete</button>
+                ${/if}
+            </div>
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="studentErrorModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div
+    class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"
+    onclick="closeModalError('studentErrorModal', 'grid-error-students-list')"
+  ></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-10/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">
+          Updating student requirements list error
+        </h2>
+
+        <button
+          class="modal-close"
+          onclick="closeModalError('studentErrorModal', 'grid-error-students-list')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <p class="text-gray-700 mt-4">Export the grid to see all the errors</p>
+      <div class="modal-body w-full relative mt-8">
+        <div id="grid-error-students-list" class="overflow-y-auto">
+          <!-- This is the content of modal -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+{% block script %}
+
+<script>
+  function closeModalCurriculumSubjects(modalElementId, listElementId) {
+    // Get the #grid-student-list element
+    var gridErrorList = document.getElementById(listElementId);
+
+    // Remove all child nodes (content) inside #grid-student-list
+    while (gridErrorList.firstChild) {
+      gridErrorList.removeChild(gridErrorList.firstChild);
+    }
+
+    closeModal(modalElementId);
+  }
+</script>
+
+<!-- ADDING STUDENTS -->
+<script>
+  async function submitStudentsRequirements(event) {
+    event.preventDefault();
+    // const csrfToken = document.getElementsByName('csrf_token')[0].value;
+    // console.log('csrfToken: ', csrfToken);
+
+    const fileErrorElement = document.getElementById('students-file-error');
+    const fileInput = document.getElementById('excelFile');
+    const file = fileInput.files[0];
+    // Get csrf token
+
+    if (!file) {
+      fileErrorElement.innerText = 'Please choose a file.';
+      return;
+    }
+
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      fileErrorElement.innerText =
+        'Invalid file type. Please select an Excel file.';
+      return;
+    } else {
+      fileErrorElement.innerText = '';
+    }
+
+    // If file type is valid, proceed with the API request
+    const formData = new FormData();
+    formData.append('excelFile', file);
+    // formData.append('csrf_token', csrfToken);
+
+    try {
+      showModal('loadingModal');
+      fetch(`${api_base_url}/submit/student-requirements`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          handleDataSubmitResults(
+            data,
+            fileInput,
+            displaySubmitErrorStudentRequirements,
+            'studentErrorModal',
+            'grid-student_requirements'
+          );
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function displaySubmitErrorStudentRequirements(students) {
+    var grid = new ej.grids.Grid({
+      dataSource: students,
+      allowPaging: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      pageSettings: { pageSize: 10 }, // Set the page size
+      // rowData: json_class['ClassSubjectGrade'],
+      columns: [
+        {
+          field: 'StudentNumber',
+          headerText: 'Student Number',
+          width: 120,
+        },
+        {
+          field: 'F_137',
+          headerText: 'F-137',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('F_137'),
+        },
+        {
+          field: 'F_138',
+          headerText: 'F-138',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('F_138'),
+        },
+        {
+          field: 'GoodMoralSeal',
+          headerText: 'GoodMoralSeal',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('GoodMoralSeal'),
+        },
+        {
+          field: 'Grade12',
+          headerText: 'Grade12',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('Grade12'),
+        },
+        {
+          field: 'Grade11',
+          headerText: 'Grade11',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('Grade11'),
+        },
+        {
+          field: 'SARForm',
+          headerText: 'SARForm',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('SARForm'),
+        },
+        {
+          field: 'PSA',
+          headerText: 'PSA',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('PSA'),
+        },
+        {
+          field: 'Diploma',
+          headerText: 'Diploma',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('Diploma'),
+        },
+        {
+          field: 'Grade10WithoutSeal',
+          headerText: 'Grade10WithoutSeal',
+          width: 150,
+          filterBarTemplate: generateFilterBarTemplate('Grade10WithoutSeal'),
+        },
+
+        {
+          field: 'Error',
+          width: 150,
+        },
+      ],
+
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+    });
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-error-students-list_excelexport') {
+        grid.excelExport();
+      }
+    };
+
+    // Render the grid
+    grid.appendTo('#grid-error-students-list');
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
+  }
+</script>
+
+<!-- FETCHING STUDENT DETAILS -->
+<script>
+  // JavaScript function to show the modal
+  async function fetchStudents() {
+    const response = await fetch(`${api_base_url}/students`);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch data. Try to contact the admin to resolve the issue.`
+      );
+    }
+
+    const data = await response.json();
+    if (!data.error) {
+      displayStudent(data, 10);
+    } else {
+      displayStudent([], 10);
+    }
+  }
+
+  // Function to initialize and display the Syncfusion Grid
+  function displayStudent(data, recordsPerPage) {
+    // Create an instance of the Syncfusion Grid
+    const grid = new ej.grids.Grid({
+      dataSource: data, // Paginated data
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      columns: [
+        // Define your columns based on your data structure
+        { field: 'Student Number', headerText: 'Student Number' },
+        { field: 'Name', headerText: 'Name' },
+        { field: 'Email', headerText: 'Email' },
+        { field: 'Mobile Number', headerText: 'Mobile Number' },
+        { field: 'Gender', headerText: 'Gender' },
+        // Add other fields as needed
+      ],
+      pageSettings: {
+        pageSize: 10, // Records per page
+        // pageCount: Math.ceil(data.length / recordsPerPage), // Calculate total number of pages
+        pageSizes: [10, 20, 50, 100], // Custom page size options
+        showPageCount: true, // Display page count
+        showPager: true, // Display pager
+      },
+      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      excelExportComplete: function (args) {
+        // Exclude the 'Subject Code' column from the exported Excel file
+        args.xlsxExportOptions.sheets[0].columns =
+          args.xlsxExportOptions.sheets[0].columns.filter(function (column) {
+            return column.field !== 'Subject';
+          });
+      },
+    });
+
+    // Render the Syncfusion Grid in the specified element
+    grid.appendTo('#grid');
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid_excelexport') {
+        grid.excelExport();
+      }
+    };
+  }
+
+  fetchStudents();
+</script>
+
+<!-- FETCH DISTINC OPTIONS -->
+
+<script>
+  // Function to generate filter bar template
+  function generateFilterBarTemplate(field) {
+    return {
+      create: function (args) {
+        var dd = document.createElement('input');
+        dd.id = field;
+        return dd;
+      },
+      write: function (args) {
+        var semester = ['All', 'Submitted', 'Missing'];
+
+        var DropDownListObj = new ej.dropdowns.DropDownList({
+          dataSource: semester,
+          fields: { text: field, value: field },
+          placeholder: 'Select a value',
+
+          change: function (e) {
+            console.log('CHANGE: ', e.value);
+            var gridObj =
+              document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            if (e.value == 'All') {
+              gridObj.removeFilteredColsByField(field);
+            } else {
+              gridObj.filterByColumn(field, 'equal', e.value);
+            }
+          },
+        });
+        DropDownListObj.appendTo('#' + field);
+      },
+    };
+  }
+
+  // get csrf token
+  // const csrfToken = document.getElementsByName('_ejRequestVerifyToken')[0]
+  //   .value;
+  // console.log('CSRF IN 2: ', csrfToken);
+
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/student/requirements`,
+    insertUrl: `${api_base_url}/students/insert`,
+    removeUrl: `${api_base_url}/students/delete`,
+    columns: [
+      {
+        field: 'StudentId',
+        isPrimaryKey: true,
+        // width: 100,
+        visible: false, // Set to false to hide the column
+      },
+      // Studen Number
+      {
+        field: 'StudentNumber',
+        headerText: 'Student Number',
+        width: 150,
+        validationRules: {
+          required: true,
+        },
+      },
+      {
+        field: 'LastName',
+        headerText: 'Last',
+        width: 150,
+      },
+      {
+        field: 'FirstName',
+        headerText: 'First',
+        width: 150,
+      },
+      {
+        field: 'MiddleName',
+        headerText: 'Middle',
+        width: 150,
+      },
+      // Student Name
+      // Gender
+      {
+        field: 'F_137',
+        headerText: 'F-137',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('F_137'),
+      },
+      {
+        field: 'F_138',
+        headerText: 'F-138',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('F_138'),
+      },
+      {
+        field: 'GoodMoralSeal',
+        headerText: 'GoodMoralSeal',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('GoodMoralSeal'),
+      },
+      {
+        field: 'Grade12',
+        headerText: 'Grade12',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('Grade12'),
+      },
+      {
+        field: 'Grade11',
+        headerText: 'Grade11',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('Grade11'),
+      },
+      {
+        field: 'SARForm',
+        headerText: 'SARForm',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('SARForm'),
+      },
+      {
+        field: 'PSA',
+        headerText: 'PSA',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('PSA'),
+      },
+      {
+        field: 'Diploma',
+        headerText: 'Diploma',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('Diploma'),
+      },
+      {
+        field: 'Grade10WithoutSeal',
+        headerText: 'Grade10WithoutSeal',
+        width: 150,
+        filterBarTemplate: generateFilterBarTemplate('Grade10WithoutSeal'),
+      },
+      {
+        headerText: 'Completed',
+        template: '#template',
+        width: 150,
+      },
+    ],
+    // [
+    //   {
+    //     field: 'StudentId',
+    //     isPrimaryKey: true,
+    //     visible: false,
+    //   },
+    //   // Fixed Columns (Student Number and Last Name)
+    //   {
+    //     headerText: 'Student Information',
+    //     columns: [
+    //       {
+    //         field: 'StudentNumber',
+    //         headerText: 'Student Number',
+    //         width: 80,
+    //         validationRules: {
+    //           required: true,
+    //         },
+    //       },
+    //       {
+    //         field: 'LastName',
+    //         headerText: 'Last Name',
+    //         width: 100,
+    //       },
+    //       {
+    //         field: 'FirstName',
+    //         headerText: 'First Name',
+    //         width: 100,
+    //       },
+    //       {
+    //         field: 'MiddleName',
+    //         headerText: 'Middle Name',
+    //         width: 100,
+    //       },
+    //     ],
+    //   },
+    //   // Scrollable Columns
+    //   {
+    //     headerText: 'Other Information',
+    //     columns: [
+    //       {
+    //         field: 'F_137',
+    //         headerText: 'F-137',
+    //         width: 150,
+    //       },
+    //       {
+    //         field: 'F_138',
+    //         headerText: 'F-138',
+    //         width: 150,
+    //       },
+    //       {
+    //         field: 'GoodMoralSeal',
+    //         headerText: 'GoodMoralSeal',
+    //         width: 150,
+    //       },
+    //       {
+    //         field: 'Grade12',
+    //         headerText: 'Grade12',
+    //         width: 150,
+    //       },
+    //       {
+    //         field: 'Grade11',
+    //         headerText: 'Grade11',
+    //         width: 150,
+    //       },
+    //       {
+    //         field: 'SARForm',
+    //         headerText: 'SARForm',
+    //         width: 150,
+    //       },
+    //       {
+    //         field: 'PSA',
+    //         headerText: 'PSA',
+    //         width: 150,
+    //       },
+    //       {
+    //         field: 'Diploma',
+    //         headerText: 'Diploma',
+    //         width: 150,
+    //       },
+    //       {
+    //         field: 'Grade10WithoutSeal',
+    //         headerText: 'Grade10WithoutSeal',
+    //         width: 150,
+    //       },
+    //       {
+    //         headerText: 'Completed',
+    //         template: '#template',
+    //         width: 150,
+    //         allowSearching: true,
+    //         allowSorting: true,
+    //       },
+    //       // Include other columns here...
+    //     ],
+    //   },
+    //   {
+    //     field: 'Completed',
+    //     headerText: 'Completed',
+    //     template: '#template',
+    //     width: 150,
+    //     allowSearching: true,
+    //     allowSorting: true,
+    //   },
+    // ],
+  };
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    try {
+      await fetch(`${api_base_url}/student/options`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('dTAL: ', data);
+          if (data.result) {
+            gridConfig.columns[6].edit.params.dataSource =
+              data.result.genderOptions;
+            gridConfig.columns[8].edit.params.dataSource =
+              data.result.courseOptions;
+            gridConfig.columns[10].edit.params.dataSource =
+              data.result.batchOptions;
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+
+    // Create a DataManager with the provided API URL
+    let curriculum_subject_data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      insertUrl: gridConfig.insertUrl,
+      removeUrl: gridConfig.removeUrl,
+      adaptor: new ej.data.ODataAdaptor(),
+      // headers: [{ csrf_token: csrfToken }],
+    });
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: curriculum_subject_data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      allowScrolling: true, // Enable scrolling
+      scrollable: { height: '100%', width: 'auto' },
+      toolbar: ['ExcelExport', 'Clear Filters'], // Add the ExcelExport button to the toolbar
+      editSettings: {
+        // allowEditing: true,
+        allowAdding: true,
+        allowDeleting: true,
+        showDeleteConfirmDialog: true,
+      },
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      // dataBound: function () {
+      //   grid.autoFitColumns(['ShipName', 'ShipAddress']);
+      // },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+
+      actionComplete: function (args) {
+        if (args.requestType === 'save' && args.action === 'add') {
+          console.log('INSERTED ARGS: ', args);
+          onSuccess('Data inserted successfully');
+        }
+
+        if (args.requestType === 'delete') {
+          onSuccess('Data deleted successfully');
+        }
+
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+      actionFailure: function (args) {
+        if (args.error) {
+          var errorResponse = JSON.parse(args.error[0].error.response);
+
+          notyf.error(errorResponse.error);
+        }
+      },
+    });
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-student_requirements_excelexport') {
+        // grid.columns[7].visible = false;
+        grid.excelExport();
+      } else if (
+        args['item'].id === 'grid-student_requirements_Clear Filters'
+      ) {
+        grid.clearFiltering();
+        grid.refresh();
+      }
+    };
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              fetchStudentPerformance(
+                rowData.StudentId,
+                rowData.StudentName,
+                rowData.StudentNumber
+              );
+            }
+          }
+        }
+      }
+    });
+
+    console.log('GRID: ', grid.dataSource);
+    // Append the grid to the container
+    grid.appendTo('#grid-student_requirements');
+
+    // Add a custom toolbar item to clear filters
+  });
+</script>
+{% endblock script %}

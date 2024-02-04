@@ -7,6 +7,7 @@ from Api.v1.student.api_routes import student_api
 from Api.v1.faculty.api_routes import faculty_api
 from Api.v1.universityadmin.api_routes import university_admin_api
 from Api.v1.systemadmin.api_routes import system_admin_api
+from Api.v1.registrar.api_routes import registrar_api
 from oauth2 import config_oauth
 
 from utils import getOverallCoursePerformance, getCurrentUser
@@ -52,6 +53,7 @@ def create_app():
         print("USING DEVELOPMENT")
         # Set the value to the default DATABASE_URI
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DEVELOPMENT_DATABASE_URI')
+        # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
         
     # Do not set this to 1 in production
     os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -100,6 +102,7 @@ def create_app():
     faculty_api_base_url = os.getenv("FACULTY_API_BASE_URL")
     university_admin_api_base_url = os.getenv("UNIVERSITY_ADMIN_API_BASE_URL")
     system_admin_api_base_url = os.getenv("SYSTEM_ADMIN_API_BASE_URL")
+    registrar_api_base_url = os.getenv("REGISTRAR_API_BASE_URL")
 
     @app.context_processor
     def custom_context_processor():
@@ -257,10 +260,10 @@ def create_app():
         # json_performance_data=json_performance_data.get_json()
         return render_template('universityadmin/home.html', university_admin_api_base_url=university_admin_api_base_url, current_page="home")
     
-    @app.route('/university-admin/students')
-    @role_required('universityAdmin')
-    def universityAdminStudents():
-        return render_template('universityadmin/students.html', university_admin_api_base_url=university_admin_api_base_url, current_page="students")
+    # @app.route('/university-admin/students')
+    # @role_required('universityAdmin')
+    # def universityAdminStudents():
+    #     return render_template('universityadmin/students.html', university_admin_api_base_url=university_admin_api_base_url, current_page="students")
 
 
     @app.route('/university-admin/all/class')
@@ -313,6 +316,43 @@ def create_app():
     @role_required('universityAdmin')
     def universityFinalizedGrades():
         return render_template('universityadmin/finalized-grade2.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
+
+
+    # ========================================================================
+    # ALL REGISTRAR ROUTES HERE
+    @app.route('/registrar')
+    @preventAuthenticated
+    def registrarLogin():
+        return render_template('registrar/login.html')
+
+    @app.route('/registrar/home')
+    @role_required('registrar')
+    def registrarHome():
+        return render_template('registrar/home.html', registrar_api_base_url=registrar_api_base_url, current_page="home")
+    
+    @app.route('/registrar/students')
+    @role_required('registrar')
+    def registrarStudents():
+        return render_template('registrar/students.html', registrar_api_base_url=registrar_api_base_url, current_page="students")
+    
+    @app.route('/registrar/student-requirements')
+    @role_required('registrar')
+    def registrarStudentRequirements():
+        return render_template('registrar/student-requirements.html', registrar_api_base_url=registrar_api_base_url, current_page="student-requirements")
+    
+    
+    @app.route('/registrar/profile')
+    @role_required('registrar')
+    def registrarProfile():
+        registrar = getCurrentUser('registrar')
+        return render_template('registrar/profile.html', registrar_api_base_url=registrar_api_base_url, current_page="profile", registrar=registrar.to_dict())
+    
+    
+    @app.route('/registrar/change-password')
+    @role_required('registrar')
+    def registrarChangePassword():
+        return render_template('registrar/change-password.html', registrar_api_base_url=registrar_api_base_url, current_page="change-password")
+
 
     # ========================================================================
     # ALL SYSTEM ADMIN ROUTES HERE
@@ -373,6 +413,7 @@ def create_app():
 
     app.register_blueprint(faculty_api, url_prefix=faculty_api_base_url)
     app.register_blueprint(student_api, url_prefix=student_api_base_url)
+    app.register_blueprint(registrar_api, url_prefix=registrar_api_base_url)
 
 
 

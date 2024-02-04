@@ -1,0 +1,607 @@
+{% extends "registrar/layout.html" %} {% block title %} <title>Home</title> {%
+endblock title %}
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 gap-4 h-full overflow-auto p-4">
+  <div
+    class="bg-white col-span-6 md:col-span-3 lg:col-span-2 p-4 flex items-center rounded-md shadow-sm"
+  >
+    <div class="flex gap-6 align-center items-center">
+      <svg
+        width="80"
+        height="80"
+        fill="#2bceda"
+        version="1.1"
+        id="Capa_1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 32.079 32.079"
+        xml:space="preserve"
+        stroke="#2bceda"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g
+          id="SVGRepo_tracerCarrier"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></g>
+        <g id="SVGRepo_iconCarrier">
+          <g>
+            <g>
+              <path
+                d="M3.355,25.615c0.26,0,0.766,0,1.711,0c0.018,0,0.036,0,0.056,0c0.946,0,1.451,0,1.71,0c0.403-0.401,0.73-0.79,0.997-1.161 l0,0c0.053,0.002,0.12,0.003,0.198,0.003c0.572,0,1.706-0.08,1.815-0.71c0.025-0.14,0.744-2.043,0.214-2.521 c-0.168-0.152-0.867-0.156-0.991-0.098c0.004-0.025,0.007-0.051,0.01-0.072c0.084-0.479-0.349-0.627-0.644-0.646 c-0.1-0.006-0.887-0.014-1.888-0.02c0.038,0.102,0.052,0.207,0.035,0.309c-0.021,0.119-0.072,0.261-0.129,0.391l0.365,0.129 c0.124,0.043,0.183,0.193,0.133,0.333l-0.436,1.229C6.462,22.921,6.322,23,6.198,22.956l-1.076-0.38 c-0.123-0.044-0.183-0.193-0.133-0.333l0.435-1.229c0.05-0.14,0.189-0.219,0.313-0.175l0.419,0.149 c0.054-0.12,0.101-0.245,0.118-0.342c0.017-0.099-0.025-0.189-0.078-0.26c-0.16,0-0.324,0-0.49-0.002H5.552c0,0,0,0,0-0.001 c-0.143,0-0.286-0.001-0.43-0.002c-0.009,0-0.019,0-0.028,0c-0.01,0-0.018,0-0.028,0c-1.584,0.009-3.167,0.021-3.311,0.028 c-0.293,0.02-0.728,0.168-0.644,0.646C1.201,21.57,1.153,23.425,3.355,25.615z M8.992,21.723c0.152-0.121,0.681-0.223,0.757-0.154 c0.296,0.268-0.327,1.918-0.359,2.1c-0.03,0.167-0.604,0.311-1.255,0.326C8.705,23.064,8.904,22.271,8.992,21.723z"
+              ></path>
+              <path
+                d="M5.618,21.369l-0.283,0.796c-0.032,0.091,0.006,0.188,0.086,0.216l0.699,0.247c0.079,0.028,0.17-0.022,0.203-0.112 l0.282-0.798c0.033-0.091-0.007-0.188-0.086-0.216l-0.697-0.247C5.741,21.227,5.65,21.275,5.618,21.369z"
+              ></path>
+              <path
+                d="M30.777,26.496v-0.439h-0.762l-0.14-2.485l-0.415,0.161c-0.555,0.219-1.107,0.353-1.67,0.41l-0.777-7.033 c0.125-0.914,0.287-2.309,0.35-3.737c0.105-2.445,0.472-10.206-6.568-10.206c-7.042,0-6.847,6.48-6.847,6.48l0.513,8.406 l-0.637,6.114c-0.704-0.025-1.386-0.165-2.077-0.434l-0.415-0.162l-0.138,2.484h-0.796v0.44H9.08 c0.104-0.069,0.178-0.183,0.178-0.318c0-0.213-0.174-0.387-0.388-0.387H1.078c-0.214,0-0.388,0.174-0.388,0.387 c0,0.136,0.073,0.25,0.178,0.318H0v2.418h17.025h7.973h7.081v-2.417H30.777z M29.352,25.732h-8.414 c0.041-0.59,0.235-1.815,1.164-1.928c0.463-0.057,1.056,0.141,1.767,0.37c0.894,0.288,2.006,0.647,3.286,0.647 c0.727,0,1.426-0.112,2.127-0.34L29.352,25.732z M24.389,23.664c0.109-0.71,0.314-2,0.547-3.348l0.502,3.645 C25.068,23.873,24.723,23.77,24.389,23.664z M15.358,8.842c1.53-0.104,6.813-0.584,6.949-2.293 c0.504,0.928,3.17,3.266,4.229,3.419c-0.239,2.338-1.913,4.25-4.127,4.845v1.958h0.01l0.709,0.338l-2.229,4.017l-2.183-4.142 l0.558-0.139v-2.089c-2.287-0.713-3.944-2.845-3.944-5.364C15.33,9.208,15.34,9.023,15.358,8.842z M17.34,23.499 c-0.066,0.021-0.129,0.041-0.197,0.063c-0.304,0.098-0.625,0.195-0.957,0.287l0.381-2.938C16.86,21.902,17.145,22.85,17.34,23.499 z M11.928,24.482c0.701,0.229,1.401,0.34,2.127,0.34c1.28,0,2.392-0.359,3.285-0.646c0.712-0.229,1.305-0.426,1.768-0.371 c0.924,0.111,1.123,1.338,1.164,1.928h-8.414L11.928,24.482z"
+              ></path>
+            </g>
+          </g>
+        </g>
+      </svg>
+      <div>
+        <p>Active Teacher</p>
+        <div class="flex items-end gap-2">
+          <p id="teacher-count" class="font-bold text-4xl text-gray-700">0</p>
+          <p class="font-normal text-lg md:text-lg text-gray-700">Teachers</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bg-white col-span-6 md:col-span-3 lg:col-span-2 p-4 flex items-center rounded-md shadow-sm"
+  >
+    <div class="flex gap-6 align-center items-center">
+      <svg
+        width="80"
+        height="80"
+        fill="#2bceda"
+        version="1.1"
+        id="Capa_1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 49.999 49.999"
+        xml:space="preserve"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g
+          id="SVGRepo_tracerCarrier"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></g>
+        <g id="SVGRepo_iconCarrier">
+          <g>
+            <g>
+              <path
+                d="M20.202,21.976c-0.488,0.124-0.966,0.269-1.439,0.426c3.119,0.527,5.05,1.416,6.236,2.33 c1.186-0.914,3.119-1.803,6.239-2.33c-0.472-0.157-0.95-0.302-1.437-0.426c3.513-2.371,5.936-7.031,5.936-11.233 C35.737,4.806,30.931,0,25,0c-5.934,0-10.737,4.806-10.737,10.742C14.264,14.944,16.685,19.604,20.202,21.976z"
+              ></path>
+              <path
+                d="M39.629,24.539v-1.532h-0.504c-9.789,0-13.066,2.337-14.126,3.604c-1.06-1.269-4.338-3.604-14.126-3.604h-0.504v1.532 c-0.452-0.01-0.904-0.017-1.379-0.017H7.846v22.199h1.143c12.068,0,14.533,2.771,14.884,3.278h2.27 c0.38-0.538,2.893-3.278,14.865-3.278h1.145V24.522h-1.145C40.534,24.522,40.081,24.529,39.629,24.539z"
+              ></path>
+            </g>
+          </g>
+        </g>
+      </svg>
+      <div>
+        <p>Total Enrollees</p>
+        <div class="flex items-end gap-2">
+          <p id="students-count" class="font-bold text-4xl text-gray-700">0</p>
+          <p class="font-normal text-lg md:text-lg text-gray-700">Students</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bg-white col-span-6 md:col-span-3 lg:col-span-2 p-4 flex items-center rounded-md shadow-sm"
+  >
+    <div class="flex gap-6 align-center items-center">
+      <svg
+        width="80"
+        height="80"
+        fill="#2bceda"
+        version="1.1"
+        id="Capa_1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 31.666 31.666"
+        xml:space="preserve"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g
+          id="SVGRepo_tracerCarrier"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></g>
+        <g id="SVGRepo_iconCarrier">
+          <g>
+            <g>
+              <path
+                d="M30.073,17.717c0-0.881-0.715-1.595-1.596-1.595H3.188c-0.881,0-1.595,0.714-1.595,1.595v1.014h1.968V29.3 c0,1.308,1.06,2.366,2.365,2.366h19.862c1.308,0,2.365-1.061,2.365-2.366V18.73h1.92V17.717L30.073,17.717z"
+              ></path>
+              <path
+                d="M21.858,11.793h1.436c1.054,0,1.91-0.866,1.91-1.919V1.54c0-0.85-0.697-1.54-1.549-1.54s-1.551,0.69-1.551,1.54v7.154 h-1.357c-0.373-0.246-0.817-0.393-1.297-0.393h-7.216c-1.335,0-2.428,1.102-2.428,2.437v3.81h12.052V11.793z"
+              ></path>
+              <circle cx="15.844" cy="3.463" r="3.462"></circle>
+            </g>
+          </g>
+        </g>
+      </svg>
+      <div>
+        <p>Total Class</p>
+        <div class="flex items-end gap-2">
+          <p id="class-count" class="font-bold text-4xl text-gray-700">0</p>
+          <p class="font-normal text-lg md:text-lg text-gray-700">Class</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bg-white col-span-6 lg:col-span-3 row-span-4 shadow-md p-4 rounded-md shadow-sm"
+  >
+    <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
+      Enrollment Trends
+    </h4>
+    <div id="enrollment"></div>
+  </div>
+
+  <div
+    class="bg-white col-span-6 lg:col-span-3 row-span-4 lg:col-start-4 shadow-md p-4 rounded-md shadow-sm"
+  >
+    <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
+      President Lister
+    </h4>
+    <div id="lister"></div>
+  </div>
+
+  <div
+    class="bg-white p-8 shadow-md col-span-full"
+    id="course-performance-container"
+  >
+    <h1 class="text-3xl font-bold text-c1 mb-8">Course Performances</h1>
+    <div id="course-performance"></div>
+  </div>
+</div>
+
+{% endblock content %} {% block script %}
+<!-- STATISTICS - Students, Faculty and Class -->
+<script>
+  async function fetchStatistics() {
+    try {
+      const response = await fetch(`${api_base_url}/statistics`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const json_statistics = await response.json();
+      console.log('json_statistics: ', json_statistics);
+
+      if (json_statistics.success) {
+        // Update counts
+        document.getElementById('teacher-count').innerText =
+          json_statistics.result.teacher_active_count;
+        document.getElementById('students-count').innerText =
+          json_statistics.result.student_enrolled_count;
+        document.getElementById('class-count').innerText =
+          json_statistics.result.class_data_count;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  fetchStatistics();
+
+  // async function fetchAverageGPA() {
+  //   try {
+  //     const response = await fetch(`${api_base_url}/current/gpa`);
+
+  //     if (!response.ok) {
+  //       throw new Error(
+  //         `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+  //       );
+  //     }
+
+  //     const json_average_gpa = await response.json();
+
+  //     if (json_average_gpa) {
+  //       document.getElementById('average-gpa').innerText =
+  //         json_average_gpa.AverageGrade;
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
+</script>
+
+<!-- ENROLLMENT TRENDS OF COURSES -->
+<script>
+  async function fetchEnrollmentTrends() {
+    try {
+      const response = await fetch(`${api_base_url}/enrollment/trends`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const json_enrollment_trends = await response.json();
+
+      displayEnrollmentTrendChart(json_enrollment_trends);
+      displayedEnrollmentNumbers(json_enrollment_trends);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function displayEnrollmentTrendChart(json_enrollment_trends) {
+    if (json_enrollment_trends.success == true) {
+      console.log('json_enrollment_trends: ', json_enrollment_trends);
+      var chartData = [...json_enrollment_trends.enrollment_trends];
+
+      // Make a template for series in which base on iteration item of json_enrollment_trends.course_list
+      var series_template = [];
+      json_enrollment_trends.course_list.forEach((course) => {
+        series_template.push({
+          type: 'StackingLine',
+          dataSource: chartData,
+          marker: { visible: true },
+          dashArray: '5, 1',
+          xName: 'x',
+          width: 2,
+          yName: course,
+          name: course,
+        });
+      });
+
+      var chart = new ej.charts.Chart({
+        //Initializing Primary X Axis
+        primaryXAxis: {
+          interval: 1,
+          valueType: 'Category',
+        },
+
+        //Initializing Chart Series
+        series: series_template,
+        //Initializing User Interaction Tooltip
+        tooltip: {
+          enable: true,
+        },
+      });
+      chart.appendTo('#enrollment');
+      // chart.appendTo('#enrollment2');
+    } else {
+      // Get current and previous 4 years and put it in array
+      var current_year = new Date().getFullYear();
+      var year = [];
+      for (let i = 0; i < 5; i++) {
+        year.push(current_year - 5 + i);
+      }
+
+      // Make the year as datasource where year is x and y is default 0
+      var chartData = [];
+      year.forEach((year) => {
+        chartData.push({ x: year, y: 0 });
+      });
+
+      // Display chart without data or handle this case as needed
+      var chart = new ej.charts.Chart({
+        // Initializing Primary X Axis
+        primaryXAxis: {
+          interval: 1,
+          valueType: 'Category',
+        },
+        primaryYAxis: {
+          minimum: 0, // Set your desired minimum value
+          maximum: 500, // Set your desired maximum value
+          interval: 50,
+        },
+        // Sample series to be displayed when there is no data
+        series: [
+          {
+            type: 'Line',
+            dataSource: chartData,
+            xName: 'x',
+            yName: 'y',
+            name: 'No Data Available',
+          },
+        ],
+        tooltip: {
+          enable: true,
+        },
+      });
+      chart.appendTo('#enrollment');
+    }
+  }
+
+  function displayedEnrollmentNumbers(json_enrollment) {
+    const text_lowest_course = document.getElementById('lowest-course');
+    const text_highest_course = document.getElementById('highest-course');
+
+    const text_lowest_count = document.getElementById('lowest-count');
+    const text_highest_count = document.getElementById('highest-count');
+
+    const text_student_enrolled_count =
+      document.getElementById('student-enrolled');
+
+    text_lowest_course.innerText = json_enrollment.LowestEnrolledCourses[0];
+    text_highest_course.innerText = json_enrollment.HighestEnrolledCourses[1];
+    text_lowest_count.innerText = json_enrollment.LowestEnrolledCount;
+    text_highest_count.innerText = json_enrollment.HighestEnrolledCount;
+
+    text_student_enrolled_count.innerText = json_enrollment.TotalEnrolled;
+  }
+
+  fetchEnrollmentTrends();
+  fetchAverageGPA();
+</script>
+
+<!-- FETCH LISTERS COUNT -->
+<script>
+  async function fetchListersCount() {
+    try {
+      const response = await fetch(`${api_base_url}/listers/count`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const json_statistics = await response.json();
+      console.log('json_statistics: ', json_statistics);
+
+      if (json_statistics.success) {
+        // Update counts
+        document.getElementById('teacher-count').innerText =
+          json_statistics.result.teacher_active_count;
+        document.getElementById('students-count').innerText =
+          json_statistics.result.student_enrolled_count;
+        document.getElementById('class-count').innerText =
+          json_statistics.result.class_data_count;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  fetchStatistics();
+
+  function columnChart() {
+    var chartData = [
+      { country: '2019', president: 50, dean: 40 },
+      { country: '2020', president: 40, dean: 35 },
+      { country: '2021', president: 70, dean: 65 },
+      { country: '2022', president: 60, dean: 50 },
+    ];
+    var chart = new ej.charts.Chart(
+      {
+        primaryXAxis: {
+          valueType: 'Category',
+          title: 'Year',
+        },
+        primaryYAxis: {
+          minimum: 0,
+          maximum: 80,
+          interval: 20,
+          title: 'Count',
+        },
+        series: [
+          {
+            dataSource: chartData,
+            xName: 'country',
+            yName: 'president',
+            name: 'President Lister',
+            // Series type as column series
+            type: 'Column',
+          },
+          {
+            dataSource: chartData,
+            xName: 'country',
+            yName: 'dean',
+            name: 'Dean Lister',
+            columnWidth: 0.75,
+            columnSpacing: 1.5,
+            // Series type as column series
+            type: 'Column',
+          },
+        ],
+        title: 'Lister Count',
+        // Set the background color for the chart area
+        chartArea: {
+          background: '#FFFFFF', // Change this to your desired color
+        },
+      },
+      '#lister'
+    );
+  }
+
+  columnChart();
+</script>
+
+<!-- STUDENT PERFORMANCE OVER TIME -->
+<script>
+  async function fetchListersCount() {
+    try {
+      const response = await fetch(`${api_base_url}/listers/count`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const lister_data = await response.json();
+      console.log('lister_data: ', lister_data);
+
+      if (json_statistics.success) {
+        // Update counts
+        document.getElementById('teacher-count').innerText =
+          json_statistics.result.teacher_active_count;
+        document.getElementById('students-count').innerText =
+          json_statistics.result.student_enrolled_count;
+        document.getElementById('class-count').innerText =
+          json_statistics.result.class_data_count;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // function displayPerformance(data_performance) {
+  //   var chartData = [...data_performance];
+  //   // Create the chart
+  //   var chart = new ej.charts.Chart({
+  //     primaryXAxis: {
+  //       title: 'Year',
+  //       minimum: data_performance[data_performance.length - 1].Year - 1,
+  //       maximum: data_performance[0].Year + 1,
+  //       interval: 1,
+  //     },
+  //     primaryYAxis: {
+  //       minimum: 20,
+  //       maximum: 100,
+  //       interval: 20,
+  //       title: 'Grade',
+  //       labelFormat: '{value}',
+  //     },
+  //     series: [
+  //       {
+  //         dataSource: chartData.filter((data) => data.Semester === 1),
+  //         xName: 'Year',
+  //         yName: 'Grade',
+  //         name: '1st Semester',
+  //         type: 'Column',
+  //         fill: '#6376EB',
+  //       },
+  //       {
+  //         dataSource: chartData.filter((data) => data.Semester === 2),
+  //         xName: 'Year',
+  //         yName: 'Grade',
+  //         name: '2nd Semester',
+  //         type: 'Column',
+  //         fill: '#5EEE82',
+  //       },
+  //       {
+  //         dataSource: chartData.filter((data) => data.Semester === 3),
+  //         xName: 'Year',
+  //         yName: 'Grade',
+  //         name: 'Summer Term',
+  //         type: 'Column',
+  //         fill: '#29BAF2',
+  //       },
+  //     ],
+  //     title: 'Performance',
+  //     // dataLabel: {
+  //     //   visible: true,
+  //     //   position: 'Top',
+  //     //   font: {
+  //     //     fontWeight: '600',
+  //     //   },
+  //     //   format: '${point.y}%',
+  //     // },
+  //     tooltip: {
+  //       enable: true,
+  //       format:
+  //         'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
+  //     },
+  //   });
+
+  //   // Render the chart
+  //   chart.appendTo('#columnChartContainer');
+  // }
+
+  // fetchStudentPerformanceOvertime();
+</script>
+
+<!-- COURSE PERFORMANCE -->
+<script>
+  async function fetchCoursePerformance() {
+    try {
+      console.log('api_base_url: ', api_base_url);
+      const response = await fetch(
+        `${api_base_url}/overall/course/performance`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const json_course_performance = await response.json();
+      if (!json_course_performance.error) {
+        console.log('IN JSON');
+        console.log(json_course_performance);
+        // Select course-performance-container
+        document
+          .getElementById('course-performance-container')
+          .classList.remove('hidden');
+        displayCoursePerformance(json_course_performance);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function displayCoursePerformance(json_course_performance) {
+    var chartData = json_course_performance.course_performance;
+    var list_course = json_course_performance.list_course;
+
+    var series = list_course.map(function (course) {
+      return {
+        dataSource: chartData.map(function (item) {
+          return { x: item.x, y: item[course] };
+        }),
+        marker: { visible: true },
+        dashArray: '5, 1',
+        xName: 'x',
+        yName: 'y',
+        name: course,
+      };
+    });
+
+    var chart = new ej.charts.Chart({
+      // Initializing Primary X Axis
+      primaryXAxis: {
+        valueType: 'Category',
+      },
+      // Initializing Primary Y Axis
+      primaryYAxis: {
+        minimum: 0,
+        maximum: 100,
+        interval: 20,
+      },
+      // Initializing Chart Series
+      series: series,
+      // Initializing User Interaction Tooltip
+      tooltip: {
+        enable: true,
+      },
+    });
+
+    chart.appendTo('#course-performance');
+  }
+
+  fetchCoursePerformance();
+</script>
+
+{% endblock script %}
