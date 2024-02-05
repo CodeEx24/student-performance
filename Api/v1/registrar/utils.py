@@ -531,8 +531,13 @@ def processAddingStudents(data, excelType=False):
                         CurriculumYear=student_batch
                     )
                     
+                    new_student_requirements = StudentRequirements(
+                        StudentId=new_student.StudentId,
+                    )
+                    
                     # # Add the new course enrolled to the session
                     db.session.add(new_course_enrolled)
+                    db.session.add(new_student_requirements)
                     db.session.commit()
                     
                     msg = Message('Your current PUP Account has been granted.', sender='your_email@example.com',
@@ -668,8 +673,13 @@ def processAddingStudents(data, excelType=False):
                         Status=1,
                         CurriculumYear=student_batch
                     )
+                    
+                    new_student_requirements = StudentRequirements(
+                        StudentId=new_student.StudentId,
+                    )
                     # # Add the new course enrolled to the session
                     db.session.add(new_course_enrolled)
+                    db.session.add(new_student_requirements)
                     db.session.commit()
                     
                     msg = Message('Your current PUP Account has been granted.', sender='your_email@example.com',
