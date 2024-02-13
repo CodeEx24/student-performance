@@ -1,124 +1,74 @@
-{% extends "faculty/layout.html" %}
+{% extends "systemadmin/layout.html" %} {% block title %}
+<title>Finalized Grades</title> {% endblock title %}
+<!----------------- STYLE ----------------->
+{% block style %}
 
-<!----------------- TITLE ----------------->
-{% block title %} SPS - Grades {% endblock title %} {% block styles %}
 <style>
-  /* Set the chart container to 100% width */
-  #columnChartContainer {
-    position: relative;
-    width: 100%; /* Inherit the width of the parent */
-    height: 100%; /* Inherit the height of the parent */
+  /* #lister_svg{
+    background-color: aqua;
+  
   }
+   */
 </style>
-{% endblock styles %}
+{% endblock style %}
 
 <!----------------- CONTENT ----------------->
 {% block content %}
-<div class="p-4 md:ml-72">
-  <div class="border-2 border-gray-200 border-dashed rounded-lg">
-    <div class="grid grid-cols-1">
-      <!-- IMPORTING GRADES (FUTURE PURPOSES) -->
-      <!-- <div
-        class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
-      >
-        <div class="flex items-end justify-between">
-          <div class="w-full bg-white p-4 mt-4">
-            <div id="Grid"></div>
-          </div>
-        </div>
-      </div> -->
-      <div
-        class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
-      >
-        <h3 class="text-2xl font-bold text-c4 px-4" id="name-number">Grades</h3>
 
-        <div>
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Grades
+      </h3>
+
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white px-4 pb-4">
           <form
-            class="bg-white p-4 rounded-lg"
+            class="bg-white rounded-lg"
             enctype="multipart/form-data"
             onsubmit="submitGrades(event)"
+            method="POST"
+            id="reset-form-email"
           >
             <div class="mb-4">
               <label
-                for="pdf-file"
+                for="excelFile"
                 class="block text-gray-700 font-bold text-lg mb-2"
               >
-                Submit Grades:
+                Resubmit Grades:
               </label>
+              <p class="font-semibold text-gray-700">
+                Column Required:
+                <span class="font-normal"
+                  >Course, Subject Code, Year, Semester, and Batch</span
+                >
+              </p>
             </div>
             <div class="mb-4 flex gap-4">
               <input
                 type="file"
-                name="pdf_file"
-                accept=".pdf"
-                id="pdf-file"
+                name="excelFile"
+                id="excelFile"
+                accept=".xlsx, .xls"
                 class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
               />
+
               <button
                 type="submit"
                 class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
               >
-                Upload PDF File
+                Upload Excel File
               </button>
             </div>
             <p id="grade-file-error" class="text-c4 text-sm"></p>
           </form>
-          <hr class="mx-2" />
-        </div>
 
-        <div class="flex items-end justify-between">
-          <div class="w-full bg-white p-4 mt-4">
-            <!-- <div id="Grid"></div> -->
-            <div id="grid_grades"></div>
-          </div>
+          <div id="grid_grades"></div>
         </div>
       </div>
-    </div>
-  </div>
-  <!-- The Modal -->
-  <div
-    id="myModal"
-    class="modal hidden fixed inset-0 flex items-center justify-center z-50"
-  >
-    <!-- Modal Overlay -->
-    <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
-
-    <!-- Modal Content -->
-    <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <div class="flex justify-between">
-          <h2 class="text-c1 text-2xl font-semibold">Performance Details</h2>
-          <button class="modal-close" onclick="closeModal('myModal')">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
-                fill="#000"
-              />
-            </svg>
-          </button>
-        </div>
-        <div class="grid grid-cols-2 mt-4">
-          <div class="flex">
-            <h4 class="text-c1 font-bold">Student Name:&nbsp;</h4>
-            <p id="student-name">Jocarl Basco</p>
-          </div>
-          <div class="flex mb-4">
-            <h4 class="text-c1 font-bold">Student Number:&nbsp;</h4>
-            <p id="student-number">Jocarl Basco</p>
-          </div>
-          <div id="columnChartContainer" class="w-full col-span-2"></div>
-        </div>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="modal-body w-full relative"></div>
     </div>
   </div>
 </div>
@@ -149,6 +99,53 @@
         ></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- The Modal -->
+<div
+  id="myModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">Performance Details</h2>
+        <button class="modal-close" onclick="closeModal('myModal')">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 mt-4">
+        <div class="flex">
+          <h4 class="text-c1 font-bold">Student Name:&nbsp;</h4>
+          <p id="student-name">Jocarl Basco</p>
+        </div>
+        <div class="flex mb-4">
+          <h4 class="text-c1 font-bold">Student Number:&nbsp;</h4>
+          <p id="student-number">Jocarl Basco</p>
+        </div>
+        <div id="columnChartContainer" class="w-full col-span-2"></div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative"></div>
   </div>
 </div>
 
@@ -202,6 +199,8 @@
 
 {% endblock content %}
 
+<!-- SCRIPTS DATA -->
+
 <!----------------- SCRIPTS ----------------->
 {% block script %}
 
@@ -213,11 +212,11 @@
     student_name,
     student_number
   ) {
-    // console log all student detail;s
-
     const response = await fetch(
       `${api_base_url}/student/performance/${student_id}`
     );
+
+    console.log('response: ', response);
 
     if (!response.ok) {
       throw new Error(
@@ -225,79 +224,147 @@
       );
     }
     const data_performance = await response.json();
-    console.log('data_performance: ', data_performance);
 
     displayPerformance(data_performance, student_name, student_number);
   }
 
+  // JavaScript function to close the modal
+
   function displayPerformance(data_performance, student_name, student_number) {
-    if (data_performance) {
-      var chartData = [...data_performance];
+    try {
+      if (data_performance && data_performance.length > 0) {
+        console.log('NOT ERROR');
+        var chartData = [...data_performance];
 
-      var chart = new ej.charts.Chart({
-        primaryXAxis: {
-          title: 'Year',
-          minimum: data_performance[data_performance.length - 1].Year - 1,
-          maximum: data_performance[0].Year + 1,
-          interval: 1,
-        },
-        primaryYAxis: {
-          minimum: 20,
-          maximum: 100,
-          interval: 20,
-          title: 'Grade',
-          labelFormat: '{value}',
-        },
-        series: [
-          {
-            dataSource: chartData.filter((data) => data.Semester === 1),
-            xName: 'Year',
-            yName: 'Grade',
-            name: '1st Semester',
-            type: 'Column',
-            fill: '#6376EB',
+        var chart = new ej.charts.Chart({
+          primaryXAxis: {
+            title: 'Year',
+            minimum: data_performance[data_performance.length - 1].Year - 1,
+            maximum: data_performance[0].Year + 1,
+            interval: 1,
           },
-          {
-            dataSource: chartData.filter((data) => data.Semester === 2),
-            xName: 'Year',
-            yName: 'Grade',
-            name: '2nd Semester',
-            type: 'Column',
-            fill: '#5EEE82',
+          primaryYAxis: {
+            minimum: 20,
+            maximum: 100,
+            interval: 20,
+            title: 'Grade',
+            labelFormat: '{value}',
           },
-          {
-            dataSource: chartData.filter((data) => data.Semester === 3),
-            xName: 'Year',
-            yName: 'Grade',
-            name: 'Summer Term',
-            type: 'Column',
-            fill: '#29BAF2',
+          series: [
+            {
+              dataSource: chartData.filter((data) => data.Semester === 1),
+              xName: 'Year',
+              yName: 'Grade',
+              name: '1st Semester',
+              type: 'Column',
+              fill: '#6376EB',
+            },
+            {
+              dataSource: chartData.filter((data) => data.Semester === 2),
+              xName: 'Year',
+              yName: 'Grade',
+              name: '2nd Semester',
+              type: 'Column',
+              fill: '#5EEE82',
+            },
+            {
+              dataSource: chartData.filter((data) => data.Semester === 3),
+              xName: 'Year',
+              yName: 'Grade',
+              name: 'Summer Term',
+              type: 'Column',
+              fill: '#29BAF2',
+            },
+          ],
+          title: 'Performance',
+          tooltip: {
+            enable: true,
+            format:
+              'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
           },
-        ],
-        title: 'Performance',
-        // dataLabel: {
-        //   visible: true,
-        //   position: 'Top',
-        //   font: {
-        //     fontWeight: '600',
-        //   },
-        //   format: '${point.y}%',
-        // },
-        tooltip: {
-          enable: true,
-          format:
-            'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
-        },
-      });
+        });
 
-      // Render the chart
-      chart.appendTo('#columnChartContainer');
+        // Render the chart
+        chart.appendTo('#columnChartContainer');
+      } else {
+        // Get the current year
+        var currentYear = new Date().getFullYear();
+
+        // Create an array of 5 years below the current year
+        var yearArray = [];
+        for (let i = 0; i < 5; i++) {
+          yearArray.push(currentYear - i);
+        }
+
+        // Create chart data with default values for each year
+        var chartData = yearArray.map((year) => {
+          return {
+            Year: year,
+            Semester1: 0,
+            Semester2: 0,
+            SummerTerm: 0,
+          };
+        });
+
+        // Display chart without data or handle this case as needed
+        var chart = new ej.charts.Chart({
+          primaryXAxis: {
+            title: 'Year',
+            interval: 1,
+          },
+          primaryYAxis: {
+            minimum: 20,
+            maximum: 100,
+            interval: 20,
+            title: 'Grade',
+            labelFormat: '{value}',
+          },
+          series: [
+            {
+              dataSource: chartData,
+              xName: 'Year',
+              yName: 'Semester1',
+              name: '1st Semester',
+              type: 'Column',
+              fill: '#6376EB',
+            },
+            {
+              dataSource: chartData,
+              xName: 'Year',
+              yName: 'Semester2',
+              name: '2nd Semester',
+              type: 'Column',
+              fill: '#5EEE82',
+            },
+            {
+              dataSource: chartData,
+              xName: 'Year',
+              yName: 'SummerTerm',
+              name: 'Summer Term',
+              type: 'Column',
+              fill: '#29BAF2',
+            },
+          ],
+          title: 'Performance',
+          tooltip: {
+            enable: true,
+            format:
+              'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
+          },
+        });
+
+        // Render the chart
+        chart.appendTo('#columnChartContainer');
+      }
+    } catch (error) {
+      console.log('Cannot render');
     }
 
     document.getElementById('student-name').innerText = student_name;
     document.getElementById('student-number').innerText = student_number;
 
-    document.getElementById('myModal').classList.remove('hidden');
+    // document.getElementById('myModal').classList.remove('hidden');
+    showModal('myModal');
   }
 </script>
 
@@ -309,7 +376,7 @@
     console.log('INSIDE SUBMIT GRADES');
 
     const fileErrorElement = document.getElementById('grade-file-error');
-    const fileInput = document.getElementById('pdf-file');
+    const fileInput = document.getElementById('excelFile');
     const file = fileInput.files[0];
 
     if (!file) {
@@ -317,9 +384,9 @@
       return;
     }
 
-    if (!file.name.endsWith('.pdf')) {
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
       fileErrorElement.innerText =
-        'Invalid file type. Please select a PDF file.';
+        'Invalid file type. Please select an Excel file.';
       return;
     } else {
       fileErrorElement.innerText = '';
@@ -327,16 +394,17 @@
 
     // If file type is valid, proceed with the API request
     const formData = new FormData();
-    formData.append('pdf-file', file);
+    formData.append('excelFile', file);
 
     showModal('loadingModal');
     try {
-      fetch(`${api_base_url}/submit-grades`, {
+      fetch(`${api_base_url}/resubmit-grades`, {
         method: 'POST',
         body: formData,
       })
         .then((response) => response.json())
         .then((data) => {
+          // Handle API response here
           handleDataSubmitResults(
             data,
             fileInput,
@@ -362,12 +430,12 @@
       allowPaging: true,
       allowFiltering: true,
       allowSorting: true, // Enable sorting
+      allowExcelExport: true,
       pageSettings: { pageSize: 10 }, // Set the page size
 
       // rowData: json_class['ClassSubjectGrade'],
       toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
       allowExcelExport: true, // Enable Excel export feature
-      // allowPdfExport: true,
       columns: [
         {
           field: 'StudentNumber',
@@ -435,10 +503,6 @@
       if (args['item'].id === 'grid-upload-grade-error-list_excelexport') {
         grid.excelExport();
       }
-
-      if (args['item'].id === 'grid-upload-grade-error-list_pdfexport') {
-        grid.pdfExport();
-      }
     };
 
     // Render the grid
@@ -465,31 +529,60 @@
   // Assume your Flask route provides configuration data
   let gridConfig = {
     apiUrl: `${api_base_url}/class-subject-grade`,
+    updateUrl: `${api_base_url}/class-subject-grade/batch/update`,
     columns: [
+      {
+        field: 'StudentId',
+        // isPrimaryKey: true, // Set this as a primary key
+        visible: false, // Make this column not visible on the grid
+      },
+      {
+        field: 'ClassSubjectId',
+        isPrimaryKey: true, // Set this as a primary key
+        visible: false, // Make this column not visible on the grid
+      },
       {
         field: 'StudentNumber',
         headerText: 'Student Number',
         width: 150,
-        editType: 'dropdownedit', // Use dropdown filter for this column
+        allowEditing: false,
+        // editType: 'dropdownedit', // Use dropdown filter for this column
       },
-      { field: 'LastName', headerText: 'Last Name', width: 150 },
-      { field: 'FirstName', headerText: 'First Name', width: 150 },
-      { field: 'MiddleName', headerText: 'Middle Name', width: 150 },
+      {
+        field: 'LastName',
+        headerText: 'LastName',
+        width: 150,
+      },
+      {
+        field: 'FirstName',
+        headerText: 'FirstName',
+        width: 150,
+        allowEditing: false,
+      },
+      {
+        field: 'MiddleName',
+        headerText: 'MiddleName',
+        width: 150,
+        allowEditing: false,
+      },
       {
         field: 'Class',
         headerText: 'Section Code',
         width: 150,
+        allowEditing: false,
         // filterBarTemplate: classOptions, // Add a dropdown filter
       },
       {
         field: 'SubjectCode',
         headerText: 'SubjectCode',
         width: 150,
+        allowEditing: false,
       },
       {
         field: 'Semester',
         headerText: 'Semester',
         width: 120,
+        allowEditing: false,
       },
       {
         field: 'Grade',
@@ -500,6 +593,7 @@
         field: 'Batch',
         headerText: 'Batch',
         width: 120,
+        allowEditing: false,
         filterBarTemplate: {
           create: function (args) {
             var dd = document.createElement('input');
@@ -547,10 +641,9 @@
     // Create a DataManager with the provided API URL
     let data = new ej.data.DataManager({
       url: gridConfig.apiUrl,
-      adaptor: new ej.data.WebApiAdaptor(),
+      updateUrl: gridConfig.updateUrl,
+      adaptor: new ej.data.ODataAdaptor(),
     });
-
-    console.log('data.adaptor: ', data);
 
     // Create Syncfusion Grid using the provided configuration
     let grid = new ej.grids.Grid({
@@ -560,19 +653,18 @@
       allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
-      toolbar: ['ExcelExport'], // Add the ExcelExport button to the toolbar
-      allowExcelExport: true, // Enable Excel export feature
+      editSettings: { allowEditing: true, mode: 'Batch' },
+      toolbar: ['ExcelExport', 'Update', 'Cancel'], // Add the ExcelExport button to the toolbar
+      header: true, // Include headers in the exported Excel file
       pageSettings: { pageSize: 10, totalRecordsCount: 10 },
       beforeDataBound: function (args) {
         // If args action type is filter then go to page 1
-
+        // Access the data returned from the server
+        console.log('Before Data bound:', args);
         if (args.actionArgs.requestType === 'filtering') {
           grid.goToPage(1);
         }
         // RUn the adaptor
-
-        // Access the data returned from the server
-        console.log('Data returned from server:', args);
       },
 
       actionBegin: function (args) {
@@ -586,11 +678,29 @@
           // Go to page 1
           grid.goToPage(1);
         }
+
+        if (args.requestType === 'save' && args.action === 'edit') {
+          console.log('HERE IN SAVE');
+          actionComplete(args);
+        }
+      },
+
+      actionComplete: function (args) {
+        console.log('ARGS COMPLETE: ', args);
+        if (args.requestType === 'beginEdit') {
+          console.log('Editing started completed');
+        } else if (args.requestType === 'save') {
+          console.log('Editing saved completed');
+        } else if (args.requestType === 'cancel') {
+          console.log('Editing cancelled completed');
+        }
       },
     });
     grid.toolbarClick = function (args) {
       if (args['item'].id === 'grid_grades_excelexport') {
-        grid.columns[7].visible = false;
+        // log the items that will be exported
+        console.log('Items to be exported:', grid.dataSource);
+        // grid.columns[7].visible = false;
         grid.excelExport();
       }
     };
@@ -602,19 +712,19 @@
         if (cellElement) {
           const dataUid = cellElement.parentElement.getAttribute('data-uid');
           if (dataUid) {
-            console.log('BUTTON CLICK');
             const rowData = grid.getRowObjectFromUID(dataUid).data;
-
-            const full_name =
+            student_name =
               rowData.LastName +
               ', ' +
               rowData.FirstName +
               ' ' +
-              rowData.MiddleName;
+              rowData.MiddleName[0] +
+              '.';
+
             if (rowData) {
               fetchStudentPerformance(
                 rowData.StudentId,
-                full_name,
+                student_name,
                 rowData.StudentNumber
               );
             }

@@ -72,12 +72,10 @@ def getUniversityAdminData(str_univ_admin_id):
 
 def updateUniversityAdminData(str_univ_admin_id, number, residentialAddress):
     try:
-        print('number:', number)
         number = re.sub(r'\D', '', number)  # Remove non-digit characters
         number_pattern = re.compile(r'^09\d{9}$')
 
         if not number_pattern.match(number):
-            print("ERROR HSADSAD")
             return {"type": "mobile", "status": 400}
 
         if residentialAddress is None or residentialAddress.strip() == "":
@@ -216,7 +214,6 @@ def getOverallCoursePerformance():
             CourseGrade.Batch, Course.CourseId
         ).all()
 
-        print('data_course_grade: ', data_course_grade)
         list_course = []
 
         if data_course_grade:
@@ -240,8 +237,6 @@ def getOverallCoursePerformance():
 
             # Convert the data into a list of dictionaries
             formatted_data = list(course_year_grades.values())
-            print('formatted_data: ', formatted_data)
-            print('list_course: ', list_course)
             return jsonify({'success': True, 'list_course': list_course, 'course_performance': formatted_data})
         else:
             return None
@@ -1703,7 +1698,6 @@ def processGradeSubmission(file):
         # Now you can access and manipulate the data in the DataFrame
         # For example, you can iterate through rows and access columns like this:
         for index, row in df.iterrows():
-            print("HERE")
             # Extract the values from the DataFrame
             student_number = row['Student Number'] # OK
             student_lastname = row['LastName']
@@ -3900,7 +3894,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                                     if data_student_class_subject_grade:
                                         for student_class_subject_grade in data_student_class_subject_grade:
                                             
-                                            
                                             current_student_id = student_class_subject_grade.Student.StudentId
                                             current_grade = student_class_subject_grade.StudentClassSubjectGrade.Grade
                                             # Get academic status
@@ -3921,7 +3914,7 @@ def finalizedGradesBatchSemester(batch_semester_id):
                                             if class_subject.Subject.IsNSTP:
                                                 # print("NSTP FOUND: ", current_student_id, student_class_subject_grade.Student.LastName, student_class_subject_grade.Student.FirstName)
                                                 # print("NSTP GRADE: ", class_subject.Subject.SubjectCode, current_grade)
-
+                                                dict_grade_data_list['StudentClassSubjectGrade'].append(current_grade)
                                                 found_entry = next((entry for entry in student_class_grade_list if entry["StudentId"] == current_student_id), None)
                                                 
                                                 # Check if current grade < 2.75 then set the  variable lister 0
@@ -4028,6 +4021,7 @@ def finalizedGradesBatchSemester(batch_semester_id):
                                     })
                                     # print("UPDATING LISTER: ", data['Lister'])
                                 else:
+                                    print("NEW STUDENT CLASS GRADE OCCUR")
                                     # Create a student_class_grade
                                     new_student_class_grade = StudentClassGrade(
                                         StudentId = data['StudentId'],
@@ -4072,7 +4066,6 @@ def finalizedGradesBatchSemester(batch_semester_id):
                                     elif found_entry['Lister'] == 2:
                                         # Print president
                                         data['DeansLister'] += 1
-                                
                                 else:
                                     print("NOT FOUND")
                                     
@@ -4080,7 +4073,9 @@ def finalizedGradesBatchSemester(batch_semester_id):
                             # Check if class_subject_grade is existing
                             class_subject_grade = db.session.query(ClassSubjectGrade).filter_by(ClassSubjectId = data['ClassSubjectId']).first()
                             # If yes update it with new values
+                            print("\n", data)
                             if class_subject_grade:
+                                
                                 db.session.query(ClassSubjectGrade).filter_by(ClassSubjectId = data['ClassSubjectId']).update({
                                     'Grade': data['StudentClassSubjectGrade'],
                                     'Passed': data['Passed'],

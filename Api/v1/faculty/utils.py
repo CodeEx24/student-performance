@@ -9,6 +9,10 @@ from flask import session,  jsonify
 import pandas as pd
 
 from static.js.utils import convertGradeToPercentage, checkStatus
+import PyPDF2
+import re
+import pdfplumber
+
 
 def getCurrentUser():
     current_user_id = session.get('user_id')
@@ -1383,7 +1387,182 @@ def processGradeSubmission(file):
     except Exception as e:
         return jsonify({'error': 'An error occurred while processing the file'}), 500
 
+def processGradePDFSubmission(file, header_names):
+    try:
+        # Course, Subject Code, Year, Semester, and Batch
+        # Open the PDF file using pdfplumber
+        with pdfplumber.open(file) as pdf:
+            # Initialize table data list
+            table_data = []
+            list_error = []
+            is_some_submitted = False
+            # Read the pdf content except table
+            pdf_val = ''
+            
+            # Get 1st page only
+            first_page = pdf.pages[0]
+            
+            # Extract text from the pdf
+            pdf_val += first_page.extract_text()
+            pdf_content = pdf_val.split('\n')[0:4]
+            
+            # Initialize variables
+            data = {
+                "Subject": '',
+                "Professor": '',
+                "Section": '',
+                "Semester": '',
+                "Batch": '',
+                "Year": '',
+                "CourseCode": ''
+            }
 
+            # Iterate through each line in pdf_content
+            for line in pdf_content:
+                # Check if the line contains information about Subject, Professor, Section, Semester, or Batch
+                if 'Subject:' in line and 'Professor' in line:
+                    data['Subject'] = line.split('Subject: ')[1].split(' Professor:')[0]
+                    data['Professor'] = line.split('Subject: ')[1].split(' Professor:')[1]
+                elif 'Section:' in line and 'Semester' in line:
+                    data['CourseCode'] = line.split('Section: ')[1].split(' Semester:')[0].split(' ')[0]
+                    data['Year'] = int(line.split('Section: ')[1].split(' Semester:')[0].split(' ')[1].split('-')[0])
+                    data['Section'] = int(line.split('Section: ')[1].split(' Semester:')[0].split(' ')[1].split('-')[1])
+                    
+                    if line.split('Section: ')[1].split(' Semester: ')[1] == '1st Semester':
+                        data['Semester'] = 1
+                    elif line.split('Section: ')[1].split(' Semester: ')[1] == '2nd Semester':
+                        data['Semester'] = 2
+                    else:
+                        data['Semester'] = 3
+                elif 'Batch:' in line:
+                    data['Batch'] = int(line.split('Batch: ')[1])
+         
+            # Query the StudentClassSubject
+            class_subject = (
+                db.session.query(
+                    ClassSubject, Subject, Class, Course, Metadata
+                )
+                .join(Class, Class.ClassId == ClassSubject.ClassId)
+                .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+                .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+                .join(Course, Course.CourseId == Metadata.CourseId)
+                .filter(Course.CourseCode == data['CourseCode'], Subject.SubjectCode == data['Subject'], Metadata.Year == data['Year'], Metadata.Semester == data['Semester'], Metadata.Batch == data['Batch'], Class.Section == data['Section'])
+                .order_by(desc(Metadata.Year), desc(Class.Section), desc(Metadata.Batch))
+                .first()
+            )
+            
+            print('class_subject: ', class_subject)
+            
+                
+            # Iterate through each page of the PDF
+            for page in pdf.pages:
+                # Extract tables from the page
+                tables = page.extract_tables()
+
+                if not tables:
+                    return jsonify({'error': 'No data found in the table'}), 400
+                
+                print('\n')
+                # Iterate through each table on the page
+                for table in tables:
+                    # Iterate through each row in the table
+                    for row in table:
+                        print('row: ', row)
+                        
+                        if row[0] == 'Student Number':
+                            continue
+                        
+                        # Find the StudentClassSubjectGrade
+                        student_class_subject_grade = (
+                            db.session.query(
+                                StudentClassSubjectGrade, Student, ClassSubject
+                            )
+                            .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+                            .join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
+                            .filter(StudentClassSubjectGrade.ClassSubjectId == class_subject.ClassSubject.ClassSubjectId, Student.StudentNumber == row[0])
+                            .first()
+                        )
+                        
+                        if student_class_subject_grade:
+                            #######################################################################################
+                            if(class_subject.Class.IsGradeFinalized==False):
+                                if row[5] == 'INCOMPLETE':
+                                    print("INCOMPLETE")
+                                    # Update the Class isGradeFinalized to False
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = 0
+                                    # Set AcademicStatus to 3
+                                    student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 3
+                                    db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
+                                elif row[5] == "PASSED":
+                                    print("PASSED")
+                                    # Update the Class isGradeFinalized to False
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = int(row[4])
+                                    # Save only but dont commit in database
+                                    db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
+                                else:
+                                    # Set Academic Status to 4
+                                    student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 4
+                                    # Update the Class isGradeFinalized to False
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = int(row[4])
+                                    # Save only but dont commit in database
+                                    db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
+                                is_some_submitted = True
+                            else:
+                                # Append the object to list_finalized_grade
+                                list_error.append({
+                                    "StudentNumber": row[0],
+                                    "LastName": row[1],
+                                    "FirstName": row[2],
+                                    "MiddleName": row[3],
+                                    "SectionCode": data['CourseCode'] + ' ' + str(data['Year']) + '-' + str(data['Section']),
+                                    "SubjectCode": data['Subject'],
+                                    "Semester": data['Semester'],
+                                    "Grade": int(row[4]),
+                                    "Batch": data['Batch'],
+                                    "Error": "Grade has been finalized already in class"
+                                })
+                            #######################################################################################
+ 
+                        else:
+                            # list_error
+                            list_error.append({
+                                "StudentNumber": row[0],
+                                "LastName": row[1],
+                                "FirstName": row[2],
+                                "MiddleName": row[3],
+                                "SectionCode": data['CourseCode'] + ' ' + str(data['Year']) + '-' + str(data['Section']),
+                                "SubjectCode": data['Subject'],
+                                "Semester": data['Semester'],
+                                "Grade": int(row[4]),
+                                "Batch": data['Batch'],
+                                "Error": "Student does not exist in the class"
+                            })
+                            
+                        # If all data is updated successfully then commit the data
+            db.session.commit()
+        
+            if list_error and is_some_submitted:
+                return jsonify({'warning': 'Some data cannot be updated', 'errors': list_error}), 400
+            elif list_error and not is_some_submitted:
+                return jsonify({'error': 'All data are already finalized or not existing', 'errors': list_error}), 400
+            else:
+                return jsonify({'result': 'File uploaded and data processed successfully'}), 200
+
+                            
+
+            # Check if any table data was extracted
+            
+
+            # Return the extracted table data
+            
+            # Remote the first data in table_data
+            table_data.pop(0)
+            # print('table_data:  ',table_data)
+            return jsonify({'table_data': table_data}), 200
+
+    except Exception as e:
+        print("ERROR: ", e)
+        return jsonify({'error': 'An error occurred while processing the file'}), 500
 # def getAllClassAverage(str_teacher_id):
 #     try:
 #         current_year = datetime.datetime.now().year

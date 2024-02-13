@@ -471,17 +471,92 @@
 
     <script>
       // Opening specific Modal
-      function showModal(elemetId) {
-        const loadingModal = document.getElementById(elemetId);
+      function showModal(elementId) {
+        const loadingModal = document.getElementById(elementId);
         loadingModal.classList.add('flex');
         loadingModal.classList.remove('hidden');
       }
 
       // Closing specific Modal
-      function closeModal(elemetId) {
-        const loadingModal = document.getElementById(elemetId);
+      function closeModal(elementId) {
+        const loadingModal = document.getElementById(elementId);
         loadingModal.classList.add('hidden');
         loadingModal.classList.remove('flex');
+      }
+
+      // Adding Data in the Grids
+      function handleAddData(elementId, data) {
+        const grid = document.getElementById(elementId).ej2_instances[0];
+        // Refresh the grid
+        grid.refresh();
+      }
+
+      function closeModalError(modalElementId, listElementId) {
+        var gridErrorList = document.getElementById(listElementId);
+
+        while (gridErrorList.firstChild) {
+          gridErrorList.removeChild(gridErrorList.firstChild);
+        }
+
+        closeModal(modalElementId);
+      }
+
+      // Handling for results of submission of data
+      function handleDataSubmitResults(
+        data,
+        fileInput,
+        displayData,
+        ModalId,
+        gridId = ''
+      ) {
+        console.log('data: ', data);
+        if (data.result) {
+          console.log('data.result: ', data.result);
+          if (gridId != '') {
+            handleAddData(gridId, data);
+          }
+          notyf.success(data.result);
+          fileInput.value = '';
+        }
+
+        if (data.warning) {
+          if (gridId) {
+            handleAddData(gridId, data);
+          }
+          notyf.open({
+            type: 'warning',
+            message: data.warning,
+          });
+          fileInput.value = '';
+          displayData(data.errors);
+          showModal(ModalId);
+        }
+
+        if (data.error) {
+          if (data.errorLast) {
+            notyf.error(data.errorLast);
+            return;
+          }
+
+          notyf.error(data.error);
+          fileInput.value = '';
+          if (data.errors) {
+            displayData(data.errors);
+            showModal(ModalId);
+          }
+        }
+
+        if (data.errorException) {
+          notyf.error(data.errorException);
+        }
+      }
+
+      function onSuccess(message) {
+        notyf.success(message);
+      }
+
+      function onError(message) {
+        notyf.error(message);
       }
     </script>
 

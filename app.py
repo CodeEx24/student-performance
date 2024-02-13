@@ -371,6 +371,11 @@ def create_app():
     def systemAdminClients():
         return render_template('systemadmin/clients.html', system_admin_api_base_url=system_admin_api_base_url, current_page="clients")
     
+    @app.route('/system-admin/grades')
+    @role_required('systemAdmin')
+    def systemAdminGrades():
+        return render_template('systemadmin/grades.html', system_admin_api_base_url=system_admin_api_base_url, current_page="grades")
+    
     
     @app.route('/system-admin/class')
     @role_required('systemAdmin')

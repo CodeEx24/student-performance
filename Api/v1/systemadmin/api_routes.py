@@ -9,7 +9,7 @@ import time
 from werkzeug.security import gen_salt
 from oauth2 import authorization
 
-from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData, updatePassword
+from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData, updatePassword, getStudentClassSubjectGrade, processGradeResubmission, updateGradesStudent
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 import os
@@ -31,19 +31,21 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         print(email)
-        user = SystemAdmin.query.filter_by(Email=email).first()
-        print('user: ', user)
-        # Check for password
-        if user and check_password_hash(user.Password, password):
-            session['user_id'] = user.SysAdminId
-            print("LOGIN : ", user.SysAdminId)
-            session['user_role'] = 'systemAdmin'
-            user = current_user()
-            return jsonify({"success": True, "message": "Login successful"}), 200
-        else:
-            # Return
+        try:
+            user = SystemAdmin.query.filter_by(Email=email).first()
+            
+             # Check for password
+            if user and check_password_hash(user.Password, password):
+                session['user_id'] = user.SysAdminId
+                session['user_role'] = 'systemAdmin'
+                user = current_user()
+                return jsonify({"success": True, "message": "Login successful"}), 200
+            else:
+                # Return
+                return jsonify({"error": True, "message": "Invalid email or password"}), 401
+        except Exception as e:
+            print('An exception occurred')
             return jsonify({"error": True, "message": "Invalid email or password"}), 401
-        # return redirect('/')
     else:
         return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
 
@@ -292,8 +294,8 @@ def fetchFaculty():
 @system_admin_api.route('/students/update(<int:studentId>)', methods=['PUT'])
 @role_required('systemAdmin')
 def deleteStudent(studentId):
-    university_admin = getCurrentUser()
-    if university_admin:
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
         updated_data = request.json
 
         
@@ -308,8 +310,8 @@ def deleteStudent(studentId):
 @system_admin_api.route('/student/options', methods=['GET'])
 @role_required('systemAdmin')
 def fetchStudentDataOptions():
-    university_admin = getCurrentUser()
-    if university_admin:
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
         
         json_student_data_options = getStudentAddOptions()
 
@@ -325,8 +327,8 @@ def fetchStudentDataOptions():
 @role_required('systemAdmin')
 def updateFinalizedGrades(latestBatchSemesterId):
     print('latestBatchSemesterId: ', latestBatchSemesterId)
-    university_admin = getCurrentUser()
-    if university_admin:
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
         
         json_student_data_options = revertFinalizedGrades(latestBatchSemesterId)
 
@@ -338,12 +340,62 @@ def updateFinalizedGrades(latestBatchSemesterId):
         return render_template('404.html'), 404
 
 
+# Getting the student subject grade in a class
+@system_admin_api.route('/class-subject-grade/', methods=['GET'])
+@role_required('systemAdmin')
+def studentClassSubjectGrade():
+    systemAdmin = getCurrentUser()
 
+    if systemAdmin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+      
+        json_class_subject_grade = getStudentClassSubjectGrade(skip, top, order_by, filter)
 
+        if json_class_subject_grade:
+            return (json_class_subject_grade)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
 
+# Getting the student subject grade in a class
+@system_admin_api.route('/class-subject-grade/$batch', methods=['POST'])
+@role_required('systemAdmin')
+def resubmitStudentClassSubjectGrade():
+    print("HERE BATCG")
+    systemAdmin = getCurrentUser()
+    # Get all data in submission of frontend
+    if systemAdmin:
+        data = {'ClassSubjectId': 1343, 'LastName': 'Allena'}
+        # Get tje data of POST request in syncfusion grid
+        try:
+            
+            return jsonify({'sucess': True, 'result': data}), 200
+        except Exception as e:
+          print('An exception occurred: ', e)
+          return jsonify({'sucess': True, 'result': data }), 200
+    else:
+        return render_template('404.html'), 404
 
+# api_routes.py
+@system_admin_api.route('/resubmit-grades', methods=['POST'])
+@role_required('systemAdmin')
+def submitGrades():
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
+        # Check if the request contains a file named 'excelFile'
+        if 'excelFile' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
 
+        file = request.files['excelFile']
 
+        # Call the utility function to process the file
+        return processGradeResubmission(file)
+    else:
+        return render_template('404.html'), 404
 
 
 

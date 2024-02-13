@@ -1,16 +1,19 @@
 # api/api_routes.py
 from flask import Blueprint, jsonify, request, redirect, url_for, flash, session, render_template
-from models import Faculty
-
+from models import Faculty, db
+import secrets
+from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash
-from decorators.auth_decorators import role_required
+from decorators.auth_decorators import role_required, preventAuthenticated
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
-
-from .utils import getSubjectCount, getHighLowAverageClass, getAllClassAverageWithPreviousYear, getPassFailRates, getTopPerformerStudent, getStudentClassSubjectGrade, getAllClass, getClassPerformance, updateFacultyData, getFacultyData, updatePassword, getStudentPerformance, getCurrentUser, processGradeSubmission
+from werkzeug.security import generate_password_hash
+from flask_mail import Message
+from mail import mail  # Import mail from the mail.py module
+from .utils import getSubjectCount, getHighLowAverageClass, getAllClassAverageWithPreviousYear, getPassFailRates, getTopPerformerStudent, getStudentClassSubjectGrade, getAllClass, getClassPerformance, updateFacultyData, getFacultyData, updatePassword, getStudentPerformance, getCurrentUser, processGradeSubmission, processGradePDFSubmission
 
 import os
 
-
+faculty_api_base_url = os.getenv("FACULTY_API_BASE_URL")
 faculty_api = Blueprint('faculty_api', __name__)
 
 # Api/v1/faculty/api_routes.py
@@ -38,6 +41,76 @@ def login():
     else:
         return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
 
+
+# Step 4: Handle the form submission for requesting a password reset email
+@faculty_api.route('/reset_password', methods=['POST'])
+def forgotPassword():
+    data = request.get_json()
+    email = data.get('email')
+
+    # Check if email exists in the database
+    faculty = Faculty.query.filter_by(Email=email).first()
+
+    if faculty:
+        # Generate a secure token
+        token = secrets.token_hex(16)
+
+        # Save the token and its expiration time in the database
+        faculty.Token = token
+        faculty.TokenExpiration = datetime.now() + timedelta(minutes=30)
+        db.session.commit()
+
+        # Send the reset email
+        msg = Message('Password Reset Request', sender='your_email@example.com', recipients=[email])
+        msg.body = f"Please click the following link to reset your password: {url_for('faculty_api.resetPasswordConfirm', token=token, _external=True)}"
+        mail.send(msg)
+        flash('An email with instructions to reset your password has been sent.', 'info')
+        return jsonify({'message': 'An email with instructions to reset your password has been sent to email.'}),200
+    else:
+        return jsonify({'message': 'Invalid email'}), 400
+
+
+
+# Step 6: Create a route to render the password reset confirmation form
+@faculty_api.route('/reset_password_confirm/<token>', methods=['GET'])
+@preventAuthenticated
+def resetPasswordConfirm(token):
+    # Check if the token is valid and not expired
+    student = Faculty.query.filter_by(Token=token).first()
+    if student and student.TokenExpiration > datetime.now():
+        return render_template('student/reset_password_confirm.html', token=token, faculty_api_base_url=faculty_api_base_url)
+    else:
+        flash('Invalid or expired token.', 'danger')
+        return render_template('404.html')
+# student_api.py (continued)
+
+
+# Step 8: Handle the form submission for resetting the password
+@faculty_api.route('/reset_password_confirm/<token>', methods=['POST'])
+def resetPassword(token):
+    data = request.get_json()
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
+    
+    if new_password != confirm_password:
+        return jsonify({'message': 'Passwords do not match', 'status': 400})
+    else: 
+        # Check if the token is valid and not expired
+        student = Faculty.query.filter_by(Token=token).first()
+
+        if student and student.TokenExpiration > datetime.now():
+            # Update the password for the user in the database
+            student.Password = generate_password_hash(new_password)
+
+            # Clear the token and expiration
+            student.Token = None
+            student.TokenExpiration = None
+
+            db.session.commit()
+
+            return jsonify({'message': 'Password reset successfully', 'status': 200})
+        else:
+            return jsonify({'message': 'Invalid or expired token', 'status': 400})
 
 # ===================================================
 # TESTING AREA
@@ -260,13 +333,28 @@ def studentPerformance(id):
 @role_required('faculty')
 def submitGrades():
     # Check if the request contains a file named 'excelFile'
-    if 'excelFile' not in request.files:
+    if 'pdf-file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
-    file = request.files['excelFile']
+    file = request.files['pdf-file']
+    header_names = ['StudentNumber', 'LastName', 'FirstName', 'MiddleName', 'Grade', 'Remarks']
+
+    return processGradePDFSubmission(file, header_names)
+
+
+    # # Check if the request contains a file named 'excelFile'
+    # if 'pdf-file' not in request.files:
+    #     return jsonify({'error': 'No file part'}), 400
+
+    # file = request.files['pdf-file']
+    # print('PDF FILE: ', file)
+    # header_names = ['StudentNumber', 'Grade', 'SubjectCode', 'Year', 'Semester', 'Batch']
+    # grade = processGradePDFSubmission(file, header_names)
+    # print(grade)
+    # return grade
 
     # Call the utility function to process the file
-    return processGradeSubmission(file)
+    # return processGradeSubmission(file)
 
 
     # You can also perform additional processing on the uploaded file here.

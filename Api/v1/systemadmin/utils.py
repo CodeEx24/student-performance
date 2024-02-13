@@ -9,7 +9,7 @@ from datetime import date, datetime
 
 from flask import session, jsonify
 from static.js.utils import convertGradeToPercentage, checkStatus
-
+import pandas as pd
 from collections import defaultdict
 
 def getCurrentUser():
@@ -801,3 +801,400 @@ def revertFinalizedGrades(latestBatchSemesterId):
         db.session.rollback()
         # Handle the exception here, e.g., log it or return an error response
         return jsonify({'error': e})
+    
+
+def updateGradesStudent(updated_data):
+    try:
+        
+        print('updated_data: ', updated_data)
+        return jsonify({"success": True, "message": "Successfully reverted the grades"}), 400
+        
+    except Exception as e:
+        print("ERROR: ", e)
+        db.session.rollback()
+        # Handle the exception here, e.g., log it or return an error response
+        return jsonify({'error': e})
+    
+
+
+def getStudentClassSubjectGrade(skip, top, order_by, filter):
+    try:
+        # Initial query
+        query = (
+            db.session.query(
+                ClassSubject,
+                StudentClassSubjectGrade,
+                Subject,
+                Class,
+                Metadata,
+                Course,
+                Student
+            )
+            .join(StudentClassSubjectGrade, StudentClassSubjectGrade.ClassSubjectId == ClassSubject.ClassSubjectId)
+            .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+            .join(Class, Class.ClassId == ClassSubject.ClassId)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+            .join(Course, Course.CourseId == Metadata.CourseId)
+            .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+            # .filter(ClassSubject.FacultyId == str_teacher_id, Class.Batch >= current_year-4)
+        )
+
+        # Parse and apply filters
+        
+        filter_conditions = []
+        # Split filter string by 'and'
+        # append the str_teacher_id
+        # filter_conditions.append(
+        #     ClassSubject.FacultyId == str_teacher_id
+        # )
+
+        if filter:
+            filter_parts = filter.split(' and ')
+            for part in filter_parts:
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(")[3].split("),'")[0]
+                    value = part.split("'")[1]
+                    column_str = None
+                    
+                    if column_name.strip() == 'Class':
+                        split_values = value.split(' ')
+                        
+                        if len(split_values) >= 2:
+                            # Check split values if have a number
+                            if any(char.isdigit() for char in split_values[-1]):
+                                batch_section = split_values[-1]
+                                course_code = ' '.join(split_values[:-1])
+                                column_arr_1 = getattr(Course, 'CourseCode')
+                                year, section = None, None
+                                
+                                if '-' in batch_section:
+                                    year, section = batch_section.split('-')
+                                    if section:
+                                        column_arr_3 = getattr(Class, 'Section')
+                                    column_arr_2 = getattr(Metadata, 'Year')
+                                else:
+                                    year = batch_section
+                                    column_arr_2 = getattr(Metadata, 'Year')
+                            else:
+                                course_code = ' '.join(split_values)
+                                year, section = None, None
+                                column_arr_1 = getattr(Course, 'CourseCode')
+
+                            # Append column_arr_1
+                            filter_conditions.append(
+                                func.lower(column_arr_1).like(f'%{split_values[0]}%')
+                            )
+                            # Check if year then append
+                            if year:
+                                filter_conditions.append(Metadata.Year == int(year))
+                                
+                            if section:
+                                filter_conditions.append(
+                                    Class.Section == int(section)
+                                )
+                            continue
+                        elif len(split_values) == 1:
+                            course_code, year, section = None, None, None
+                            # check if value contains "-" and digit in it
+                            if '-' in value and any(x.isdigit() for x in value):
+                                year, section = value.split('-')
+                                column_arr_2 = Metadata.Year
+                                column_arr_3 = Class.Section
+                            else:
+                                course_code = value
+                                column_arr_1 = getattr(Course, 'CourseCode')
+                            
+                            if course_code:
+                                filter_conditions.append(column_arr_1.like(f'%{course_code.upper()}%'))
+
+                            if year:
+                                filter_conditions.append(
+                                    column_arr_2 == int(year)
+                                )
+                            
+                            if section:
+                                filter_conditions.append(
+                                    column_arr_3 == int(section)
+                                )
+                            continue
+                    elif column_name.strip() == 'LastName':
+                        column_str = getattr(Student, 'LastName')
+                    elif column_name.strip() == 'FirstName':
+                        column_str = getattr(Student, 'FirstName')
+                    elif column_name.strip() == 'MiddleName':
+                        column_str = getattr(Student, 'MiddleName')
+                    elif column_name.strip() == 'StudentNumber':
+                        column_str =  getattr(Student, 'StudentNumber')     
+                    elif column_name.strip() == 'SubjectCode':
+                        column_str = getattr(Subject, 'SubjectCode')
+                 
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).like(f'%{value}%')
+                        )
+                else:
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    
+                    column_num = None
+                    int_value = value.strip(')')
+                    
+                    # Check for column name 
+
+                    if column_name.strip() == 'Grade':
+                        column_num = StudentClassSubjectGrade.Grade
+                    elif column_name.strip() == 'Batch':
+                        column_num = Metadata.Batch
+                    elif column_name.strip() == 'Semester':
+                        column_num = Metadata.Semester
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                # END OF ELSE PART
+            # END OF FOR LOOP
+                
+        
+        # Apply all filter conditions with 'and'
+  
+        filter_query = query.filter(and_(*filter_conditions))
+
+ 
+        # Apply sorting logic
+        if order_by:
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'StudentNumber':
+                order_attr = getattr(Student, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == "LastName":
+                order_attr = getattr(Student, 'LastName')
+            elif order_by.split(' ')[0] == "FirstName":
+                order_attr = getattr(Student, 'FirstName')
+            elif order_by.split(' ')[0] == "MiddleName":
+                order_attr = getattr(Student, 'MiddleName')
+            elif order_by.split(' ')[0] == 'Grade':
+                order_attr = getattr(StudentClassSubjectGrade, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'SubjectCode':
+                order_attr = getattr(Subject, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'Batch':
+                order_attr = getattr(Metadata, order_by.split(' ')[0])
+            elif order_by.split(' ')[0] == 'Semester':
+                order_attr = getattr(Metadata, order_by.split(' ')[0])
+            else:
+
+                if ' ' in order_by:
+                    order_query = filter_query.order_by(desc(Course.CourseCode), desc(Metadata.Year), desc(Class.Section))
+                
+                else:
+                    order_query = filter_query.order_by(Course.CourseCode, Metadata.Year, Class.Section)
+                # close the if_order by and go to next line of it
+
+            # Check if order_by contains space
+            if not order_by.split(' ')[0] == "Class":
+                if ' ' in order_by:
+                    order_query = filter_query.order_by(desc(order_attr))
+                else:
+                    order_query = filter_query.order_by(order_attr)
+        else:
+            # Apply default sorting
+            order_query = filter_query.order_by(
+                desc(Course.CourseCode), desc(Metadata.Batch), desc(Metadata.Year), desc(Metadata.Semester), Student.LastName
+            )
+
+        # Check if order_query and filter query exists:
+        total_count = order_query.count()
+        result_all = order_query.offset(skip).limit(top).all()
+       
+        if result_all:
+            list_data_class_subject_grade = []
+            unique_classes = set()
+     
+            for class_subject_grade in result_all:
+               
+                class_name = f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Metadata.Year}-{class_subject_grade.Class.Section}"
+
+                dict_class_subject_grade = {
+                    'ClassSubjectId': class_subject_grade.ClassSubject.ClassSubjectId ,
+                    'StudentId': class_subject_grade.Student.StudentId,
+                    'StudentNumber': class_subject_grade.Student.StudentNumber,
+                    'LastName': class_subject_grade.Student.LastName,
+                    'FirstName': class_subject_grade.Student.FirstName,
+                    'MiddleName': class_subject_grade.Student.MiddleName,
+                    'Class': class_name,
+                    'Batch': class_subject_grade.Metadata.Batch,
+                    'Semester': class_subject_grade.Metadata.Semester,
+                    'Grade': class_subject_grade.StudentClassSubjectGrade.Grade,
+                    'SubjectCode': class_subject_grade.Subject.SubjectCode
+                }
+
+                list_data_class_subject_grade.append(dict_class_subject_grade)
+                unique_classes.add(class_name)
+
+            sorted_unique_classes = sorted(unique_classes)
+      
+            # Return the list of class grades, the classes, and pagination information
+            return jsonify({'result':list_data_class_subject_grade, 'count': total_count, 'classes': list(sorted_unique_classes)})
+        else:
+            return {'ClassSubjectGrade': [], 'Classes': [], 'currentPage': 1, 'totalPages': 0, 'totalItems': 0}
+
+    except Exception as e:
+        print("ERROR: ", e)
+        # Log the exception or handle it appropriately
+        return None
+    
+
+
+
+def processGradeResubmission(file):
+    try:
+        # Check if the file is empty
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        # Check file extension
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+
+        # Read the Excel file into a DataFrame
+        df = pd.read_excel(file)
+        
+        list_error = []
+        is_some_submitted = False
+        # Now you can access and manipulate the data in the DataFrame
+        # For example, you can iterate through rows and access columns like this:
+        for index, row in df.iterrows():
+            # Extract the values from the DataFrame
+            student_number = row['Student Number'] # OK
+            student_lastname = row['LastName']
+            student_firstname = row['FirstName']
+            student_middlename = row['MiddleName']
+            section_code = row['Section Code']
+            subject_code = row['SubjectCode'] # OK
+            semester = row['Semester'] # OK
+            grade = row['Grade']
+            batch = row['Batch'] # OK
+            
+            # print full name
+            print(f"{student_lastname}, {student_firstname} {student_middlename}")
+            # Split the section_code by the last space and keep the first part
+            course_code = section_code.rsplit(' ', 1)[0] 
+            
+            # Split the section_code by space, get the last part, and split it by hyphen '-' to extract year and section
+            year, section = section_code.split(' ')[-1].split('-')
+            # Now you can use the modified_section_code as needed in your code
+            student_data = (
+                db.session.query(Student,  StudentClassSubjectGrade, ClassSubject, Class, Subject, Course, Metadata)
+                .join(StudentClassSubjectGrade, StudentClassSubjectGrade.StudentId == Student.StudentId)
+                .join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
+                .join(Class, Class.ClassId == ClassSubject.ClassId)
+                .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+                .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+                .join(Course, Course.CourseId == Metadata.CourseId)
+                .filter(Student.StudentNumber == student_number, Metadata.Year == year, Class.Section == section, Metadata.Batch == batch, Metadata.Semester == semester,  Subject.SubjectCode == subject_code)
+                .order_by(desc(Student.LastName), desc(Metadata.Year), desc(Class.Section), desc(Metadata.Batch))
+                .first()
+            )
+            
+            if student_data:
+                # check if AcademicStatus student_data.StudentClassSubjectGrade is 3
+                if student_data.StudentClassSubjectGrade.AcademicStatus == 3:
+                    
+                    class_subject_grade = (
+                        db.session.query(ClassSubjectGrade)
+                        .filter(ClassSubjectGrade.ClassSubjectId == student_data.ClassSubject.ClassSubjectId)
+                        .first()
+                    )
+                    
+                    student_class_grade = (
+                        db.session.query(StudentClassGrade)
+                        .filter(StudentClassGrade.ClassId == student_data.Class.ClassId, StudentClassGrade.StudentId == student_data.Student.StudentId)
+                        .first()
+                    )
+                    
+                    class_grade = (
+                        db.session.query(ClassGrade)
+                        .filter(ClassGrade.ClassId == student_data.Class.ClassId)
+                        .first()
+                    )
+                    
+                    # Update the grade STUDENT CLASS SUBJECT GRADE UPDATE
+                    student_data.StudentClassSubjectGrade.Grade = grade
+                    student_data.StudentClassSubjectGrade.AcademicStatus = 1
+                    db.session.add(student_data.StudentClassSubjectGrade)
+                    # STUDENT CLASS GRADE UPDATE
+                    # Get student class grade
+                    
+                    student_class_average_grade = db.session.query(func.avg(StudentClassSubjectGrade.Grade)).\
+                        join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId).\
+                        join(Class, Class.ClassId == ClassSubject.ClassId).\
+                        filter(Class.ClassId == student_data.Class.ClassId, 
+                            StudentClassSubjectGrade.StudentId == student_data.Student.StudentId).\
+                        group_by(Class.ClassId).\
+                        scalar()
+
+                    print('student_class_grade.Grade: ', student_class_grade.Grade)
+                    # If student_class_grade is an instance of your ORM model, update its Grade attribute with the calculated average grade
+                    student_class_grade.Grade = round(float(student_class_average_grade), 2)
+                    db.session.add(student_class_grade)
+                    
+                                        
+                    print("HERE CHECKER")
+                    # Get average grade for StudentClassSUbjectGrade with the same ClassSubjectId
+                    class_subject_average_grade = db.session.query(func.avg(StudentClassSubjectGrade.Grade)).\
+                        join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId).\
+                        join(Class, Class.ClassId == ClassSubject.ClassId).\
+                        filter(Class.ClassId == student_data.Class.ClassId).\
+                        group_by(Class.ClassId).\
+                        scalar()
+                    
+                    class_subject_grade.Grade == round(float(class_subject_average_grade), 2)  
+                    class_subject_grade.Passed += 1
+                    class_subject_grade.Incomplete -= 1
+                    db.session.add(class_subject_grade)
+                    
+                    
+                    print('class_subject_average_grade: ', round(float(class_subject_average_grade), 2))
+                    
+                    # Get class grade through average of StudentClassGrade that has the same ClassId
+                    class_average_grade = db.session.query(func.avg(StudentClassGrade.Grade)).\
+                        join(Class, Class.ClassId == StudentClassGrade.ClassId).\
+                        filter(Class.ClassId == student_data.Class.ClassId, StudentClassGrade.Grade != 0).\
+                        group_by(Class.ClassId).\
+                        scalar()
+                    print('class_average_grade: ', round(float(class_average_grade), 2))
+                    class_grade.Grade = round(float(class_average_grade), 2) 
+                    db.session.add(class_grade)
+                    is_some_submitted = True
+                    db.session.commit()
+                else:
+                    db.session.rollback()
+                    list_error.append({
+                        "StudentNumber": student_number,
+                        "LastName": student_lastname,
+                        "FirstName": student_firstname,
+                        "MiddleName": student_middlename,
+                        "SectionCode": section_code,
+                        "SubjectCode": subject_code,
+                        "Semester": semester,
+                        "Grade": grade,
+                        "Batch": batch,
+                        "Error": "You cannot modify grade for this student"
+                    })
+                    
+        if list_error and is_some_submitted:
+            return jsonify({'warning': 'Some data cannot be updated', 'errors': list_error}), 400
+        elif list_error and not is_some_submitted:
+            return jsonify({'error': 'All data cannot be modified', 'errors': list_error}), 400
+        else:
+            return jsonify({'result': 'File uploaded and data processed successfully'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("ERROR: ", e)
+        return jsonify({'error': 'An error occurred while processing the file'}), 500
+    
