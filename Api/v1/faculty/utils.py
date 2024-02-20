@@ -9,7 +9,6 @@ from flask import session,  jsonify
 import pandas as pd
 
 from static.js.utils import convertGradeToPercentage, checkStatus
-import PyPDF2
 import re
 import pdfplumber
 
@@ -1451,7 +1450,8 @@ def processGradePDFSubmission(file, header_names):
                 .first()
             )
             
-            print('class_subject: ', class_subject)
+            if not class_subject:
+                return jsonify({'error': 'Class does not exist'}), 400
             
                 
             # Iterate through each page of the PDF

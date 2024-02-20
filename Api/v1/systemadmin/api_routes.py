@@ -13,6 +13,7 @@ from .utils import getCurrentUser, getClientList, getClientsData, getAllClassDat
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 import os
+import re 
 
 system_admin_api = Blueprint('system_admin_api', __name__)
 
@@ -28,13 +29,21 @@ def current_user():
 # @login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        print(email)
         try:
-            user = SystemAdmin.query.filter_by(Email=email).first()
+            email = request.form.get('email')
+            password = request.form.get('password')
             
-             # Check for password
+            if not email or not password:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
+
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+                return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+
+            user = SystemAdmin.query.filter_by(Email=email).first()
+                # Check for password
+            if not user:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
+                
             if user and check_password_hash(user.Password, password):
                 session['user_id'] = user.SysAdminId
                 session['user_role'] = 'systemAdmin'
@@ -46,8 +55,8 @@ def login():
         except Exception as e:
             print('An exception occurred')
             return jsonify({"error": True, "message": "Invalid email or password"}), 401
-    else:
-        return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
+    
+  
 
 
 # Changing the password of the user

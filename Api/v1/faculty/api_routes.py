@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash
 from flask_mail import Message
 from mail import mail  # Import mail from the mail.py module
 from .utils import getSubjectCount, getHighLowAverageClass, getAllClassAverageWithPreviousYear, getPassFailRates, getTopPerformerStudent, getStudentClassSubjectGrade, getAllClass, getClassPerformance, updateFacultyData, getFacultyData, updatePassword, getStudentPerformance, getCurrentUser, processGradeSubmission, processGradePDFSubmission
-
+import re
 import os
 
 faculty_api_base_url = os.getenv("FACULTY_API_BASE_URL")
@@ -20,26 +20,34 @@ faculty_api = Blueprint('faculty_api', __name__)
 # Define a function to get the current faculty
 
 
-@faculty_api.route('/login', methods=['GET', 'POST'])
+@faculty_api.route('/login', methods=['POST'])
 # @login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        teacher = Faculty.query.filter_by(Email=email).first()
-        if teacher and check_password_hash(teacher.Password, password):
-            # Successfully authenticated
-            print("SUCCESS LOGING")
-            session['user_id'] = teacher.FacultyId
+        try:
+            email = request.form['email']
+            password = request.form['password']
+            
+            if not email or not password:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
 
-            session['user_role'] = 'faculty'
-            return jsonify({"success": True, "message": "Login successful"}), 200
-        else:
-            # Return
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+                return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+            
+            teacher = Faculty.query.filter_by(Email=email).first()
+            if not teacher:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
+            
+            if teacher and check_password_hash(teacher.Password, password):
+                session['user_id'] = teacher.FacultyId
+                session['user_role'] = 'faculty'
+                return jsonify({"success": True, "message": "Login successful"}), 200
+            else:
+                return jsonify({"error": True, "message": "Invalid email or password"}), 401
+        except Exception as e:
+            print('An exception occurred')
             return jsonify({"error": True, "message": "Invalid email or password"}), 401
-        # return redirect('/')
-    else:
-        return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
+
 
 
 # Step 4: Handle the form submission for requesting a password reset email

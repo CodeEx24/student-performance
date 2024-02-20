@@ -9,7 +9,7 @@ from decorators.rate_decorators import login_decorator, resend_otp_decorator
 # FUNCTIONS IMPORT
 from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent
 import os
-
+import re
 
 university_admin_api = Blueprint('university_admin_api', __name__)
 
@@ -17,20 +17,31 @@ university_admin_api = Blueprint('university_admin_api', __name__)
 # @login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
-      
-        email = request.form['email']
-        password = request.form['password']
-        admin = UniversityAdmin.query.filter_by(Email=email).first()
-        if admin and check_password_hash(admin.Password, password):
-            session['user_id'] = admin.UnivAdminId
-            session['user_role'] = 'universityAdmin'
-            return jsonify({"success": True, "message": "Login successful"}), 200
-        else:
-            # Return
+        try:
+            email = request.form['email']
+            password = request.form['password']
+            
+            if not email or not password:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
+
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+                return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+            
+            admin = UniversityAdmin.query.filter_by(Email=email).first()
+            if not admin:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
+            
+            if admin and check_password_hash(admin.Password, password):
+                session['user_id'] = admin.UnivAdminId
+                session['user_role'] = 'universityAdmin'
+                return jsonify({"success": True, "message": "Login successful"}), 200
+            else:
+                # Return
+                return jsonify({"error": True, "message": "Invalid email or password"}), 401
+            # return redirect('/')
+        except Exception as e:
+            print('An exception occurred')
             return jsonify({"error": True, "message": "Invalid email or password"}), 401
-        # return redirect('/')
-    else:
-        return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
 
 # ===================================================
 # TESTING AREA

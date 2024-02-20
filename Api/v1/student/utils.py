@@ -410,9 +410,47 @@ def updateStudentData(str_student_id, number, residentialAddress):
 
 def updatePassword(str_student_id, password, new_password, confirm_password):
     try:
-        data_student = db.session.query(Student).filter(
-            Student.StudentId == str_student_id).first()
+        data_student = db.session.query(Student).filter(Student.StudentId == str_student_id).first()
 
+  
+        password_validator = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$'
+
+        error = False
+        errorList = []
+        if not password:
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must not be invalid"})
+        elif len(password) < 8:
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must be 8 characters long"})
+        elif not re.match(password_validator, password):
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must contain a number and characters uppercase and lowercase"})
+
+        if not new_password:
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must not be invalid"})
+        elif len(new_password) < 8:
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must be 8 characters long"})
+        elif not re.match(password_validator, new_password):
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must contain a number and characters uppercase and lowercase"})
+
+        if not confirm_password:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must not be invalid"})
+        elif len(confirm_password) < 8:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must be 8 characters long"})
+        elif not re.match(password_validator, confirm_password):
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must contain a number and characters uppercase and lowercase"})
+
+        if error:
+            return {"error": True, 'errorList': errorList, "status": 400}
+            
+        
         if data_student:
             # Assuming 'password' is the hashed password stored in the database
             hashed_password = data_student.Password
@@ -426,7 +464,7 @@ def updatePassword(str_student_id, password, new_password, confirm_password):
                 return {"message": "Password changed successfully", "status": 200}
 
             else:
-                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 400}
+                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 401}
         else:
             return {"message": "Something went wrong", "status": 404}
 

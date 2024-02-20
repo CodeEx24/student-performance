@@ -34,6 +34,7 @@
           name="email"
           type="email"
           placeholder="username@gmail.com"
+          onchange="validateEmail()"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
         />
       </div>
@@ -50,6 +51,7 @@
           name="password"
           type="password"
           placeholder="password"
+          onchange="validatePassword()"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
         />
       </div>
@@ -101,6 +103,23 @@
 
       const formData = new FormData(event.target);
       const apiUrl = '/api/v1/system-admin/login';
+
+      const emailError = document.getElementById('email-error');
+      const passwordError = document.getElementById('password-error');
+      const email = formData.get('email');
+      const password = formData.get('password');
+
+      if (!email) {
+        emailError.textContent = 'Email is required';
+      }
+
+      if (!password) {
+        passwordError.textContent = 'Password is required';
+      }
+
+      if (emailError.textContent !== '' || passwordError.textContent !== '') {
+        return;
+      }
 
       fetch(apiUrl, {
         method: 'POST',

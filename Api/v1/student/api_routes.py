@@ -21,7 +21,7 @@ from flask_mail import Message
 from mail import mail  # Import mail from the mail.py module
 import secrets
 from datetime import datetime, timedelta
-
+import re
 
 student_api_base_url = os.getenv("STUDENT_API_BASE_URL")
 student_api = Blueprint('student_api', __name__)
@@ -35,27 +35,31 @@ MAX_LOGIN_ATTEMPTS = 3
 @student_api.route('/login', methods=['POST'])
 # @login_decorator("Too many login attempts. Please try again later")
 def login():
-    print("HERE")
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        # Print email and pass
-        # create_app.sayHello()
-        student = Student.query.filter_by(Email=email).first()
-        if student and check_password_hash(student.Password, password):
-            # Successfully authenticated
-            # access_token = create_access_token(identity=student.StudentId)
-            # refresh_token = create_refresh_token(identity=student.StudentId)
-            session['user_id'] = student.StudentId
-            session['user_role'] = 'student'
+        try:
+            email = request.form['email']
+            password = request.form['password']
+            
+            if not email or not password:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
 
-            return jsonify({"success": True, "message": "Login successful"}), 200
-        else:
-            # Return
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+                return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+            
+            student = Student.query.filter_by(Email=email).first()
+            if not student:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
+            
+            if student and check_password_hash(student.Password, password):
+                session['user_id'] = student.StudentId
+                session['user_role'] = 'student'
+                return jsonify({"success": True, "message": "Login successful"}), 200
+            else:
+                return jsonify({"error": True, "message": "Invalid email or password"}), 401
+        except Exception as e:
+            print('An exception occurred')
             return jsonify({"error": True, "message": "Invalid email or password"}), 401
-        # return redirect('/')
-    else:
-        return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
+
 
 # @student_api.route('/verify-otp', methods=['POST'])
 # def verifyOtp():
@@ -125,8 +129,19 @@ def forgotPassword():
     data = request.get_json()
     email = data.get('email')
 
+    if not email:
+        return jsonify({'error': True, 'message': 'Please input an email'}), 401
+
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+        return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+    
     # Check if email exists in the database
     student = Student.query.filter_by(Email=email).first()
+
+    if not student:
+        # Intended so the intruder cannot be able to know whether email is registered or not
+        return jsonify({'success': True, 'message': 'An email with instructions to reset your password has been sent to email.'}),200
+        # return jsonify({'error': True, 'message': 'Email is invalid'}), 400
 
     if student:
         # Generate a secure token
@@ -142,9 +157,9 @@ def forgotPassword():
         msg.body = f"Please click the following link to reset your password: {url_for('student_api.resetPasswordConfirm', token=token, _external=True)}"
         mail.send(msg)
         flash('An email with instructions to reset your password has been sent.', 'info')
-        return jsonify({'message': 'An email with instructions to reset your password has been sent to email.'}),200
+        return jsonify({'success': True, 'message': 'An email with instructions to reset your password has been sent to email.'}),200
     else:
-        return jsonify({'message': 'Invalid email'}), 400
+        return jsonify({'error': True, 'message': 'Email is invalid'}), 400
 
 
 # Step 6: Create a route to render the password reset confirmation form
@@ -167,6 +182,19 @@ def resetPassword(token):
     data = request.get_json()
     new_password = data.get('new_password')
     confirm_password = data.get('confirm_password')
+    
+    # Check new password if length is 8
+    if len(new_password) < 8:
+        return jsonify({'message': 'New Password must be at least 8 characters', 'status': 400})
+    
+    if len(confirm_password) < 8:
+        return jsonify({'message': 'Confirm Password must be at least 8 characters', 'status': 400})
+    
+    if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$', new_password):
+        return jsonify({'message': 'New Password must contain uppercase, lowercase characters and number', 'status': 400})
+    
+    if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$', confirm_password):
+        return jsonify({'message': 'New Password must contain uppercase, lowercase characters and number', 'status': 400})
     
     if new_password != confirm_password:
         return jsonify({'message': 'Passwords do not match', 'status': 400})

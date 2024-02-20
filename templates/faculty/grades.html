@@ -337,13 +337,17 @@
       })
         .then((response) => response.json())
         .then((data) => {
-          handleDataSubmitResults(
-            data,
-            fileInput,
-            displaySubmitErrorUpdatedGrades,
-            'uploadGradeErrorModal',
-            'grid_grades'
-          );
+          if (data.error == 'Class does not exist') {
+            notyf.error(data.error);
+          } else {
+            handleDataSubmitResults(
+              data,
+              fileInput,
+              displaySubmitErrorUpdatedGrades,
+              'uploadGradeErrorModal',
+              'grid_grades'
+            );
+          }
         })
         .catch((error) => {
           console.error('Error:', error);

@@ -33,8 +33,10 @@
           id="email"
           name="email"
           placeholder="username@gmail.com"
+          onchange="validateEmail()"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
         />
+        <p id="email-error" class="text-c4 text-sm text-left mt-2"></p>
       </div>
 
       <div class="">
@@ -49,8 +51,10 @@
           name="password"
           type="password"
           placeholder="password"
+          onchange="validatePassword()"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
         />
+        <p id="password-error" class="text-c4 text-sm text-left mt-2"></p>
       </div>
 
       <button
@@ -59,14 +63,14 @@
       >
         Sign In
       </button>
+      <ul class="messages text-red-500">
+        <li id="message-container"></li>
+      </ul>
       <a
         href="{{ url_for('studentResetRequest') }}"
         class="text-c5 font-semibold"
         >Forgot Password?</a
       >
-      <ul class="messages text-red-500">
-        <li id="message-container"></li>
-      </ul>
     </form>
 
     <div>
@@ -101,8 +105,27 @@
     .addEventListener('submit', function (event) {
       event.preventDefault();
 
+      // // Check if email error and password error didnt have text content
+
       const formData = new FormData(event.target);
       const apiUrl = '/api/v1/student/login';
+
+      const emailError = document.getElementById('email-error');
+      const passwordError = document.getElementById('password-error');
+      const email = formData.get('email');
+      const password = formData.get('password');
+
+      if (!email) {
+        emailError.textContent = 'Email is required';
+      }
+
+      if (!password) {
+        passwordError.textContent = 'Password is required';
+      }
+
+      if (emailError.textContent !== '' || passwordError.textContent !== '') {
+        return;
+      }
 
       fetch(apiUrl, {
         method: 'POST',

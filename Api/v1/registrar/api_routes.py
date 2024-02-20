@@ -9,19 +9,28 @@ from decorators.rate_decorators import login_decorator, resend_otp_decorator
 # FUNCTIONS IMPORT
 from .utils import getCurrentUser, getUniversityAdminData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements
 import os
-
+import re
 
 registrar_api = Blueprint('registrar_api', __name__)
 
 @registrar_api.route('/login', methods=['POST'])
 # @login_decorator("Too many login attempts. Please try again later")
 def login():
-    try:
-        print("HERE IN REGISTRAR LOGIN")
-        if request.method == 'POST':
+    if request.method == 'POST':
+        try:
             email = request.form['email']
             password = request.form['password']
+            
+            if not email or not password:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
+
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+                return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+            
             registrar = Registrar.query.filter_by(Email=email).first()
+            if not registrar:
+                return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
+            
             if registrar and check_password_hash(registrar.Password, password):
                 session['user_id'] = registrar.RegistrarId
                 session['user_role'] = 'registrar'
@@ -29,12 +38,12 @@ def login():
             else:
                 # Return
                 return jsonify({"error": True, "message": "Invalid email or password"}), 401
-            # return redirect('/')
-        else:
-            return jsonify({'error': True, 'message': 'Invalid username or password'}), 401
-    except Exception as e:
-      return jsonify({'error': True, 'message': 'Something went wrong'})
+        # return redirect('/')
+        except Exception as e:
+            return jsonify({'error': True, 'message': 'Something went wrong'})
   
+       
+    
 # ===================================================
 # TESTING AREA
 @registrar_api.route('/profile', methods=['GET'])
@@ -151,7 +160,6 @@ def deleteStudent(studentId):
     registrar = getCurrentUser()
     if registrar:
         result = deleteStudentData(studentId)
-        print('result: ', result)
         return result
     else:
         return render_template('404.html'), 404

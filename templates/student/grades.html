@@ -25,75 +25,6 @@
 <div class="lg:px-40 md:px-16 py-4 w-screen px-8">
   <h3 class="text-3xl font-bold text-c4 mb-4">Grades</h3>
 
-  <div class="flex lg:flex-nowrap flex-wrap gap-3">
-    <div
-      class="bg-white lg:w-8/12 w-full md:mb-4 mb-1 rounded-lg shadow-md flex p-4"
-    >
-      <div
-        class="hidden md:flex md:w-5/12 w-3/12 h-[100%] bg-no-repeat bg-cover bg-center bg-[20%] rounded-lg ml-4"
-        style="
-          background-image: url('https://th.bing.com/th?id=OIF.uJhvT%2boczQC1KDMuS8%2bAdA&rs=1&pid=ImgDetMain');
-        "
-      ></div>
-      <div class="w-full lg:w-9/12 md:w-7/12 pl-4">
-        <p class="font-bold text-2xl text-c1 opacity-90 mt-2">
-          Student Details:
-        </p>
-        <div class="mt-4">
-          <p class="text-c1 font-extrabold">
-            Student Number:
-            <span class="text-c1 opacity-90 font-normal" id="student-number"
-              >2020-00001-CM-0</span
-            >
-          </p>
-          <p class="text-c1 font-extrabold">
-            Name:
-            <span class="text-c1 opacity-90 font-normal" id="student-name"
-              >Jocarl P. Basco</span
-            >
-          </p>
-          <p class="text-c1 font-extrabold">
-            Email:
-            <span class="text-c1 opacity-90 font-normal" id="student-email"
-              >jocarlbasco24@gmail.com</span
-            >
-          </p>
-          <p class="text-c1 font-extrabold">
-            Cellphone Number:
-            <span
-              class="text-c1 opacity-90 font-normal"
-              id="student-mobile-phone"
-              >09764210387</span
-            >
-          </p>
-          <p class="text-c1 font-extrabold">
-            Course Taken:
-            <span
-              class="text-c1 opacity-90 font-normal"
-              id="student-course"
-            ></span>
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- CALENDAR -->
-    <div
-      class="w-screen lg:w-4/12 bg-gradient-to-r from-yellow-600 to-yellow-400 mb-4 rounded-lg p-6 shadow-md"
-    >
-      <div>
-        <p class="font-bold text-2xl text-white opacity-90">
-          Scholarship Qualification:
-        </p>
-        <div class="flex justify-between">
-          <span class="text-white text-base font-semibold"
-            >You are qualified to Free Higher Education Act.</span
-          >
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="flex flex-row gap-4">
     <div class="bg-white w-full rounded-lg p-8 shadow-md">
       <h3 class="text-2xl font-bold text-c4 mb-3" id="name-number">
@@ -225,26 +156,7 @@
   }
 
   function displayDetails(data) {
-    console.log('DATA: ', data);
-    const number = document.getElementById('student-number');
-    const name = document.getElementById('student-name');
-    const email = document.getElementById('student-email');
-    const mobile_number = document.getElementById('student-mobile-phone');
-    const student_course = document.getElementById('student-course');
     const name_number = document.getElementById('name-number');
-
-    number.innerHTML = `${
-      data.StudentNumber ? data.StudentNumber : 'No Data Available'
-    }`;
-    name.innerHTML = `${data.Name ? data.Name : 'No Data Available'}`;
-    email.innerHTML = `${data.Email ? data.Email : 'No Data Available'}`;
-    mobile_number.innerHTML = `${
-      data.MobileNumber ? data.MobileNumber : 'No Mobile Number'
-    }`;
-
-    student_course.innerHTML = `${
-      data.CourseName ? data.CourseName : 'None Course'
-    }`;
 
     name_number.innerHTML = `${
       data.CourseName && data.StudentNumber

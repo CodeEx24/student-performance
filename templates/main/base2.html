@@ -89,6 +89,61 @@
         ],
       });
     </script>
+
+    <script>
+      function removeErrorMessage() {
+        // select message-container
+        const messageContainer = document.getElementById('message-container');
+        // Clear the message
+        messageContainer.textContent = '';
+      }
+
+      function validateEmail() {
+        removeErrorMessage();
+        const emailInput = document.getElementById('email');
+        const email = emailInput.value;
+        // Select email-error
+        const emailError = document.getElementById('email-error');
+
+        // Regular expression to check email format
+        const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email) {
+          emailError.textContent = 'Email is required';
+        } else if (!emailFormat.test(email)) {
+          emailError.textContent = 'Please enter a valid email address';
+          // Clear the input field if the email is not valid
+        }
+
+        if (email && emailFormat.test(email)) {
+          emailError.textContent = '';
+        }
+      }
+
+      function validatePassword() {
+        removeErrorMessage();
+        const passwordInput = document.getElementById('password');
+        const password = passwordInput.value;
+        // Select password-error
+        const passwordError = document.getElementById('password-error');
+
+        const passwordFormat = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+
+        if (!password) {
+          passwordError.textContent = 'Password is required';
+        }
+        // else if password length is less than 8 characters
+        else if (password.length < 8) {
+          passwordError.textContent =
+            'Password must be at least 8 characters long';
+        } else if (!passwordFormat.test(password)) {
+          passwordError.textContent =
+            'Password must contain uppercase and lowercase characters and a number';
+        } else {
+          passwordError.textContent = ''; // Clear any previous error message
+        }
+      }
+    </script>
     <!-- Include JavaScript and other common resources here -->
     {% block script %} {% endblock script %}
   </body>
