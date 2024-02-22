@@ -2,33 +2,20 @@
 from flask import Flask, render_template, redirect, url_for, session
 from flask_caching import Cache
 from flask_cors import CORS
-
 from Api.v1.student.api_routes import student_api
 from Api.v1.faculty.api_routes import faculty_api
 from Api.v1.universityadmin.api_routes import university_admin_api
 from Api.v1.systemadmin.api_routes import system_admin_api
 from Api.v1.registrar.api_routes import registrar_api
 from oauth2 import config_oauth
-
 from utils import getOverallCoursePerformance, getCurrentUser
-
-# from flask_mail import Mail, Message
 import os
 from dotenv import load_dotenv
-
 from models import init_db
-# from flask_jwt_extended import JWTManager
-
 from decorators.auth_decorators import preventAuthenticated, role_required
-
 from datetime import  timedelta
-from mail import mail  # Import mail from the mail.py module
-# from flask_oauthlib.provider import OAuth2Provider
+from mail import mail
 from werkzeug.security import check_password_hash
-# Get models OAuth2Client
-# from models import OAuth2Client, Student, OAuth2Token
-# from flask_talisman import Talisman
-# from flask_wtf.csrf import CSRFProtect
 from datetime import datetime
 
 
@@ -36,24 +23,15 @@ def create_app():
     load_dotenv()  # Load environment variables from .env file
     app = Flask(__name__)
 
-    # talisman = Talisman(app)
-    # csrf = CSRFProtect(app)
-
-
     if __name__ == '__main__':
         app.run(debug=False)
     
-    # SETUP YOUR POSTGRE DATABASE HERE
-    # Check if CONFIG_MODE is set to development
     if os.getenv("CONFIG_MODE") == "production":
         print("USING PRODUCTION")
-        # Set the value to DEVELOPMENT_DATABASE_URI
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
     else:
         print("USING DEVELOPMENT")
-        # Set the value to the default DATABASE_URI
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DEVELOPMENT_DATABASE_URI')
-        # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
         
     # Do not set this to 1 in production
     os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -65,22 +43,24 @@ def create_app():
         
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['OAUTH2_REFRESH_TOKEN_GENERATOR'] = True
-    # app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['Werkzeug_Hash_Algorithm'] = 'sha256'
     
-    # Replace 'your-secret-key' with an actual secret key
     app.secret_key = os.getenv('SECRET_KEY')
     Cache(app, config={'CACHE_TYPE': 'simple'})
-    # cache.init_app(app)
+
 
     # Allowed third party apps
     allowed_origins = ["*"]
     CORS(app, origins=allowed_origins, allow_headers=["Authorization", "X-API-Key"])
 
     # jwt = JWTManager(app)
-    init_db(app)
     # oauth = OAuth2Provider(app)
+    # talisman = Talisman(app)
+    # csrf = CSRFProtect(app)
+    init_db(app)
+    
    
     # Configure Flask-Mail for sending emails
     app.config['MAIL_SERVER'] =  os.getenv("MAIL_SERVER")
@@ -89,13 +69,7 @@ def create_app():
     app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
     app.config['MAIL_USE_TLS'] = False
     app.config['MAIL_USE_SSL'] = True
-    # app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
     mail.init_app(app)
-    # The Api Key is static for development mode. The Api key in future must refresh in order to secure the api endpoint of the application
-    # student_api_key = os.getenv('STUDENT_API_KEY')
-    # faculty_api_key = os.getenv('FACULTY_API_KEY')
-    # university_admin_api_key = os.getenv('UNIVERSITY_ADMIN_API_KEY')
-    # system_admin_api_key = os.getenv('SYSTEM_ADMIN_API_KEY')
 
     # The api base url for api endpoints
     student_api_base_url = os.getenv("STUDENT_API_BASE_URL")
@@ -118,10 +92,6 @@ def create_app():
     
     # ===========================================================================
     # ROUTING FOR THE APPLICATION (http:localhost:3000)
-
-
-
-
     @app.route('/practice')
     def practice():
         return render_template('practice.html')
@@ -140,10 +110,6 @@ def create_app():
         return redirect(url_for('home'))  # Redirect to home or appropriate route
 
     # ========================================================================
-
-
-    # ALL STUDENT ROUTES HERE
-    # ALL STUDENT ROUTES HERE
     @app.route('/student')
     @preventAuthenticated
     def studentLogin():
@@ -165,7 +131,6 @@ def create_app():
             # Return 404
             return handle_404_error(None)
         
-    
 
     @app.route('/student/reset-request')
     @preventAuthenticated
@@ -200,8 +165,6 @@ def create_app():
 
 
     # ========================================================================
-
-
     # ALL FACULTY ROUTES HERE
     @app.route('/faculty')
     @preventAuthenticated
@@ -260,11 +223,6 @@ def create_app():
         # json_performance_data=json_performance_data.get_json()
         return render_template('universityadmin/home.html', university_admin_api_base_url=university_admin_api_base_url, current_page="home")
     
-    # @app.route('/university-admin/students')
-    # @role_required('universityAdmin')
-    # def universityAdminStudents():
-    #     return render_template('universityadmin/students.html', university_admin_api_base_url=university_admin_api_base_url, current_page="students")
-
 
     @app.route('/university-admin/all/class')
     @role_required('universityAdmin')
@@ -306,11 +264,6 @@ def create_app():
     def universityChangePassword():
         return render_template('universityadmin/change-password.html', university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
     
-    
-    # @app.route('/university-admin/finalized-grades')
-    # @role_required('universityAdmin')
-    # def universityFinalizedGrades():
-    #     return render_template('universityadmin/finalized-grades.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
     
     @app.route('/university-admin/finalized-grades')
     @role_required('universityAdmin')

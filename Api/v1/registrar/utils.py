@@ -42,18 +42,18 @@ def generate_password(length=12):
     return password
     
 
-def getUniversityAdminData(str_univ_admin_id):
+def getRegistrarData(str_registrar_id):
     try:
         data_university_admin = (
-            db.session.query(UniversityAdmin).filter(
-                UniversityAdmin.UnivAdminId == str_univ_admin_id).first()
+            db.session.query(Registrar).filter(
+                Registrar.RegistrarId == str_registrar_id).first()
         )
 
         if data_university_admin:
           
 
             dict_student_data = {
-                "UnivAdminNumber": data_university_admin.UnivAdminNumber,
+                "UnivAdminNumber": data_university_admin.RegistrarNumber,
                 "Name": data_university_admin.Name,
                 "PlaceOfBirth": data_university_admin.PlaceOfBirth,
                 "ResidentialAddress": data_university_admin.ResidentialAddress,

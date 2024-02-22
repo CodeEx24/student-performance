@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getCurrentUser, getUniversityAdminData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements
+from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements
 import os
 import re
 
@@ -40,7 +40,7 @@ def login():
                 return jsonify({"error": True, "message": "Invalid email or password"}), 401
         # return redirect('/')
         except Exception as e:
-            return jsonify({'error': True, 'message': 'Something went wrong'})
+            return jsonify({'error': True, 'message': 'Invalid email or password'})
   
        
     
@@ -49,9 +49,9 @@ def login():
 @registrar_api.route('/profile', methods=['GET'])
 @role_required('registrar')
 def profile():
-    universityAdmin = getCurrentUser()
-    if universityAdmin:
-        return jsonify(universityAdmin.to_dict())
+    registrar = getCurrentUser()
+    if registrar:
+        return jsonify(registrar.to_dict())
     else:
         flash('User not found', 'danger')
         return redirect(url_for('university_admin_api.login'))
@@ -62,11 +62,11 @@ def profile():
 @registrar_api.route('/', methods=['GET'])
 @role_required('registrar')
 def registrarData():
-    universityAdmin = getCurrentUser()
-    if universityAdmin:
-        json_university_admin_data = getUniversityAdminData(universityAdmin.UnivAdminId)
-        if json_university_admin_data:
-            return (json_university_admin_data)
+    registrar = getCurrentUser()
+    if registrar:
+        json_registrar_data = getRegistrarData(registrar.RegistrarId)
+        if json_registrar_data:
+            return (json_registrar_data)
         else:
             return jsonify(message="No data available")
     else:
