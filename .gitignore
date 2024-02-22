@@ -2,7 +2,7 @@
 
 *.pyc
 .env
-*venv
+
 __pycache__/
 ZSPS Docs - Cheatsheet/Database 2.drawio
 ZSPS Docs - Cheatsheet/Database.drawio
