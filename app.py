@@ -31,7 +31,7 @@ def create_app():
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
     else:
         print("USING DEVELOPMENT")
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DEVELOPMENT_DATABASE_URI')
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
         
     # Do not set this to 1 in production
     os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -45,7 +45,6 @@ def create_app():
     app.config['OAUTH2_REFRESH_TOKEN_GENERATOR'] = True
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.config['Werkzeug_Hash_Algorithm'] = 'sha256'
     
     app.secret_key = os.getenv('SECRET_KEY')
     Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -276,7 +275,7 @@ def create_app():
     @app.route('/registrar')
     @preventAuthenticated
     def registrarLogin():
-        return render_template('registrar/login.html')
+        return render_template('registrar/login_new.html')
 
     @app.route('/registrar/home')
     @role_required('registrar')

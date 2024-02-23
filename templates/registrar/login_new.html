@@ -105,7 +105,7 @@
     .getElementById('login-form')
     .addEventListener('submit', function (event) {
       event.preventDefault();
-
+      console.log('STARTING');
       const formData = new FormData(event.target);
       const apiUrl = '/api/v1/registrar/login';
 
@@ -125,6 +125,7 @@
       if (emailError.textContent !== '' || passwordError.textContent !== '') {
         return;
       }
+      console.log('DONE CHECKINGS');
 
       fetch(apiUrl, {
         method: 'POST',
@@ -141,6 +142,7 @@
             console.log(data.message);
             window.location.href = "{{ url_for('registrarHome') }}";
           } else if (data.error) {
+            console.log('HERE IN DATA ERROR: ', data.message);
             // Thrown error
             const messageContainer =
               document.getElementById('message-container');
@@ -148,6 +150,7 @@
           }
         })
         .catch((error) => {
+          console.log('HERE IN CATCH: ', error);
           const messageContainer = document.getElementById('message-container');
           messageContainer.innerHTML = `<div class="text-red-500">${error.message}</div>`;
         });

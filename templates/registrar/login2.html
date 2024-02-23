@@ -1,0 +1,158 @@
+{% extends "main/base2.html" %} {% block content %}
+
+<div class="flex h-screen w-screen items-center justify-center mx-auto">
+  <div
+    class="bg-white shadow-lg p-10 text-center rounded-lg w-[36rem] border-2 border-gray-100"
+  >
+    <div>
+      <img
+        src="{{ url_for('static', filename='images/pup.png') }}"
+        alt="Logo"
+        class="object-cover object-center rounded-lg mx-auto w-16 md:w-28 lg:w-32"
+      />
+
+      <h1
+        class="text-gray-800 font-poppins text-2xl font-extrabold mt-3 md:text-4xl md:mt-8"
+      >
+        SPS Registrar Module
+      </h1>
+      <p class="text-gray-800 text-md font-poppins mt-3 mb-3 md:text-lg">
+        Sign in to start your session
+      </p>
+    </div>
+
+    <form class="flex flex-col gap-3" id="login-form">
+      <!-- ADD CSRF /> -->
+
+      <div class="">
+        <label
+          htmlFor="email"
+          class="flex text-left mb-2 font-medium text-gray-800"
+        >
+          Your email
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="username@gmail.com"
+          onchange="validateEmail()"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
+        />
+        <p id="email-error" class="text-c4 text-sm text-left mt-2"></p>
+      </div>
+
+      <div class="">
+        <label
+          htmlFor="password"
+          class="flex text-left mb-2 font-medium text-gray-800"
+        >
+          Your password
+        </label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="password"
+          onchange="validatePassword()"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
+        />
+        <p id="password-error" class="text-c4 text-sm text-left mt-2"></p>
+      </div>
+
+      <button
+        type="submit"
+        class="text-white bg-sky-700 hover:bg-sky-600 focus:ring-4 focus:outline-none mt-4 focus:ring-sky-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+      >
+        Sign In
+      </button>
+      <a
+        href="{{ url_for('studentResetRequest') }}"
+        class="text-c5 font-semibold"
+        >Forgot Password?</a
+      >
+      <ul class="messages text-red-500">
+        <li id="message-container"></li>
+      </ul>
+    </form>
+
+    <div>
+      <div class="text-sm text-gray-800 mt-3">
+        By using this service, you understand and agree to the PUP Online
+        Services
+        <a
+          class="text-blue-500"
+          href="https://www.pup.edu.ph/terms/"
+          target="_blank"
+          >Terms of Use</a
+        >
+        and
+        <a
+          class="text-blue-500"
+          href="https://www.pup.edu.ph/privacy/"
+          target="_blank"
+          >Privacy Statement</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+<!-- SCRIPTS -->
+{% block script %}
+<script>
+  document
+    .getElementById('login-form')
+    .addEventListener('submit', function (event) {
+      event.preventDefault();
+      console.log('STARTING');
+      const formData = new FormData(event.target);
+      const apiUrl = '/api/v1/registrar/login';
+
+      const emailError = document.getElementById('email-error');
+      const passwordError = document.getElementById('password-error');
+      const email = formData.get('email');
+      const password = formData.get('password');
+
+      if (!email) {
+        emailError.textContent = 'Email is required';
+      }
+
+      if (!password) {
+        passwordError.textContent = 'Password is required';
+      }
+
+      if (emailError.textContent !== '' || passwordError.textContent !== '') {
+        return;
+      }
+      console.log('DONE CHECKINGS');
+
+      fetch(apiUrl, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          // CCheck if data.sucess throw message
+          if (data.success) {
+            // Redirect to dashboard
+            console.log(data.message);
+            window.location.href = "{{ url_for('registrarHome') }}";
+          } else if (data.error) {
+            // Thrown error
+            const messageContainer =
+              document.getElementById('message-container');
+            messageContainer.innerHTML = `<div class="text-red-500">${data.message}</div>`;
+          }
+        })
+        .catch((error) => {
+          const messageContainer = document.getElementById('message-container');
+          messageContainer.innerHTML = `<div class="text-red-500">${error.message}</div>`;
+        });
+    });
+</script>
+
+{% endblock script %}
