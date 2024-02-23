@@ -14,7 +14,6 @@ import re
 registrar_api = Blueprint('registrar_api', __name__)
 
 @registrar_api.route('/login', methods=['POST'])
-# @login_decorator("Too many login attempts. Please try again later")
 def login():
     if request.method == 'POST':
         try:
