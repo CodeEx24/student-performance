@@ -457,8 +457,7 @@ def updatePassword(str_student_id, password, new_password, confirm_password):
 
             if check_password_hash(hashed_password, password):
                 # If the current password matches
-                new_hashed_password = generate_password_hash(
-                    new_password)
+                new_hashed_password = generate_password_hash(new_password)
                 data_student.Password = new_hashed_password
                 db.session.commit()
                 return {"message": "Password changed successfully", "status": 200}

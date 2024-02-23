@@ -18,28 +18,32 @@ registrar_api = Blueprint('registrar_api', __name__)
 def login():
     if request.method == 'POST':
         try:
+            print("DONE 1")
             email = request.form['email']
             password = request.form['password']
-            
+            print("DONE 2")
             if not email or not password:
                 return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
-
+            print("DONE 3")
             if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
                 return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
-            
+            print("DONE 4")
             registrar = Registrar.query.filter_by(Email=email).first()
             if not registrar:
                 return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
-            
+            print("DONE 5")
             if registrar and check_password_hash(registrar.Password, password):
+                print("DONE 6")
                 session['user_id'] = registrar.RegistrarId
                 session['user_role'] = 'registrar'
-                return jsonify({"success": True, "message": "Login successful"}), 200
+                return jsonify({"success": True, "message": "Login successful"})
             else:
+                print("DONE 7")
                 # Return
                 return jsonify({"error": True, "message": "Invalid email or password"}), 401
         # return redirect('/')
         except Exception as e:
+            print("Except into error: ", e)
             return jsonify({'error': True, 'message': 'Invalid email or password'})
   
        
