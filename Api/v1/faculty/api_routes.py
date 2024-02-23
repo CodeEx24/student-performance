@@ -31,8 +31,8 @@ def login():
             if not email or not password:
                 return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
 
-            if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
-                return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+            # if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+            #     return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
             
             teacher = Faculty.query.filter_by(Email=email).first()
             if not teacher:
@@ -345,9 +345,8 @@ def submitGrades():
         return jsonify({'error': 'No file part'}), 400
 
     file = request.files['pdf-file']
-    header_names = ['StudentNumber', 'LastName', 'FirstName', 'MiddleName', 'Grade', 'Remarks']
 
-    return processGradePDFSubmission(file, header_names)
+    return processGradePDFSubmission(file)
 
 
     # # Check if the request contains a file named 'excelFile'

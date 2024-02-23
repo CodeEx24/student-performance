@@ -242,11 +242,13 @@
     </main>
     <script>
       const api_base_url = '{{ student_api_base_url | default("") }}';
-    </script>
 
-    <script>
       function logout() {
-        window.location.href = "{{ url_for('logout') }}";
+        // Clear browser session history
+        window.history.pushState({}, '', '/');
+
+        // Redirect to the logout endpoint
+        window.location.href = '/logout';
       }
     </script>
 

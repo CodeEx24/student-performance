@@ -333,9 +333,9 @@
 
           <!-- NAVIGATION LINKS -->
           <div class="w-full">
-            <a
-              class="flex items-center px-4 py-4 transition-colors duration-300 transform rounded-lg bg-gradient-to-r from-red-800 to-red-500 hover:from-red-900 hover:to-red-600 text-white font-bold py-2 px-4 rounded shadow-md"
-              href="{{ url_for('logout') }}"
+            <button
+              class="flex w-full items-center px-4 py-4 transition-colors duration-300 transform rounded-lg bg-gradient-to-r from-red-800 to-red-500 hover:from-red-900 hover:to-red-600 text-white font-bold py-2 px-4 rounded shadow-md"
+              onclick="logout()"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -343,7 +343,7 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="white"
-                class="w-5 h-5"
+                class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'class-performance' else 'text-gray-500' }}"
               >
                 <path
                   stroke-linecap="round"
@@ -353,7 +353,7 @@
               </svg>
 
               <span class="mx-2 text-sm font-medium">Log Out</span>
-            </a>
+            </button>
           </div>
         </div>
       </aside>
@@ -388,6 +388,14 @@
 
     <script>
       const api_base_url = '{{ faculty_api_base_url | default("") }}';
+
+      function logout() {
+        // Clear browser session history
+        window.history.pushState({}, '', '/');
+
+        // Redirect to the logout endpoint
+        window.location.href = '/logout';
+      }
 
       async function fetchFacultyDetails2() {
         const response = await fetch(`${api_base_url}/`);

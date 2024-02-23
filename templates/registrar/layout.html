@@ -340,9 +340,9 @@
           </div>
         </div>
         <div class="w-full">
-          <a
-            class="flex items-center px-4 py-4 transition-colors duration-300 transform rounded-lg bg-gradient-to-r from-red-800 to-red-500 hover:from-red-900 hover:to-red-600 text-white font-bold py-2 px-4 rounded shadow-md"
-            href="{{ url_for('logout') }}"
+          <button
+            class="flex w-full items-center px-4 py-4 transition-colors duration-300 transform rounded-lg bg-gradient-to-r from-red-800 to-red-500 hover:from-red-900 hover:to-red-600 text-white font-bold py-2 px-4 rounded shadow-md"
+            onclick="logout()"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -360,7 +360,7 @@
             </svg>
 
             <span class="mx-2 text-sm font-medium">Log Out</span>
-          </a>
+          </button>
         </div>
       </div>
     </aside>
@@ -490,6 +490,14 @@
 
     <script>
       const api_base_url = '{{ registrar_api_base_url | default("") }}';
+
+      function logout() {
+        // Clear browser session history
+        window.history.pushState({}, '', '/');
+
+        // Redirect to the logout endpoint
+        window.location.href = '/logout';
+      }
     </script>
 
     <!-- NOTYF -->

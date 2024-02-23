@@ -100,13 +100,17 @@ def create_app():
     @app.route('/')
     @preventAuthenticated
     def home():
+        # Check if there is user role
+        if 'user_role' in session:
+            role = session['user_role']
+            return redirect(url_for(f"{role}Home"))
         return render_template('main/index.html')
 
 
     @app.route('/logout')
     def logout():
         session.clear()
-        return redirect(url_for('home'))  # Redirect to home or appropriate route
+        return redirect(url_for('home'))
 
     # ========================================================================
     @app.route('/student')

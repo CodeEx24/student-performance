@@ -102,29 +102,72 @@ def updateUniversityAdminData(str_univ_admin_id, number, residentialAddress):
 
 def updatePassword(str_university_admin_id, password, new_password, confirm_password):
     try:
-        data_student = db.session.query(UniversityAdmin).filter(
-            UniversityAdmin.UnivAdminId == str_university_admin_id).first()
+        data_university_admin = db.session.query(UniversityAdmin).filter(UniversityAdmin.UnivAdminId == str_university_admin_id).first()
 
-        if data_student:
+  
+        password_validator = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$'
+
+        error = False
+        errorList = []
+        if not password:
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must not be invalid"})
+        elif len(password) < 8:
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must be 8 characters long"})
+        elif not re.match(password_validator, password):
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must contain a number and characters uppercase and lowercase"})
+
+        if not new_password:
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must not be invalid"})
+        elif len(new_password) < 8:
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must be 8 characters long"})
+        elif not re.match(password_validator, new_password):
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must contain a number and characters uppercase and lowercase"})
+
+        if not confirm_password:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must not be invalid"})
+        elif len(confirm_password) < 8:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must be 8 characters long"})
+        elif not re.match(password_validator, confirm_password):
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must contain a number and characters uppercase and lowercase"})
+
+        if new_password != confirm_password:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Password does not match"})
+
+        if error:
+            return {"error": True, 'errorList': errorList, "status": 400}
+            
+        
+        if data_university_admin:
             # Assuming 'password' is the hashed password stored in the database
-            hashed_password = data_student.Password
+            hashed_password = data_university_admin.Password
 
             if check_password_hash(hashed_password, password):
                 # If the current password matches
                 new_hashed_password = generate_password_hash(new_password)
-                data_student.Password = new_hashed_password
+                data_university_admin.Password = new_hashed_password
                 db.session.commit()
-                return {"message": "Password changed successfully", "status": 200, 'success': True}
+                return {"message": "Password changed successfully", "status": 200}
 
             else:
-                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 400, 'error': True}
+                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 401}
         else:
-            return {"message": "Something went wrong", "status": 404, 'error': True}
+            return {"message": "Something went wrong", "status": 404}
 
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         db.session.rollback()  # Rollback the transaction in case of an error
-        return {"message": "An error occurred", "status": 500, 'error': True}
+        return {"message": "An error occurred", "status": 500}
+
 
 
 def getEnrollmentTrends():

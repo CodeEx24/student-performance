@@ -10,7 +10,7 @@ import pandas as pd
 
 from static.js.utils import convertGradeToPercentage, checkStatus
 import re
-# import pdfplumber
+import pdfplumber
 
 
 def getCurrentUser():
@@ -1298,23 +1298,66 @@ def updateFacultyData(str_teacher_id, number, residential_address):
         return {"message": "An error occurred", "status": 500}
 
 
-def updatePassword(str_teacher_id, password, new_password, confirm_password):
+def updatePassword(str_faculty_id, password, new_password, confirm_password):
     try:
-        data_faculty = db.session.query(Faculty).filter(Faculty.FacultyId == str_teacher_id).first()
+        data_faculty = db.session.query(Faculty).filter(Faculty.FacultyId == str_faculty_id).first()
 
+  
+        password_validator = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$'
+
+        error = False
+        errorList = []
+        if not password:
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must not be invalid"})
+        elif len(password) < 8:
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must be 8 characters long"})
+        elif not re.match(password_validator, password):
+            error = True
+            errorList.append({'type': 'current_password', 'message': "Password must contain a number and characters uppercase and lowercase"})
+
+        if not new_password:
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must not be invalid"})
+        elif len(new_password) < 8:
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must be 8 characters long"})
+        elif not re.match(password_validator, new_password):
+            error = True
+            errorList.append({'type': 'new_password', 'message': "New Password must contain a number and characters uppercase and lowercase"})
+
+        if not confirm_password:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must not be invalid"})
+        elif len(confirm_password) < 8:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must be 8 characters long"})
+        elif not re.match(password_validator, confirm_password):
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must contain a number and characters uppercase and lowercase"})
+
+        if new_password != confirm_password:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must match with New Password"})
+
+        if error:
+            return {"error": True, 'errorList': errorList, "status": 400}
+            
+        
         if data_faculty:
             # Assuming 'password' is the hashed password stored in the database
-            hashed_password = data_faculty.password
+            hashed_password = data_faculty.Password
 
             if check_password_hash(hashed_password, password):
                 # If the current password matches
                 new_hashed_password = generate_password_hash(new_password)
-                data_faculty.password = new_hashed_password
+                data_faculty.Password = new_hashed_password
                 db.session.commit()
                 return {"message": "Password changed successfully", "status": 200}
 
             else:
-                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 400}
+                return {"message": "Changing Password was unsuccessful. Please try again.", "status": 401}
         else:
             return {"message": "Something went wrong", "status": 404}
 
@@ -1385,168 +1428,171 @@ def processGradeSubmission(file):
     except Exception as e:
         return jsonify({'error': 'An error occurred while processing the file'}), 500
 
-def processGradePDFSubmission(file, header_names):
+def processGradePDFSubmission(file):
     try:
-        return jsonify({'error': 'An error occurred while processing the file'}), 500
+        # Check if file is pdf
+        if not file.filename.endswith('.pdf'):
+            return jsonify({'error': 'Invalid file type. Please select a PDF file.'}), 400
+
         # Course, Subject Code, Year, Semester, and Batch
         # Open the PDF file using pdfplumber
-        # with pdfplumber.open(file) as pdf:
-        #     # Initialize table data list
-        #     table_data = []
-        #     list_error = []
-        #     is_some_submitted = False
-        #     # Read the pdf content except table
-        #     pdf_val = ''
+        with pdfplumber.open(file) as pdf:
+            # Initialize table data list
+            table_data = []
+            list_error = []
+            is_some_submitted = False
+            # Read the pdf content except table
+            pdf_val = ''
             
-        #     # Get 1st page only
-        #     first_page = pdf.pages[0]
+            # Get 1st page only
+            first_page = pdf.pages[0]
             
-        #     # Extract text from the pdf
-        #     pdf_val += first_page.extract_text()
-        #     pdf_content = pdf_val.split('\n')[0:4]
+            # Extract text from the pdf
+            pdf_val += first_page.extract_text()
+            pdf_content = pdf_val.split('\n')[0:4]
             
-        #     # Initialize variables
-        #     data = {
-        #         "Subject": '',
-        #         "Professor": '',
-        #         "Section": '',
-        #         "Semester": '',
-        #         "Batch": '',
-        #         "Year": '',
-        #         "CourseCode": ''
-        #     }
+            # Initialize variables
+            data = {
+                "Subject": '',
+                "Professor": '',
+                "Section": '',
+                "Semester": '',
+                "Batch": '',
+                "Year": '',
+                "CourseCode": ''
+            }
 
-        #     # Iterate through each line in pdf_content
-        #     for line in pdf_content:
-        #         # Check if the line contains information about Subject, Professor, Section, Semester, or Batch
-        #         if 'Subject:' in line and 'Professor' in line:
-        #             data['Subject'] = line.split('Subject: ')[1].split(' Professor:')[0]
-        #             data['Professor'] = line.split('Subject: ')[1].split(' Professor:')[1]
-        #         elif 'Section:' in line and 'Semester' in line:
-        #             data['CourseCode'] = line.split('Section: ')[1].split(' Semester:')[0].split(' ')[0]
-        #             data['Year'] = int(line.split('Section: ')[1].split(' Semester:')[0].split(' ')[1].split('-')[0])
-        #             data['Section'] = int(line.split('Section: ')[1].split(' Semester:')[0].split(' ')[1].split('-')[1])
+            # Iterate through each line in pdf_content
+            for line in pdf_content:
+                # Check if the line contains information about Subject, Professor, Section, Semester, or Batch
+                if 'Subject:' in line and 'Professor' in line:
+                    data['Subject'] = line.split('Subject: ')[1].split(' Professor:')[0]
+                    data['Professor'] = line.split('Subject: ')[1].split(' Professor:')[1]
+                elif 'Section:' in line and 'Semester' in line:
+                    data['CourseCode'] = line.split('Section: ')[1].split(' Semester:')[0].split(' ')[0]
+                    data['Year'] = int(line.split('Section: ')[1].split(' Semester:')[0].split(' ')[1].split('-')[0])
+                    data['Section'] = int(line.split('Section: ')[1].split(' Semester:')[0].split(' ')[1].split('-')[1])
                     
-        #             if line.split('Section: ')[1].split(' Semester: ')[1] == '1st Semester':
-        #                 data['Semester'] = 1
-        #             elif line.split('Section: ')[1].split(' Semester: ')[1] == '2nd Semester':
-        #                 data['Semester'] = 2
-        #             else:
-        #                 data['Semester'] = 3
-        #         elif 'Batch:' in line:
-        #             data['Batch'] = int(line.split('Batch: ')[1])
+                    if line.split('Section: ')[1].split(' Semester: ')[1] == '1st Semester':
+                        data['Semester'] = 1
+                    elif line.split('Section: ')[1].split(' Semester: ')[1] == '2nd Semester':
+                        data['Semester'] = 2
+                    else:
+                        data['Semester'] = 3
+                elif 'Batch:' in line:
+                    data['Batch'] = int(line.split('Batch: ')[1])
          
-        #     # Query the StudentClassSubject
-        #     class_subject = (
-        #         db.session.query(
-        #             ClassSubject, Subject, Class, Course, Metadata
-        #         )
-        #         .join(Class, Class.ClassId == ClassSubject.ClassId)
-        #         .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
-        #         .join(Metadata, Metadata.MetadataId == Class.MetadataId)
-        #         .join(Course, Course.CourseId == Metadata.CourseId)
-        #         .filter(Course.CourseCode == data['CourseCode'], Subject.SubjectCode == data['Subject'], Metadata.Year == data['Year'], Metadata.Semester == data['Semester'], Metadata.Batch == data['Batch'], Class.Section == data['Section'])
-        #         .order_by(desc(Metadata.Year), desc(Class.Section), desc(Metadata.Batch))
-        #         .first()
-        #     )
+            # Query the StudentClassSubject
+            class_subject = (
+                db.session.query(
+                    ClassSubject, Subject, Class, Course, Metadata
+                )
+                .join(Class, Class.ClassId == ClassSubject.ClassId)
+                .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
+                .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+                .join(Course, Course.CourseId == Metadata.CourseId)
+                .filter(Course.CourseCode == data['CourseCode'], Subject.SubjectCode == data['Subject'], Metadata.Year == data['Year'], Metadata.Semester == data['Semester'], Metadata.Batch == data['Batch'], Class.Section == data['Section'])
+                .order_by(desc(Metadata.Year), desc(Class.Section), desc(Metadata.Batch))
+                .first()
+            )
             
-        #     if not class_subject:
-        #         return jsonify({'error': 'Class does not exist'}), 400
+            if not class_subject:
+                return jsonify({'error': 'Class does not exist'}), 400
             
                 
-        #     # Iterate through each page of the PDF
-        #     for page in pdf.pages:
-        #         # Extract tables from the page
-        #         tables = page.extract_tables()
+            # Iterate through each page of the PDF
+            for page in pdf.pages:
+                # Extract tables from the page
+                tables = page.extract_tables()
 
-        #         if not tables:
-        #             return jsonify({'error': 'No data found in the table'}), 400
+                if not tables:
+                    return jsonify({'error': 'No data found in the table'}), 400
                 
-        #         print('\n')
-        #         # Iterate through each table on the page
-        #         for table in tables:
-        #             # Iterate through each row in the table
-        #             for row in table:
-        #                 print('row: ', row)
+                print('\n')
+                # Iterate through each table on the page
+                for table in tables:
+                    # Iterate through each row in the table
+                    for row in table:
+                        print('row: ', row)
                         
-        #                 if row[0] == 'Student Number':
-        #                     continue
+                        if row[0] == 'Student Number':
+                            continue
                         
-        #                 # Find the StudentClassSubjectGrade
-        #                 student_class_subject_grade = (
-        #                     db.session.query(
-        #                         StudentClassSubjectGrade, Student, ClassSubject
-        #                     )
-        #                     .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
-        #                     .join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
-        #                     .filter(StudentClassSubjectGrade.ClassSubjectId == class_subject.ClassSubject.ClassSubjectId, Student.StudentNumber == row[0])
-        #                     .first()
-        #                 )
+                        # Find the StudentClassSubjectGrade
+                        student_class_subject_grade = (
+                            db.session.query(
+                                StudentClassSubjectGrade, Student, ClassSubject
+                            )
+                            .join(Student, Student.StudentId == StudentClassSubjectGrade.StudentId)
+                            .join(ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId)
+                            .filter(StudentClassSubjectGrade.ClassSubjectId == class_subject.ClassSubject.ClassSubjectId, Student.StudentNumber == row[0])
+                            .first()
+                        )
                         
-        #                 if student_class_subject_grade:
-        #                     #######################################################################################
-        #                     if(class_subject.Class.IsGradeFinalized==False):
-        #                         if row[5] == 'INCOMPLETE':
-        #                             print("INCOMPLETE")
-        #                             # Update the Class isGradeFinalized to False
-        #                             student_class_subject_grade.StudentClassSubjectGrade.Grade = 0
-        #                             # Set AcademicStatus to 3
-        #                             student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 3
-        #                             db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
-        #                         elif row[5] == "PASSED":
-        #                             print("PASSED")
-        #                             # Update the Class isGradeFinalized to False
-        #                             student_class_subject_grade.StudentClassSubjectGrade.Grade = int(row[4])
-        #                             # Save only but dont commit in database
-        #                             db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
-        #                         else:
-        #                             # Set Academic Status to 4
-        #                             student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 4
-        #                             # Update the Class isGradeFinalized to False
-        #                             student_class_subject_grade.StudentClassSubjectGrade.Grade = int(row[4])
-        #                             # Save only but dont commit in database
-        #                             db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
-        #                         is_some_submitted = True
-        #                     else:
-        #                         # Append the object to list_finalized_grade
-        #                         list_error.append({
-        #                             "StudentNumber": row[0],
-        #                             "LastName": row[1],
-        #                             "FirstName": row[2],
-        #                             "MiddleName": row[3],
-        #                             "SectionCode": data['CourseCode'] + ' ' + str(data['Year']) + '-' + str(data['Section']),
-        #                             "SubjectCode": data['Subject'],
-        #                             "Semester": data['Semester'],
-        #                             "Grade": int(row[4]),
-        #                             "Batch": data['Batch'],
-        #                             "Error": "Grade has been finalized already in class"
-        #                         })
-        #                     #######################################################################################
+                        if student_class_subject_grade:
+                            #######################################################################################
+                            if(class_subject.Class.IsGradeFinalized==False):
+                                if row[5] == 'INCOMPLETE':
+                                    print("INCOMPLETE")
+                                    # Update the Class isGradeFinalized to False
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = 0
+                                    # Set AcademicStatus to 3
+                                    student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 3
+                                    db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
+                                elif row[5] == "PASSED":
+                                    print("PASSED")
+                                    # Update the Class isGradeFinalized to False
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = int(row[4])
+                                    # Save only but dont commit in database
+                                    db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
+                                else:
+                                    # Set Academic Status to 4
+                                    student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 4
+                                    # Update the Class isGradeFinalized to False
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = int(row[4])
+                                    # Save only but dont commit in database
+                                    db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
+                                is_some_submitted = True
+                            else:
+                                # Append the object to list_finalized_grade
+                                list_error.append({
+                                    "StudentNumber": row[0],
+                                    "LastName": row[1],
+                                    "FirstName": row[2],
+                                    "MiddleName": row[3],
+                                    "SectionCode": data['CourseCode'] + ' ' + str(data['Year']) + '-' + str(data['Section']),
+                                    "SubjectCode": data['Subject'],
+                                    "Semester": data['Semester'],
+                                    "Grade": int(row[4]),
+                                    "Batch": data['Batch'],
+                                    "Error": "Grade has been finalized already in class"
+                                })
+                            #######################################################################################
  
-        #                 else:
-        #                     # list_error
-        #                     list_error.append({
-        #                         "StudentNumber": row[0],
-        #                         "LastName": row[1],
-        #                         "FirstName": row[2],
-        #                         "MiddleName": row[3],
-        #                         "SectionCode": data['CourseCode'] + ' ' + str(data['Year']) + '-' + str(data['Section']),
-        #                         "SubjectCode": data['Subject'],
-        #                         "Semester": data['Semester'],
-        #                         "Grade": int(row[4]),
-        #                         "Batch": data['Batch'],
-        #                         "Error": "Student does not exist in the class"
-        #                     })
+                        else:
+                            # list_error
+                            list_error.append({
+                                "StudentNumber": row[0],
+                                "LastName": row[1],
+                                "FirstName": row[2],
+                                "MiddleName": row[3],
+                                "SectionCode": data['CourseCode'] + ' ' + str(data['Year']) + '-' + str(data['Section']),
+                                "SubjectCode": data['Subject'],
+                                "Semester": data['Semester'],
+                                "Grade": int(row[4]),
+                                "Batch": data['Batch'],
+                                "Error": "Student does not exist in the class"
+                            })
                             
-        #                 # If all data is updated successfully then commit the data
-        #     db.session.commit()
+                        # If all data is updated successfully then commit the data
+            db.session.commit()
         
-        #     if list_error and is_some_submitted:
-        #         return jsonify({'warning': 'Some data cannot be updated', 'errors': list_error}), 400
-        #     elif list_error and not is_some_submitted:
-        #         return jsonify({'error': 'All data are already finalized or not existing', 'errors': list_error}), 400
-        #     else:
-        #         return jsonify({'result': 'File uploaded and data processed successfully'}), 200
+            if list_error and is_some_submitted:
+                return jsonify({'warning': 'Some data cannot be updated', 'errors': list_error}), 400
+            elif list_error and not is_some_submitted:
+                return jsonify({'error': 'All data are already finalized or not existing', 'errors': list_error}), 400
+            else:
+                return jsonify({'result': 'File uploaded and data processed successfully'}), 200
     except Exception as e:
         print("ERROR: ", e)
         return jsonify({'error': 'An error occurred while processing the file'}), 500

@@ -81,6 +81,7 @@
                     value="{{ systemAdmin.MobileNumber }}"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     placeholder="09XXXXXXXXX"
+                    onchange="validatePhoneNumber(event)"
                   />
                   <p id="error-mobile" class="text-c4 text-sm"></p>
                 </div>
@@ -97,6 +98,7 @@
                     value="{{ systemAdmin.ResidentialAddress }}"
                     class="bg-gray-50 border border-gray-300 font-normal text-c1 text-sm focus:ring-primary focus:border-secondary block w-full px-2 py-1"
                     placeholder="Unit No/Brgy/Municipality/City"
+                    onchange="validateAddress(event)"
                   />
                   <p id="error-residential" class="text-c4 text-sm"></p>
                 </div>
@@ -150,6 +152,37 @@
 {% block script %}
 <!-- Include Notyf script -->
 <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<script>
+  function validatePhoneNumber(event) {
+    // select error-mobile for showing message
+    const errorMobile = document.getElementById('error-mobile');
+    const phoneNumberRegex = /^09\d{9}$/; // Regex to match 09XXXXXXXXX format
+    const inputValue = event.target.value;
+
+    if (!phoneNumberRegex.test(inputValue)) {
+      errorMobile.textContent =
+        'Please enter a valid 11-digit mobile number starting with 09.';
+    } else {
+      errorMobile.textContent = '';
+    }
+  }
+
+  function validateAddress(event) {
+    const errorResidential = document.getElementById('error-residential');
+    const residentialAddress = event.target.value;
+
+    const addressRegex = /[a-zA-Z]/; // Regex to match at least one letter
+
+    if (residentialAddress === '') {
+      errorResidential.textContent = 'Residential address must not be empty';
+    } else if (!addressRegex.test(residentialAddress)) {
+      errorResidential.textContent = 'Residential address must include letters';
+    } else {
+      errorResidential.textContent = '';
+    }
+  }
+</script>
 
 <!-- UPDATING USER DETAILS -->
 <script>

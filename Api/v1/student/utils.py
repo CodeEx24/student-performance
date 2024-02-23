@@ -447,6 +447,10 @@ def updatePassword(str_student_id, password, new_password, confirm_password):
             error = True
             errorList.append({'type': 'confirm_password', 'message': "Confirm Password must contain a number and characters uppercase and lowercase"})
 
+        if new_password != confirm_password:
+            error = True
+            errorList.append({'type': 'confirm_password', 'message': "Confirm Password must match with New Password"})
+
         if error:
             return {"error": True, 'errorList': errorList, "status": 400}
             

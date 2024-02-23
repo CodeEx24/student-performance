@@ -139,8 +139,14 @@
           // CCheck if data.sucess throw message
           if (data.success) {
             // Redirect to dashboard
-            console.log(data.message);
             window.location.href = '/student/home';
+
+            // Replace the current history state with the home page
+            window.history.replaceState(
+              { page: 'studentHome' },
+              'Student Home',
+              '/student/home'
+            );
           } else if (data.error) {
             // Thrown error
             const messageContainer =
