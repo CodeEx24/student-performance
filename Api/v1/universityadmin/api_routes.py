@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent, getListerTrends
 import os
 import re
 
@@ -122,6 +122,21 @@ def enrollmentTrends():
 
         if json_performance_data:
             return (json_performance_data)
+        else:
+            return jsonify(message="No Performance data available")
+    else:
+        return render_template('404.html'), 404
+    
+# Getting the enrollment trends of different courses
+@university_admin_api.route('/lister/trends', methods=['GET'])
+@role_required('universityAdmin')
+def listerTrends():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_lister_data = getListerTrends()
+
+        if json_lister_data:
+            return (json_lister_data)
         else:
             return jsonify(message="No Performance data available")
     else:

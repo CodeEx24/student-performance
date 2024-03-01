@@ -384,14 +384,39 @@ endblock title %}
   }
 
   fetchStatistics();
+</script>
 
-  function columnChart() {
-    var chartData = [
-      { country: '2019', president: 50, dean: 40 },
-      { country: '2020', president: 40, dean: 35 },
-      { country: '2021', president: 70, dean: 65 },
-      { country: '2022', president: 60, dean: 50 },
-    ];
+<!-- LISTER GRAPHS OF STUDENTS -->
+<script>
+  async function fetchListerTrends() {
+    try {
+      const response = await fetch(`${api_base_url}/lister/trends`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const json_lister_trends = await response.json();
+
+      console.log('json_lister_trends.success: ', json_lister_trends.success);
+      if (json_lister_trends.success) {
+        displayListerCountTrends(
+          json_lister_trends.lister,
+          json_lister_trends.max,
+          json_lister_trends.min,
+          json_lister_trends.interval
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function displayListerCountTrends(data, max, min, interval) {
+    console.log('HERE');
+    var chartData = [...data];
     var chart = new ej.charts.Chart(
       {
         primaryXAxis: {
@@ -400,14 +425,14 @@ endblock title %}
         },
         primaryYAxis: {
           minimum: 0,
-          maximum: 80,
+          maximum: max + 5,
           interval: 20,
           title: 'Count',
         },
         series: [
           {
             dataSource: chartData,
-            xName: 'country',
+            xName: 'year',
             yName: 'president',
             name: 'President Lister',
             // Series type as column series
@@ -415,7 +440,7 @@ endblock title %}
           },
           {
             dataSource: chartData,
-            xName: 'country',
+            xName: 'year',
             yName: 'dean',
             name: 'Dean Lister',
             columnWidth: 0.75,
@@ -434,7 +459,7 @@ endblock title %}
     );
   }
 
-  columnChart();
+  fetchListerTrends();
 </script>
 
 <!-- STUDENT PERFORMANCE OVER TIME -->

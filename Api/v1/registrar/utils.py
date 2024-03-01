@@ -1,4 +1,4 @@
-from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, db, UniversityAdmin, Metadata, Registrar, Student, StudentRequirements
+from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, db, UniversityAdmin, Metadata, Registrar, Student, StudentRequirements, LatestBatchSemester
 from sqlalchemy import desc, distinct, func, and_
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -173,7 +173,7 @@ def updatePassword(str_registrar_id, password, new_password, confirm_password):
 def getStatistics():
     try:
         # Get the teacher active in Faculty
-        teacher_active_count = db.session.query(Faculty).filter_by(IsActive = True).count()
+        teacher_active_count = db.session.query(Faculty).filter_by(Status = "Active").count()
         
         # Get count of student enrolled in courses with the current year
         # Get the current year
@@ -1079,3 +1079,66 @@ def processUpdatingStudentRequirements(file):
         print("ERROR: ", e)
         db.session.rollback()
         return jsonify({'errorException': 'An error occurred while processing the file'}), 500
+    
+
+    
+
+
+def get_lister_counts(item):
+    president_lister_count = db.session.query(func.count(StudentClassGrade.Lister)).\
+        join(Class, Class.ClassId == StudentClassGrade.ClassId).\
+        join(Metadata, Metadata.MetadataId == Class.MetadataId).\
+        filter(Metadata.Batch == item.Batch, StudentClassGrade.Lister == 1).\
+        scalar()
+
+    dean_lister_count = db.session.query(func.count(StudentClassGrade.Lister)).\
+        join(Class, Class.ClassId == StudentClassGrade.ClassId).\
+        join(Metadata, Metadata.MetadataId == Class.MetadataId).\
+        filter(Metadata.Batch == item.Batch, StudentClassGrade.Lister == 2).\
+        scalar()
+
+    return president_lister_count, dean_lister_count
+
+def get_list_lister_data(data_latest_batch_semester):
+    list_lister_data = []
+    max_count = 0
+    min_count = None
+
+    if data_latest_batch_semester:
+        for item in data_latest_batch_semester:
+            president_lister_count, dean_lister_count = get_lister_counts(item)
+
+            max_count = max(max_count, president_lister_count, dean_lister_count)
+            if not min_count:
+                min_count = min(president_lister_count, dean_lister_count)
+            else:
+                min_count = min(min_count, president_lister_count, dean_lister_count)
+
+            grade_dict = {"year": str(item.Batch), "president": president_lister_count, "dean": dean_lister_count}
+            list_lister_data.append(grade_dict)
+
+        return list_lister_data, max_count, min_count
+
+    return None, None, None
+
+def getListerTrends():
+    try:
+        data_latest_batch_semester_desc = db.session.query(LatestBatchSemester).distinct(LatestBatchSemester.Batch).order_by(desc(LatestBatchSemester.Batch)).limit(5).all()
+        data_latest_batch_semester = list(reversed(data_latest_batch_semester_desc))
+
+        list_lister_data, max_count, min_count = get_list_lister_data(data_latest_batch_semester)
+        interval = 0
+        # Make a 5 interval in max count and min count Ex. 100/5 = 20 then interval is 20
+        if max_count and min_count:
+            max_count = max_count + 1
+            min_count = min_count - 1
+            interval = int((max_count - min_count) / 5)
+    
+        if list_lister_data:
+            return jsonify({'success': True, 'lister': list_lister_data, "max": max_count, "min": min_count, "interval": interval})
+        else:
+            return None
+
+    except Exception as e:
+        print("ERROR: ", e)
+        return None

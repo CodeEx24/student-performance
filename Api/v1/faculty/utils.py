@@ -1428,7 +1428,7 @@ def processGradeSubmission(file):
     except Exception as e:
         return jsonify({'error': 'An error occurred while processing the file'}), 500
 
-def processGradePDFSubmission(file):
+def processGradePDFSubmission(file, faculty_id):
     try:
         # Check if file is pdf
         if not file.filename.endswith('.pdf'):
@@ -1491,7 +1491,7 @@ def processGradePDFSubmission(file):
                 .join(Subject, Subject.SubjectId == ClassSubject.SubjectId)
                 .join(Metadata, Metadata.MetadataId == Class.MetadataId)
                 .join(Course, Course.CourseId == Metadata.CourseId)
-                .filter(Course.CourseCode == data['CourseCode'], Subject.SubjectCode == data['Subject'], Metadata.Year == data['Year'], Metadata.Semester == data['Semester'], Metadata.Batch == data['Batch'], Class.Section == data['Section'])
+                .filter(Course.CourseCode == data['CourseCode'], Subject.SubjectCode == data['Subject'], Metadata.Year == data['Year'], Metadata.Semester == data['Semester'], Metadata.Batch == data['Batch'], Class.Section == data['Section'], ClassSubject.FacultyId == faculty_id)
                 .order_by(desc(Metadata.Year), desc(Class.Section), desc(Metadata.Batch))
                 .first()
             )
@@ -1531,25 +1531,26 @@ def processGradePDFSubmission(file):
                         
                         if student_class_subject_grade:
                             #######################################################################################
+                            grade = float(row[4])
                             if(class_subject.Class.IsGradeFinalized==False):
-                                if row[5] == 'INCOMPLETE':
+                                if row[5] == 'INCOMPLETE' and grade > 3:
                                     print("INCOMPLETE")
                                     # Update the Class isGradeFinalized to False
                                     student_class_subject_grade.StudentClassSubjectGrade.Grade = 0
                                     # Set AcademicStatus to 3
                                     student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 3
                                     db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
-                                elif row[5] == "PASSED":
+                                elif row[5] == "PASSED" and grade <= 3 and grade >= 1:
                                     print("PASSED")
                                     # Update the Class isGradeFinalized to False
-                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = int(row[4])
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = grade if grade is not None else 0
                                     # Save only but dont commit in database
                                     db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
                                 else:
                                     # Set Academic Status to 4
                                     student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 4
                                     # Update the Class isGradeFinalized to False
-                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = int(row[4])
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = grade if grade is not None else 0
                                     # Save only but dont commit in database
                                     db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
                                 is_some_submitted = True
@@ -1563,12 +1564,11 @@ def processGradePDFSubmission(file):
                                     "SectionCode": data['CourseCode'] + ' ' + str(data['Year']) + '-' + str(data['Section']),
                                     "SubjectCode": data['Subject'],
                                     "Semester": data['Semester'],
-                                    "Grade": int(row[4]),
+                                    "Grade": float(row[4]),
                                     "Batch": data['Batch'],
                                     "Error": "Grade has been finalized already in class"
                                 })
                             #######################################################################################
- 
                         else:
                             # list_error
                             list_error.append({
@@ -1579,11 +1579,10 @@ def processGradePDFSubmission(file):
                                 "SectionCode": data['CourseCode'] + ' ' + str(data['Year']) + '-' + str(data['Section']),
                                 "SubjectCode": data['Subject'],
                                 "Semester": data['Semester'],
-                                "Grade": int(row[4]),
+                                "Grade": float(row[4]),
                                 "Batch": data['Batch'],
                                 "Error": "Student does not exist in the class"
                             })
-                            
                         # If all data is updated successfully then commit the data
             db.session.commit()
         

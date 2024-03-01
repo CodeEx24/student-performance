@@ -340,13 +340,17 @@ def studentPerformance(id):
 @faculty_api.route('/submit-grades', methods=['POST'])
 @role_required('faculty')
 def submitGrades():
-    # Check if the request contains a file named 'excelFile'
-    if 'pdf-file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
+    faculty = getCurrentUser()
+    if faculty:
+        # Check if the request contains a file named 'excelFile'
+        if 'pdf-file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
 
-    file = request.files['pdf-file']
+        file = request.files['pdf-file']
 
-    return processGradePDFSubmission(file)
+        return processGradePDFSubmission(file, faculty.FacultyId)
+    else:
+        return render_template('404.html'), 404
 
 
     # # Check if the request contains a file named 'excelFile'

@@ -62,11 +62,12 @@ class Student(db.Model): # (class SPSStudent) In DJANGO you must set the name di
 
 # Faculty Users
 class Faculty(db.Model):
-    __tablename__ = 'FISFaculty' # Set the name of table in database
-    FacultyId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    __tablename__ = 'FISFaculty'
+    
+    FacultyId = db.Column(db.Integer, primary_key=True, autoincrement=True)  # UserID
     FacultyType = db.Column(db.String(50), nullable=False)  # Faculty Type
     Rank = db.Column(db.String(50))  # Faculty Rank
-    Units = db.Column(db.Numeric, nullable=False)  # Faculty Unit
+    Units = db.Column(db.Float, nullable=False)  # Faculty Unit
     FirstName = db.Column(db.String(50), nullable=False)  # First Name
     LastName = db.Column(db.String(50), nullable=False)  # Last Name
     MiddleName = db.Column(db.String(50))  # Middle Name
@@ -79,17 +80,21 @@ class Faculty(db.Model):
     FacultyCode = db.Column(db.Integer, nullable=False)  # Faculty Code
     Honorific = db.Column(db.String(50))  # Honorific
     Age = db.Column(db.Numeric, nullable=False)  # Age
+    Specialization = db.Column(db.String)  # Specialization
+    PreferredSchedule = db.Column(db.String)  # PreferredSchedule
     
     Email = db.Column(db.String(50), unique=True, nullable=False)  # Email
     ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
     MobileNumber = db.Column(db.String(11))  # MobileNumber
     Gender = db.Column(db.Integer) # Gender # 1 if Male 2 if Female
-    
+
     Password = db.Column(db.String(256), nullable=False)  # Password
     ProfilePic= db.Column(db.String(50),default="14wkc8rPgd8NcrqFoRFO_CNyrJ7nhmU08")  # Profile Pic
-    IsActive = db.Column(db.Boolean, default=True)
+    Status = db.Column(db.String(50), default="Deactivated")
+    Login_Attempt = db.Column(db.Integer, default=12)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
     # FOREIGN TABLES
     
 

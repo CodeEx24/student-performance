@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements
+from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements, getListerTrends
 import os
 import re
 
@@ -119,6 +119,22 @@ def overallCoursePerformance():
             return  json_performance_data
         else:
             return jsonify(error="No Performance data available")
+    else:
+        return render_template('404.html'), 404
+    
+
+# Getting the enrollment trends of different courses
+@registrar_api.route('/lister/trends', methods=['GET'])
+@role_required('registrar')
+def listerTrends():
+    registrar = getCurrentUser()
+    if registrar:
+        json_lister_data = getListerTrends()
+
+        if json_lister_data:
+            return (json_lister_data)
+        else:
+            return jsonify(message="No Performance data available")
     else:
         return render_template('404.html'), 404
     
