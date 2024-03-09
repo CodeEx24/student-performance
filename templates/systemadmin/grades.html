@@ -629,10 +629,52 @@
         },
       },
       {
-        headerText: 'Actions',
-        template:
-          '<button class="btn px-4 py-2 bg-primary text-white font-bold">Performance</button>', // Add a button to the cell
+        field: 'Remarks',
+        headerText: 'Remarks',
         width: 150,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Remarks';
+            return dd;
+          },
+          write: function (args) {
+            var currentYear = new Date().getFullYear();
+            var remarks = [
+              'All',
+              'Passed',
+              'Failed',
+              'Incomplete',
+              'Withdrawn',
+            ];
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: remarks,
+              fields: { text: 'Remarks', value: 'Remarks' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Remarks');
+                } else {
+                  const num =
+                    e.value === 'Passed'
+                      ? 1
+                      : e.value === 'Failed'
+                      ? 2
+                      : e.value === 'Incomplete'
+                      ? 3
+                      : 4;
+                  gridObj.filterByColumn('Remarks', 'equal', parseInt(num));
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Remarks');
+          },
+        },
       },
     ],
   };

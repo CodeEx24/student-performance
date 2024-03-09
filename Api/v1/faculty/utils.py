@@ -1533,7 +1533,7 @@ def processGradePDFSubmission(file, faculty_id):
                             #######################################################################################
                             grade = float(row[4])
                             if(class_subject.Class.IsGradeFinalized==False):
-                                if row[5] == 'INCOMPLETE' and grade > 3:
+                                if row[5] == 'INCOMPLETE':
                                     print("INCOMPLETE")
                                     # Update the Class isGradeFinalized to False
                                     student_class_subject_grade.StudentClassSubjectGrade.Grade = 0

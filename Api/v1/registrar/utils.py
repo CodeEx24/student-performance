@@ -754,6 +754,7 @@ def deleteStudentData(studentId):
                 db.session.commit()
                 return jsonify({'result': 'Data deleted successfully'}), 200
     except Exception as e:
+        print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return jsonify({'error': e}), 500
     
@@ -801,7 +802,7 @@ def getStudentRequirements(skip, top, order_by, filter):
                 if '(tolower(' in part:
                     print('PART: ', part)
                     # Check if part contains startswith
-                    if 'startswith)' in part:
+                    if 'startswith(' in part:
                         
                         # Extracting column name and value
                         column_name = part.split("(")[3].split("),'")[0]

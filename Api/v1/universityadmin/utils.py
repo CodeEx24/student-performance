@@ -3395,29 +3395,10 @@ def deleteClassData(classId):
             if class_count > 1 :
                 # Delete the class from database
                 db.session.query(Class).filter_by(ClassId = classId).delete()
-                # Check count of class_metadata_count
-                if class_metadata_count == 1:
-                    # Delete the metadata
-                    db.session.query(Metadata).filter_by(MetadataId = class_data.Metadata.MetadataId).delete()
-                # commit
-                db.session.commit()
-                return jsonify({'result': 'Data deleted successfully'}), 200
-            # else if class count is == 1 delete the class and latest_batch_semester
             elif class_count == 1:
-                # Delete the class from database
                 db.session.query(Class).filter_by(ClassId = classId).delete()
-                
-                
-                # Delete the latest_batch_semester
                 db.session.query(LatestBatchSemester).filter_by(Batch = class_data.Metadata.Batch, Semester = class_data.Metadata.Semester).delete()
-                print("CLASS AND LATEST DELETED")
-                # Check count of class_metadata_count
-                if class_metadata_count == 1:
-                    print("CLASS METADATA DELETED")
-                    # Delete the metadata
-                    db.session.query(Metadata).filter_by(MetadataId = class_data.Metadata.MetadataId).delete()
-                
-            # Commit
+
             db.session.commit()
             # return success
             return jsonify({'result': 'Data deleted successfully'}), 200

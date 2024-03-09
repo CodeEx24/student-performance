@@ -102,6 +102,10 @@
         color: white;
       }
 
+      .e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn-text {
+        color: white !important;
+      }
+
       .e-overlay {
         background-color: #9d1d1d !important;
       }
@@ -199,10 +203,10 @@
                   class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'home' else 'hover:bg-gray-100 hover:text-c1' }}"
                 >
                   <svg
-                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'home' else 'text-gray-500' }}"
-                    viewBox="0 0 24 24"
-                    fill="none"
+                    viewBox="0 0 16 16"
                     xmlns="http://www.w3.org/2000/svg"
+                    fill="{{ '#ffffff' if current_page == 'home' else '#6B7280' }}"
+                    class="bi bi-house-door-fill w-5 h-5"
                   >
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                     <g
@@ -212,15 +216,7 @@
                     ></g>
                     <g id="SVGRepo_iconCarrier">
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M4 4.69434V18.6943C4 20.3512 5.34315 21.6943 7 21.6943H17C18.6569 21.6943 20 20.3512 20 18.6943V8.69434C20 7.03748 18.6569 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434ZM7.25 11.6943C7.25 11.2801 7.58579 10.9443 8 10.9443H16C16.4142 10.9443 16.75 11.2801 16.75 11.6943C16.75 12.1085 16.4142 12.4443 16 12.4443H8C7.58579 12.4443 7.25 12.1085 7.25 11.6943ZM7.25 15.1943C7.25 14.7801 7.58579 14.4443 8 14.4443H13.5C13.9142 14.4443 14.25 14.7801 14.25 15.1943C14.25 15.6085 13.9142 15.9443 13.5 15.9443H8C7.58579 15.9443 7.25 15.6085 7.25 15.1943Z"
-                        fill="currentColor"
-                      ></path>
-                      <path
-                        opacity="0.5"
-                        d="M18 4.00038V5.86504C17.6872 5.75449 17.3506 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434V4.62329C4 4.09027 4.39193 3.63837 4.91959 3.56299L15.7172 2.02048C16.922 1.84835 18 2.78328 18 4.00038Z"
-                        fill="currentColor"
+                        d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5z"
                       ></path>
                     </g>
                   </svg>
@@ -269,10 +265,14 @@
                   class="flex items-center px-4 py-4 text-gray-600 transition-colors duration-300 transform rounded-lg {{ 'bg-warning text-white font-bold rounded shadow-md' if current_page == 'grades' else 'hover:bg-gray-100 hover:text-c1' }}"
                 >
                   <svg
-                    class="flex-shrink-0 w-5 h-5 transition duration-75 group-hover:text-c1 {{ 'text-white' if current_page == 'grades' else 'text-gray-500' }}"
-                    viewBox="0 0 24 24"
-                    fill="none"
+                    fill="{{ '#ffffff' if current_page == 'grades' else '#6B7280' }}"
+                    class="w-5 h-5"
+                    version="1.1"
+                    id="Icons"
                     xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 32 32"
+                    xml:space="preserve"
                   >
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                     <g
@@ -282,16 +282,16 @@
                     ></g>
                     <g id="SVGRepo_iconCarrier">
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M4 4.69434V18.6943C4 20.3512 5.34315 21.6943 7 21.6943H17C18.6569 21.6943 20 20.3512 20 18.6943V8.69434C20 7.03748 18.6569 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434ZM7.25 11.6943C7.25 11.2801 7.58579 10.9443 8 10.9443H16C16.4142 10.9443 16.75 11.2801 16.75 11.6943C16.75 12.1085 16.4142 12.4443 16 12.4443H8C7.58579 12.4443 7.25 12.1085 7.25 11.6943ZM7.25 15.1943C7.25 14.7801 7.58579 14.4443 8 14.4443H13.5C13.9142 14.4443 14.25 14.7801 14.25 15.1943C14.25 15.6085 13.9142 15.9443 13.5 15.9443H8C7.58579 15.9443 7.25 15.6085 7.25 15.1943Z"
-                        fill="currentColor"
+                        d="M23,28L23,28c-1.1,0-2.1-0.7-2.5-1.8c0-0.1,0-0.2-0.1-0.2h-8.9c0,0.1,0,0.2-0.1,0.2C11.1,27.3,10.1,28,9,28h0 c-0.6,0-1,0.4-1,1s0.4,1,1,1h14c0.6,0,1-0.4,1-1S23.6,28,23,28z"
                       ></path>
-                      <path
-                        opacity="0.5"
-                        d="M18 4.00038V5.86504C17.6872 5.75449 17.3506 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434V4.62329C4 4.09027 4.39193 3.63837 4.91959 3.56299L15.7172 2.02048C16.922 1.84835 18 2.78328 18 4.00038Z"
-                        fill="currentColor"
-                      ></path>
+                      <g>
+                        <path
+                          d="M11,13v-2c-1.7,0-3,1.3-3,3s1.3,3,3,3s3-1.3,3-3h-2C11.4,14,11,13.6,11,13z"
+                        ></path>
+                        <path
+                          d="M27,3H5C3.3,3,2,4.3,2,6v15c0,1.7,1.3,3,3,3h6.9h8.1H27c1.7,0,3-1.3,3-3V6C30,4.3,28.7,3,27,3z M16,14c0,2.8-2.2,5-5,5 s-5-2.2-5-5s2.2-5,5-5c0-0.6,0.4-1,1-1c2.8,0,5,2.2,5,5C17,13.6,16.6,14,16,14z M25,16h-2c-0.6,0-1-0.4-1-1s0.4-1,1-1h2 c0.6,0,1,0.4,1,1S25.6,16,25,16z M25,13h-5c-0.6,0-1-0.4-1-1s0.4-1,1-1h5c0.6,0,1,0.4,1,1S25.6,13,25,13z"
+                        ></path>
+                      </g>
                     </g>
                   </svg>
                   <span class="flex-1 ml-3 whitespace-nowrap">Grades</span>
@@ -500,7 +500,7 @@
       >
         <div class="flex items-center justify-between">
           <a
-            href="index.html"
+            href="{{ url_for('systemAdminHome') }}"
             class="text-white text-3xl font-semibold uppercase hover:text-c2"
             >Admin</a
           >
@@ -516,67 +516,55 @@
         <!-- Dropdown Nav -->
         <nav :class="isOpen ? 'flex': 'hidden'" class="flex flex-col pt-4">
           <a
-            href="index.html"
-            class="flex items-center bg-warning hover:bg-yellow-400 text-white py-2 pl-4 nav-item font-bold"
+            href="{{ url_for('systemAdminHome') }}"
+            class="flex items-center text-white hover:bg-warning  py-2 pl-4 nav-item  {{ 'bg-warning font-bold' if current_page == 'home' else 'opacity-75 hover:opacity-100 hover:bg-warning' }}"
           >
-            <i class="fas fa-tachometer-alt mr-3"></i>
-            Dashboard
+            <i class="fa fa-home mr-3" aria-hidden="true"></i>
+            Home
           </a>
           <a
-            href="blank.html"
-            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+            href="{{ url_for('systemAdminGrades') }}"
+            class="flex items-center text-white hover:bg-warning  py-2 pl-4 nav-item  {{ 'bg-warning font-bold' if current_page == 'grades' else 'opacity-75 hover:opacity-100 hover:bg-warning' }}"
           >
-            <i class="fas fa-sticky-note mr-3"></i>
-            Blank Page
+            <i class="fa fa-clipboard mr-3" aria-hidden="true"></i>
+            Grades
           </a>
           <a
-            href="tables.html"
-            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+            href="{{ url_for('systemAdminStudents') }}"
+            class="flex items-center text-white hover:bg-warning  py-2 pl-4 nav-item  {{ 'bg-warning font-bold' if current_page == 'students' else 'opacity-75 hover:opacity-100 hover:bg-warning' }}"
           >
-            <i class="fas fa-table mr-3"></i>
-            Tables
+            <i class="fa fa-circle mr-3" aria-hidden="true"></i>
+            Student
           </a>
           <a
-            href="forms.html"
-            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+            href="{{ url_for('systemAdminFaculties') }}"
+            class="flex items-center text-white hover:bg-warning  py-2 pl-4 nav-item  {{ 'bg-warning font-bold' if current_page == 'faculty' else 'opacity-75 hover:opacity-100 hover:bg-warning' }}"
           >
-            <i class="fas fa-align-left mr-3"></i>
-            Forms
+            <i class="fa fa-circle mr-3" aria-hidden="true"></i>
+            Faculty
           </a>
           <a
-            href="tabs.html"
-            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+            href="{{ url_for('systemAdminBatch') }}"
+            class="flex items-center text-white hover:bg-warning  py-2 pl-4 nav-item  {{ 'bg-warning font-bold' if current_page == 'batch' else 'opacity-75 hover:opacity-100 hover:bg-warning' }}"
           >
-            <i class="fas fa-tablet-alt mr-3"></i>
-            Tabbed Content
+            <i class="fa fa-list-ul mr-3" aria-hidden="true"></i>
+            Batch
           </a>
           <a
-            href="calendar.html"
-            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+            href="{{ url_for('systemAdminProfile') }}"
+            class="flex items-center text-white hover:bg-warning  py-2 pl-4 nav-item  {{ 'bg-warning font-bold' if current_page == 'profile' else 'opacity-75 hover:opacity-100 hover:bg-warning' }}"
           >
-            <i class="fas fa-calendar mr-3"></i>
-            Calendar
+            <i class="fa fa-user-circle mr-3" aria-hidden="true"></i>
+
+            Profile
           </a>
           <a
-            href="#"
-            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
+            href="{{ url_for('systemAdminChangePassword') }}"
+            class="flex items-center text-white hover:bg-warning  py-2 pl-4 nav-item  {{ 'bg-warning font-bold' if current_page == 'change-password' else 'opacity-75 hover:opacity-100 hover:bg-warning' }}"
           >
-            <i class="fas fa-cogs mr-3"></i>
-            Support
-          </a>
-          <a
-            href="#"
-            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
-          >
-            <i class="fas fa-user mr-3"></i>
-            My Account
-          </a>
-          <a
-            href="#"
-            class="flex items-center text-white opacity-75 hover:opacity-100 hover:bg-warning py-2 pl-4 nav-item"
-          >
-            <i class="fas fa-sign-out-alt mr-3"></i>
-            Sign Out
+            <i class="fa fa-lock mr-3" aria-hidden="true"></i>
+
+            Change Password
           </a>
           <button
             class="w-full bg-white cta-btn font-semibold py-2 mt-3 rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-300 flex items-center justify-center"

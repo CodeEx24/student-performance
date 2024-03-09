@@ -141,6 +141,63 @@ def updatePassword(str_system_admin_id, password, new_password, confirm_password
         return {"message": "An error occurred", "status": 500}
 
 
+def getStudentPerformance(str_student_id):
+    try:
+        list_student_performance = (
+            db.session.query(StudentClassGrade, Class, Metadata)
+            .join(Class, StudentClassGrade.ClassId == Class.ClassId)
+            .join(Metadata, Metadata.MetadataId == Class.MetadataId)
+            .filter(StudentClassGrade.StudentId == str_student_id)
+            .order_by(desc(Metadata.Batch), desc(Metadata.Semester))
+            .all()
+        )
+
+        if list_student_performance:
+            list_performance_data = []  # Initialize a list to store dictionary data
+            for gpa in list_student_performance:
+
+                gpa_dict = {
+                    'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
+                    'Semester': gpa.Metadata.Semester,
+                    'Year': gpa.Metadata.Batch,
+                }
+                # Append the dictionary to the list
+                list_performance_data.append(gpa_dict)
+
+            # Check for missing entries
+            batch_semester_map = {(gpa_dict["Year"], semester): False for semester in range(
+                1, 4) for gpa_dict in list_performance_data}
+
+            for gpa_dict in list_performance_data:
+                batch_semester_map[(gpa_dict["Year"],
+                                    gpa_dict["Semester"])] = True
+
+            missing_entries = []
+            for (batch, semester), is_present in batch_semester_map.items():
+                if not is_present:
+                    missing_entries.append({
+                        "Year": batch,
+                        "Grade": 0,
+                        "Semester": semester
+                    })
+
+            # Append missing entries to list_performance_data
+            list_performance_data.extend(missing_entries)
+
+            # Sort the combined list based on year descending and semester descending
+            sorted_list_performance_data = sorted(list_performance_data, key=lambda x: (
+                x['Year'], x['Semester']), reverse=True)
+
+            return sorted_list_performance_data
+        else:
+            return None
+
+    except Exception as e:
+        print("ERROR: ", e)
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
 def getClientList(skip, top, order_by, filter):
     try:
         clients = OAuth2Client.query.all()
@@ -705,7 +762,7 @@ def getFacultyData(skip, top, order_by, filter):
                 order_query = filter_query.order_by(order_attr)
         else:
             # Apply default sorting
-            order_query = filter_query.order_by(desc(Faculty.IsActive))
+            order_query = filter_query.order_by(desc(Faculty.Status))
         
         
         # Query for counting all records
@@ -721,7 +778,7 @@ def getFacultyData(skip, top, order_by, filter):
                     "FacultyCode": data.FacultyCode,
                     "LastName": data.LastName,
                     "FirstName": data.FirstName,
-                    "MiddleName": data.MiddleName,
+                    "MiddleName": data.MiddleName if data.MiddleName else "",
                     "Email": data.Email,
                     "MobileNumber": data.MobileNumber,
                     "Gender": "Male" if data.Gender == 1 else "Female",
@@ -961,6 +1018,8 @@ def getStudentClassSubjectGrade(skip, top, order_by, filter):
                         column_num = StudentClassSubjectGrade.Grade
                     elif column_name.strip() == 'Batch':
                         column_num = Metadata.Batch
+                    elif column_name.strip() == 'Remarks':
+                        column_num = StudentClassSubjectGrade.AcademicStatus
                     elif column_name.strip() == 'Semester':
                         column_num = Metadata.Semester
                     
@@ -1027,8 +1086,16 @@ def getStudentClassSubjectGrade(skip, top, order_by, filter):
             unique_classes = set()
      
             for class_subject_grade in result_all:
-               
+                remarks = ""
                 class_name = f"{class_subject_grade.Course.CourseCode} {class_subject_grade.Metadata.Year}-{class_subject_grade.Class.Section}"
+                if class_subject_grade.StudentClassSubjectGrade.AcademicStatus == 1:
+                    remarks = "Passed"
+                elif class_subject_grade.StudentClassSubjectGrade.AcademicStatus == 2:
+                    remarks = "Failed"
+                elif class_subject_grade.StudentClassSubjectGrade.AcademicStatus == 3:
+                    remarks = "Incomplete"
+                else:
+                    remarks = "Withdrawn"
 
                 dict_class_subject_grade = {
                     'ClassSubjectId': class_subject_grade.ClassSubject.ClassSubjectId ,
@@ -1041,7 +1108,8 @@ def getStudentClassSubjectGrade(skip, top, order_by, filter):
                     'Batch': class_subject_grade.Metadata.Batch,
                     'Semester': class_subject_grade.Metadata.Semester,
                     'Grade': class_subject_grade.StudentClassSubjectGrade.Grade,
-                    'SubjectCode': class_subject_grade.Subject.SubjectCode
+                    'SubjectCode': class_subject_grade.Subject.SubjectCode,
+                    'Remarks': remarks
                 }
 
                 list_data_class_subject_grade.append(dict_class_subject_grade)

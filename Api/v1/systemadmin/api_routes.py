@@ -9,7 +9,7 @@ import time
 from werkzeug.security import gen_salt
 from oauth2 import authorization
 
-from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData, updatePassword, getStudentClassSubjectGrade, processGradeResubmission, updateGradesStudent
+from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData, updatePassword, getStudentClassSubjectGrade, processGradeResubmission, updateGradesStudent, getStudentPerformance
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 import os
@@ -407,7 +407,20 @@ def submitGrades():
         return render_template('404.html'), 404
 
 
+# Getting the specific student performance
+@system_admin_api.route('/student/performance/<string:id>', methods=['GET'])
+@role_required('systemAdmin')
+def studentPerformance(id):
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
+        json_student_performance = getStudentPerformance(id)
 
+        if json_student_performance:
+            return (json_student_performance)
+        else:
+            return jsonify({'error': True, 'message': "Something went wrong. Try to contact the admin to resolve the issue."})
+    else:
+        return render_template('404.html'), 404
 
 
 
