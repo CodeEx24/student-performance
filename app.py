@@ -8,7 +8,7 @@ from Api.v1.universityadmin.api_routes import university_admin_api
 from Api.v1.systemadmin.api_routes import system_admin_api
 from Api.v1.registrar.api_routes import registrar_api
 from oauth2 import config_oauth
-from utils import getOverallCoursePerformance, getCurrentUser
+from utils import getCurrentUser
 import os
 from dotenv import load_dotenv
 from models import init_db
@@ -229,7 +229,7 @@ def create_app():
 
     @app.route('/university-admin/all/class')
     @role_required('universityAdmin')
-    def universityAllClass():
+    def universityAdminAllClass():
         return render_template('universityadmin/all-class.html', university_admin_api_base_url=university_admin_api_base_url, current_page="class-performance")
     
     @app.route('/university-admin/grades')
@@ -257,20 +257,20 @@ def create_app():
 
     @app.route('/university-admin/profile')
     @role_required('universityAdmin')
-    def universityProfile():
+    def universityAdminProfile():
         universityAdmin = getCurrentUser('universityAdmin')
         return render_template('universityadmin/profile.html', university_admin_api_base_url=university_admin_api_base_url, current_page="profile", universityAdmin=universityAdmin.to_dict())
 
 
     @app.route('/university-admin/change-password')
     @role_required('universityAdmin')
-    def universityChangePassword():
+    def universityAdminChangePassword():
         return render_template('universityadmin/change-password.html', university_admin_api_base_url=university_admin_api_base_url, current_page="change-password")
     
     
     @app.route('/university-admin/finalized-grades')
     @role_required('universityAdmin')
-    def universityFinalizedGrades():
+    def universityAdminFinalizedGrades():
         return render_template('universityadmin/finalized-grade2.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
 
 
