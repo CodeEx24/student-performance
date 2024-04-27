@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from collections import defaultdict
 
 from datetime import date, datetime
-
+from sklearn.linear_model import LinearRegression
 
 from flask import session, jsonify
 from static.js.utils import convertGradeToPercentage, checkStatus
@@ -301,9 +301,43 @@ def getCurrentGpaGiven():
     except Exception as e:
         # Handle the exception here, e.g., log it or return an error response
         return None
+    
+def predict_performance(data):
+    # Extracting features and labels from the data
+    years = [entry['x'] for entry in data]
+    courses_data = [{key: entry[key] for key in entry if key != 'x'} for entry in data]
+
+    # Initializing the linear regression model
+    model = LinearRegression()
+
+    # Predicting performance level for each course
+    predictions = []
+    for course_data in courses_data:
+        # Training the model for each course
+        model.fit([[year] for year in years], list(course_data.values()))
+        # Predicting the performance for the latest year
+        latest_year = max(years)
+        prediction = model.predict([[latest_year]])[0]
+
+        # Classifying performance levels
+        if prediction < 85:
+            performance_level = "Need Improvement"
+        elif prediction >= 85 and prediction <= 90:
+            performance_level = "Maintain"
+        else:
+            performance_level = "Great Performance"
+
+        predictions.append({
+            "Course": list(course_data.keys())[list(course_data.values()).index(prediction)],
+            "Prediction": prediction,
+            "Performance Level": performance_level
+        })
+
+    return predictions
 
 def getOverallCoursePerformance():
     try:
+        # Get course performance for the last 5 years
         data_course_grade = db.session.query(
             Course.CourseId,
             Course.CourseCode,
@@ -337,7 +371,7 @@ def getOverallCoursePerformance():
                     course_year_grades[year] = {"x": year}
 
                 course_year_grades[year][course_code] = grade
-
+            
             # Convert the data into a list of dictionaries
             formatted_data = list(course_year_grades.values())
             return jsonify({'success': True, 'list_course': list_course, 'course_performance': formatted_data})
@@ -542,6 +576,33 @@ def getAllClassData(skip, top, order_by, filter):
         return None
 
 
+def predict_class_performance(data):
+    if(len(data) == 1 and data[0]['y'] == 0 ):
+        return "No class data available"
+    
+    # Extract x and y values from the data
+    X = [[entry['x']] for entry in data]
+    y = [entry['y'] for entry in data]
+
+    # Train a linear regression model
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Predict future performance for the next year
+    future_year = max([entry['x'] for entry in data]) + 1
+    X_pred = [[future_year]]
+    future_performance = model.predict(X_pred)[0]
+
+    # Classify the predicted performance
+    if future_performance < 85:
+        class_status = "Needs Improvement"
+    elif 85 <= future_performance < 90:
+        class_status = "Good Performance"
+    else:
+        class_status = "Great Performance"
+
+    return class_status
+
 def getClassPerformance(class_id):
     try:
         class_grade = (
@@ -581,7 +642,7 @@ def getClassPerformance(class_id):
                         ClassGrade,
                     )
                     .join(ClassGrade, ClassGrade.ClassId == Class.ClassId)
-                    .filter(Metadata.Year == i, Metadata.Batch == batch, Class.Section == num_class_section)
+                    .filter(Metadata.Year == i, Metadata.Batch == batch, Class.Section == num_class_section, Class.ClassId == class_id)
                     .first()
 
                 )
@@ -590,6 +651,8 @@ def getClassPerformance(class_id):
                     {'x': class_grade_result.Metadata.Batch, 'y': convertGradeToPercentage(class_grade_result.ClassGrade.Grade)})
                 
             dict_class_grade['ListGrade'].extend(list_grade)
+            prediction = predict_class_performance(dict_class_grade['ListGrade'])
+            dict_class_grade['Status'] = prediction
 
             return (dict_class_grade)
         else:
@@ -1727,6 +1790,35 @@ def getStudentClassSubjectGrade(skip, top, order_by, filter):
         return None
     
 
+def predict_future_grade(data):
+    # Filter out entries with grade 0
+    filtered_data = [entry for entry in data if entry['Grade'] != 0]
+
+    if not filtered_data:
+        return "No valid data for prediction", None
+
+    X = []
+    y = []
+    for entry in filtered_data:
+        grade = entry['Grade']
+        semester = entry['Semester']
+        year = entry['Year']
+        X.append([semester, year])
+        y.append(grade)
+
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Predict future grade for the next semester
+    future_semester = max([entry['Semester'] for entry in filtered_data]) + 1
+    future_year = max([entry['Year'] for entry in filtered_data])
+    X_pred = [[future_semester, future_year]]
+    future_grade = model.predict(X_pred)[0]
+    struggling = future_grade < 85
+
+    return future_grade, struggling  # Threshold for struggling student
+
+    
 def getStudentPerformance(str_student_id):
     try:
         list_student_performance = (
@@ -1738,17 +1830,25 @@ def getStudentPerformance(str_student_id):
             .all()
         )
 
+        
         if list_student_performance:
             list_performance_data = []  # Initialize a list to store dictionary data
+          
+            latest_year = list_student_performance[0].Metadata.Year
+            latest_semester = list_student_performance[0].Metadata.Semester
+        
             for gpa in list_student_performance:
-
-                gpa_dict = {
-                    'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
-                    'Semester': gpa.Metadata.Semester,
-                    'Year': gpa.Metadata.Batch,
-                }
-                # Append the dictionary to the list
-                list_performance_data.append(gpa_dict)
+                # Check if Grade is not 0 or NoneTypew
+                if gpa.StudentClassGrade.Grade == 0 or gpa.StudentClassGrade.Grade is None:
+                    continue
+                else:
+                    gpa_dict = {
+                        'Grade': convertGradeToPercentage(gpa.StudentClassGrade.Grade),
+                        'Semester': gpa.Metadata.Semester,
+                        'Year': gpa.Metadata.Batch,
+                    }
+                    # Append the dictionary to the list
+                    list_performance_data.append(gpa_dict)
 
             # Check for missing entries
             batch_semester_map = {(gpa_dict["Year"], semester): False for semester in range(
@@ -1773,12 +1873,30 @@ def getStudentPerformance(str_student_id):
             # Sort the combined list based on year descending and semester descending
             sorted_list_performance_data = sorted(list_performance_data, key=lambda x: (
                 x['Year'], x['Semester']), reverse=True)
+            
+            predicted_grade, struggling = predict_future_grade(sorted_list_performance_data)
+            
+            
+            print(latest_year , latest_semester)
+            # # Check whether the 
+            if(latest_year == 4 and latest_semester < 2):
+                predicted_grade = round(predicted_grade, 2)
+            elif (latest_year <= 3 and latest_semester <= 3):
+                predicted_grade = round(predicted_grade, 2)
+            else:
+                predicted_grade = "Not Applicable"
+            
+            if struggling == True:
+                struggling = "Academic Struggling"
+            else:
+                struggling = "Meet Academic Expectations"
 
-            return sorted_list_performance_data
+            return ({'grade': sorted_list_performance_data, 'future_grade': predicted_grade, 'status': struggling})
         else:
             return None
 
     except Exception as e:
+        print("ERROR: ", e )
         # Handle the exception here, e.g., log it or return an error response
         return None
 
@@ -3813,20 +3931,22 @@ def finalizedGradesReport(metadata_id):
                                         continue
                                     else:
                                         bool_graduate = False;
+                                        # # Set the CourseEnrolled Status to 0
+                                        # course_enrolled = db.session.query(CourseEnrolled).filter_by(StudentId = student_id).first()
+                                        # # Update the status of course_enrolled
+                                        # if course_enrolled:
+                                        #     course_enrolled.Status = 0  # Set status to 0
+                                        #     db.session.commit()  # Commit the changes to the database
                                         
-                                        # Set the CourseEnrolled Status to 0
-                                        db.session.query(CourseEnrolled).filter_by(StudentId = student_id).update({
-                                            'Status': 0
-                                        })
-                                        db.session.commit()
+                                        # db.session.commit()
                                         break
                                 else:
                                     bool_graduate = False;
                                     # Set the CourseEnrolled Status to 0
-                                    db.session.query(CourseEnrolled).filter_by(StudentId = student_id).update({
-                                        'Status': 0
-                                    })
-                                    db.session.commit()
+                                    # db.session.query(CourseEnrolled).filter_by(StudentId = student_id).update({
+                                    #     'Status': 0
+                                    # })
+                                    # db.session.commit()
                                     break     
                             # Check for value of flag if still true
                             if bool_graduate:

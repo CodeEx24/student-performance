@@ -16,6 +16,16 @@ def getCurrentUser():
     current_user_id = session.get('user_id')
     return SystemAdmin.query.get(current_user_id)
 
+def is_valid_email(email):
+    # Regular expression for a basic email validation
+    email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(email_pattern, email)
+
+def is_valid_phone_number(phone_number):
+    # Regular expression for a phone number validation
+    phone_pattern = r'^09\d{9}$'
+    return re.match(phone_pattern, phone_number)
+
 def getUniversityAdminData(str_univ_admin_id):
     try:
         data_university_admin = (
@@ -538,8 +548,6 @@ def getStudentData(skip, top, order_by, filter):
             db.session.query(CourseEnrolled, Student, Course).join(Student, Student.StudentId == CourseEnrolled.StudentId).join(Course, Course.CourseId == CourseEnrolled.CourseId)
         )
         
-        
-        
         filter_conditions = []
         if filter:
             filter_parts = filter.split(' and ')
@@ -591,6 +599,8 @@ def getStudentData(skip, top, order_by, filter):
              
                     if column_name.strip() == 'Batch':
                         column_num = CourseEnrolled.CurriculumYear
+                    if column_name.strip() == 'Status':
+                        column_num = CourseEnrolled.Status
                     
                     if column_num:
                         # Append column_num
@@ -621,14 +631,14 @@ def getStudentData(skip, top, order_by, filter):
                 order_attr = getattr(CourseEnrolled, 'DateEnrolled')
             elif order_by.split(' ')[0] == 'Batch':
                 order_attr = getattr(CourseEnrolled, 'CurriculumYear')
-           
+            elif order_by.split(' ')[0] == 'Status':
+                order_attr = getattr(CourseEnrolled, 'Status')
            
             if ' ' in order_by:
                 order_query = filter_query.order_by(desc(order_attr))
             else:
                 order_query = filter_query.order_by(order_attr)
         else:
-            print("ELSE")
             # Apply default sorting
             order_query = filter_query.order_by(desc(CourseEnrolled.CurriculumYear), desc(Course.CourseCode), desc(Student.StudentNumber))
         
@@ -641,6 +651,7 @@ def getStudentData(skip, top, order_by, filter):
              # For loop the student_query and put it in dictionary
             list_student_data = []
             for data in student_limit_offset_query:
+                status = "Regular" if data.CourseEnrolled.Status == 0 else "Graduated" if data.CourseEnrolled.Status == 1 else "Irregular" if data.CourseEnrolled.Status == 2 else "Drop"
                 dict_student = {
                     "StudentId": data.Student.StudentId,
                     "StudentNumber": data.Student.StudentNumber,
@@ -652,7 +663,8 @@ def getStudentData(skip, top, order_by, filter):
                     "Gender": "Male" if data.Student.Gender == 1 else "Female",
                     "CourseCode": data.Course.CourseCode,
                     "DateEnrolled": data.CourseEnrolled.DateEnrolled.strftime('%Y-%m-%d'),
-                    "Batch": data.CourseEnrolled.CurriculumYear
+                    "Batch": data.CourseEnrolled.CurriculumYear,
+                    "Status": status
                 }
                 # Append the data
                 list_student_data.append(dict_student)
@@ -663,9 +675,7 @@ def getStudentData(skip, top, order_by, filter):
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
-
-
-
+    
 
 def getFacultyData(skip, top, order_by, filter):
     try:
@@ -1277,4 +1287,152 @@ def processGradeResubmission(file):
         db.session.rollback()
         print("ERROR: ", e)
         return jsonify({'error': 'An error occurred while processing the file'}), 500
+    
+    
+
+def processUpdatingStudents(data, excelType=False):
+    try:
+        def errorObject(data):
+            return ({
+                        'StudentNumber': data[0],
+                        'LastName': data[1],
+                        'FirstName': data[2],
+                        'MiddleName': data[3],
+                        'Email': data[4],
+                        'Phone': data[5],
+                        'Gender': data[6],
+                        'CourseCode': data[7],
+                        'DateEnrolled': data[8],  # Adding the original string for reference
+                        'Batch': data[9],
+                        'Error': data[10]
+                    })
+        
+        if excelType == True:
+            # Check if the file is empty
+            if data.filename == '':
+                return jsonify({'error': 'No selected file'}), 400
+
+            # Check file extension
+            if not data.filename.endswith(('.xlsx', '.xls')):
+                return jsonify({'error': 'Invalid file type. Please select an Excel file.'}), 400
+
+
+            # Read the Excel file into a DataFrame
+            df = pd.read_excel(data)
+            
+            # dict data list
+            list_student_data = []
+            errors = []
+            
+            for index, row in df.iterrows():
+                student_number = row['Student Number'] # OK
+                student_lastname = row['LastName']
+                student_firstname = row['FirstName']
+                student_middlename = row['MiddleName']
+                student_email = row['Email']
+                student_mobile =  str(row['Mobile Number'])
+                student_gender = 1 if row['Gender'] == "Male" else 2 # OK
+                student_course = row['Course Code']
+                student_date_enrolled = row['Date Enrolled']
+                student_batch = row['Batch'] # OK
+                student_status = 2 if row['Status'] == "Irregular" else 0 if row['Status'] == "Regular" else 3 if row["Status"] == "Drop" else 1
+
+
+                if student_mobile:
+                    # Check for length of phone number if 10 add 0 in first
+                    if len(student_mobile) == 10:
+                        student_mobile = '0' + student_mobile
+                    elif len(student_mobile) != 11:
+                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Mobile Format']))
+                        continue
+                    
+            
+                # Check if Date Enrolled is a valid date format
+                if student_date_enrolled is not None:
+    # Check if it is in date format then convert it into YYYY-MM-DD
+                    if isinstance(student_date_enrolled, str):
+                        try:
+                            # Parse the string into a datetime object
+                            student_date_enrolled = datetime.strptime(student_date_enrolled, "%Y-%m-%d")
+                            # Convert it back to the desired string format
+                            student_date_enrolled = student_date_enrolled.strftime("%Y-%m-%d")
+                        except ValueError:
+                            errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Date Enrolled format']))
+                            continue
+                    elif isinstance(student_date_enrolled, datetime):
+                        # Convert the datetime object to the desired string format
+                        student_date_enrolled = student_date_enrolled.strftime("%Y-%m-%d")
+                    else:
+                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Date Enrolled format']))
+                        continue
+                # Check if Batch is a valid format (e.g., numeric)
+                if not str(student_batch).isdigit():
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Batch format']))
+                    continue
+                
+                elif not student_batch:
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Batch']))
+                    continue
+                
+                # Check if Email is a valid format
+                if not is_valid_email(student_email):
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Email format']))
+                    continue
+                
+                elif not student_email:
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender  , student_course, student_date_enrolled, student_batch, 'Invalid Email format']))
+                    continue
+                
+                # Check if Phone Number is a valid format
+                if student_mobile and not is_valid_phone_number(student_mobile):
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Phone Number format']))
+                    continue
+            
+                if not student_course:
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Course']))
+                    continue
+                
+                # Check if the student is already exist in the database based on StudentNumber or Email
+                student_data = db.session.query(Student, CourseEnrolled, Course).join(CourseEnrolled, CourseEnrolled.StudentId == Student.StudentId).join(Course, Course.CourseId == CourseEnrolled.CourseId).filter(
+                    (Student.StudentNumber == student_number) 
+                ).first()
+
+                if student_data:
+                    course = db.session.query(Course).filter_by(CourseCode=student_course).first()
+                    
+                    if student_data.CourseEnrolled.Status != 1:
+                        print("student_status: ", student_status)
+                        # Update the student's information
+                        student_data.Student.LastName = student_lastname
+                        student_data.Student.FirstName = student_firstname
+                        student_data.Student.MiddleName = student_middlename
+                        student_data.Student.Email = student_email
+                        student_data.Student.MobileNumber = str(student_mobile)
+                        student_data.Student.Gender = student_gender
+
+                        # Update the CourseEnrolled information if needed
+                        student_data.CourseEnrolled.CourseId = course.CourseId
+                        student_data.CourseEnrolled.DateEnrolled = student_date_enrolled
+                        student_data.CourseEnrolled.Status = student_status
+                        student_data.CourseEnrolled.CurriculumYear = student_batch
+                        print("student_data.CourseEnrolled.Status: ", student_data.CourseEnrolled.Status)
+                        db.session.commit()  # Commit the changes to the database
+                    else:
+                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, "Cannot update the graduated student information"]))
+                else:
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_gender, student_course, student_date_enrolled, student_batch, "Student Number doesn't already exist"]))
+                
+                    
+            if errors and list_student_data:
+                db.session.rollback()
+                return jsonify({'warning': 'Some data cannot be updated.', 'errors': errors, 'data': list_student_data}), 500
+            if errors and not list_student_data:
+                db.session.rollback()
+                return jsonify({'error': 'Updating data failed.', 'errors': errors}), 500
+            else:        
+                return  jsonify({'result': 'Data updated successfully', 'data': list_student_data}), 200
+    except Exception as e:
+        db.session.rollback()
+        print("ERROR: ", e)
+        return jsonify({'errorException': 'An error occurred while processing the file'}), 500
     

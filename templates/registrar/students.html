@@ -39,7 +39,9 @@
             </p>
             <p class="block text-gray-700 font-bold text-md mb-2">
               Optional:
-              <span class="font-normal">Phone Number, Address and Gender</span>
+              <span class="font-normal"
+                >Status, Phone Number, Address and Gender</span
+              >
             </p>
           </div>
           <div class="mb-4 flex gap-4">
@@ -573,6 +575,56 @@
           },
         },
       },
+
+      {
+        field: 'Status',
+        headerText: 'Status',
+        width: 50,
+        editType: 'dropdownedit',
+        validationRules: {
+          required: true,
+        },
+        edit: {
+          params: {
+            dataSource: [],
+          },
+        },
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Status';
+            return dd;
+          },
+          write: function (args) {
+            var status = ['All', 'Regular', 'Irregular', 'Graduated', 'Drop'];
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: status,
+              fields: { text: 'Status', value: 'Status' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Status');
+                } else {
+                  if (e.value === 'Regular') {
+                    gridObj.filterByColumn('Status', 'equal', parseInt(0));
+                  } else if (e.value === 'Irregular') {
+                    gridObj.filterByColumn('Status', 'equal', parseInt(2));
+                  } else if (e.value === 'Drop') {
+                    gridObj.filterByColumn('Status', 'equal', parseInt(3));
+                  } else {
+                    gridObj.filterByColumn('Status', 'equal', parseInt(1));
+                  }
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Status');
+          },
+        },
+      },
     ],
   };
 
@@ -589,6 +641,10 @@
               data.result.courseOptions;
             gridConfig.columns[10].edit.params.dataSource =
               data.result.batchOptions;
+            gridConfig.columns[11].edit.params.dataSource = [
+              { Status: 'Regular' },
+              { Status: 'Irregular' },
+            ];
           }
         })
         .catch((error) => {

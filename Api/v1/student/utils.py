@@ -6,6 +6,13 @@ import re
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import session, jsonify
 
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+import numpy as np
+
 from static.js.utils import convertGradeToPercentage, checkStatus
 
 def saveSessionValues(user_id, token):
@@ -48,6 +55,7 @@ def getStudentGpa(studentId):
         return None
 
 
+
 def getStudentPerformance(str_student_id):
     try:
         list_student_performance = (
@@ -68,6 +76,7 @@ def getStudentPerformance(str_student_id):
                         'Semester': gpa.Metadata.Semester,
                         'Year': gpa.Metadata.Batch,
                     }
+                    
                     # Append the dictionary to the list
                     list_performance_data.append(gpa_dict)
             # Check for missing entries
@@ -93,6 +102,9 @@ def getStudentPerformance(str_student_id):
             # Sort the combined list based on year descending and semester descending
             sorted_list_performance_data = sorted(list_performance_data, key=lambda x: (
                 x['Year'], x['Semester']), reverse=True)
+            
+            future = predict_future_grades(sorted_list_performance_data)
+            print("FUTURE: ", future)
 
             return sorted_list_performance_data
         else:
@@ -102,6 +114,31 @@ def getStudentPerformance(str_student_id):
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return None
+
+
+def predict_future_grades(data):
+    # Filter out entries with grade 0
+    filtered_data = [entry for entry in data if entry['Grade'] != 0]
+
+    X = []
+    y = []
+    for entry in filtered_data:
+        grade = entry['Grade']
+        semester = entry['Semester']
+        year = entry['Year']
+        X.append([semester, year])
+        y.append(grade)
+
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Predict future grades for the next semester
+    future_semester = max([entry['Semester'] for entry in filtered_data]) + 1
+    future_year = max([entry['Year'] for entry in filtered_data])
+    X_pred = [[future_semester, future_year]]
+    future_grade = model.predict(X_pred)[0]
+
+    return future_grade
 
 def getLatestSubjectGrade(str_student_id):
     try:

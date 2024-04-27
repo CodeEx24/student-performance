@@ -356,6 +356,8 @@ def getStudentData(skip, top, order_by, filter):
              
                     if column_name.strip() == 'Batch':
                         column_num = CourseEnrolled.CurriculumYear
+                    if column_name.strip() == 'Status':
+                        column_num = CourseEnrolled.Status
                     
                     if column_num:
                         # Append column_num
@@ -386,7 +388,8 @@ def getStudentData(skip, top, order_by, filter):
                 order_attr = getattr(CourseEnrolled, 'DateEnrolled')
             elif order_by.split(' ')[0] == 'Batch':
                 order_attr = getattr(CourseEnrolled, 'CurriculumYear')
-           
+            elif order_by.split(' ')[0] == 'Status':
+                order_attr = getattr(CourseEnrolled, 'Status')
            
             if ' ' in order_by:
                 order_query = filter_query.order_by(desc(order_attr))
@@ -405,6 +408,7 @@ def getStudentData(skip, top, order_by, filter):
              # For loop the student_query and put it in dictionary
             list_student_data = []
             for data in student_limit_offset_query:
+                status = "Regular" if data.CourseEnrolled.Status == 0 else "Graduated" if data.CourseEnrolled.Status == 1 else "Irregular" if data.CourseEnrolled.Status == 2 else "Drop"
                 dict_student = {
                     "StudentId": data.Student.StudentId,
                     "StudentNumber": data.Student.StudentNumber,
@@ -416,7 +420,8 @@ def getStudentData(skip, top, order_by, filter):
                     "Gender": "Male" if data.Student.Gender == 1 else "Female",
                     "CourseCode": data.Course.CourseCode,
                     "DateEnrolled": data.CourseEnrolled.DateEnrolled.strftime('%Y-%m-%d'),
-                    "Batch": data.CourseEnrolled.CurriculumYear
+                    "Batch": data.CourseEnrolled.CurriculumYear,
+                    "Status": status
                 }
                 # Append the data
                 list_student_data.append(dict_student)
@@ -476,6 +481,8 @@ def processAddingStudents(data, excelType=False):
                 student_course = row['Course Code']
                 student_date_enrolled = row['Date Enrolled']
                 student_batch = row['Batch'] # OK
+                student_status = 2 if row.get('Status') == "Irregular" else 0
+
 
                 if student_mobile:
                     # Check for length of phone number if 10 add 0 in first
@@ -502,6 +509,7 @@ def processAddingStudents(data, excelType=False):
                 if not str(student_batch).isdigit():
                     errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Batch format']))
                     continue
+                
                 elif not student_batch:
                     errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Batch']))
                     continue
@@ -563,7 +571,7 @@ def processAddingStudents(data, excelType=False):
                         CourseId=course.CourseId,
                         StudentId=new_student.StudentId,
                         DateEnrolled=student_date_enrolled,
-                        Status=1,
+                        Status=student_status,
                         CurriculumYear=student_batch
                     )
                     
@@ -629,7 +637,8 @@ def processAddingStudents(data, excelType=False):
                 student_course = data['CourseCode'].strip()
                 student_date_enrolled = data['DateEnrolled']
                 student_batch = data['Batch'] # OK
-                
+                student_status = 0 if data['Status'] == "Regular" else 2
+                print('student_status: ', student_status)
                 
                 if student_mobile:
                     # Check for length of phone number if 10 add 0 in first
@@ -706,7 +715,7 @@ def processAddingStudents(data, excelType=False):
                         CourseId=course.CourseId,
                         StudentId=new_student.StudentId,
                         DateEnrolled=student_date_enrolled,
-                        Status=1,
+                        Status=student_status,
                         CurriculumYear=student_batch
                     )
                     

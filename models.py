@@ -286,7 +286,7 @@ class CourseEnrolled(db.Model):
     CourseId = db.Column(db.Integer, db.ForeignKey('SPSCourse.CourseId', ondelete="CASCADE"), primary_key=True)  # Unique Identifier
     StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Students Reference
     DateEnrolled = db.Column(db.Date) # Date they enrolled
-    Status = db.Column(db.Integer, nullable=False)  # (0 - Not Graduated/Continuing ||  1 - Graduated  ||  2 - Drop  ||  3 - Transfer Course || 4 - Transfer School)
+    Status = db.Column(db.Integer, nullable=False)  # (0 - Not Graduated/Continuing/Regular ||  1 - Graduated || 2 - Irregular ||  3 - Drop  ||  4 - Transfer Course || 5 - Transfer School)
     CurriculumYear = db.Column(db.Integer, nullable=False)  # (2019, 2020, 2021) - For checking what the subjects they should taken
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)

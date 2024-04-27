@@ -9,7 +9,7 @@ import time
 from werkzeug.security import gen_salt
 from oauth2 import authorization
 
-from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData, updatePassword, getStudentClassSubjectGrade, processGradeResubmission, updateGradesStudent, getStudentPerformance
+from .utils import getCurrentUser, getClientList, getClientsData, getAllClassData, getBatchSemester, getStudentData, getFacultyData, updateStudentData, getStudentAddOptions, revertFinalizedGrades, updateSystemAdminData, updatePassword, getStudentClassSubjectGrade, processGradeResubmission, updateGradesStudent, getStudentPerformance, processUpdatingStudents
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 import os
@@ -449,3 +449,22 @@ def authorize():
 def split_by_crlf(s):
     return [v for v in s.splitlines() if v]
 
+
+
+# api_routes.py
+@system_admin_api.route('/update-students', methods=['POST'])
+@role_required('systemAdmin')
+def updateStudents():
+    systemAdmin = getCurrentUser()
+    if systemAdmin:
+            # Check if the request contains a file named 'excelFile'
+        if 'excelFile' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+
+        file = request.files['excelFile']
+
+        # Call the utility function to process the file
+        return processUpdatingStudents(file, excelType=True)
+    else:
+        return render_template('404.html'), 404
+   

@@ -13,7 +13,49 @@
       <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
         Students
       </h3>
-      <p class="text-xl font-bold mx-4">For future improvements/updates</p>
+      <div>
+        <form
+          class="bg-white p-4 rounded-lg"
+          enctype="multipart/form-data"
+          onsubmit="submitStudents(event)"
+          method="POST"
+          id="reset-form-email"
+        >
+          <div class="mb-4">
+            <label
+              for="excelFile"
+              class="block text-gray-700 font-bold text-lg mb-2"
+            >
+              Update Student Details
+            </label>
+            <p class="block text-gray-700 font-bold text-md mb-2">
+              Column Required:
+              <span class="font-normal"
+                >Student Number, Name, Email, Course Code, Date Enrolled, and
+                Batch, Phone Number, Address and Gender</span
+              >
+            </p>
+          </div>
+          <div class="mb-4 flex gap-4">
+            <input
+              type="file"
+              name="excelFile"
+              id="excelFile"
+              accept=".xlsx, .xls"
+              class="bg-gray-200 text-gray-700 rounded-lg py-2 px-4 w-1/2"
+            />
+            <!-- ADD CSRF /> -->
+
+            <button
+              type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+            >
+              Upload Excel File
+            </button>
+          </div>
+          <p id="students-file-error" class="text-c4 text-sm"></p>
+        </form>
+      </div>
       <hr class="mx-2" />
       <div class="flex items-end justify-between">
         <div class="w-full bg-white p-4 mt-4">
@@ -156,7 +198,7 @@
 
     try {
       showModal('loadingModal');
-      fetch(`${api_base_url}/submit-students`, {
+      fetch(`${api_base_url}/update-students`, {
         method: 'POST',
         body: formData,
       })
@@ -529,6 +571,52 @@
         },
         allowEditing: true,
       },
+      {
+        field: 'Status',
+        headerText: 'Status',
+        width: 50,
+        editType: 'dropdownedit',
+        edit: {
+          params: {
+            dataSource: [],
+          },
+        },
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Status';
+            return dd;
+          },
+          write: function (args) {
+            var status = ['All', 'Regular', 'Irregular', 'Graduated', 'Drop'];
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: status,
+              fields: { text: 'Status', value: 'Status' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Status');
+                } else {
+                  if (e.value === 'Regular') {
+                    gridObj.filterByColumn('Status', 'equal', parseInt(0));
+                  } else if (e.value === 'Irregular') {
+                    gridObj.filterByColumn('Status', 'equal', parseInt(2));
+                  } else if (e.value === 'Drop') {
+                    gridObj.filterByColumn('Status', 'equal', parseInt(3));
+                  } else {
+                    gridObj.filterByColumn('Status', 'equal', parseInt(1));
+                  }
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Status');
+          },
+        },
+      },
     ],
   };
 
@@ -633,10 +721,7 @@
       },
     });
     grid.toolbarClick = function (args) {
-      if (args['item'].id === 'grid-students-list_excelexport') {
-        grid.columns[7].visible = false;
-        grid.excelExport();
-      }
+      grid.excelExport();
     };
 
     // Add a click event handler for all buttons with the "btn" class

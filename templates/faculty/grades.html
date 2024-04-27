@@ -107,11 +107,19 @@
         <div class="grid grid-cols-2 mt-4">
           <div class="flex">
             <h4 class="text-c1 font-bold">Student Name:&nbsp;</h4>
-            <p id="student-name">Jocarl Basco</p>
+            <p id="student-name">Loading...</p>
           </div>
           <div class="flex mb-4">
             <h4 class="text-c1 font-bold">Student Number:&nbsp;</h4>
-            <p id="student-number">Jocarl Basco</p>
+            <p id="student-number">Loading...</p>
+          </div>
+          <div class="flex">
+            <h4 class="text-c1 font-bold">Grade Prediction:&nbsp;</h4>
+            <p id="student-prediction">Loading...</p>
+          </div>
+          <div class="flex mb-4">
+            <h4 class="text-c1 font-bold">Status:&nbsp;</h4>
+            <p id="student-status">Loading...</p>
           </div>
           <div id="columnChartContainer" class="w-full col-span-2"></div>
         </div>
@@ -225,13 +233,36 @@
       );
     }
     const data_performance = await response.json();
+    // Select id prediction and struggle
+
+    // student - prediction;
+    // student - struggle;
     console.log('data_performance: ', data_performance);
 
-    displayPerformance(data_performance, student_name, student_number);
+    displayPerformance(
+      data_performance.grade,
+      student_name,
+      student_number,
+      data_performance.future_grade,
+      data_performance.status
+    );
   }
 
-  function displayPerformance(data_performance, student_name, student_number) {
+  function displayPerformance(
+    data_performance,
+    student_name,
+    student_number,
+    student_prediction,
+    student_struggle
+  ) {
     try {
+      const student_prediction_text =
+        document.getElementById('student-prediction');
+      const student_struggle_text = document.getElementById('student-status');
+      // Update text
+      student_prediction_text.innerText = student_prediction;
+      student_struggle_text.innerText = student_struggle;
+
       if (data_performance && data_performance.length > 0) {
         console.log('NOT ERROR');
         var chartData = [...data_performance];

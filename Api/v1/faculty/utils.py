@@ -11,6 +11,7 @@ import pandas as pd
 from static.js.utils import convertGradeToPercentage, checkStatus
 import re
 import pdfplumber
+from sklearn.linear_model import LinearRegression
 
 
 def getCurrentUser():
@@ -1178,6 +1179,34 @@ def getClassPerformance(class_id):
         return None
 
 
+def predict_future_grade(data):
+    # Filter out entries with grade 0
+    filtered_data = [entry for entry in data if entry['Grade'] != 0]
+
+    if not filtered_data:
+        return "No valid data for prediction", None
+
+    X = []
+    y = []
+    for entry in filtered_data:
+        grade = entry['Grade']
+        semester = entry['Semester']
+        year = entry['Year']
+        X.append([semester, year])
+        y.append(grade)
+
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Predict future grade for the next semester
+    future_semester = max([entry['Semester'] for entry in filtered_data]) + 1
+    future_year = max([entry['Year'] for entry in filtered_data])
+    X_pred = [[future_semester, future_year]]
+    future_grade = model.predict(X_pred)[0]
+    struggling = future_grade < 85
+
+    return future_grade, struggling  # Threshold for struggling student
+
 def getStudentPerformance(str_student_id):
     try:
         list_student_performance = (
@@ -1189,8 +1218,13 @@ def getStudentPerformance(str_student_id):
             .all()
         )
 
+        
         if list_student_performance:
             list_performance_data = []  # Initialize a list to store dictionary data
+          
+            latest_year = list_student_performance[0].Metadata.Year
+            latest_semester = list_student_performance[0].Metadata.Semester
+        
             for gpa in list_student_performance:
                 # Check if Grade is not 0 or NoneTypew
                 if gpa.StudentClassGrade.Grade == 0 or gpa.StudentClassGrade.Grade is None:
@@ -1227,8 +1261,25 @@ def getStudentPerformance(str_student_id):
             # Sort the combined list based on year descending and semester descending
             sorted_list_performance_data = sorted(list_performance_data, key=lambda x: (
                 x['Year'], x['Semester']), reverse=True)
+            
+            predicted_grade, struggling = predict_future_grade(sorted_list_performance_data)
+            
+            
+            print(latest_year , latest_semester)
+            # # Check whether the 
+            if(latest_year == 4 and latest_semester < 2):
+                predicted_grade = round(predicted_grade, 2)
+            elif (latest_year <= 3 and latest_semester <= 3):
+                predicted_grade = round(predicted_grade, 2)
+            else:
+                predicted_grade = "Not Applicable"
+            
+            if struggling == True:
+                struggling = "Academic Struggling"
+            else:
+                struggling = "Meet Academic Expectations"
 
-            return sorted_list_performance_data
+            return ({'grade': sorted_list_performance_data, 'future_grade': predicted_grade, 'status': struggling})
         else:
             return None
 

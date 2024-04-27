@@ -158,11 +158,14 @@
           <h4 class="text-c1 font-bold">Class Name:&nbsp;</h4>
           <p id="class-name">...</p>
         </div>
-        <div class="flex mb-4">
+        <div class="flex">
           <h4 class="text-c1 font-bold">Course:&nbsp;</h4>
           <p id="course-name">...</p>
         </div>
-
+        <div class="flex mb-4">
+          <h4 class="text-c1 font-bold">Status:&nbsp;</h4>
+          <p id="class-status">...</p>
+        </div>
         <div
           id="columnChartClassPerformance"
           class="w-full col-span-full z-10"
@@ -258,7 +261,8 @@
 
     document.getElementById('course-name').innerText = course;
     document.getElementById('class-name').innerText = class_name;
-
+    document.getElementById('class-status').innerText =
+      json_class_performance.Status;
     // Render the chart
     chart.appendTo(`#columnChartClassPerformance`);
 
