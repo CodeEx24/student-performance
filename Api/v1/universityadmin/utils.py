@@ -2911,6 +2911,7 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
             
             # Check if latest_batch_semester.IsStartEnrollment is False
             if not latest_batch_semester.IsEnrollmentStarted:
+                print("SHOULD NOT ADD")
                 return jsonify({'error': 'Cannot add students. Enrollment is not yet started.'}), 400
             
             # Check if grade is already finalized
@@ -3092,7 +3093,9 @@ def processAddingStudentInSubject(data, class_subject_id, excelType=False):
                         "ClassSubjectId": class_subject_id,
                         "StudentId": student.StudentId,
                         "StudentNumber": student.StudentNumber,
-                        "Name": student.Name,
+                        "LastName": student.LastName,
+                        "FirstName": student.FirstName,
+                        "MiddleName": student.MiddleName,
                         "Email": student.Email,
                         "Grade": new_student_class_subject_grade.Grade
                     }
@@ -4694,6 +4697,153 @@ def getListerStudent(skip, top, order_by, filter):
 
         else:
             return jsonify({'result': [], 'count': 0})
+    except Exception as e:
+        print("ERROR: ", e)
+        # Handle the exception here, e.g., log it or return an error response
+        return None
+
+
+
+
+
+def getStudentList(skip, top, order_by, filter):
+    try:
+        student_query = (
+            db.session.query(CourseEnrolled, Student, Course).join(Student, Student.StudentId == CourseEnrolled.StudentId).join(Course, Course.CourseId == CourseEnrolled.CourseId)
+        )
+        
+        filter_conditions = []
+        if filter:
+            filter_parts = filter.split(' and ')
+            for part in filter_parts:
+                
+                # Check if part has to lower in value
+                if '(tolower(' in part:
+                    # Extracting column name and value
+                    column_name = part.split("(")[3].split("),'")[0]
+                    value = part.split("'")[1]
+                    column_str = None
+                    if column_name.strip() == 'StudentNumber':
+                        column_str = getattr(Student, 'StudentNumber')
+                    elif column_name.strip() == 'LastName':
+                        column_str = getattr(Student, 'LastName')
+                    elif column_name.strip() == 'FirstName':
+                        column_str = getattr(Student, 'FirstName')
+                    elif column_name.strip() == 'MiddleName':
+                        column_str = getattr(Student, 'MiddleName')
+                    elif column_name.strip() == 'Email':
+                        column_str =  getattr(Student, 'Email')     
+                    elif column_name.strip() == 'MobileNumber':
+                        column_str = getattr(Student, 'MobileNumber')
+                    elif column_name.strip() == 'CourseCode':
+                        column_str = getattr(Course, 'CourseCode')
+                    elif column_name.strip() == 'ResidentialAddress':
+                        column_str = getattr(Course, 'ResidentialAddress')
+                    elif column_name.strip() == 'DateEnrolled':
+                        column_str = getattr(CourseEnrolled, 'DateEnrolled')
+                        filter_conditions.append(
+                            CourseEnrolled.DateEnrolled == (1 if value == 'male' else 2)
+                        )
+                    elif column_name.strip() == 'Gender':
+                        filter_conditions.append(
+                            Student.Gender == (1 if value == 'male' else 2)
+                        )
+                        continue
+                    
+                    if column_str:
+                        # Append column_str
+                        filter_conditions.append(
+                            func.lower(column_str).like(f'%{value}%')
+                        )
+                else:
+                    # column_name = part[0][1:]  # Remove the opening '('
+                    column_name, value = [x.strip() for x in part[:-1].split("eq")]
+                    column_name = column_name[1:]
+                    
+                    column_num = None
+                    int_value = value.strip(')')
+             
+                    if column_name.strip() == 'Batch':
+                        column_num = CourseEnrolled.CurriculumYear
+                    if column_name.strip() == 'Status':
+                        column_num = CourseEnrolled.Status
+                    
+                    if column_num:
+                        # Append column_num
+                        filter_conditions.append(
+                            column_num == int_value
+                        )
+                        
+        filter_query = student_query.filter(and_(*filter_conditions))
+        if order_by:
+            # Determine the order attribute
+            if order_by.split(' ')[0] == 'StudentNumber':
+                order_attr = getattr(Student, 'StudentNumber')
+            elif order_by.split(' ')[0] == "LastName":
+                order_attr = getattr(Student, 'LastName')
+            elif order_by.split(' ')[0] == "FirstName":
+                order_attr = getattr(Student, 'FirstName')
+            elif order_by.split(' ')[0] == "MiddleName":
+                order_attr = getattr(Student, 'MiddleName')
+            elif order_by.split(' ')[0] == 'Email':
+                order_attr = getattr(Student, 'Email')
+            elif order_by.split(' ')[0] == 'DateOfBirth':
+                order_attr = getattr(Student, 'DateOfBirth')
+            elif order_by.split(' ')[0] == 'Gender':
+                order_attr = getattr(Student, 'Gender')
+            elif order_by.split(' ')[0] == 'MobileNumber':
+                order_attr = getattr(Student, 'MobileNumber')
+            elif order_by.split(' ')[0] == 'ResidentialAddress':
+                order_attr = getattr(Student, 'ResidentialAddress')
+            elif order_by.split(' ')[0] == 'CourseCode':
+                order_attr = getattr(Course, 'CourseCode')
+            elif order_by.split(' ')[0] == 'DateEnrolled':
+                order_attr = getattr(CourseEnrolled, 'DateEnrolled')
+            elif order_by.split(' ')[0] == 'Batch':
+                order_attr = getattr(CourseEnrolled, 'CurriculumYear')
+            elif order_by.split(' ')[0] == 'Status':
+                order_attr = getattr(CourseEnrolled, 'Status')
+           
+            if ' ' in order_by:
+                order_query = filter_query.order_by(desc(order_attr))
+            else:
+                order_query = filter_query.order_by(order_attr)
+        else:
+            # Apply default sorting
+            order_query = filter_query.order_by(desc(CourseEnrolled.CurriculumYear), desc(Course.CourseCode), desc(Student.StudentNumber))
+        
+        
+        # Query for counting all records
+        total_count = order_query.count()
+        # Limitized query = 
+        student_limit_offset_query = order_query.offset(skip).limit(top).all()
+        if student_limit_offset_query:
+             # For loop the student_query and put it in dictionary
+            list_student_data = []
+            for data in student_limit_offset_query:
+                status = "Regular" if data.CourseEnrolled.Status == 0 else "Graduated" if data.CourseEnrolled.Status == 1 else "Irregular" if data.CourseEnrolled.Status == 2 else "Drop"
+                date_of_birth = data.Student.DateOfBirth.strftime('%Y-%m-%d') if data.Student.DateOfBirth else None
+                dict_student = {
+                    "StudentId": data.Student.StudentId,
+                    "StudentNumber": data.Student.StudentNumber,
+                    "LastName": data.Student.LastName,
+                    "FirstName": data.Student.FirstName,
+                    "MiddleName": data.Student.MiddleName,
+                    "Email": data.Student.Email,
+                    "DateOfBirth": date_of_birth,
+                    "ResidentialAddress": data.Student.ResidentialAddress,
+                    "MobileNumber": data.Student.MobileNumber,
+                    "Gender": "Male" if data.Student.Gender == 1 else "Female",
+                    "CourseCode": data.Course.CourseCode,
+                    "DateEnrolled": data.CourseEnrolled.DateEnrolled.strftime('%Y-%m-%d'),
+                    "Batch": data.CourseEnrolled.CurriculumYear,
+                    "Status": status
+                }
+                # Append the data
+                list_student_data.append(dict_student)
+            return jsonify({"result": list_student_data, "count":total_count})
+        else:
+            return None
     except Exception as e:
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
