@@ -50,7 +50,7 @@ def create_app():
 
     # Allowed third party apps
     allowed_origins = ["*"]
-    CORS(app, origins=allowed_origins, allow_headers=["Authorization", "X-API-Key"])
+    CORS(app, origins=allowed_origins, allow_headers=["Authorization", "X-API-Key", "x-csrftoken"])
 
     # jwt = JWTManager(app)
     # oauth = OAuth2Provider(app)
