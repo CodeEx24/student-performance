@@ -1,0 +1,356 @@
+{% extends "universityadmin/layout.html" %}
+
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="p-4">
+  <div class="rounded-lg">
+    <div class="grid grid-cols-1">
+      <!-- IMPORTING GRADES (FUTURE PURPOSES) -->
+      <!-- <div
+          class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+        >
+          <div class="flex items-end justify-between">
+            <div class="w-full bg-white p-4 mt-4">
+              <div id="Grid"></div>
+            </div>
+          </div>
+        </div> -->
+      <div
+        class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+      >
+        <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+          Student Achievements
+        </h3>
+        <hr class="mx-2" />
+        <div class="flex items-end justify-between">
+          <div class="w-full bg-white p-4">
+            <div id="profileForm" class="w-full mt-4">
+              <div class="grid gap-6 mb-6 md:grid-cols-2">
+                <div>
+                  <p class="text-c1 font-extrabold">Student:</p>
+
+                  <div class="relative group">
+                    <button
+                      id="dropdown-button"
+                      class="inline-flex justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500"
+                    >
+                      <span class="mr-2">Select Student</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 ml-2 -mr-1"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                    <div
+                      id="dropdown-menu"
+                      class="hidden absolute right-0 mt-2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 p-1 space-y-1 w-full"
+                    >
+                      <!-- Search input -->
+                      <input
+                        id="search-input"
+                        class="block w-full px-4 py-2 text-gray-800 border rounded-md border-gray-300 focus:outline-none"
+                        type="text"
+                        placeholder="Search items"
+                        autocomplete="off"
+                      />
+                      <!-- Dropdown content goes here -->
+                      <div class="block px-4 py-2 text-gray-700">
+                        <input
+                          type="checkbox"
+                          id="uppercase"
+                          name="case"
+                          value="Uppercase"
+                        />
+                        <label for="uppercase" class="cursor-pointer"
+                          >Uppercase</label
+                        >
+                      </div>
+                      <div class="block px-4 py-2 text-gray-700">
+                        <input
+                          type="checkbox"
+                          id="lowercase"
+                          name="case"
+                          value="Lowercase"
+                        />
+                        <label for="lowercase" class="cursor-pointer"
+                          >Lowercase</label
+                        >
+                      </div>
+                      <div class="block px-4 py-2 text-gray-700">
+                        <input
+                          type="checkbox"
+                          id="camelCase"
+                          name="case"
+                          value="Camel Case"
+                        />
+                        <label for="camelCase" class="cursor-pointer"
+                          >Camel Case</label
+                        >
+                      </div>
+                      <div class="block px-4 py-2 text-gray-700">
+                        <input
+                          type="checkbox"
+                          id="kebabCase"
+                          name="case"
+                          value="Kebab Case"
+                        />
+                        <label for="kebabCase" class="cursor-pointer"
+                          >Kebab Case</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p class="text-c1 font-extrabold">Title:</p>
+                  <input
+                    type="text"
+                    name="excelFile"
+                    id="excelFile"
+                    accept=".xlsx, .xls"
+                    class="text-gray-700 rounded-lg py-2 px-4 w-full border bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <p class="text-c1 font-extrabold">Scores:</p>
+                  <input
+                    type="text"
+                    name="excelFile"
+                    id="excelFile"
+                    accept=".xlsx, .xls"
+                    class="text-gray-700 rounded-lg py-2 px-4 w-full border bg-gray-50"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  class="text-white bg-c4 hover:bg-c5 transition duration-300 font-bold text-sm sm:w-auto px-5 px-5 py-2 text-center"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="loadingModal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+<!----------------- SCRIPTS ----------------->
+{% block script %}
+<script>
+  // JavaScript to toggle the dropdown
+  const dropdownButton = document.getElementById('dropdown-button');
+  const dropdownMenu = document.getElementById('dropdown-menu');
+  const searchInput = document.getElementById('search-input');
+  let isOpen = false; // Set to true to open the dropdown by default
+
+  // Function to toggle the dropdown state
+  function toggleDropdown() {
+    isOpen = !isOpen;
+    dropdownMenu.classList.toggle('hidden', !isOpen);
+  }
+
+  // // Set initial state
+  // toggleDropdown();
+
+  dropdownButton.addEventListener('click', () => {
+    toggleDropdown();
+  });
+
+  // Add event listener to filter items based on input
+  searchInput.addEventListener('input', () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const items = dropdownMenu.querySelectorAll('input[type="checkbox"]');
+
+    console.log('searchTerm: ', searchTerm);
+    if (searchTerm !== '') {
+      items.forEach((item) => {
+        const text = item.value.toLowerCase();
+        if (text.includes(searchTerm)) {
+          // Select items parent
+          item.parentElement.classList.add('block');
+          item.parentElement.classList.remove('hidden');
+        } else {
+          item.parentElement.classList.add('hidden');
+          item.parentElement.classList.remove('block');
+        }
+      });
+    } else {
+      items.forEach((item) => {
+        item.parentElement.classList.add('block');
+        item.parentElement.classList.remove('hidden');
+      });
+    }
+  });
+</script>
+
+<!-- Include Notyf script -->
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<script>
+  function validatePhoneNumber(event) {
+    // select error-mobile for showing message
+    const errorMobile = document.getElementById('error-mobile');
+    const phoneNumberRegex = /^09\d{9}$/; // Regex to match 09XXXXXXXXX format
+    const inputValue = event.target.value;
+
+    if (!phoneNumberRegex.test(inputValue)) {
+      errorMobile.textContent =
+        'Please enter a valid 11-digit mobile number starting with 09.';
+    } else {
+      errorMobile.textContent = '';
+    }
+  }
+
+  function validateAddress(event) {
+    const errorResidential = document.getElementById('error-residential');
+    const residentialAddress = event.target.value;
+
+    const addressRegex = /[a-zA-Z]/; // Regex to match at least one letter
+
+    if (residentialAddress === '') {
+      errorResidential.textContent = 'Residential address must not be empty';
+    } else if (!addressRegex.test(residentialAddress)) {
+      errorResidential.textContent = 'Residential address must include letters';
+    } else {
+      errorResidential.textContent = '';
+    }
+  }
+</script>
+
+<!-- UPDATING USER DETAILS -->
+<script>
+  function updateDetails(data_university_admin_details) {
+    const input_number = document.getElementById('number-input');
+    const input_residential = document.getElementById('residential-input');
+
+    input_number.value = data_university_admin_details.number;
+    input_residential.value = data_university_admin_details.residentialAddress;
+  }
+</script>
+
+<script>
+  document
+    .getElementById('profileForm')
+    .addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevents the default form submission
+      console.log('HERE IN PROFILE FORM');
+      // Get form data
+      const formData = new FormData(this);
+      console.log('FORM DATA: ', formData);
+
+      // Make a POST request using the Fetch API
+      showModal('loadingModal');
+      fetch(`${api_base_url}/details/update`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const errorDetails = {
+            mobile: {
+              id: 'error-mobile',
+              message: 'Mobile must be in "09XXXXXXXXX" format',
+            },
+            residential: {
+              id: 'error-residential',
+              message: 'Residential address must not be empty',
+            },
+          };
+
+          const status = data.status;
+          const errorType = data.type;
+
+          if (status === 400 || status === 404 || status === 500) {
+            if (errorDetails[errorType]) {
+              const { id, message } = errorDetails[errorType];
+              const errorElement = document.getElementById(id);
+              errorElement.innerText = message;
+              errorElement.classList.add('mt-2');
+            } else {
+              notyf.error(data.message);
+            }
+          } else if (status === 200) {
+            for (const key in errorDetails) {
+              const { id } = errorDetails[key];
+              const errorElement = document.getElementById(id);
+              errorElement.innerText = '';
+              errorElement.classList.remove('mt-2');
+            }
+
+            notyf.success(data.message);
+            updateDetails(data);
+          } else {
+            notyf.error('Something went wrong');
+          }
+        })
+        .catch((error) => {
+          // Handle errors
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch data. Try to contact the admin to resolve the issue.`
+            );
+          }
+          console.error('Error:', error);
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    });
+</script>
+
+{% endblock script %}

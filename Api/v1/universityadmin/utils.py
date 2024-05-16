@@ -706,7 +706,7 @@ def processAddingStudents(data, excelType=False):
                 student_mobile =  str(row['Phone Number'])
                 student_address = row['Address'] # OK
                 student_gender = row['Gender'] # OK
-                student_course = row['Course Code']
+                student_program = row['Program'] # Change to program
                 student_date_enrolled = row['Date Enrolled']
                 student_batch = row['Batch'] # OK
 
@@ -715,7 +715,7 @@ def processAddingStudents(data, excelType=False):
                     if len(student_mobile) == 10:
                         student_mobile = '0' + student_mobile
                     elif len(student_mobile) != 11:
-                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Mobile Format']))
+                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Mobile Format']))
                         continue
                     
             
@@ -725,35 +725,35 @@ def processAddingStudents(data, excelType=False):
                     if isinstance(student_date_enrolled, datetime):
                         student_date_enrolled = student_date_enrolled.strftime("%Y-%m-%d")
                     else:
-                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Date Enrolled format']))
+                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Date Enrolled format']))
                         continue
                 else:
-                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Date Enrolled']))
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Date Enrolled']))
                     continue
                 
                 # Check if Batch is a valid format (e.g., numeric)
                 if not str(student_batch).isdigit():
-                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Batch format']))
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Batch format']))
                     continue
                 elif not student_batch:
-                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Batch']))
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Batch']))
                     continue
                 
                 # Check if Email is a valid format
                 if not is_valid_email(student_email):
-                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Email format']))
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Email format']))
                     continue
                 elif not student_email:
-                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender  , student_course, student_date_enrolled, student_batch, 'Invalid Email format']))
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender  , student_program, student_date_enrolled, student_batch, 'Invalid Email format']))
                     continue
                 
                 # Check if Phone Number is a valid format
                 if student_mobile and not is_valid_phone_number(student_mobile):
-                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Phone Number format']))
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Phone Number format']))
                     continue
             
-                if not student_course:
-                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Invalid Course']))
+                if not student_program:
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Course']))
                     continue
                 
                 # Check if the student is already exist in the database based on StudentNumber or Email
@@ -768,7 +768,7 @@ def processAddingStudents(data, excelType=False):
                     password = generate_password()
                     gender = 1 if student_gender == 'Male' else (2 if student_gender == 'Female' else None)
 
-                    course = db.session.query(Course).filter_by(CourseCode=student_course).first()
+                    course = db.session.query(Course).filter_by(CourseCode=student_program).first()
 
                     # Add the new student in the database
 
@@ -833,9 +833,9 @@ def processAddingStudents(data, excelType=False):
                         })
                 else:
                     if student_number_data:
-                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Student Number already exist']))
+                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Student Number already exist']))
                     else:
-                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_course, student_date_enrolled, student_batch, 'Email already exist']))
+                        errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Email already exist']))
                     
             if errors and list_student_data:
                 db.session.rollback()
@@ -854,7 +854,7 @@ def processAddingStudents(data, excelType=False):
                 student_email = data['Email'].strip()
                 student_gender = data.get('Gender', 1) # OK
                 student_mobile =  str(data['MobileNumber']).strip()
-                student_course = data['CourseCode'].strip()
+                student_program = data['Program'].strip()
                 student_date_enrolled = data['DateEnrolled']
                 student_batch = data['Batch'] # OK
                 
@@ -908,7 +908,7 @@ def processAddingStudents(data, excelType=False):
                     password = generate_password()
                     gender = 1 if student_gender == 'Male' else (2 if student_gender == 'Female' else None)
 
-                    course = db.session.query(Course).filter_by(CourseCode=student_course).first()
+                    course = db.session.query(Course).filter_by(CourseCode=student_program).first()
                     
                     
                 # Add the new student in the database
@@ -1373,8 +1373,6 @@ def getStudentData(skip, top, order_by, filter):
             db.session.query(CourseEnrolled, Student, Course).join(Student, Student.StudentId == CourseEnrolled.StudentId).join(Course, Course.CourseId == CourseEnrolled.CourseId)
         )
         
-        
-        
         filter_conditions = []
         if filter:
             filter_parts = filter.split(' and ')
@@ -1398,7 +1396,7 @@ def getStudentData(skip, top, order_by, filter):
                         column_str =  getattr(Student, 'Email')     
                     elif column_name.strip() == 'MobileNumber':
                         column_str = getattr(Student, 'MobileNumber')
-                    elif column_name.strip() == 'CourseCode':
+                    elif column_name.strip() == 'Program':
                         column_str = getattr(Course, 'CourseCode')
                     elif column_name.strip() == 'DateEnrolled':
                         column_str = getattr(CourseEnrolled, 'DateEnrolled')
@@ -1450,7 +1448,7 @@ def getStudentData(skip, top, order_by, filter):
                 order_attr = getattr(Student, 'Gender')
             elif order_by.split(' ')[0] == 'MobileNumber':
                 order_attr = getattr(Student, 'MobileNumber')
-            elif order_by.split(' ')[0] == 'CourseCode':
+            elif order_by.split(' ')[0] == 'Program':
                 order_attr = getattr(Course, 'CourseCode')
             elif order_by.split(' ')[0] == 'DateEnrolled':
                 order_attr = getattr(CourseEnrolled, 'DateEnrolled')
@@ -1484,7 +1482,7 @@ def getStudentData(skip, top, order_by, filter):
                     "Email": data.Student.Email,
                     "MobileNumber": data.Student.MobileNumber,
                     "Gender": "Male" if data.Student.Gender == 1 else "Female",
-                    "CourseCode": data.Course.CourseCode,
+                    "Program": data.Course.CourseCode,
                     "DateEnrolled": data.CourseEnrolled.DateEnrolled.strftime('%Y-%m-%d'),
                     "Batch": data.CourseEnrolled.CurriculumYear
                 }
@@ -4599,6 +4597,14 @@ def getListerStudent(skip, top, order_by, filter):
                             continue
                     elif column_name.strip() == 'Course':
                         column_str = getattr(Course, 'Name')
+                    elif column_name.strip() == 'StudentNumber':
+                        column_str = getattr(Student, 'StudentNumber')
+                    elif column_name.strip() == 'LastName':
+                        column_str = getattr(Student, 'LastName')
+                    elif column_name.strip() == 'FirstName':
+                        column_str = getattr(Student, 'FirstName')
+                    elif column_name.strip() == 'MiddleName':
+                        column_str = getattr(Student, 'MiddleName')
                     elif column_name.strip() == 'Grade':
                         filter_conditions.append(
                             ClassGrade.Grade == value
@@ -4643,8 +4649,12 @@ def getListerStudent(skip, top, order_by, filter):
             # Determine the order attribute
             if order_by.split(' ')[0] == 'StudentNumber':
                 order_attr = getattr(Student, 'StudentNumber')
-            elif order_by.split(' ')[0] == 'StudentName':
+            elif order_by.split(' ')[0] == 'FirstName':
                 order_attr = getattr(Student, 'LastName')
+            elif order_by.split(' ')[0] == 'LastName':
+                order_attr = getattr(Student, 'LastName')
+            elif order_by.split(' ')[0] == 'MiddleName':
+                order_attr = getattr(Student, 'MiddleName')
             elif order_by.split(' ')[0] == "Batch":
                 order_attr = getattr(Metadata, "Batch")
             elif order_by.split(' ')[0] == "Lister":
@@ -4680,12 +4690,14 @@ def getListerStudent(skip, top, order_by, filter):
             list_metadata = []
                 # For loop the data_student and put it in dictionary
             for data in student_lister_main_query:
-                full_name = f"{data.Student.LastName}, {data.Student.FirstName} {data.Student.MiddleName}"
                 class_name = f"{data.Course.CourseCode} {data.Metadata.Year}-{data.Class.Section}"
                 lister = "President Lister" if data.StudentClassGrade.Lister == 2 else "Dean Lister"
                 dict_metadata = {
+                    
                     "StudentNumber": data.Student.StudentNumber,
-                    "StudentName": full_name,
+                    "LastName": data.Student.LastName,
+                    "FirstName": data.Student.FirstName,
+                    "MiddleName": data.Student.MiddleName,
                     "Batch": data.Metadata.Batch,
                     "Semester": data.Metadata.Semester,
                     "ClassName": class_name,

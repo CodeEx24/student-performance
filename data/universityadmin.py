@@ -15,7 +15,6 @@ university_admin_data = [
         "ResidentialAddress": "Quezon City",
         "MobileNumber": "09613523624",
         "IsActive": True
-
     },
     {
         "UnivAdminNumber": "2020-00002-UA-0",
@@ -30,7 +29,6 @@ university_admin_data = [
         "ResidentialAddress": "Quezon City",
         "MobileNumber": "09612363261",
         "IsActive": True
-
     },
     # Add more admin data as needed
 ]

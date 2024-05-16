@@ -768,6 +768,25 @@ def fetchListers():
         return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
 
 
+    
+@university_admin_api.route('/student/listers/', methods=['GET'])
+def fetchListersStudents():
+    university_admin = getCurrentUser()
+    if university_admin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = request.args.get('$orderby')
+        filter = request.args.get('$filter')
+        print("HERE IN BACKEND")
+        student_achievement_list = getListerStudent(skip, top, order_by, filter)
+        if student_achievement_list:
+            return student_achievement_list
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+
+
 # Get enc STATIC_TOKEN
 STATIC_TOKEN = "1b20e3f9-8d44-45b7-96da-02e8001d73e8"
 
@@ -815,4 +834,4 @@ def fetchPublicStudents():
         return (json_student_data)
     else:
         return jsonify(error="Something went wrong. Try to contact the admin to resolve the issue.")
- 
+    

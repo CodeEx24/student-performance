@@ -33,7 +33,7 @@
             <p class="block text-gray-700 font-bold text-md mb-2">
               Column Required:
               <span class="font-normal"
-                >Student Number, Name, Email, Course Code, Date Enrolled, and
+                >Student Number, Name, Email, Program, Date Enrolled, and
                 Batch</span
               >
             </p>
@@ -277,8 +277,8 @@
           width: 100,
         },
         {
-          field: 'CourseCode',
-          headerText: 'Course Code',
+          field: 'Program',
+          headerText: 'Program',
           width: 100,
         },
         {
@@ -413,7 +413,7 @@
       {
         field: 'StudentNumber',
         headerText: 'Student Number',
-        width: 80,
+        width: 70,
 
         validationRules: {
           required: true,
@@ -496,13 +496,14 @@
       {
         field: 'MobileNumber',
         headerText: 'Mobile Number',
-        width: 80,
+        width: 70,
+        // visible: false,
       },
       // Course Code
       {
-        field: 'CourseCode',
-        headerText: 'Course Code',
-        width: 50,
+        field: 'Program',
+        headerText: 'Program',
+        width: 70,
         validationRules: {
           required: true,
         },
@@ -671,7 +672,7 @@
       allowFiltering: true,
       allowSorting: true, // Enable sorting
       allowExcelExport: true,
-      toolbar: ['ExcelExport', 'Add', 'Delete', 'Cancel'], // Add the ExcelExport button to the toolbar
+      toolbar: ['ExcelExport', 'Add', 'Delete', 'Update', 'Cancel'], // Add the ExcelExport button to the toolbar
       editSettings: {
         // allowEditing: true,
         allowAdding: true,

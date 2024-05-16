@@ -63,7 +63,7 @@
           <div id="grid-student_requirements"></div>
           <script id="template" type="text/x-template">
             <div class="template_checkbox flex gap-4 ">
-                ${if(Completed)}
+                ${if(Completed === "Completed")}
                 <button class=" px-2 py-1 bg-success text-white font-bold rounded-md">Completed</button>
                 ${else}
                 <button class=" px-2 py-1 bg-red-500 text-white font-bold rounded-md" >Incomplete</button>
@@ -151,6 +151,111 @@
     </div>
   </div>
 </div>
+
+<!-- The Modal -->
+<div
+  id="student-requirements-modal"
+  class="modal hidden fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">Performance Details</h2>
+        <button
+          class="modal-close"
+          onclick="closeModal('student-requirements-modal')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <p id="student-id" class="hidden">1234 1231 123123</p>
+        <div class="">
+          <h4 class="text-c1 font-bold">Student Name:&nbsp;</h4>
+          <p id="student-name">Sampe Name</p>
+        </div>
+        <div>
+          <h4 class="text-c1 font-bold">Student Number:&nbsp;</h4>
+          <p id="student-number">1234 1231 123123</p>
+        </div>
+        <div class="">
+          <h4 class="text-c1 font-bold">Status</h4>
+          <p id="student-status">Complete</p>
+        </div>
+      </div>
+      <form
+        class="grid grid-cols-2 mt-4 gap-4 w-[600px]"
+        onsubmit="updateSingleStudentRequirements(event)"
+      >
+        <div class="flex gap-2.5">
+          <input type="checkbox" id="f137" name="f137" />
+          <label class="text-base" for="submitted">F-137</label>
+        </div>
+        <div class="flex gap-2.5">
+          <input type="checkbox" id="f138" name="f138" />
+          <label class="text-base" for="submitted">F-138</label>
+        </div>
+        <div class="flex gap-2.5">
+          <input type="checkbox" id="good-moral-seal" name="good-moral-seal" />
+          <label class="text-base" for="submitted">Good Moral Seal</label>
+        </div>
+        <div class="flex gap-2.5">
+          <input type="checkbox" id="grade12" name="grade12" />
+          <label class="text-base" for="submitted">Grade 12</label>
+        </div>
+        <div class="flex gap-2.5">
+          <input type="checkbox" id="grade11" name="grade11" />
+          <label class="text-base" for="submitted">Grade 11</label>
+        </div>
+        <div class="flex gap-2.5">
+          <input type="checkbox" id="sar-form" name="sar-form" />
+          <label class="text-base" for="submitted">SAR Form</label>
+        </div>
+        <div class="flex gap-2.5">
+          <input type="checkbox" id="psa" name="psa" />
+          <label class="text-base" for="submitted">PSA</label>
+        </div>
+        <div class="flex gap-2.5">
+          <input type="checkbox" id="diploma" name="diploma" />
+          <label class="text-base" for="submitted">Diploma</label>
+        </div>
+        <div class="flex gap-2.5">
+          <input
+            type="checkbox"
+            id="grade-10-without-seal"
+            name="grade-10-without-seal"
+          />
+          <label class="text-base" for="submitted">Grade 10 Without Seal</label>
+        </div>
+        <button
+          type="submit"
+          class="col-span-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+        >
+          Update Changes
+        </button>
+      </form>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative"></div>
+  </div>
+</div>
 {% endblock content %}
 
 <!-- SCRIPTS DATA -->
@@ -217,18 +322,22 @@
           );
         })
         .catch((error) => {
-          console.error('Error:', error);
+          if (error) {
+            console.log('Error: ', error);
+          }
         })
         .finally(() => {
           closeModal('loadingModal');
         });
     } catch (error) {
-      console.log(error);
+      if (error) {
+        console.log('Error: ', error);
+      }
     }
   }
 
   function displaySubmitErrorStudentRequirements(students) {
-    var grid = new ej.grids.Grid({
+    let gridError = new ej.grids.Grid({
       dataSource: students,
       allowPaging: true,
       allowSorting: true, // Enable sorting
@@ -306,21 +415,21 @@
       allowExcelExport: true, // Enable Excel export feature
     });
 
-    grid.toolbarClick = function (args) {
+    gridError.toolbarClick = function (args) {
       if (args['item'].id === 'grid-error-students-list_excelexport') {
-        grid.excelExport();
+        gridError.excelExport();
       }
     };
 
     // Render the grid
-    grid.appendTo('#grid-error-students-list');
+    gridError.appendTo('#grid-error-students-list');
 
     const filterbarOperator = new ej.buttons.CheckBox();
     filterbarOperator.appendTo('#filterBarOperator');
 
     filterbarOperator.addEventListener('change', function (args) {
-      grid.filterSettings.showFilterBarOperator = args.checked;
-      grid.clearFiltering();
+      gridError.filterSettings.showFilterBarOperator = args.checked;
+      gridError.clearFiltering();
     });
   }
 </script>
@@ -394,9 +503,9 @@
   fetchStudents();
 </script>
 
-<!-- FETCH DISTINC OPTIONS -->
-
+<!-- FETCH DISTINCT OPTIONS -->
 <script>
+  let grid;
   // Function to generate filter bar template
   function generateFilterBarTemplate(field) {
     return {
@@ -429,12 +538,37 @@
     };
   }
 
-  // get csrf token
-  // const csrfToken = document.getElementsByName('_ejRequestVerifyToken')[0]
-  //   .value;
-  // console.log('CSRF IN 2: ', csrfToken);
+  function generateFilter(field, value) {
+    return {
+      create: function (args) {
+        var dd = document.createElement('input');
+        dd.id = field;
+        return dd;
+      },
+      write: function (args) {
+        var semester = [...value];
 
-  // Assume your Flask route provides configuration data
+        var DropDownListObj = new ej.dropdowns.DropDownList({
+          dataSource: semester,
+          fields: { text: field, value: field },
+          placeholder: 'Select a value',
+
+          change: function (e) {
+            console.log('CHANGE: ', e.value);
+            var gridObj =
+              document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+            if (e.value == 'All') {
+              gridObj.removeFilteredColsByField(field);
+            } else {
+              gridObj.filterByColumn(field, 'equal', e.value);
+            }
+          },
+        });
+        DropDownListObj.appendTo('#' + field);
+      },
+    };
+  }
+
   let gridConfig = {
     apiUrl: `${api_base_url}/student/requirements`,
     insertUrl: `${api_base_url}/students/insert`,
@@ -470,171 +604,89 @@
         headerText: 'Middle',
         width: 150,
       },
-      // Student Name
-      // Gender
+      {
+        headerText: 'Status',
+        field: 'Completed',
+        template: '#template',
+        filterBarTemplate: generateFilter('Completed', [
+          'All',
+          'Completed',
+          'Incomplete',
+        ]),
+        width: 80,
+      },
+      {
+        headerText: 'Actions',
+        template:
+          '<button class="btn p-1" ><svg class="btn" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="#eab308" d="M3 21V3h10.925l-2 2H5v14h14v-6.95l2-2V21zm18.025-9H12zM9 15v-4.25L19.625.125L23.8 4.4L13.25 15zM21.025 4.4l-1.4-1.4zM11 13h1.4l5.8-5.8l-.7-.7l-.725-.7L11 11.575zm6.5-6.5l-.725-.7zl.7.7z"/></svg></button>', // Add a button to the cell
+        width: 80,
+      },
+
+      // HIDDEN FIELDS:
       {
         field: 'F_137',
         headerText: 'F-137',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('F_137'),
       },
       {
         field: 'F_138',
         headerText: 'F-138',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('F_138'),
       },
       {
         field: 'GoodMoralSeal',
         headerText: 'GoodMoralSeal',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('GoodMoralSeal'),
       },
       {
         field: 'Grade12',
         headerText: 'Grade12',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('Grade12'),
       },
       {
         field: 'Grade11',
         headerText: 'Grade11',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('Grade11'),
       },
       {
         field: 'SARForm',
         headerText: 'SARForm',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('SARForm'),
       },
       {
         field: 'PSA',
         headerText: 'PSA',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('PSA'),
       },
       {
         field: 'Diploma',
         headerText: 'Diploma',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('Diploma'),
       },
       {
         field: 'Grade10WithoutSeal',
         headerText: 'Grade10WithoutSeal',
         width: 150,
+        visible: false,
         filterBarTemplate: generateFilterBarTemplate('Grade10WithoutSeal'),
       },
-      {
-        headerText: 'Completed',
-        template: '#template',
-        width: 150,
-      },
     ],
-    // [
-    //   {
-    //     field: 'StudentId',
-    //     isPrimaryKey: true,
-    //     visible: false,
-    //   },
-    //   // Fixed Columns (Student Number and Last Name)
-    //   {
-    //     headerText: 'Student Information',
-    //     columns: [
-    //       {
-    //         field: 'StudentNumber',
-    //         headerText: 'Student Number',
-    //         width: 80,
-    //         validationRules: {
-    //           required: true,
-    //         },
-    //       },
-    //       {
-    //         field: 'LastName',
-    //         headerText: 'Last Name',
-    //         width: 100,
-    //       },
-    //       {
-    //         field: 'FirstName',
-    //         headerText: 'First Name',
-    //         width: 100,
-    //       },
-    //       {
-    //         field: 'MiddleName',
-    //         headerText: 'Middle Name',
-    //         width: 100,
-    //       },
-    //     ],
-    //   },
-    //   // Scrollable Columns
-    //   {
-    //     headerText: 'Other Information',
-    //     columns: [
-    //       {
-    //         field: 'F_137',
-    //         headerText: 'F-137',
-    //         width: 150,
-    //       },
-    //       {
-    //         field: 'F_138',
-    //         headerText: 'F-138',
-    //         width: 150,
-    //       },
-    //       {
-    //         field: 'GoodMoralSeal',
-    //         headerText: 'GoodMoralSeal',
-    //         width: 150,
-    //       },
-    //       {
-    //         field: 'Grade12',
-    //         headerText: 'Grade12',
-    //         width: 150,
-    //       },
-    //       {
-    //         field: 'Grade11',
-    //         headerText: 'Grade11',
-    //         width: 150,
-    //       },
-    //       {
-    //         field: 'SARForm',
-    //         headerText: 'SARForm',
-    //         width: 150,
-    //       },
-    //       {
-    //         field: 'PSA',
-    //         headerText: 'PSA',
-    //         width: 150,
-    //       },
-    //       {
-    //         field: 'Diploma',
-    //         headerText: 'Diploma',
-    //         width: 150,
-    //       },
-    //       {
-    //         field: 'Grade10WithoutSeal',
-    //         headerText: 'Grade10WithoutSeal',
-    //         width: 150,
-    //       },
-    //       {
-    //         headerText: 'Completed',
-    //         template: '#template',
-    //         width: 150,
-    //         allowSearching: true,
-    //         allowSorting: true,
-    //       },
-    //       // Include other columns here...
-    //     ],
-    //   },
-    //   {
-    //     field: 'Completed',
-    //     headerText: 'Completed',
-    //     template: '#template',
-    //     width: 150,
-    //     allowSearching: true,
-    //     allowSorting: true,
-    //   },
-    // ],
   };
 
   document.addEventListener('DOMContentLoaded', async function () {
@@ -642,7 +694,6 @@
       await fetch(`${api_base_url}/student/options`)
         .then((response) => response.json())
         .then((data) => {
-          console.log('dTAL: ', data);
           if (data.result) {
             gridConfig.columns[6].edit.params.dataSource =
               data.result.genderOptions;
@@ -653,10 +704,14 @@
           }
         })
         .catch((error) => {
-          console.error('Error:', error);
+          if (error) {
+            console.log('Error: ', error);
+          }
         });
     } catch (error) {
-      console.log('Error: ', error);
+      if (error) {
+        console.log('Error: ', error);
+      }
     }
 
     // Create a DataManager with the provided API URL
@@ -669,7 +724,7 @@
     });
 
     // Create Syncfusion Grid using the provided configuration
-    let grid = new ej.grids.Grid({
+    grid = new ej.grids.Grid({
       dataSource: curriculum_subject_data,
       columns: gridConfig.columns,
       allowPaging: true,
@@ -678,7 +733,7 @@
       allowExcelExport: true,
       allowScrolling: true, // Enable scrolling
       scrollable: { height: '100%', width: 'auto' },
-      toolbar: ['ExcelExport', 'Clear Filters'], // Add the ExcelExport button to the toolbar
+      toolbar: ['ExcelExport', 'Send Notice', 'Clear Filters'], // Add the ExcelExport button to the toolbar
       editSettings: {
         // allowEditing: true,
         allowAdding: true,
@@ -736,15 +791,52 @@
         }
       },
     });
+
     grid.toolbarClick = function (args) {
       if (args['item'].id === 'grid-student_requirements_excelexport') {
-        // grid.columns[7].visible = false;
+        grid.columns[5].visible = false;
+        grid.columns[6].visible = false;
+        grid.columns[7].visible = true;
+        grid.columns[8].visible = true;
+        grid.columns[9].visible = true;
+        grid.columns[10].visible = true;
+        grid.columns[11].visible = true;
+        grid.columns[12].visible = true;
+        grid.columns[13].visible = true;
+        grid.columns[14].visible = true;
+        grid.columns[15].visible = true;
+
         grid.excelExport();
       } else if (
         args['item'].id === 'grid-student_requirements_Clear Filters'
       ) {
         grid.clearFiltering();
         grid.refresh();
+      } else if (args['item'].id === 'grid-student_requirements_Send Notice') {
+        try {
+          showModal('loadingModal');
+          fetch(`${api_base_url}/notice/students`, {
+            method: 'POST',
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                notyf.success(data.message);
+              }
+            })
+            .catch((error) => {
+              if (error) {
+                console.log('Error: ', error);
+              }
+            })
+            .finally(() => {
+              closeModal('loadingModal');
+            });
+        } catch (error) {
+          if (error) {
+            console.log('Error: ', error);
+          }
+        }
       }
     };
 
@@ -756,13 +848,57 @@
           const dataUid = cellElement.parentElement.getAttribute('data-uid');
           if (dataUid) {
             const rowData = grid.getRowObjectFromUID(dataUid).data;
-            if (rowData) {
-              fetchStudentPerformance(
-                rowData.StudentId,
-                rowData.StudentName,
-                rowData.StudentNumber
-              );
-            }
+            const fullname =
+              rowData.LastName +
+              ' ' +
+              rowData.FirstName +
+              ' ' +
+              rowData.MiddleName;
+
+            // Get student name , status and number
+            const student_id_text = document.getElementById('student-id');
+            const student_number_text =
+              document.getElementById('student-number');
+            const student_name_text = document.getElementById('student-name');
+            const student_status_text =
+              document.getElementById('student-status');
+
+            student_number_text.innerText = rowData.StudentNumber;
+            student_name_text.innerText = fullname;
+            student_status_text.innerText = rowData.Completed;
+            student_id_text.innerText = rowData.StudentId;
+
+            // Get inputs based on the value of rowData F-137 F-138, GoodMoralSeal, Grade12, Grade11, SarForm, PSA, Diploma, Grade10WithoutSeal
+            const student_f137_input = document.getElementById('f137');
+            const student_f138_input = document.getElementById('f138');
+            const student_good_moral_seal_input =
+              document.getElementById('good-moral-seal');
+
+            const student_grade12_input = document.getElementById('grade12');
+            const student_grade11_input = document.getElementById('grade11');
+
+            const student_sar_form_input = document.getElementById('sar-form');
+            const student_psa_input = document.getElementById('psa');
+            const student_diploma_input = document.getElementById('diploma');
+            const student_grade10_without_seal_input = document.getElementById(
+              'grade-10-without-seal'
+            );
+
+            // // update values
+            student_f137_input.checked = rowData.F_137 === 'Submitted';
+            student_f138_input.checked = rowData.F_138 === 'Submitted';
+            student_good_moral_seal_input.checked =
+              rowData.GoodMoralSeal === 'Submitted';
+            student_grade12_input.checked = rowData.Grade12 === 'Submitted';
+            student_grade11_input.checked = rowData.Grade11 === 'Submitted';
+
+            student_sar_form_input.checked = rowData.SARForm === 'Submitted';
+            student_psa_input.checked = rowData.PSA === 'Submitted';
+            student_diploma_input.checked = rowData.Diploma === 'Submitted';
+            student_grade10_without_seal_input.checked =
+              rowData.Grade10WithoutSeal === 'Submitted';
+
+            showModal('student-requirements-modal');
           }
         }
       }
@@ -772,7 +908,79 @@
     // Append the grid to the container
     grid.appendTo('#grid-student_requirements');
 
+    // get this grid-student_requirements_Send Notice F137
+    const sendNoticeButton = document.getElementById(
+      'grid-student_requirements_Send Notice'
+    );
+    console.log('sendNoticeButton:', sendNoticeButton);
+    // Set class e-tbar-btn-text
+    // get parent of sendNoticeButton
+    const sendNoticeButtonParent = sendNoticeButton.parentElement;
+    sendNoticeButtonParent.title = 'Send email notice to students';
+    // Add class e-tbar-btn
+    sendNoticeButton.classList.add('flex');
+    sendNoticeButton.classList.add('items-center');
+
+    // update text to Notice
+    sendNoticeButton.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="#ffffff" d="M24 7h-2v6h2zm0 8h-2v2h2zm-4-9c0-1.1-.9-2-2-2H2C.9 4 0 4.9 0 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2zm-2 0l-8 5l-8-5zm0 12H2V8l8 5l8-5z"/></svg><p class="e-tbar-btn-text ml-1">Send Notice</p>';
+
     // Add a custom toolbar item to clear filters
   });
 </script>
+
+<!-- UPDATE STUDENT REQUIREMENTS -->
+<script>
+  // Function to handle form submission
+  function updateSingleStudentRequirements(event) {
+    // Prevent the default form submission
+    event.preventDefault();
+
+    const form = event.target;
+    // Create an object to hold the form data
+    const formData = new FormData(form);
+    console.log('FORM DATA FIRST: ', formData);
+    // Iterate over each input element in the form
+    Array.from(form.elements).forEach((input) => {
+      if (input.type === 'checkbox') {
+        formData[input.name] = input.checked;
+      }
+    });
+
+    const studentId = document.getElementById('student-id').innerText;
+    try {
+      showModal('loadingModal');
+      fetch(`${api_base_url}/submit/student-requirements/${studentId}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            notyf.success(data.message);
+            grid.refresh();
+            closeModal('student-requirements-modal');
+          } else {
+            notyf.error(data.message);
+          }
+        })
+        .catch((error) => {
+          if (error) {
+            console.log('Error: ', error);
+          }
+        })
+        .finally(() => {
+          closeModal('loadingModal');
+        });
+    } catch (error) {
+      if (error) {
+        console.log('Error: ', error);
+      }
+    }
+
+    // Here, you can also send formData to a server or process it further as needed
+  }
+</script>
+
 {% endblock script %}

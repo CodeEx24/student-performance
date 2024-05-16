@@ -205,6 +205,8 @@ class StudentRequirements(db.Model):
     PSA = db.Column(db.Boolean, default=False)
     Diploma = db.Column(db.Boolean, default=False)
     Grade10WithoutSeal = db.Column(db.Boolean, default=False)
+    IsCompleted = db.Column(db.Boolean, default=False)
+    NoticeCount = db.Column(db.Integer, default=0)
 
     def to_dict(self):
         return {
@@ -255,8 +257,27 @@ class SystemAdmin(db.Model):
             'IsActive': self.IsActive
         }
 
-    def get_user_id(self):
-        return self.SysAdminId
+class StudentAchievement(db.Model):
+    __tablename__ = 'SPSStudentAchievements'
+
+    StudentAchievementId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE")) 
+    Title = db.Column(db.String(200), nullable=False)
+    Score = db.Column(db.Integer, nullable=False)
+    YearObtain = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    def to_dict(self):
+        return {
+            'StudentAchievementId': self.StudentAchievementId,
+            'StudentId': self.StudentId,
+            'Title': self.Title,
+            'Score': self.Score,
+            'YearObtain': self.YearObtain,
+        }
+
+
    
 # Course List
 class Course(db.Model):
@@ -264,8 +285,9 @@ class Course(db.Model):
 
     CourseId = db.Column(db.Integer, primary_key=True, autoincrement=True) # Unique Identifier
     CourseCode = db.Column(db.String(10), unique=True) # Course Code - (BSIT, BSHM, BSCS)
-    Name = db.Column(db.String(200)) # (Name of Course (Bachelor of Science in Information Technology)
-    Description = db.Column(db.String(200)) # Description of course
+    Name = db.Column(db.String(200), nullable=False) # (Name of Course (Bachelor of Science in Information Technology)
+    Description = db.Column(db.String(200), nullable=False) # Description of course
+    DurationYears = db.Column(db.Integer, nullable=False) # Year Span of course
     IsValidPUPQCCourses = db.Column(db.Boolean, default=True) # APMS are handling different courses so there are specific courses available in QC Only
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
@@ -742,6 +764,6 @@ def init_db(app):
     #         inspector = inspect(db.engine)
     #         db.create_all()
 
-    #         if add_data=='True':
+    #         if add_data=='False':
     #             print("DEVELOPMENT AND ADDING DATA")
     #             create_sample_data()

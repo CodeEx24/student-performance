@@ -27,11 +27,9 @@ def create_app():
         app.run(debug=False)
     
     if os.getenv("CONFIG_MODE") == "production":
-        print("USING PRODUCTION")
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("PRODUCTION_DATABASE_URI")
     else:
-        print("USING DEVELOPMENT")
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PRODUCTION_DATABASE_URI')
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("PRODUCTION_DATABASE_URI")
         
     # Do not set this to 1 in production
     os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -272,6 +270,18 @@ def create_app():
     @role_required('universityAdmin')
     def universityAdminFinalizedGrades():
         return render_template('universityadmin/finalized-grade2.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
+    
+    @app.route('/university-admin/student-lister')
+    @role_required('universityAdmin')
+    def universityAdminStudentLister():
+        return render_template('universityadmin/student-lister.html', university_admin_api_base_url=university_admin_api_base_url, current_page="student-lister")
+    
+    
+    @app.route('/university-admin/student-achievements')
+    @role_required('universityAdmin')
+    def universityAdminStudentAchievements():
+        return render_template('universityadmin/achievement.html', university_admin_api_base_url=university_admin_api_base_url, current_page="student-achievements")
+
 
 
     # ========================================================================

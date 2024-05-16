@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements, getListerTrends
+from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements, getListerTrends, processUpdatingSingleStudentRequirements, noticeStudentsEmail
 import os
 import re
 
@@ -290,3 +290,30 @@ def submitStudentsRequirements():
 
     # Call the utility function to process the file
     return processUpdatingStudentRequirements(file)
+
+@registrar_api.route('/submit/student-requirements/<int:studentId>', methods=['POST'])
+@role_required('registrar')
+def submitSingleStudentsRequirements(studentId):
+    registrar = getCurrentUser()
+    if registrar:
+        data = request.form
+        
+        object_data = {}
+        # loop the data item
+        for key, value in data.items():
+            object_data[key] = True if value == 'on' else False
+
+        return processUpdatingSingleStudentRequirements(studentId, object_data)
+    else:
+        return render_template('404.html'), 404
+
+
+@registrar_api.route('/notice/students', methods=['POST'])
+@role_required('registrar')
+def noticeStudents():
+    registrar = getCurrentUser()
+    if registrar:
+        result = noticeStudentsEmail()
+        return result
+    else:
+        return render_template('404.html'), 404
