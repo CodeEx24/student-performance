@@ -271,6 +271,13 @@ def create_app():
     def universityAdminFinalizedGrades():
         return render_template('universityadmin/finalized-grade2.html', university_admin_api_base_url=university_admin_api_base_url, current_page="finalized-grades")
     
+    
+    @app.route('/university-admin/honors-criteria')
+    @role_required('universityAdmin')
+    def universityAdminHonorsCriteria():
+        return render_template('universityadmin/honors-criteria.html', university_admin_api_base_url=university_admin_api_base_url, current_page="honors-criteria")
+    
+    
     @app.route('/university-admin/student-lister')
     @role_required('universityAdmin')
     def universityAdminStudentLister():
@@ -281,6 +288,13 @@ def create_app():
     @role_required('universityAdmin')
     def universityAdminStudentAchievements():
         return render_template('universityadmin/achievement.html', university_admin_api_base_url=university_admin_api_base_url, current_page="student-achievements")
+    
+    
+    @app.route('/university-admin/latin-honors')
+    @role_required('universityAdmin')
+    def universityAdminLatinHonors():
+        return render_template('universityadmin/latin-honors.html', university_admin_api_base_url=university_admin_api_base_url, current_page="latin-honors")
+
 
 
 

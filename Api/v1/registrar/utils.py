@@ -1,4 +1,4 @@
-from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, db, UniversityAdmin, Metadata, Registrar, Student, StudentRequirements, LatestBatchSemester
+from models import StudentClassGrade, ClassGrade, Class, Course, CourseEnrolled, CourseGrade, StudentClassSubjectGrade, Subject, ClassSubject, Class, Faculty, db, UniversityAdmin, Metadata, Registrar, Student, StudentRequirements, LatestBatchSemester, ClassSubjectGrade
 from sqlalchemy import desc, distinct, func, and_
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from datetime import date, datetime
 
-
+from sklearn.linear_model import LinearRegression
 from flask import session, jsonify
 from static.js.utils import convertGradeToPercentage, checkStatus
 from flask_mail import Message
@@ -16,8 +16,10 @@ import random
 import string
 from sqlalchemy.orm import Session
 
-
+import numpy as np
 from collections import defaultdict
+import math
+
 
 def getCurrentUser():
     current_user_id = session.get('user_id')
@@ -476,7 +478,7 @@ def processAddingStudents(data, excelType=False):
                 student_mobile =  str(row['Phone Number'])
                 student_address = row['Address'] # OK
                 student_gender = row['Gender'] # OK
-                student_program = row['Course Code']
+                student_program = row['Program']
                 student_date_enrolled = row['Date Enrolled']
                 student_batch = row['Batch'] # OK
                 student_status = 2 if row.get('Status') == "Irregular" else 0
@@ -526,7 +528,7 @@ def processAddingStudents(data, excelType=False):
                     continue
             
                 if not student_program:
-                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Course']))
+                    errors.append(errorObject([student_number, student_lastname, student_firstname, student_middlename, student_email, student_mobile, student_address, student_gender, student_program, student_date_enrolled, student_batch, 'Invalid Program']))
                     continue
                 
                 # Check if the student is already exist in the database based on StudentNumber or Email
@@ -1254,3 +1256,411 @@ def noticeStudentsEmail():
         return jsonify({'errorException': 'An error occurred while processing the file'}), 500
     
 
+
+def getOutcomeRates(semester):
+    try:
+        rate_list = ["Passed", "Failed", "Dropout", "Incomplete", "Withdrawn"]
+        if semester in [1, 2, 3]:
+            # Get latest batch semester finalized
+            data_latest_batch_semester = db.session.query(LatestBatchSemester) \
+                .filter_by(Semester=semester, IsGradeFinalized=True) \
+                .order_by(LatestBatchSemester.Batch.desc()) \
+                .first()
+            
+            if data_latest_batch_semester:
+                list_data = []
+                list_year = []
+                for batch_year in range(data_latest_batch_semester.Batch - 5, data_latest_batch_semester.Batch):
+                    list_year.append(batch_year)
+                    # Get the rates of the passing students
+                    class_count = db.session.query(
+                        func.sum(ClassSubjectGrade.Passed).label('total_passed'),
+                        func.sum(ClassSubjectGrade.Failed).label('total_failed'),
+                        func.sum(ClassSubjectGrade.Dropout).label('total_dropout'),
+                        func.sum(ClassSubjectGrade.Incomplete).label('total_incomplete'),
+                        func.sum(ClassSubjectGrade.Withdrawn).label('total_withdrawn')
+                    ).join(ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId)\
+                    .join(Class, Class.ClassId == ClassSubject.ClassId)\
+                    .join(Metadata, Metadata.MetadataId == Class.MetadataId)\
+                    .filter(Metadata.Batch == batch_year, Metadata.Semester == semester)\
+                    .first()
+                    
+                    enrolled_students = db.session.query(
+                        func.sum(Metadata.TotalEnrolledStudents).label('total_enrolled')
+                    ).filter(
+                        Metadata.Batch == batch_year,
+                        Metadata.Semester == semester
+                    ).scalar()
+
+                    total_enrolled_students = enrolled_students or 0
+                    
+                    total_passed = class_count.total_passed or 0
+                    total_failed = class_count.total_failed or 0
+                    total_dropout = class_count.total_dropout or 0
+                    total_incomplete = class_count.total_incomplete or 0
+                    total_withdrawn = class_count.total_withdrawn or 0
+                    total = total_passed + total_failed + total_incomplete + total_dropout + total_withdrawn | 1
+                    
+                    failed_rate = math.ceil((total_failed / total) * 100)
+                    dropout_rate = math.ceil((total_dropout / total) * 100)
+                    incomplete_rate = math.ceil((total_incomplete / total) * 100)
+                    withdrawn_rate = math.ceil((total_withdrawn / total) * 100)
+                    passed_rate = 100 - failed_rate - dropout_rate - incomplete_rate - withdrawn_rate if total_passed > 0 else 0
+                    
+                    rate_data = {
+                        "x": batch_year,
+                        "Passed": passed_rate,
+                        "Failed": failed_rate,
+                        "Dropout": dropout_rate,
+                        "Incomplete": incomplete_rate,
+                        "Withdrawn": withdrawn_rate
+                    }
+                    
+                    list_data.append(rate_data)
+                
+                # format_data = []
+                # for type in ["PassedRates", "FailedRates", "DropoutRates", "IncompleteRates", "WithdrawnRates"]:
+                #     data_dict = {
+                #         "type": type,
+                #         "results": []
+                #     }
+                #     for data in list_data:
+                #         data_dict['results'].append({"x": (data['Year']), "y": data[type]})
+                #     format_data.append(data_dict)
+                        
+                
+                return jsonify({'success': True, 'data': list_data, 'rate_list': rate_list})
+            else:
+                return jsonify({'success': False})
+        else:
+            # Get latest batch semester finalized
+            data_latest_batch_semester = db.session.query(LatestBatchSemester) \
+                .filter_by(IsGradeFinalized=True) \
+                .order_by(LatestBatchSemester.Batch.desc()) \
+                .first()
+            if data_latest_batch_semester:
+                list_data = []
+                for batch_year in range(data_latest_batch_semester.Batch - 5, data_latest_batch_semester.Batch):
+                    
+                    # Get the rates of the passing students
+                    class_count = db.session.query(
+                        func.sum(ClassSubjectGrade.Passed).label('total_passed'),
+                        func.sum(ClassSubjectGrade.Failed).label('total_failed'),
+                        func.sum(ClassSubjectGrade.Dropout).label('total_dropout'),
+                        func.sum(ClassSubjectGrade.Incomplete).label('total_incomplete'),
+                        func.sum(ClassSubjectGrade.Withdrawn).label('total_withdrawn')
+                    ).join(ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId)\
+                    .join(Class, Class.ClassId == ClassSubject.ClassId)\
+                    .join(Metadata, Metadata.MetadataId == Class.MetadataId)\
+                    .filter(Metadata.Batch == batch_year)\
+                    .first()
+                    
+                    enrolled_students = db.session.query(
+                        func.sum(Metadata.TotalEnrolledStudents).label('total_enrolled')
+                    ).filter(
+                        Metadata.Batch == batch_year,
+                    ).scalar()
+
+                    total_enrolled_students = enrolled_students or 0
+                    total_passed = class_count.total_passed or 0
+                    total_failed = class_count.total_failed or 0
+                    total_dropout = class_count.total_dropout or 0
+                    total_incomplete = class_count.total_incomplete or 0
+                    total_withdrawn = class_count.total_withdrawn or 0
+                    total = total_passed + total_failed + total_incomplete + total_dropout + total_withdrawn | 1
+                    
+                    failed_rate = math.ceil((total_failed / total) * 100)
+                    dropout_rate = math.ceil((total_dropout / total) * 100)
+                    incomplete_rate = math.ceil((total_incomplete / total) * 100)
+                    withdrawn_rate = math.ceil((total_withdrawn / total) * 100)
+                    passed_rate = 100 - failed_rate - dropout_rate - incomplete_rate - withdrawn_rate if total_passed > 0 else 0
+                    
+                    rate_data = {
+                        "x": batch_year,
+                        "Passed": passed_rate,
+                        "Failed": failed_rate,
+                        "Dropout": dropout_rate,
+                        "Incomplete": incomplete_rate,
+                        "Withdrawn": withdrawn_rate
+                    }
+                    
+                    list_data.append(rate_data)
+                return jsonify({'success': True, 'data': list_data, 'rate_list': rate_list})
+            return jsonify({'success': True})
+    except Exception as e:
+        print("ERROR: ", e)
+        # Handle the exception here, e.g., log it or return an error response
+        return e
+    
+def getBatchLatest():
+    try:
+        # Get latest batch semester
+        latest_batch_semester = db.session.query(LatestBatchSemester)\
+            .filter_by(IsGradeFinalized=True)\
+            .order_by(LatestBatchSemester.Batch.desc())\
+            .first()
+
+        if latest_batch_semester:
+            latest_batch = latest_batch_semester.Batch
+        else:
+            latest_batch = None  # Or handle the case where no batch is found
+
+        print(f"Latest Batch: {latest_batch}")
+        
+        return jsonify({"data": latest_batch, "success": True })
+    except Exception as e:
+        print("ERROR: ", e)
+        # Handle the exception here, e.g., log it or return an error response
+        return jsonify({'error': str(e)}), 500
+
+
+
+def getGradDropWithdrawnRate(desired_year):
+    try:
+        
+        if not desired_year:
+            # Get current year
+            desired_year = datetime.now().year
+         
+        # Get latest batch semester
+        # Search year predicted
+        search_batch = db.session.query(LatestBatchSemester).filter(LatestBatchSemester.Batch == desired_year, LatestBatchSemester.IsGradeFinalized == True, LatestBatchSemester.Semester >= 2).first()
+        latest_batch = db.session.query(LatestBatchSemester).filter(LatestBatchSemester.IsGradeFinalized == True, LatestBatchSemester.Semester >= 2).order_by(LatestBatchSemester.Batch.desc()).first()
+        print("search_batch: ", search_batch)
+        last_batch = db.session.query(LatestBatchSemester).order_by(LatestBatchSemester.Batch).first()
+        
+        first_applicable_years = latest_batch.Batch - 5
+        last_applicable_years = latest_batch.Batch + 3
+        
+        if search_batch:
+            print("HERE IN SEARCH")
+            if search_batch.Batch <= latest_batch.Batch and search_batch.Batch >= first_applicable_years:
+                class_count = db.session.query(
+                        func.sum(ClassSubjectGrade.Passed).label('total_passed'),
+                        func.sum(ClassSubjectGrade.Failed).label('total_failed'),
+                        func.sum(ClassSubjectGrade.Dropout).label('total_dropout'),
+                        func.sum(ClassSubjectGrade.Incomplete).label('total_incomplete'),
+                        func.sum(ClassSubjectGrade.Withdrawn).label('total_withdrawn')
+                    ).join(ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId)\
+                    .join(Class, Class.ClassId == ClassSubject.ClassId)\
+                    .join(Metadata, Metadata.MetadataId == Class.MetadataId)\
+                    .filter(Metadata.Batch == search_batch.Batch)\
+                    .first()
+                
+                # Get all course
+                course = db.session.query(Course).all()
+                total_enrolled = 0
+                for data in course:
+                    enrolled_students = db.session.query(
+                        func.sum(Metadata.TotalEnrolledStudents).label('total_enrolled')
+                    ).filter(
+                        Metadata.Batch == search_batch.Batch,
+                        Metadata.Year == data.DurationYears,
+                        Metadata.Semester == 1,
+                        Metadata.CourseId == data.CourseId
+                    ).scalar() or 0
+                    print('enrolled_students: ', enrolled_students)
+                    total_enrolled += enrolled_students
+                if not total_enrolled:
+                    total_enrolled = 1
+                print('total_enrolled: ', total_enrolled)
+                total_graduated_students = db.session.query(func.count(CourseEnrolled.Status)) \
+                        .filter_by(Status=1, BatchYearGraduated=search_batch.Batch) \
+                        .scalar()
+                print('total_graduated_students: ', total_graduated_students)
+                
+                total_passed = class_count.total_passed or 0
+                total_failed = class_count.total_failed or 0
+                total_dropout = class_count.total_dropout or 0
+                total_incomplete = class_count.total_incomplete or 0
+                total_withdrawn = class_count.total_withdrawn or 0
+                
+                
+                total = total_passed + total_failed + total_incomplete + total_dropout + total_withdrawn | 1
+               
+                total_dropout_rate = math.ceil((total_dropout/total)*100)
+                total_withdrawn_rate = math.ceil((total_withdrawn/total)*100)
+                total_graduated_rate = math.ceil((total_graduated_students/total_enrolled)*100)
+                
+                
+                data_dict = {
+                    "graduated": {
+                        "rate": total_graduated_rate,
+                        "count": total_graduated_students
+                    },
+                    "dropout": {
+                        "rate": total_dropout_rate,
+                        "count": total_dropout
+                    },
+                    "withdrawn": {
+                        "rate": total_withdrawn_rate,
+                        "count": total_withdrawn
+                    }
+                }
+                
+                return jsonify({"data": data_dict, "predicted": False, "success": True})
+            else:
+                print("SAMPLE RESU")
+        elif desired_year >= latest_batch.Batch:
+            print("HERE IN DESIRERD")
+            historical_years = []  # Example years
+            
+            historical_graduated = []  # Example summa cum laude counts
+            historical_dropout = []  # Example cum laude counts
+            historical_withdrawn = [] 
+            
+            historical_graduated_count=[]
+            historical_dropout_count = []
+            historical_withdrawn_count = []
+            
+            historical_enrolled_count = []  
+            print("APPLICABLE: ", last_batch.Batch)
+            # Loop the latest.Batch as first and -5 it to loop for it
+            for year_data in range(latest_batch.Batch - 5, desired_year + 1):
+                if year_data <= latest_batch.Batch:
+                    print("HERE IN YEAR DATA")
+                    class_count = db.session.query(
+                        func.sum(ClassSubjectGrade.Passed).label('total_passed'),
+                        func.sum(ClassSubjectGrade.Failed).label('total_failed'),
+                        func.sum(ClassSubjectGrade.Dropout).label('total_dropout'),
+                        func.sum(ClassSubjectGrade.Incomplete).label('total_incomplete'),
+                        func.sum(ClassSubjectGrade.Withdrawn).label('total_withdrawn')
+                    ).join(ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId)\
+                    .join(Class, Class.ClassId == ClassSubject.ClassId)\
+                    .join(Metadata, Metadata.MetadataId == Class.MetadataId)\
+                    .filter(Metadata.Batch == year_data)\
+                    .first() 
+                    
+                    # Get all course
+                    course = db.session.query(Course).all()
+                    total_enrolled = 0
+                    for data in course:
+                        enrolled_students = db.session.query(
+                            func.sum(Metadata.TotalEnrolledStudents).label('total_enrolled')
+                        ).filter(
+                            Metadata.Batch == year_data,
+                            Metadata.Year == data.DurationYears,
+                            Metadata.Semester == 1,
+                            Metadata.CourseId == data.CourseId
+                        ).scalar() or 0
+                        print('enrolled_students: ', enrolled_students)
+                        total_enrolled += enrolled_students
+                    if not total_enrolled:
+                        total_enrolled = 1
+                    print('total_enrolled: ', total_enrolled)
+                    total_graduated = db.session.query(func.count(CourseEnrolled.Status)) \
+                            .filter_by(Status=1, BatchYearGraduated=year_data) \
+                            .scalar()
+                    print('total_graduated: ', total_graduated)
+                        
+                    print("TOTAL")
+                    total_passed = class_count.total_passed or 0
+                    total_failed = class_count.total_failed or 0
+                    total_dropout = class_count.total_dropout or 0
+                    total_incomplete = class_count.total_incomplete or 0
+                    total_withdrawn = class_count.total_withdrawn or 0
+                    
+                    
+                    total = total_passed + total_failed + total_incomplete + total_dropout + total_withdrawn | 1
+                    print("RATE CALCULATION")
+                    total_dropout_rate = math.ceil((total_dropout/total)*100)
+                    total_withdrawn_rate = math.ceil((total_withdrawn/total)*100)
+                    total_graduated_rate = math.ceil((total_graduated/total_enrolled)*100)
+                    print("AFTER")
+                    
+                    data_dict = {
+                        "graduated": {
+                            "rate": total_graduated_rate,
+                            "count": total_graduated
+                        },
+                        "dropout": {
+                            "rate": total_dropout_rate,
+                            "count": total_dropout
+                        },
+                        "withdrawn": {
+                            "rate": total_withdrawn_rate,
+                            "count": total_withdrawn
+                        }
+                    }
+                
+                    
+                    historical_years.append(year_data)
+                    
+                    historical_graduated.append(total_graduated_rate)
+                    historical_dropout.append(total_dropout_rate)
+                    historical_withdrawn.append(total_withdrawn_rate)
+                    
+                    historical_enrolled_count.append(total_enrolled)
+                    historical_graduated_count.append(total_graduated)
+                    historical_dropout_count.append(total_dropout)
+                    historical_withdrawn_count.append(total_withdrawn)
+                else:
+                    # Prepare data for linear regression
+                    X = np.array(historical_years).reshape(-1, 1)
+                    y_graduated = np.array(historical_graduated)
+                    y_dropout = np.array(historical_dropout)
+                    y_withdrawn = np.array(historical_withdrawn)
+                    # y_total = np.array(historical_total_graduated)
+                    
+                    y_enrolled_count = np.array(historical_enrolled_count)
+                    y_graduated_count = np.array(historical_graduated_count)
+                    y_dropout_count = np.array(historical_dropout_count)
+                    y_withdrawn_count = np.array(historical_withdrawn_count)
+
+                    # Train linear regression models
+                    model_graduated = LinearRegression().fit(X, y_graduated)
+                    model_dropout = LinearRegression().fit(X, y_dropout)
+                    model_withdrawn = LinearRegression().fit(X, y_withdrawn)
+              
+                    model_enrolled_count = LinearRegression().fit(X, y_enrolled_count)
+                    model_graduated_count = LinearRegression().fit(X, y_graduated_count)
+                    model_dropout_count = LinearRegression().fit(X, y_dropout_count)
+                    model_withdrawn_count = LinearRegression().fit(X, y_withdrawn_count)
+
+                    # Predict for the desired year
+                    predicted_graduated = model_graduated.predict(np.array([[year_data]]))[0]
+                    predicted_dropout = model_dropout.predict(np.array([[year_data]]))[0]
+                    predicted_withdrawn = model_withdrawn.predict(np.array([[year_data]]))[0]
+                    
+                    predicted_enrolled_count = model_enrolled_count.predict(np.array([[year_data]]))[0]
+                    predicted_graduated_count = model_graduated_count.predict(np.array([[year_data]]))[0]
+                    predicted_dropout_count = model_dropout_count.predict(np.array([[year_data]]))[0]
+                    predicted_withdrawn_count = model_withdrawn_count.predict(np.array([[year_data]]))[0]
+
+                    historical_years.append(year_data)
+                    historical_graduated.append(predicted_graduated)
+                    historical_dropout.append(predicted_dropout)
+                    historical_withdrawn.append(predicted_withdrawn)
+                    historical_enrolled_count.append(round(predicted_enrolled_count))
+                    historical_graduated_count.append(round(predicted_graduated_count))
+                    historical_dropout_count.append(round(predicted_dropout_count))
+                    historical_withdrawn_count.append(round(predicted_withdrawn_count))
+            
+            
+            if desired_year in historical_years:
+                index = historical_years.index(desired_year)
+                graduated_rate = round((historical_graduated_count[index] / historical_enrolled_count[index])*100, 2)
+                data_dict = {
+                    "graduated": {
+                        "rate": graduated_rate,
+                        "count": historical_graduated_count[index]
+                    },
+                    "dropout": {
+                        "rate": round(historical_dropout[index], 2),
+                        "count": historical_dropout_count[index]
+                    },
+                    "withdrawn": {
+                        "rate": round(historical_withdrawn[index], 2),
+                        "count": historical_withdrawn_count[index]
+                    }
+                }
+                
+                return jsonify({"data": data_dict, "predicted": True, "success": True})
+        else:
+            print("Desired year is out of the applicable range.")
+        
+        return jsonify({"data": {}, "success": False})
+    except Exception as e:
+        print("ERROR: ", e)
+        # Handle the exception here, e.g., log it or return an error response
+        return jsonify({'error': str(e)}), 500

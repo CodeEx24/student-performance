@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, finalizedGradesReport, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent, getListerTrends, getStudentList
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent, getListerTrends, getStudentList, createCriteria, getCriteriaList, getSpecificCriteriaData, getCriteriaOptions, getPassingAndDropRates, getLatinHonorRates, getBatchLatest, getLatinHonors
 import os
 import re
 
@@ -610,6 +610,35 @@ def submitStudentsClassSubject(class_subject_id):
     else:
         return render_template('404.html'), 404    
     
+    
+@university_admin_api.route('/passing-and-drop/rates', methods=['GET'])
+@role_required('universityAdmin')
+def passingAndDropRates():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        return getPassingAndDropRates()
+    else:
+        return render_template('404.html'), 404    
+    
+@university_admin_api.route('/batch/latest', methods=['GET'])
+@role_required('universityAdmin')
+def fetchBatchLatest():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        return getBatchLatest()
+    else:
+        return render_template('404.html'), 404   
+    
+
+@university_admin_api.route('/latin-honors/rates/<int:year>', methods=['GET'])
+@role_required('universityAdmin')
+def latinHonorRates(year):
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        return getLatinHonorRates(year)
+    else:
+        return render_template('404.html'), 404    
+    
 
 # api_routes.py
 @university_admin_api.route('/metadata/', methods=['GET'])
@@ -626,6 +655,27 @@ def fetchMetadata():
 
         if json_student_data:
             return (json_student_data)
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return render_template('404.html'), 404
+    
+
+# api_routes.py
+@university_admin_api.route('/latin/honors/', methods=['GET'])
+@role_required('universityAdmin')
+def fetchLatinHonors():
+    university_admin = getCurrentUser()
+    if university_admin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = (request.args.get('$orderby'))
+        filter = (request.args.get('$filter'))
+        
+        json_latin_honors_data = getLatinHonors(skip, top, order_by, filter)
+
+        if json_latin_honors_data:
+            return (json_latin_honors_data)
         else:
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
@@ -673,36 +723,23 @@ def submitClassStudents(class_id):
     else:
         return render_template('404.html'), 404
 
-# Finalized grades routes
-@university_admin_api.route('/finalized/grades/<int:metadata_id>', methods=['GET'])
+
+@university_admin_api.route('/finalized/grades/batch', methods=['POST'])
 @role_required('universityAdmin')
-def finalizedGrades(metadata_id):
-    university_admin = getCurrentUser()
-    if university_admin:
-        json_student_data = finalizedGradesReport(metadata_id)
-
-        if json_student_data:
-            return (json_student_data)
+def finalizedGradesBatch():
+    # Check if method is post
+    if request.method == 'POST':
+        universityAdmin = getCurrentUser()
+        if universityAdmin:
+            batch_semester_id = request.form['batchSemester']
+            honors_criteria_id = request.form['criteriaOption']
+            json_student_data = finalizedGradesBatchSemester(batch_semester_id, honors_criteria_id)
+            if json_student_data:
+                return (json_student_data)
+            else:
+                return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
         else:
-            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
-    else:
-        return render_template('404.html'), 404
-
-
-@university_admin_api.route('/finalized/grades/batch/<int:batch_semester_id>', methods=['PUT'])
-@role_required('universityAdmin')
-def finalizedGradesBatch(batch_semester_id):
-    university_admin = getCurrentUser()
-    if university_admin:
-        print("HERE IN FINALIZED GRADES: ", batch_semester_id)
-        json_student_data = finalizedGradesBatchSemester(batch_semester_id)
-
-        if json_student_data:
-            return (json_student_data)
-        else:
-            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
-    else:
-        return render_template('404.html'), 404
+            return render_template('404.html'), 404
     
     
 @university_admin_api.route('/start/enrollment/<int:batch_semester_id>', methods=['PUT'])
@@ -785,7 +822,69 @@ def fetchListersStudents():
             return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
     else:
         return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    
+    
+@university_admin_api.route('/submit/criteria', methods=['POST'])
+def submitCriteria():
+     if request.method == 'POST':
+        university_admin = getCurrentUser()
+        if university_admin:
+            try:
+                return createCriteria(request.form)
+            except Exception as e:
+                print('An exception occurred')
+                return jsonify({"error": True, "message": "Invalid email or password"}), 401
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
 
+      
+@university_admin_api.route('/criteria/', methods=['GET'])
+def getCriteria():
+    university_admin = getCurrentUser()
+    if university_admin:
+        skip = int(request.args.get('$skip', 0))
+        top = int(request.args.get('$top', 10))
+        order_by = request.args.get('$orderby')
+        filter = request.args.get('$filter')
+        
+        student_achievement_list = getCriteriaList(skip, top, order_by, filter)
+        if student_achievement_list:
+            return student_achievement_list
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    
+@university_admin_api.route('/criteria/<int:criteriaId>', methods=['GET'])
+def getSpecificCriteria(criteriaId):
+    university_admin = getCurrentUser()
+    if university_admin:
+        print("criteriaId: ", criteriaId)
+        
+        criteria_data = getSpecificCriteriaData(criteriaId)
+        if criteria_data:
+            return criteria_data
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+
+@university_admin_api.route('/criteria-option/<int:semester>', methods=['GET'])
+def getSemesterOptionCriteria(semester):
+    university_admin = getCurrentUser()
+    if university_admin:
+        print("criteriaId: ", semester)
+        
+        criteria_options_data = getCriteriaOptions(semester)
+        if criteria_options_data:
+            return criteria_options_data
+        else:
+            return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+    else:
+        return jsonify(message="Something went wrong. Try to contact the admin to resolve the issue.")
+
+
+   
 
 # Get enc STATIC_TOKEN
 STATIC_TOKEN = "1b20e3f9-8d44-45b7-96da-02e8001d73e8"

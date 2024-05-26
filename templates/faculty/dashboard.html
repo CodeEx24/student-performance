@@ -311,6 +311,7 @@
   }
 
   function displayPassFailRates(json_pass_fail_rates) {
+    console.log('json_pass_fail_rates: ', json_pass_fail_rates);
     const transformedData = json_pass_fail_rates.flatMap((entry) => {
       const year = entry.Year;
       return [

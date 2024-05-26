@@ -1,0 +1,1182 @@
+{% extends "universityadmin/layout.html" %} {% block title %}
+<title>Honors Criteria</title> {% endblock title %}
+<!----------------- STYLE ----------------->
+{% block style %}
+
+<style>
+  /* #lister_svg{
+    background-color: aqua;
+  
+  }
+   */
+</style>
+{% endblock style %}
+
+<!----------------- CONTENT ----------------->
+{% block content %}
+
+<div class="grid grid-cols-6 grid-rows-11 gap-4 h-full overflow-auto">
+  <div class="p-4 col-span-full">
+    <div
+      class="rounded-sm border border-stroke bg-white p-4 md:p-6 xl:p-7.5 shadow-sm"
+    >
+      <h3 class="text-2xl font-bold text-c4 mb-3 px-4" id="name-number">
+        Honors Criteria
+      </h3>
+
+      <div class="flex items-end justify-between">
+        <div class="w-full bg-white p-4 mt-4">
+          <script id="template" type="text/x-template">
+            <div class="template_checkbox flex gap-4">
+                <button class="btn-enrollment px-4 py-2 bg-primary text-white font-bold opacity-70" disabled>View Criteria</button>
+                <button class="btn-enrollment px-4 py-2 bg-red-600 text-white font-bold opacity-70" disabled>Delete Criteria</button>
+            </div>
+          </script>
+
+          <div id="grid-metadata"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- The Modal -->
+<div
+  id="loadingModal"
+  class="hidden modal fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-container bg-white p-8 rounded shadow-lg z-10">
+    <!-- Modal Header -->
+
+    <!-- Modal Body -->
+    <div class="modal-body w-full relative">
+      <div class="flex flex-row gap-2">
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"
+        ></div>
+        <div
+          class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="criteriaInputModal"
+  class="hidden modal fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-6/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">CRITERIA SETUP</h2>
+
+        <button
+          class="modal-close"
+          onclick="closeModalCriteria('criteriaInputModal')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <form id="criteriaForm">
+        <div class="space-y-2.5 mt-4">
+          <div class="flex flex-col">
+            <label class="text-base text-c1">Criteria Label</label>
+            <input
+              id="criteriaName"
+              name="criteria"
+              placeholder="1st Semester - Batch 2020"
+              class="border rounded-md p-2"
+              onchange="checkCriteriaName(this.value)"
+            />
+            <p id="criteriaNameError" class="text-c5 hidden"></p>
+          </div>
+
+          <div class="flex flex-col">
+            <label for="semesterSelect" class="text-base text-c1"
+              >Select Semester</label
+            >
+            <select
+              id="semesterSelect"
+              name="semester"
+              class="border rounded-md p-2 py-2.5"
+              placeholder="Please select semester"
+              onchange="checkSemesterValidity(this.value)"
+            >
+              <option value="1">1st Semester</option>
+              <option value="2">2nd Semester</option>
+              <option value="3">Summer Term</option>
+            </select>
+            <p id="semesterError" class="text-c5 hidden"></p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 mt-4"></div>
+
+        <div
+          id="criteriaContainer"
+          class="modal-body w-full relative mt-4 grid grid-cols-2 gap-6"
+        >
+          <div id="latinContainer" class="space-y-4">
+            <p class="font-bold text-c1 text-xl">Latin Honor Criteria:</p>
+            <div class="flex flex-col">
+              <label class="text-base text-c1"
+                >Summa Cum Laude (Max. GWA)</label
+              >
+              <input
+                id="summa"
+                name="summa"
+                placeholder="1.20"
+                class="border rounded-md p-2"
+                type="number"
+                step="0.005"
+                onchange="checkCriteriaValidity(this.id, this.value)"
+              />
+              <p id="summaError" class="text-c5 hidden"></p>
+            </div>
+            <div class="flex flex-col">
+              <label class="text-base text-c1"
+                >Magna Cum Laude (Max. GWA)</label
+              >
+              <input
+                id="magna"
+                name="magna"
+                placeholder="1.45"
+                class="border rounded-md p-2"
+                type="number"
+                step="0.005"
+                onchange="checkCriteriaValidity(this.id, this.value)"
+              />
+              <p id="magnaError" class="text-c5 hidden"></p>
+            </div>
+            <div class="flex flex-col">
+              <label class="text-base text-c1">Cum Laude (Max. GWA)</label>
+              <input
+                id="cum"
+                name="cum"
+                placeholder="1.75"
+                class="border rounded-md p-2"
+                type="number"
+                step="0.005"
+                onchange="checkCriteriaValidity(this.id, this.value)"
+              />
+              <p id="cumError" class="text-c5 hidden"></p>
+            </div>
+          </div>
+          <div id="listerContainer" class="space-y-4">
+            <p class="font-bold text-c1 text-xl">Listers Criteria:</p>
+            <div class="flex flex-col">
+              <label class="font-medium">President Lister (Max. GWA)</label>
+              <input
+                id="presidentLister"
+                name="presidentLister"
+                placeholder="1.50"
+                class="border rounded-md p-2"
+                type="number"
+                step="0.005"
+                onchange="checkListerValidity(this.id, this.value)"
+              />
+              <p id="presidentListerError" class="text-c5 hidden"></p>
+            </div>
+
+            <div class="flex flex-col">
+              <label class="font-medium">Deans Lister (Max. GWA)</label>
+              <input
+                id="deansLister"
+                name="deansLister"
+                placeholder="1.75"
+                class="border rounded-md p-2"
+                type="number"
+                step="0.005"
+                onchange="checkListerValidity(this.id, this.value)"
+              />
+              <p id="deansListerError" class="text-c5 hidden"></p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 flex justify-end gap-4">
+          <button
+            class="bg-red-600 px-4 py-2 text-white rounded-md"
+            onclick='(function(event){ event.preventDefault(); closeModalCriteria("criteriaInputModal"); })(event)'
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="bg-primary px-4 py-2 text-white rounded-md"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Criteria input modal -->
+<div
+  id="criteriaInputModal"
+  class="hidden modal fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-6/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">CRITERIA SETUP</h2>
+
+        <button class="modal-close" onclick="closeModal('criteriaInputModal')">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 mt-4">
+        <p class="font-semibold text-c1 text-xl">
+          Batch: <span id="batch" class="font-normal">2024 -2025</span>
+        </p>
+        <p class="font-semibold text-c1 text-xl ml-2.5">
+          Semester: <span id="semester" class="font-normal">2nd Semester</span>
+        </p>
+      </div>
+
+      <div
+        id="criteriaContainer"
+        class="modal-body w-full relative mt-4 grid grid-cols-2 gap-6"
+      >
+        <!-- LATIN CONTAINER -->
+        <div id="latinContainer" class="space-y-4">
+          <p class="font-bold text-c1 text-xl">Latin Honor Criteria:</p>
+          <div class="flex flex-col">
+            <label class="text-base text-c1">Summa Cum Laude (Max. GWA)</label>
+            <input
+              id="summa"
+              name="summa"
+              placeholder="1.20"
+              class="border rounded-md p-2"
+              step="0.001"
+              onchange="checkCriteriaValidity(this.id, this.value)"
+            />
+            <p id="summaError" class="text-c5 hidden"></p>
+          </div>
+          <div class="flex flex-col">
+            <label class="text-base text-c1">Magna Cum Laude (Max. GWA)</label>
+            <input
+              id="magna"
+              name="magna"
+              placeholder="1.45"
+              class="border rounded-md p-2"
+              type="number"
+              step="0.001"
+              onchange="checkCriteriaValidity(this.id, this.value)"
+            />
+            <p id="magnaError" class="text-c5 hidden"></p>
+          </div>
+          <div class="flex flex-col">
+            <label class="text-base text-c1">Cum Laude (Max. GWA)</label>
+            <input
+              id="cum"
+              name="cum"
+              placeholder="1.75"
+              class="border rounded-md p-2"
+              step="0.001"
+              onchange="checkCriteriaValidity(this.id, this.value)"
+            />
+            <p id="cumError" class="text-c5 hidden"></p>
+          </div>
+        </div>
+
+        <!-- LISTER CONTAINER -->
+        <div id="listerContainer" class="space-y-4">
+          <p class="font-bold text-c1 text-xl">Listers Criteria:</p>
+          <div class="flex flex-col">
+            <label class="font-medium">President Lister (Max. GWA)</label>
+            <input
+              id="presidentLister"
+              name="presidentLister"
+              placeholder="1.50"
+              class="border rounded-md p-2"
+              step="0.001"
+              onchange="checkListerValidity(this.id, this.value)"
+            />
+            <p id="presidentListerError" class="text-c5 hidden"></p>
+          </div>
+
+          <div class="flex flex-col">
+            <label class="font-medium">Deans Lister (Max. GWA)</label>
+            <input
+              id="deansLister"
+              name="deansLister"
+              placeholder="1.75"
+              class="border rounded-md p-2"
+              step="0.001"
+              onchange="checkListerValidity(this.id, this.value)"
+            />
+            <p id="deansListerError" class="text-c5 hidden"></p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end gap-4">
+        <button
+          class="bg-red-600 px-4 py-2 text-white rounded-md"
+          onclick='(function(event){ event.preventDefault(); closeModal("criteriaInputModal"); })(event)'
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="bg-primary px-4 py-2 text-white rounded-md"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Criteria data modal -->
+
+<div
+  id="criteriaViewDataModal"
+  class="hidden modal fixed inset-0 items-center justify-center z-50"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-6/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">Honors Criteria Data</h2>
+
+        <button
+          class="modal-close"
+          onclick="closeModal('criteriaViewDataModal')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 mt-4 space-y-2.5">
+        <p class="font-semibold text-c1 text-xl">
+          Name:
+          <span id="criteriaNameData" class="font-normal">2024 -2025</span>
+        </p>
+        <p class="font-semibold text-c1 text-xl">
+          Semester:
+          <span id="semesterData" class="font-normal">2nd Semester</span>
+        </p>
+      </div>
+
+      <div
+        id="criteriaContainer"
+        class="modal-body w-full relative mt-4 grid grid-cols-2 gap-6"
+      >
+        <!-- LATIN CONTAINER -->
+        <div id="latinContainer" class="space-y-4">
+          <p class="font-bold text-c1 text-xl">Latin Honor Criteria:</p>
+          <div class="flex flex-col">
+            <p class="text-base text-c1 font-semibold">
+              Summa Cum Laude (Max. GWA)
+            </p>
+            <p id="summaCumLaudeData">Number 1</p>
+          </div>
+          <div class="flex flex-col">
+            <p class="text-base text-c1 font-semibold">
+              Magna Cum Laude (Max. GWA)
+            </p>
+            <p id="magnaCumLaudeData">Number 1</p>
+          </div>
+          <div class="flex flex-col">
+            <p class="text-base text-c1 font-semibold">Cum Laude (Max. GWA)</p>
+            <p id="cumLaudeData">Number 1</p>
+          </div>
+        </div>
+
+        <!-- LISTER CONTAINER -->
+        <div id="listerContainer" class="space-y-4">
+          <p class="font-bold text-c1 text-xl">Listers Criteria:</p>
+          <div class="flex flex-col">
+            <p class="text-base text-c1 font-semibold">
+              President Lister (Max. GWA)
+            </p>
+            <p id="presidentListerData">Number 1</p>
+          </div>
+
+          <div class="flex flex-col">
+            <p class="text-base text-c1 font-semibold">
+              Deans Lister (Max. GWA)
+            </p>
+            <p id="deansListerData">Number 1</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- SCRIPTS DATA -->
+{% block script %}
+
+<!-- Submit the Criteria Form -->
+<script>
+  document
+    .getElementById('criteriaForm')
+    .addEventListener('submit', function (event) {
+      // Prevent the default form submission behavior
+      event.preventDefault();
+
+      // Log the form element to the console (for debugging purposes)
+      console.log('Form submission prevented:', event.target);
+
+      const formData = new FormData(event.target);
+      const apiUrl = `${api_base_url}/submit/criteria`;
+
+      // Get all error
+      const summaError = document.getElementById('summaError');
+      const magnaError = document.getElementById('magnaError');
+      const cumError = document.getElementById('cumError');
+      const presidentListerError = document.getElementById(
+        'presidentListerError'
+      );
+      const deansListerError = document.getElementById('deansListerError');
+      const criteriaError = document.getElementById('criteriaNameError');
+      const semesterError = document.getElementById('semesterError');
+
+      // Check if there is an error
+      if (
+        summaError.classList.contains('flex') ||
+        magnaError.classList.contains('flex') ||
+        cumError.classList.contains('flex') ||
+        presidentListerError.classList.contains('flex') ||
+        deansListerError.classList.contains('flex') ||
+        criteriaError.classList.contains('flex') ||
+        semesterError.classList.contains('flex')
+      ) {
+        notyf.error('Please resolve all the error conditions');
+        return;
+      }
+
+      try {
+        fetch(apiUrl, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .then((data) => {
+            // CCheck if data.sucess throw message
+            if (data.success) {
+              notyf.success(data.message);
+
+              closeModal('criteriaInputModal');
+            } else if (data.error) {
+              console.log(data);
+              notyf.error(data.message);
+
+              if (data.errorList.length > 0) {
+                // Map the data.errorList and look for key to find element by id and put the inner text of it
+                data.errorList.forEach((error) => {
+                  const name = Object.keys(error);
+                  const errorElement = document.getElementById(name);
+                  console.log('ERROR ELEMENT: ', errorElement);
+                  // Show the error element
+                  errorElement.classList.add('flex');
+                  errorElement.classList.remove('hidden');
+                  errorElement.textContent = error[name];
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            console.log('ERROR: ', error);
+          });
+      } catch (error) {
+        console.log('ERROR: ', error);
+      }
+    });
+</script>
+
+<script>
+  function openCriteriaAddModal() {
+    showModal('criteriaInputModal');
+    const semesterSelect = Number(
+      document.getElementById('semesterSelect').value
+    );
+
+    if (!isNaN(semesterSelect)) {
+      checkSemesterValidity(semesterSelect);
+    }
+  }
+
+  function checkCriteriaName(name) {
+    // Check if the name is a string is more than 4 charcter
+    if (name.length < 4) {
+      document.getElementById('criteriaNameError').classList.add('flex');
+      document.getElementById('criteriaNameError').classList.remove('hidden');
+      document.getElementById('criteriaNameError').textContent =
+        'The field value must be more than 4 characters';
+      return;
+    } else {
+      document.getElementById('criteriaNameError').classList.add('hidden');
+      document.getElementById('criteriaNameError').classList.remove('flex');
+      document.getElementById('criteriaNameError').textContent = '';
+    }
+  }
+
+  function checkSemesterValidity(value) {
+    // Check if the value is 1, 2 or 3
+    if (value < 1 || value > 3) {
+      document.getElementById('semesterError').classList.add('flex');
+      document.getElementById('semesterError').classList.remove('hidden');
+      document.getElementById('semesterError').textContent =
+        'The field value must be 1st, 2nd or Summer Term';
+      return;
+    } else {
+      document.getElementById('semesterError').classList.add('hidden');
+      document.getElementById('semesterError').classList.remove('flex');
+      document.getElementById('semesterError').textContent = '';
+    }
+
+    const valueNumber = Number(value);
+    const criteriaContainer = document.getElementById('criteriaContainer');
+    const latinContainer = document.getElementById('latinContainer');
+
+    if (!isNaN(valueNumber) && valueNumber === 1) {
+      criteriaContainer.classList.add('grid-cols-1');
+      criteriaContainer.classList.remove('grid-cols-2');
+      latinContainer.classList.add('hidden');
+    } else if (!isNaN(valueNumber) && valueNumber === 2) {
+      criteriaContainer.classList.add('grid-cols-2');
+      criteriaContainer.classList.remove('grid-cols-1');
+      latinContainer.classList.remove('hidden');
+    } else if (!isNaN(valueNumber) && valueNumber === 3) {
+      criteriaContainer.classList.remove('grid-cols-2');
+      criteriaContainer.classList.add('grid-cols-1');
+      latinContainer.classList.add('hidden');
+    }
+
+    const errorIds = [
+      'criteriaNameError',
+      'semesterError',
+      'summaError',
+      'magnaError',
+      'cumError',
+      'presidentListerError',
+      'deansListerError',
+    ];
+
+    errorIds.forEach((id) => {
+      clearError(id);
+    });
+  }
+</script>
+
+<!-- Closing Modal -->
+<script>
+  function closeModalCriteria(elementId) {
+    toggleVisibility(elementId, 'hidden', 'flex');
+
+    const errorIds = [
+      'criteriaNameError',
+      'semesterError',
+      'summaError',
+      'magnaError',
+      'cumError',
+      'presidentListerError',
+      'deansListerError',
+    ];
+
+    errorIds.forEach((id) => {
+      clearError(id);
+    });
+
+    const inputIds = [
+      'criteriaName',
+      'summa',
+      'magna',
+      'cum',
+      'presidentLister',
+      'deansLister',
+    ];
+
+    inputIds.forEach((id) => {
+      document.getElementById(id).value = '';
+    });
+  }
+
+  function toggleVisibility(elementId, addClass, removeClass) {
+    const element = document.getElementById(elementId);
+    element.classList.add(addClass);
+    element.classList.remove(removeClass);
+  }
+
+  function clearError(elementId) {
+    const element = document.getElementById(elementId);
+    toggleVisibility(elementId, 'hidden', 'flex');
+    element.textContent = '';
+  }
+</script>
+
+<script>
+  function checkCriteriaValidity(id, value) {
+    const number = Number(value);
+    const paragraphError = document.getElementById(`${id}Error`);
+
+    // Common function to display error
+    function displayError(message) {
+      paragraphError.classList.add('flex');
+      paragraphError.classList.remove('hidden');
+      paragraphError.textContent = message;
+    }
+
+    // Common function to clear error
+    function clearError() {
+      paragraphError.classList.add('hidden');
+      paragraphError.classList.remove('flex');
+      paragraphError.textContent = '';
+    }
+
+    // Check if value is a valid number
+    if (isNaN(number)) {
+      displayError('The field value must be a number');
+      return;
+    }
+
+    // Check if value is positive
+    if (number < 0) {
+      displayError('The field value must be a positive number');
+      return;
+    }
+
+    // Specific checks based on ID
+    switch (id) {
+      case 'summa':
+        if (number > 1.5) {
+          displayError('It must be around 1.01 to 1.50');
+        } else {
+          const magna = Number(document.getElementById('magna').value);
+          if (magna !== 0 && !isNaN(magna) && number >= magna) {
+            displayError('The field value must be less than Magna Cum Laude');
+          } else {
+            clearError();
+          }
+        }
+        break;
+      case 'magna':
+        if (number > 1.75) {
+          displayError('It must be around 1.05 to 1.75');
+        } else {
+          const summa = Number(document.getElementById('summa').value);
+          const cum = Number(document.getElementById('cum').value);
+          if (
+            (summa !== 0 && !isNaN(summa) && number <= summa) ||
+            (cum !== 0 && !isNaN(cum) && number >= cum)
+          ) {
+            displayError(
+              'The field value must be correctly positioned between Summa Cum Laude and Cum Laude'
+            );
+          } else {
+            clearError();
+          }
+        }
+        break;
+      case 'cum':
+        if (number > 2.0) {
+          displayError('It must be around 1.05 to 2.00');
+        } else {
+          const summa = Number(document.getElementById('summa').value);
+          const magna = Number(document.getElementById('magna').value);
+          if (
+            (magna !== 0 && !isNaN(magna) && number <= magna) ||
+            (summa !== 0 && !isNaN(summa) && number <= summa)
+          ) {
+            displayError(
+              'The field value must be greater than Magna and Summa Cum Laude'
+            );
+          } else {
+            clearError();
+          }
+        }
+        break;
+      default:
+        clearError();
+    }
+  }
+</script>
+
+<script>
+  function checkListerValidity(id, value) {
+    const number = Number(value);
+    const paragraphError = document.getElementById(`${id}Error`);
+
+    // Common function to display error
+    function displayError(message) {
+      paragraphError.classList.add('flex');
+      paragraphError.classList.remove('hidden');
+      paragraphError.textContent = message;
+    }
+
+    // Common function to clear error
+    function clearError() {
+      paragraphError.classList.add('hidden');
+      paragraphError.classList.remove('flex');
+      paragraphError.textContent = '';
+    }
+
+    // Check if value is a valid number
+    if (isNaN(number)) {
+      displayError('The field value must be a number');
+      return;
+    }
+
+    // Check if value is positive
+    if (number < 0) {
+      displayError('The field value must be a positive number');
+      return;
+    }
+
+    if (number > 2.5) {
+      displayError('The value must be less than or equal to 2.5');
+      return;
+    }
+
+    // Specific checks based on ID
+    switch (id) {
+      case 'presidentLister':
+        const deansValue = Number(document.getElementById('deansLister').value);
+        if (deansValue !== 0 && !isNaN(deansValue) && number >= deansValue) {
+          displayError(
+            "The president's value must be less than the deans' value"
+          );
+        } else {
+          clearError();
+        }
+        break;
+      case 'deansLister':
+        const presidentValue = Number(
+          document.getElementById('presidentLister').value
+        );
+        if (
+          presidentValue !== 0 &&
+          !isNaN(presidentValue) &&
+          number <= presidentValue
+        ) {
+          displayError(
+            "The deans' value must be greater than the president's value"
+          );
+        } else {
+          clearError();
+        }
+        break;
+      default:
+        clearError();
+    }
+  }
+</script>
+
+<!-- FETCH ALL CLASS DATA (GRIDS)-->
+<script>
+  // JavaScript function to show the modal
+  async function finalizedGrades(batchSemesterId, batch, semester, button) {
+    showModal('criteriaInputModal');
+    console.log('SEMESTER: ', semester);
+    console.log('BATCH: ', batch);
+    document.getElementById('batch').innerText = `${batch} - ${batch + 1}`;
+    document.getElementById('semester').innerText =
+      semester === 1
+        ? '1st Semester'
+        : semester === 2
+        ? '2nd Semester'
+        : '3rd Semester';
+
+    const criteriaContainer = document.getElementById('criteriaContainer');
+    const latinContainer = document.getElementById('latinContainer');
+
+    if (semester === 3) {
+      criteriaContainer.classList.remove('grid-cols-2');
+      criteriaContainer.classList.add('grid-cols-1');
+      latinContainer.classList.add('hidden');
+    }
+
+    if (semester === 2) {
+      criteriaContainer.classList.add('grid-cols-2');
+      criteriaContainer.classList.remove('grid-cols-1');
+      latinContainer.classList.remove('hidden');
+    }
+
+    if (semester === 1) {
+      criteriaContainer.classList.add('grid-cols-1');
+      criteriaContainer.classList.remove('grid-cols-2');
+      latinContainer.classList.add('hidden');
+    }
+
+    // closeModal('criteriaInputModal')
+    // try {
+    //   showModal('loadingModal');
+
+    //   console.log('INSIDE BEFORE PUT');
+    //   const response = await fetch(
+    //     `${api_base_url}/finalized/grades/batch/${batchSemesterId}`,
+    //     {
+    //       method: 'PUT',
+    //     }
+    //   );
+
+    //   const result = await response.json();
+    //   console.log('RESULT: ', result);
+
+    //   if (result.success) {
+    //     button.disabled = true;
+    //     button.classList.add('opacity-70');
+    //     // notyf the message
+    //     notyf.success(result.message);
+    //   } else if (result.error) {
+    //     // notyg message
+    //     notyf.error(result.message);
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    // } finally {
+    //   closeModal('loadingModal');
+    // }
+  }
+
+  async function startEnrollment(batchSemesterId, button, btnFinalized) {
+    console.log('START ENROLLMENT: ', batchSemesterId);
+    try {
+      showModal('loadingModal');
+
+      const response = await fetch(
+        `${api_base_url}/start/enrollment/${batchSemesterId}`,
+        {
+          method: 'PUT',
+        }
+      );
+
+      const result = await response.json();
+      console.log('RESULT: ', result);
+
+      if (result.success) {
+        button.disabled = true;
+        button.classList.add('opacity-70');
+        btnFinalized.disabled = false;
+        btnFinalized.classList.remove('opacity-70');
+        // notyf the message
+        notyf.success(result.message);
+      } else if (result.error) {
+        console.log('ERROR');
+        // notyf error
+        notyf.error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      closeModal('loadingModal');
+    }
+  }
+</script>
+
+<script>
+  // Assume your Flask route provides configuration data
+  let gridConfig = {
+    apiUrl: `${api_base_url}/criteria`,
+    columns: [
+      {
+        field: 'HonorsCriteriaId',
+        isPrimaryKey: true,
+        visible: false, // Set to false to hide the column
+      },
+      {
+        field: 'HonorsCriteriaName',
+        headerText: 'Criteria Name',
+        width: 100,
+      },
+      {
+        field: 'Semester',
+        headerText: 'Semester',
+        width: 70,
+        filterBarTemplate: {
+          create: function (args) {
+            var dd = document.createElement('input');
+            dd.id = 'Semester';
+            return dd;
+          },
+          write: function (args) {
+            var semester = ['All', '1', '2', '3'];
+
+            var DropDownListObj = new ej.dropdowns.DropDownList({
+              dataSource: semester,
+              fields: { text: 'Semester', value: 'Semester' },
+              placeholder: 'Select a value',
+
+              change: function (e) {
+                console.log('CHANGE: ', e.value);
+                var gridObj =
+                  document.getElementsByClassName('e-grid')[0].ej2_instances[0];
+                if (e.value == 'All') {
+                  gridObj.removeFilteredColsByField('Semester');
+                } else {
+                  gridObj.filterByColumn(
+                    'Semester',
+                    'equal',
+                    parseInt(e.value)
+                  );
+                }
+              },
+            });
+            DropDownListObj.appendTo('#Semester');
+          },
+        },
+      },
+      {
+        headerText: 'Actions',
+        template:
+          '<div><button class="btn-view-criteria px-4 py-2 bg-primary text-white font-bold">View Criteria</button></div>', // Add a button to the cell
+        width: 50,
+        textAlign: 'Left',
+      },
+      //   {
+      //     headerText: 'IsGradeFinalized',
+      //     template: '#finalized-template',
+      //     width: 50,
+      //     textAlign: 'Left',
+      //   },
+    ],
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create a DataManager with the provided API URL
+    let curriculum_subject_data = new ej.data.DataManager({
+      url: gridConfig.apiUrl,
+      adaptor: new ej.data.WebApiAdaptor(),
+    });
+
+    console.log(
+      'data.adaptor curriculum_subject_data: ',
+      curriculum_subject_data
+    );
+
+    // Create Syncfusion Grid using the provided configuration
+    let grid = new ej.grids.Grid({
+      dataSource: curriculum_subject_data,
+      columns: gridConfig.columns,
+      allowPaging: true,
+      allowFiltering: true,
+      allowSorting: true, // Enable sorting
+      allowExcelExport: true,
+      toolbar: ['ExcelExport', 'Add Criteria'], // Add the ExcelExport button to the toolbar
+      allowExcelExport: true, // Enable Excel export feature
+      pageSettings: { pageSize: 10, totalRecordsCount: 10 },
+      created: function () {
+        // Disable buttons based on IsGradeFinalized after rendering the grid
+        disableButtonsBasedOnGradeFinalized();
+      },
+      beforeDataBound: function (args) {
+        // If args action type is filter then go to page 1
+
+        if (args.actionArgs.requestType === 'filtering') {
+          grid.goToPage(1);
+        }
+        // RUn the adaptor
+
+        // Access the data returned from the server
+        console.log('Data returned from server:', args);
+      },
+
+      actionBegin: function (args) {
+        console.log('args in actionBegin: ', args);
+        if (args.requestType === 'paging') {
+          // Handle pagination click
+          console.log('Page clicked:', args.currentPage);
+          // You can perform additional actions here, such as loading data for the new page.
+        }
+        if (args.requestType === 'filtering') {
+          // Go to page 1
+          grid.goToPage(1);
+        }
+      },
+    });
+
+    grid.toolbarClick = function (args) {
+      if (args['item'].id === 'grid-metadata_excelexport') {
+        grid.excelExport();
+      }
+      if (args['item'].id === 'grid-metadata_Add Criteria') {
+        openCriteriaAddModal();
+      }
+    };
+
+    // Add a click event handler for all buttons with the "btn" class
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('btn-view-criteria')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        const button = event.target;
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              viewCriteriaId(
+                rowData.HonorsCriteriaId,
+                rowData.HonorsCriteriaName,
+                rowData.Semester
+              );
+            }
+          }
+        }
+      }
+
+      if (event.target.classList.contains('btn-enrollment')) {
+        const cellElement = event.target.closest('.e-rowcell');
+        const button = event.target;
+
+        // get the btn-finalized closest to button
+        const btnFinalized = button
+          .closest('.template_checkbox')
+          .querySelector('.btn-finalized');
+
+        if (cellElement) {
+          const dataUid = cellElement.parentElement.getAttribute('data-uid');
+          if (dataUid) {
+            const rowData = grid.getRowObjectFromUID(dataUid).data;
+            if (rowData) {
+              startEnrollment(
+                rowData.LatestBatchSemesterId,
+                button,
+                btnFinalized
+              );
+            }
+          }
+        }
+      }
+    });
+
+    // Render the grid
+    grid.appendTo('#grid-metadata');
+
+    const filterbarOperator = new ej.buttons.CheckBox();
+    filterbarOperator.appendTo('#filterBarOperator');
+
+    filterbarOperator.addEventListener('change', function (args) {
+      grid.filterSettings.showFilterBarOperator = args.checked;
+      grid.clearFiltering();
+    });
+  });
+</script>
+
+<script>
+  function viewCriteriaId(criteriaId, name, semester) {
+    console.log('Criteria Id: ' + criteriaId);
+    console.log('Criteria Name: ' + name);
+    console.log('Semester: ' + semester);
+
+    // Fetch the criteria data
+    try {
+      fetch(`${api_base_url}/criteria/${criteriaId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            const criteria = data.data;
+            console.log('CRITERIA: ', criteria);
+            showModal('criteriaViewDataModal');
+
+            // Get all data paragraph
+            const criteriaParagraph =
+              document.getElementById('criteriaNameData');
+            const semesterParagraph = document.getElementById('semesterData');
+
+            const summaParagraph = document.getElementById('summaCumLaudeData');
+            const magnaParagraph = document.getElementById('magnaCumLaudeData');
+            const cumParagraph = document.getElementById('cumLaudeData');
+
+            const presidentListerParagraph = document.getElementById(
+              'presidentListerData'
+            );
+            const deansListerParagraph =
+              document.getElementById('deansListerData');
+
+            criteriaParagraph.textContent = name;
+            semesterParagraph.textContent =
+              semester === 1
+                ? '1st Semester'
+                : semester === 2
+                ? '2nd Semester'
+                : 'Summer Term';
+
+            presidentListerParagraph.textContent =
+              criteria.PresidentListerHighestGWA;
+            deansListerParagraph.textContent = criteria.DeansListerHighestGWA;
+
+            summaParagraph.textContent = criteria.SummaCumLaudeHighestGWA
+              ? criteria.SummaCumLaudeHighestGWA
+              : '--';
+            magnaParagraph.textContent = criteria.MagnaCumLaudeHighestGWA
+              ? criteria.MagnaCumLaudeHighestGWA
+              : '--';
+            cumParagraph.textContent = criteria.CumLaudeHighestGWA
+              ? criteria.CumLaudeHighestGWA
+              : '--';
+          } else if (data.error) {
+            notyf.error(data.message);
+          }
+        });
+    } catch (error) {
+      notyf.error(error.message);
+    }
+  }
+</script>
+
+{% endblock script %}

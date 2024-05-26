@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements, getListerTrends, processUpdatingSingleStudentRequirements, noticeStudentsEmail
+from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements, getListerTrends, processUpdatingSingleStudentRequirements, noticeStudentsEmail, getOutcomeRates, getBatchLatest, getGradDropWithdrawnRate
 import os
 import re
 
@@ -101,6 +101,21 @@ def enrollmentTrends():
 
         if json_performance_data:
             return (json_performance_data)
+        else:
+            return jsonify(message="No Performance data available")
+    else:
+        return render_template('404.html'), 404
+    
+
+@registrar_api.route('/outcome/rates/<int:semester>', methods=['GET'])
+@role_required('registrar')
+def fetchOutcomRates(semester):
+    registrar = getCurrentUser()
+    if registrar:
+        json_outcome_data = getOutcomeRates(semester)
+
+        if json_outcome_data:
+            return (json_outcome_data)
         else:
             return jsonify(message="No Performance data available")
     else:
@@ -317,3 +332,24 @@ def noticeStudents():
         return result
     else:
         return render_template('404.html'), 404
+    
+    
+@registrar_api.route('/batch/latest', methods=['GET'])
+@role_required('registrar')
+def fetchBatchLatest():
+    registrar = getCurrentUser()
+    if registrar:
+        return getBatchLatest()
+    else:
+        return render_template('404.html'), 404   
+    
+@registrar_api.route('/grad-drop-withdrawn/rates/<int:year>', methods=['GET'])
+@role_required('registrar')
+def fetchGraduateDropWithdrawnRates(year):
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        return getGradDropWithdrawnRate(year)
+    else:
+        return render_template('404.html'), 404    
+        
+    

@@ -309,10 +309,15 @@ class CourseEnrolled(db.Model):
     StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Students Reference
     DateEnrolled = db.Column(db.Date) # Date they enrolled
     Status = db.Column(db.Integer, nullable=False)  # (0 - Not Graduated/Continuing/Regular ||  1 - Graduated || 2 - Irregular ||  3 - Drop  ||  4 - Transfer Course || 5 - Transfer School)
+    FinalGWAGrade = db.Column(db.Float)
+    LatinHonors = db.Column(db.Integer) # 1 - Summa Cum Laude, 2 - Magna Cum Laude, 3 - Cum Laude
     CurriculumYear = db.Column(db.Integer, nullable=False)  # (2019, 2020, 2021) - For checking what the subjects they should taken
+    # HasIncompleteSubjectsInCurriculum = db.Column(db.Boolean, nullable=False, default=False)
+    BatchYearGraduated = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+    __table_args__ = (db.UniqueConstraint('CourseId', 'StudentId', name='uq_course_student'),)
 
     def to_dict(self):
         return {
@@ -320,7 +325,7 @@ class CourseEnrolled(db.Model):
             'StudentId': self.StudentId,
             'DateEnrolled': self.DateEnrolled,
         }
-
+        
 # Metadata containing the details of class such as Year, Semester, Batch and Course
 class Metadata(db.Model):
     __tablename__ = 'SPSMetadata'
@@ -330,8 +335,11 @@ class Metadata(db.Model):
     Year = db.Column(db.Integer, nullable=False) # (1, 2, 3, 4) - Current year of the class 
     Semester = db.Column(db.Integer, nullable=False) # (1, 2, 3) - Current semester of class
     Batch = db.Column(db.Integer, nullable=False) # (2019, 2020, 2021, ...) - Batch of the class
+    TotalEnrolledStudents = db.Column(db.Integer, nullable=False, default=0) # Updated everytime students register in the subjects () - But checks if the student is already existing in the current batch also
+    TotalGraduatedStudents = db.Column(db.Integer) # 0 If there are no graduated, Dynamic
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
 
 # Class Details 
 class Class(db.Model):
@@ -414,7 +422,8 @@ class StudentClassSubjectGrade(db.Model):
     StudentId = db.Column(db.Integer, db.ForeignKey('SPSStudent.StudentId', ondelete="CASCADE"), primary_key=True) # Referencing to the student in subject taken
     Grade = db.Column(db.Float) # Students Grade
     DateEnrolled = db.Column(db.Date) # Date enrolled in the subject
-    AcademicStatus = db.Column(db.Integer) # (1 - Passed, 2 - Failed, 3 - Incomplete or INC,  4 - Withdrawn, 5 - ReEnroll )
+    AcademicStatus = db.Column(db.Integer) # (1 - Passed, 2 - Failed, 3 - Incomplete or INC,  4 - Withdrawn, 5 - Drop, 6 - ReEnroll )
+    CompletedOnTime = db.Column(db.Boolean, default=True) #
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -455,6 +464,7 @@ class ClassSubjectGrade(db.Model):
     Grade = db.Column(db.Float) # Average Grade of Class Subject
     Passed = db.Column(db.Integer) # Amount of Passed
     Failed = db.Column(db.Integer) # Amount of Failed
+    Withdrawn = db.Column(db.Integer) # Amount of Withdrawn
     Incomplete = db.Column(db.Integer) # Amount of Incomplete
     Dropout = db.Column(db.Integer) # Amount of Dropout
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -540,6 +550,30 @@ class LatestBatchSemester(db.Model):
     Semester = db.Column(db.Integer, nullable=False) # (1, 2, 3) - Semester
     IsEnrollmentStarted = db.Column(db.Boolean, default=False)
     IsGradeFinalized = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    def to_dict(self):
+        return {
+            'LatestBatchSemesterId': self.LatestBatchSemesterId,
+            'Batch': self.Batch,
+            'Semester': self.Semester,
+            'IsEnrollmentStarted': self.IsEnrollmentStarted,
+            'IsGradeFinalized': self.IsGradeFinalized
+            # Add other attributes if needed
+        }
+        
+class HonorsCriteria(db.Model):
+    __tablename__ = 'SPSHonorsCriteria'
+
+    HonorsCriteriaId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    HonorsCriteriaName = db.Column(db.String, unique=True, nullable=False)
+    Semester = db.Column(db.Integer, nullable=False) # (1, 2, 3) - Semester
+    PresidentListerHighestGWA = db.Column(db.Float, nullable=False)
+    DeansListerHighestGWA = db.Column(db.Float, nullable=False)
+    SummaCumLaudeHighestGWA = db.Column(db.Float)
+    MagnaCumLaudeHighestGWA = db.Column(db.Float)
+    CumLaudeHighestGWA = db.Column(db.Float)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     

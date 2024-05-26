@@ -78,43 +78,421 @@
   </div>
 </div>
 
+<div
+  id="criteriaInputModal"
+  class="hidden modal fixed inset-0 items-center justify-center z-20"
+>
+  <!-- Modal Overlay -->
+  <div class="modal-overlay absolute inset-0 bg-gray-800 opacity-50"></div>
+  <!-- Modal Content -->
+  <div
+    class="modal-container bg-white p-8 rounded shadow-lg z-10 w-6/12 overflow-y-auto"
+  >
+    <!-- Modal Header -->
+    <div class="modal-header overflow-y-auto">
+      <div class="flex justify-between">
+        <h2 class="text-c1 text-2xl font-semibold">CRITERIA SETUP</h2>
+
+        <button
+          class="modal-close"
+          onclick="closeModalCriteria('criteriaInputModal')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+              fill="#000"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 mt-4">
+        <p class="font-semibold text-c1 text-xl">
+          Batch: <span id="batch" class="font-normal">2024 -2025</span>
+        </p>
+        <p class="font-semibold text-c1 text-xl ml-2.5">
+          Semester: <span id="semester" class="font-normal">2nd Semester</span>
+        </p>
+      </div>
+      <form id="criteriaForm">
+        <div class="flex flex-col mt-2.5">
+          <label for="semesterSelect" class="font-semibold text-c1 text-xl"
+            >Criteria for Honors:</label
+          >
+          <select
+            id="criteriaOptionSelect"
+            name="criteriaOption"
+            class="border rounded-md p-2 py-2.5"
+            placeholder="Please select criteria for honors"
+            onchange="checkSelectedCriteriaValue(this.value)"
+          ></select>
+          <p id="semesterError" class="text-c5 hidden"></p>
+        </div>
+        <div
+          id="criteriaContainer"
+          class="modal-body w-full relative mt-4 grid grid-cols-2 gap-6"
+        >
+          <!-- LATIN CONTAINER -->
+          <div id="latinContainer" class="space-y-4">
+            <p class="font-bold text-c1 text-xl">Latin Honor Criteria:</p>
+            <div class="flex flex-col">
+              <p class="text-base text-c1 font-semibold">
+                Summa Cum Laude (Max. GWA)
+              </p>
+              <p id="summaCumLaudeData">0.00</p>
+            </div>
+            <div class="flex flex-col">
+              <p class="text-base text-c1 font-semibold">
+                Magna Cum Laude (Max. GWA)
+              </p>
+              <p id="magnaCumLaudeData">0.00</p>
+            </div>
+            <div class="flex flex-col">
+              <p class="text-base text-c1 font-semibold">
+                Cum Laude (Max. GWA)
+              </p>
+              <p id="cumLaudeData">0.00</p>
+            </div>
+          </div>
+
+          <!-- LISTER CONTAINER -->
+          <div id="listerContainer" class="space-y-4">
+            <p class="font-bold text-c1 text-xl">Listers Criteria:</p>
+            <div class="flex flex-col">
+              <p class="text-base text-c1 font-semibold">
+                President Lister (Max. GWA)
+              </p>
+              <p id="presidentListerData">0.00</p>
+            </div>
+
+            <div class="flex flex-col">
+              <p class="text-base text-c1 font-semibold">
+                Deans Lister (Max. GWA)
+              </p>
+              <p id="deansListerData">0.00</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 flex justify-end gap-4">
+          <button
+            class="bg-red-600 px-4 py-2 text-white rounded-md"
+            onclick='(function(event){ event.preventDefault(); closeModalCriteria("criteriaInputModal"); })(event)'
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="bg-primary px-4 py-2 text-white rounded-md"
+          >
+            Submit
+          </button>
+        </div>
+        <input
+          type="text"
+          value=""
+          id="batchSemester"
+          name="batchSemester"
+          class="hidden"
+        />
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 
 <!-- SCRIPTS DATA -->
 {% block script %}
+<!-- CRITERIA SUBMIT -->
+<script>
+  document
+    .getElementById('criteriaForm')
+    .addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      // Get form data
+      const formData = new FormData(this);
+      try {
+        // Show loading Modal
+        showModal('loadingModal');
+        fetch(`${api_base_url}/finalized/grades/batch`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            console.log('Success:', result);
+            if (result.success) {
+              buttonFinalizedGrades.disabled = true;
+              buttonFinalizedGrades.classList.add('opacity-70');
+              notyf.success(result.message);
+            }
+          })
+          .catch((error) => {
+            notyf.error(error.message);
+          })
+          .finally(() => {
+            closeModal('loadingModal');
+            closeModal('criteriaInputModal');
+          });
+      } catch (error) {
+        notyf.error(error.message);
+      }
+    });
+</script>
+
+<script>
+  function closeModalCriteria(elementId) {
+    const loadingModal = document.getElementById(elementId);
+    loadingModal.classList.add('hidden');
+    loadingModal.classList.remove('flex');
+
+    // Select the criteriaOptionSelect and remove the option
+    const criteriaOptionSelect = document.getElementById(
+      'criteriaOptionSelect'
+    );
+    criteriaOptionSelect.options.length = 0;
+  }
+</script>
+
+<script>
+  function checkCriteriaValidity(id, value) {
+    const number = Number(value);
+    const paragraphError = document.getElementById(`${id}Error`);
+
+    // Common function to display error
+    function displayError(message) {
+      paragraphError.classList.add('flex');
+      paragraphError.classList.remove('hidden');
+      paragraphError.textContent = message;
+    }
+
+    // Common function to clear error
+    function clearError() {
+      paragraphError.classList.add('hidden');
+      paragraphError.classList.remove('flex');
+      paragraphError.textContent = '';
+    }
+
+    // Check if value is a valid number
+    if (isNaN(number)) {
+      displayError('The field value must be a number');
+      return;
+    }
+
+    // Check if value is positive
+    if (number < 0) {
+      displayError('The field value must be a positive number');
+      return;
+    }
+
+    // Specific checks based on ID
+    switch (id) {
+      case 'summa':
+        if (number > 1.5) {
+          displayError('It must be around 1.01 to 1.50');
+        } else {
+          const magna = Number(document.getElementById('magna').value);
+          if (magna !== 0 && !isNaN(magna) && number >= magna) {
+            displayError('The field value must be less than Magna Cum Laude');
+          } else {
+            clearError();
+          }
+        }
+        break;
+      case 'magna':
+        if (number > 1.75) {
+          displayError('It must be around 1.05 to 1.75');
+        } else {
+          const summa = Number(document.getElementById('summa').value);
+          const cum = Number(document.getElementById('cum').value);
+          if (
+            (summa !== 0 && !isNaN(summa) && number <= summa) ||
+            (cum !== 0 && !isNaN(cum) && number >= cum)
+          ) {
+            displayError(
+              'The field value must be correctly positioned between Summa Cum Laude and Cum Laude'
+            );
+          } else {
+            clearError();
+          }
+        }
+        break;
+      case 'cum':
+        if (number > 2.0) {
+          displayError('It must be around 1.05 to 2.00');
+        } else {
+          const summa = Number(document.getElementById('summa').value);
+          const magna = Number(document.getElementById('magna').value);
+          if (
+            (magna !== 0 && !isNaN(magna) && number <= magna) ||
+            (summa !== 0 && !isNaN(summa) && number <= summa)
+          ) {
+            displayError(
+              'The field value must be greater than Magna and Summa Cum Laude'
+            );
+          } else {
+            clearError();
+          }
+        }
+        break;
+      default:
+        clearError();
+    }
+  }
+</script>
+
+<script>
+  function checkListerValidity(id, value) {
+    const number = Number(value);
+    const paragraphError = document.getElementById(`${id}Error`);
+
+    // Common function to display error
+    function displayError(message) {
+      paragraphError.classList.add('flex');
+      paragraphError.classList.remove('hidden');
+      paragraphError.textContent = message;
+    }
+
+    // Common function to clear error
+    function clearError() {
+      paragraphError.classList.add('hidden');
+      paragraphError.classList.remove('flex');
+      paragraphError.textContent = '';
+    }
+
+    // Check if value is a valid number
+    if (isNaN(number)) {
+      displayError('The field value must be a number');
+      return;
+    }
+
+    // Check if value is positive
+    if (number < 0) {
+      displayError('The field value must be a positive number');
+      return;
+    }
+
+    // Specific checks based on ID
+    switch (id) {
+      case 'presidentLister':
+        const deansValue = Number(document.getElementById('deansLister').value);
+        if (deansValue !== 0 && !isNaN(deansValue) && number >= deansValue) {
+          displayError(
+            "The president's value must be less than the deans' value"
+          );
+        } else {
+          clearError();
+        }
+        break;
+      case 'deansLister':
+        const presidentValue = Number(
+          document.getElementById('presidentLister').value
+        );
+        if (
+          presidentValue !== 0 &&
+          !isNaN(presidentValue) &&
+          number <= presidentValue
+        ) {
+          displayError(
+            "The deans' value must be greater than the president's value"
+          );
+        } else {
+          clearError();
+        }
+        break;
+      default:
+        clearError();
+    }
+  }
+</script>
 
 <!-- FETCH ALL CLASS DATA (GRIDS)-->
 <script>
+  let buttonFinalizedGrades;
   // JavaScript function to show the modal
-  async function finalizedGrades(batchSemesterId, button) {
-    console.log('FINALIZED GRADES: ', batchSemesterId);
-    try {
-      showModal('loadingModal');
+  async function finalizedGrades(batchSemesterId, batch, semester) {
+    document.getElementById('batch').innerText = `${batch} - ${batch + 1}`;
+    document.getElementById('semester').innerText =
+      semester === 1
+        ? '1st Semester'
+        : semester === 2
+        ? '2nd Semester'
+        : '3rd Semester';
 
-      console.log('INSIDE BEFORE PUT');
+    document.getElementById('batchSemester').value = batchSemesterId;
+
+    const criteriaOptionSelect = document.getElementById(
+      'criteriaOptionSelect'
+    );
+    // Delete the criteria option
+    criteriaOptionSelect.options.length = 0;
+
+    // trycatch with fetch inside
+    try {
       const response = await fetch(
-        `${api_base_url}/finalized/grades/batch/${batchSemesterId}`,
+        `${api_base_url}/criteria-option/${semester}`,
         {
-          method: 'PUT',
+          method: 'GET',
         }
       );
 
-      const result = await response.json();
-      console.log('RESULT: ', result);
+      console.log('RESPONSE: ', response);
+      console.log('RESPONSE DATA: ', response.data);
 
-      if (result.success) {
-        button.disabled = true;
-        button.classList.add('opacity-70');
-        // notyf the message
-        notyf.success(result.message);
-      } else if (result.error) {
-        // notyg message
-        notyf.error(result.message);
-      }
+      const criteriaOption = await response.json();
+
+      criteriaOption.data.map((criteria) => {
+        // Add options in criteriaOptionSelect
+
+        const option = document.createElement('option');
+        option.value = criteria.HonorsCriteriaId;
+        option.textContent = criteria.HonorsCriteriaName;
+        option.classList.add('text-c1');
+        criteriaOptionSelect.appendChild(option);
+      });
+      // first option value
+      value = criteriaOption.data[0].HonorsCriteriaId;
+      // Fetch the first option
+      const criteriaData = await fetch(`${api_base_url}/criteria/${value}`);
+
+      const result = await criteriaData.json();
+
+      // Get the first option
+      const firstOption = criteriaOption.data[0];
+      const summaParagraph = document.getElementById('summaCumLaudeData');
+      const magnaParagraph = document.getElementById('magnaCumLaudeData');
+      const cumParagraph = document.getElementById('cumLaudeData');
+
+      const presidentListerParagraph = document.getElementById(
+        'presidentListerData'
+      );
+      const deansListerParagraph = document.getElementById('deansListerData');
+
+      presidentListerParagraph.textContent =
+        result.data.PresidentListerHighestGWA;
+      deansListerParagraph.textContent = result.data.DeansListerHighestGWA;
+
+      summaParagraph.textContent = result.data.SummaCumLaudeHighestGWA
+        ? result.data.SummaCumLaudeHighestGWA
+        : '0.00';
+      magnaParagraph.textContent = result.data.MagnaCumLaudeHighestGWA
+        ? result.data.MagnaCumLaudeHighestGWA
+        : '0.00';
+      cumParagraph.textContent = result.data.CumLaudeHighestGWA
+        ? result.data.CumLaudeHighestGWA
+        : '0.00';
+
+      showModal('criteriaInputModal');
     } catch (error) {
-      console.error(error);
-    } finally {
-      closeModal('loadingModal');
+      console.log('CATCH THE ERROR HERE 1');
+      notyf.error('Something went wrong. Please try again');
     }
   }
 
@@ -148,8 +526,46 @@
     } catch (error) {
       console.error(error);
     } finally {
-      closeModal('loadingModal');
+      closeModalCriteria('loadingModal');
     }
+  }
+</script>
+
+<script>
+  async function checkSelectedCriteriaValue(value) {
+    // find id using value in HonorsCriteriaId
+
+    console.log(value);
+
+    try {
+      const response = await fetch(`${api_base_url}/criteria/${value}`);
+
+      const result = await response.json();
+      console.log('RESULT DATA VALUE: ', result);
+
+      const summaParagraph = document.getElementById('summaCumLaudeData');
+      const magnaParagraph = document.getElementById('magnaCumLaudeData');
+      const cumParagraph = document.getElementById('cumLaudeData');
+
+      const presidentListerParagraph = document.getElementById(
+        'presidentListerData'
+      );
+      const deansListerParagraph = document.getElementById('deansListerData');
+
+      presidentListerParagraph.textContent =
+        result.data.PresidentListerHighestGWA;
+      deansListerParagraph.textContent = result.data.DeansListerHighestGWA;
+
+      summaParagraph.textContent = result.data.SummaCumLaudeHighestGWA
+        ? result.data.SummaCumLaudeHighestGWA
+        : '0.00';
+      magnaParagraph.textContent = result.data.MagnaCumLaudeHighestGWA
+        ? result.data.MagnaCumLaudeHighestGWA
+        : '0.00';
+      cumParagraph.textContent = result.data.CumLaudeHighestGWA
+        ? result.data.CumLaudeHighestGWA
+        : '0.00';
+    } catch (error) {}
   }
 </script>
 
@@ -317,13 +733,17 @@
     document.addEventListener('click', function (event) {
       if (event.target.classList.contains('btn-finalized')) {
         const cellElement = event.target.closest('.e-rowcell');
-        const button = event.target;
+        buttonFinalizedGrades = event.target;
         if (cellElement) {
           const dataUid = cellElement.parentElement.getAttribute('data-uid');
           if (dataUid) {
             const rowData = grid.getRowObjectFromUID(dataUid).data;
             if (rowData) {
-              finalizedGrades(rowData.LatestBatchSemesterId, button);
+              finalizedGrades(
+                rowData.LatestBatchSemesterId,
+                rowData.Batch,
+                rowData.Semester
+              );
             }
           }
         }

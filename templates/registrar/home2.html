@@ -150,90 +150,87 @@ endblock title %}
       </div>
     </div>
   </div>
-  <div class="col-span-6">
-    <div class="grid grid-cols-6 grid-row-12 gap-4">
-      <div
-        class="bg-white col-span-6 lg:col-span-4 lg:row-span-3 lg:row-span-0 shadow-md p-4 rounded-md shadow-sm"
-      >
-        <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
-          Enrollment Trends
-        </h4>
-        <div id="enrollment"></div>
-      </div>
-
-      <div
-        class="bg-white col-span-6 lg:col-span-2 lg:row-span-8 shadow-md p-4 rounded-md shadow-sm flex flex-col justify-center items-center"
-      >
-        <div class="w-full px-4 mt-4 space-y-2">
-          <label class="text-xl font-bold text-c1">Please select a year</label>
-          <select
-            id="semesterSelect"
-            name="semester"
-            class="border rounded-md p-2 py-2.5 w-full"
-            placeholder="Please select semester"
-            onchange="fetchYearlyRates(this.value)"
-          ></select>
-          <div
-            id="yearly-rates"
-            class="hidden bg-green-200 px-4 py-2 rounded-md"
-          >
-            <p class="font-bold">
-              Notes:
-              <span class="font-normal">
-                The results below are predictions and may differ from the actual
-                data once it becomes available.
-              </span>
-            </p>
-          </div>
-        </div>
-        <div class="flex flex-col items-center justify-center mt-4">
-          <p class="text-c1 font-semibold text-xl">Graduation Rates</p>
-          <p class="mt-2">
-            Total Student Graduates: <span id="graduation_count">25</span>
-          </p>
-          <div id="graduation_gauge" style="height: 250px; width: 250px"></div>
-        </div>
-        <div class="flex flex-col items-center justify-center mt-4">
-          <p class="text-c1 font-semibold text-xl">Dropout Rates</p>
-          <p class="mt-2 justify-center">Accumulated Subjects Dropped <br /></p>
-          <p>of Students: <span id="dropout_count">25</span></p>
-          <div id="dropout_gauge" style="height: 250px; width: 250px"></div>
-        </div>
-        <div class="flex flex-col items-center justify-center mt-4">
-          <p class="text-c1 font-semibold text-xl">Withdrawn Rates</p>
-          <p class="mt-2 justify-center">
-            Accumulated Subjects Withdrawn <br />
-            <p>of Students: <span id="withdrawn_count">25</span></p>
-          </p>
-          <div id="withdrawn_gauge" style="height: 250px; width: 250px"></div>
-        </div>
-      </div>
-
-      <div
-        class="bg-white col-span-6 lg:col-span-4 lg:row-span-4 lg:row-span-0 shadow-md p-4 rounded-md shadow-sm"
-      >
-        <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
-          Student Outcome Rates
-        </h4>
-        <div id="outcome-rates"></div>
-      </div>
-    </div>
+  <div
+    class="bg-white col-span-6 lg:col-span-3 row-span-4 shadow-md p-4 rounded-md shadow-sm"
+  >
+    <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
+      Enrollment Trends
+    </h4>
+    <div id="enrollment"></div>
   </div>
-  <div class="hidden">
+
+  <div
+    class="bg-white col-span-6 lg:col-span-3 row-span-4 lg:col-start-4 shadow-md p-4 rounded-md shadow-sm"
+  >
     <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
       President Lister
     </h4>
     <div id="lister"></div>
-    <div
-      class="bg-white p-8 shadow-md col-span-full"
-      id="course-performance-container"
-    >
-      <h1 class="text-3xl font-bold text-c1 mb-8">Course Performances</h1>
-    </div>
+  </div>
+
+  <div
+    class="bg-white p-8 shadow-md col-span-full"
+    id="course-performance-container"
+  >
+    <h1 class="text-3xl font-bold text-c1 mb-8">Program Performances</h1>
+    <div id="course-performance"></div>
   </div>
 </div>
 
 {% endblock content %} {% block script %}
+<!-- STATISTICS - Students, Faculty and Class -->
+<script>
+  async function fetchStatistics() {
+    try {
+      const response = await fetch(`${api_base_url}/statistics`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const json_statistics = await response.json();
+      console.log('json_statistics: ', json_statistics);
+
+      if (json_statistics.success) {
+        // Update counts
+        document.getElementById('teacher-count').innerText =
+          json_statistics.result.teacher_active_count;
+        document.getElementById('students-count').innerText =
+          json_statistics.result.student_enrolled_count;
+        document.getElementById('class-count').innerText =
+          json_statistics.result.class_data_count;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  fetchStatistics();
+
+  // async function fetchAverageGPA() {
+  //   try {
+  //     const response = await fetch(`${api_base_url}/current/gpa`);
+
+  //     if (!response.ok) {
+  //       throw new Error(
+  //         `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+  //       );
+  //     }
+
+  //     const json_average_gpa = await response.json();
+
+  //     if (json_average_gpa) {
+  //       document.getElementById('average-gpa').innerText =
+  //         json_average_gpa.AverageGrade;
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
+</script>
+
 <!-- ENROLLMENT TRENDS OF COURSES -->
 <script>
   async function fetchEnrollmentTrends() {
@@ -249,7 +246,7 @@ endblock title %}
       const json_enrollment_trends = await response.json();
 
       displayEnrollmentTrendChart(json_enrollment_trends);
-      // displayedEnrollmentNumbers(json_enrollment_trends);
+      displayedEnrollmentNumbers(json_enrollment_trends);
     } catch (error) {
       console.error(error);
     }
@@ -266,7 +263,8 @@ endblock title %}
         series_template.push({
           type: 'StackingLine',
           dataSource: chartData,
-          marker: { visible: true, width: 8, height: 8 },
+          marker: { visible: true },
+          dashArray: '5, 1',
           xName: 'x',
           width: 2,
           yName: course,
@@ -356,144 +354,14 @@ endblock title %}
   }
 
   fetchEnrollmentTrends();
+  fetchAverageGPA();
 </script>
 
-<!-- OUTCOME RATES (CLASS AVERAGE) -->
+<!-- FETCH LISTERS COUNT -->
 <script>
-  async function fetchOutcomeRates(semester) {
+  async function fetchListersCount() {
     try {
-      const response = await fetch(`${api_base_url}/outcome/rates/${semester}`);
-
-      if (!response.ok) {
-        throw new Error(
-          'Failed to fetch data. Try to contact the admin to resolve the issue.'
-        );
-      }
-
-      const json_student_outcome_rate = await response.json();
-      if (json_student_outcome_rate.error) {
-        notyf.error(json_student_outcome_rate.message);
-        return;
-      } else {
-        displayOutcomeRateChart(json_student_outcome_rate);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  fetchOutcomeRates(0);
-
-  function displayOutcomeRateChart(json_outcome_rate) {
-    if (json_outcome_rate.success == true) {
-      console.log('json_outcome_rate: ', json_outcome_rate);
-      var chartData = json_outcome_rate.data;
-      console.log('chartData: ', chartData);
-      // Make a template for series in which base on iteration item of json_outcome_rate.course_list
-      var series_template = [];
-      json_outcome_rate.rate_list.forEach((type) => {
-        series_template.push({
-          type: 'Line',
-          dataSource: chartData,
-          marker: { visible: true, width: 8, height: 8 },
-
-          xName: 'x',
-          width: 2,
-          yName: type,
-          name: type,
-        });
-      });
-
-      var chart = new ej.charts.Chart({
-        //Initializing Primary X Axis
-        primaryXAxis: {
-          interval: 1,
-          valueType: 'Category',
-          title: 'Year',
-        },
-        primaryYAxis: {
-          title: 'Percentage',
-          minimum: 0,
-          maximum: 105,
-          interval: 10,
-        },
-        //Initializing Chart Series
-        series: series_template,
-        //Initializing User Interaction Tooltip
-        tooltip: {
-          enable: true,
-          format: '${series.name} : ${point.y}% (${point.x})', // Added format here
-        },
-      });
-      chart.appendTo('#outcome-rates');
-      // chart.appendTo('#enrollment2');
-    } else {
-      // Get current and previous 4 years and put it in array
-      var current_year = new Date().getFullYear();
-      var year = [];
-      for (let i = 0; i < 5; i++) {
-        year.push(current_year - 5 + i);
-      }
-
-      // Make the year as datasource where year is x and y is default 0
-      var chartData = [];
-      year.forEach((year) => {
-        chartData.push({ x: year, y: 0 });
-      });
-
-      // Display chart without data or handle this case as needed
-      var chart = new ej.charts.Chart({
-        // Initializing Primary X Axis
-        primaryXAxis: {
-          interval: 1,
-          valueType: 'Category',
-        },
-        primaryYAxis: {
-          minimum: 0, // Set your desired minimum value
-          maximum: 500, // Set your desired maximum value
-          interval: 50,
-        },
-        // Sample series to be displayed when there is no data
-        series: [
-          {
-            type: 'Line',
-            dataSource: chartData,
-            xName: 'x',
-            yName: 'y',
-            name: 'No Data Available',
-          },
-        ],
-        tooltip: {
-          enable: true,
-        },
-      });
-      chart.appendTo('#outcome-rates');
-    }
-  }
-
-  function displayedEnrollmentNumbers(json_enrollment) {
-    const text_lowest_course = document.getElementById('lowest-course');
-    const text_highest_course = document.getElementById('highest-course');
-
-    const text_lowest_count = document.getElementById('lowest-count');
-    const text_highest_count = document.getElementById('highest-count');
-
-    const text_student_enrolled_count =
-      document.getElementById('student-enrolled');
-
-    text_lowest_course.innerText = json_enrollment.LowestEnrolledCourses[0];
-    text_highest_course.innerText = json_enrollment.HighestEnrolledCourses[1];
-    text_lowest_count.innerText = json_enrollment.LowestEnrolledCount;
-    text_highest_count.innerText = json_enrollment.HighestEnrolledCount;
-
-    text_student_enrolled_count.innerText = json_enrollment.TotalEnrolled;
-  }
-</script>
-
-<script>
-  async function fetchStatistics() {
-    try {
-      const response = await fetch(`${api_base_url}/statistics`);
+      const response = await fetch(`${api_base_url}/listers/count`);
 
       if (!response.ok) {
         throw new Error(
@@ -502,6 +370,7 @@ endblock title %}
       }
 
       const json_statistics = await response.json();
+      console.log('json_statistics: ', json_statistics);
 
       if (json_statistics.success) {
         // Update counts
@@ -520,198 +389,249 @@ endblock title %}
   fetchStatistics();
 </script>
 
-<!-- FETCH LATEST BATCH SEMESTER -->
+<!-- LISTER GRAPHS OF STUDENTS -->
 <script>
-  async function fetchLatestBatchSemester() {
+  async function fetchListerTrends() {
     try {
-      const response = await fetch(`${api_base_url}/batch/latest`);
+      const response = await fetch(`${api_base_url}/lister/trends`);
+
       if (!response.ok) {
         throw new Error(
           `Failed to fetch data. Try to contact the system admin to resolve the issue.`
         );
       }
 
-      const data = await response.json();
-      const latestYear = data.data;
-      console.log('latestYear: ', latestYear);
-      if (data.data) {
-        console.log('DATA: ', data.data);
-        const selectElement = document.getElementById('semesterSelect');
-        for (let year = latestYear - 3; year <= latestYear + 7; year++) {
-          const option = document.createElement('option');
-          option.value = year;
-          option.textContent = year;
-          selectElement.appendChild(option);
-        }
+      const json_lister_trends = await response.json();
 
-        fetchYearlyRates(latestYear);
-      } else {
-        console.log(data);
+      console.log('json_lister_trends.success: ', json_lister_trends.success);
+      if (json_lister_trends.success) {
+        displayListerCountTrends(
+          json_lister_trends.lister,
+          json_lister_trends.max,
+          json_lister_trends.min,
+          json_lister_trends.interval
+        );
       }
     } catch (error) {
       console.error(error);
     }
   }
 
-  fetchLatestBatchSemester();
-
-  async function fetchYearlyRates(year) {
-    const selectElement = document.getElementById('semesterSelect');
-    selectElement.value = year;
-    try {
-      const response = await fetch(
-        `${api_base_url}/grad-drop-withdrawn/rates/${year}`
-      );
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
-        );
-      }
-
-      const rRates = await response.json();
-
-      console.log('rRates: ', rRates);
-      displayLatinRates(rRates.data, rRates.predicted);
-      // displayedEnrollmentNumbers(json_enrollment_trends);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  function displayLatinRates(data, predicted) {
-    const yearlyRates = document.getElementById('yearly-rates');
-    if (predicted) {
-      yearlyRates.classList.add('flex');
-      yearlyRates.classList.remove('hidden');
-    } else {
-      yearlyRates.classList.add('hidden');
-      yearlyRates.classList.remove('flex');
-    }
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (key.toLowerCase() == 'graduated') {
-        document.getElementById('graduation_count').innerHTML = value['count'];
-        var summaGauge = createCircularGauge(
-          '#graduation_gauge',
-          value['rate'],
-          '#33BCBD'
-        );
-        summaGauge.appendTo('#graduation_gauge');
-      } else if (key.toLowerCase() == 'dropout') {
-         document.getElementById('dropout_count').innerHTML = value['count'];
-        var magnaGauge = createCircularGauge(
-          '#dropout_gauge',
-          value['rate'],
-          '#33BCBD'
-        );
-        magnaGauge.appendTo('#dropout_gauge');
-      } else {
-         document.getElementById('withdrawn_count').innerHTML = value['count'];
-        var cumLaudeGauge = createCircularGauge(
-          '#withdrawn_gauge',
-          value['rate'],
-          '#33BCBD'
-        );
-        cumLaudeGauge.appendTo('#withdrawn_gauge');
-      }
-    });
-
-    // // Function to update percentage value
-    // function updatePercentage(value) {
-    //   var percentageElement = document.getElementById('percentage');
-    //   percentageElement.innerHTML = `${value}` + '%';
-    // }
-
-    // // Example usage: Update percentage to 85%
-    // updatePercentage(85);
-  }
-
-  function createCircularGauge(containerId, value, rangeColor) {
-    return new ej.circulargauge.CircularGauge({
-      axes: [
-        {
-          radius: '90%',
-          minimum: 0,
-          maximum: 100,
-          startAngle: 240,
-          endAngle: 120,
-          annotations: [
-            {
-              content: `<p class="font-bold text-c1 text-xl">${value}%</p>`,
-              zIndex: '1',
-              angle: 180,
-            },
-          ],
-          lineStyle: {
-            width: 0,
-          },
-          majorTicks: {
-            color: 'white',
-            offset: -5,
-            height: 12,
-          },
-          minorTicks: {
-            width: 0,
-          },
-          labelStyle: {
-            useRangeColor: true,
-            font: {
-              color: '#424242',
-              size: '13px',
-              fontFamily: 'Roboto',
-            },
-          },
-          pointers: [
-            {
-              value: value,
-              radius: '60%',
-              color: '#33BCBD',
-              cap: {
-                radius: 10,
-                border: {
-                  color: '#33BCBD',
-                  width: 5,
-                },
-              },
-              animation: {
-                enable: false,
-              },
-            },
-          ],
-          ranges: [
-            {
-              start: 0,
-              end: 100,
-              startWidth: 10,
-              endWidth: 10,
-              radius: '102%',
-              color: '#3A5DC8',
-            },
-            {
-              start: 0,
-              end: 100,
-              radius: '102%',
-              startWidth: 10,
-              endWidth: 10,
-              color: rangeColor,
-            },
-          ],
+  function displayListerCountTrends(data, max, min, interval) {
+    console.log('HERE');
+    var chartData = [...data];
+    var chart = new ej.charts.Chart(
+      {
+        primaryXAxis: {
+          valueType: 'Category',
+          title: 'Year',
         },
-      ],
-      tooltip: {
-        type: ['Pointer', 'Range', 'Annotation'],
-        enable: true,
-        enableAnimation: false,
-        // annotationSettings: {
-        //   template: '<div>CircularGauge</div>',
-        // },
-        rangeSettings: {
-          fill: 'red',
+        primaryYAxis: {
+          minimum: 0,
+          maximum: max + 5,
+          interval: 20,
+          title: 'Count',
+        },
+        series: [
+          {
+            dataSource: chartData,
+            xName: 'year',
+            yName: 'president',
+            name: 'President Lister',
+            // Series type as column series
+            type: 'Column',
+          },
+          {
+            dataSource: chartData,
+            xName: 'year',
+            yName: 'dean',
+            name: 'Dean Lister',
+            columnWidth: 0.75,
+            columnSpacing: 1.5,
+            // Series type as column series
+            type: 'Column',
+          },
+        ],
+        title: 'Lister Count',
+        // Set the background color for the chart area
+        chartArea: {
+          background: '#FFFFFF', // Change this to your desired color
         },
       },
-    });
+      '#lister'
+    );
   }
+
+  fetchListerTrends();
 </script>
 
+<!-- STUDENT PERFORMANCE OVER TIME -->
+<script>
+  async function fetchListersCount() {
+    try {
+      const response = await fetch(`${api_base_url}/listers/count`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const lister_data = await response.json();
+      console.log('lister_data: ', lister_data);
+
+      if (json_statistics.success) {
+        // Update counts
+        document.getElementById('teacher-count').innerText =
+          json_statistics.result.teacher_active_count;
+        document.getElementById('students-count').innerText =
+          json_statistics.result.student_enrolled_count;
+        document.getElementById('class-count').innerText =
+          json_statistics.result.class_data_count;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // function displayPerformance(data_performance) {
+  //   var chartData = [...data_performance];
+  //   // Create the chart
+  //   var chart = new ej.charts.Chart({
+  //     primaryXAxis: {
+  //       title: 'Year',
+  //       minimum: data_performance[data_performance.length - 1].Year - 1,
+  //       maximum: data_performance[0].Year + 1,
+  //       interval: 1,
+  //     },
+  //     primaryYAxis: {
+  //       minimum: 20,
+  //       maximum: 100,
+  //       interval: 20,
+  //       title: 'Grade',
+  //       labelFormat: '{value}',
+  //     },
+  //     series: [
+  //       {
+  //         dataSource: chartData.filter((data) => data.Semester === 1),
+  //         xName: 'Year',
+  //         yName: 'Grade',
+  //         name: '1st Semester',
+  //         type: 'Column',
+  //         fill: '#6376EB',
+  //       },
+  //       {
+  //         dataSource: chartData.filter((data) => data.Semester === 2),
+  //         xName: 'Year',
+  //         yName: 'Grade',
+  //         name: '2nd Semester',
+  //         type: 'Column',
+  //         fill: '#5EEE82',
+  //       },
+  //       {
+  //         dataSource: chartData.filter((data) => data.Semester === 3),
+  //         xName: 'Year',
+  //         yName: 'Grade',
+  //         name: 'Summer Term',
+  //         type: 'Column',
+  //         fill: '#29BAF2',
+  //       },
+  //     ],
+  //     title: 'Performance',
+  //     // dataLabel: {
+  //     //   visible: true,
+  //     //   position: 'Top',
+  //     //   font: {
+  //     //     fontWeight: '600',
+  //     //   },
+  //     //   format: '${point.y}%',
+  //     // },
+  //     tooltip: {
+  //       enable: true,
+  //       format:
+  //         'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
+  //     },
+  //   });
+
+  //   // Render the chart
+  //   chart.appendTo('#columnChartContainer');
+  // }
+
+  // fetchStudentPerformanceOvertime();
+</script>
+
+<!-- COURSE PERFORMANCE -->
+<script>
+  async function fetchCoursePerformance() {
+    try {
+      console.log('api_base_url: ', api_base_url);
+      const response = await fetch(
+        `${api_base_url}/overall/course/performance`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const json_course_performance = await response.json();
+      if (!json_course_performance.error) {
+        console.log('IN JSON');
+        console.log(json_course_performance);
+        // Select course-performance-container
+        document
+          .getElementById('course-performance-container')
+          .classList.remove('hidden');
+        displayCoursePerformance(json_course_performance);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function displayCoursePerformance(json_course_performance) {
+    var chartData = json_course_performance.course_performance;
+    var list_course = json_course_performance.list_course;
+
+    var series = list_course.map(function (course) {
+      return {
+        dataSource: chartData.map(function (item) {
+          return { x: item.x, y: item[course] };
+        }),
+        marker: { visible: true },
+        dashArray: '5, 1',
+        xName: 'x',
+        yName: 'y',
+        name: course,
+      };
+    });
+
+    var chart = new ej.charts.Chart({
+      // Initializing Primary X Axis
+      primaryXAxis: {
+        valueType: 'Category',
+        title: 'Year',
+      },
+      // Initializing Primary Y Axis
+      primaryYAxis: {
+        minimum: 0,
+        maximum: 100,
+        interval: 20,
+        title: 'Average Grade Percentage',
+      },
+      // Initializing Chart Series
+      series: series,
+      // Initializing User Interaction Tooltip
+      tooltip: {
+        enable: true,
+      },
+    });
+
+    chart.appendTo('#course-performance');
+  }
+
+  fetchCoursePerformance();
+</script>
 
 {% endblock script %}

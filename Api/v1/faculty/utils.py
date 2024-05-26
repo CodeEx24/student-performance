@@ -27,13 +27,14 @@ def getAllClassAverageWithPreviousYear(str_teacher_id):
         
         print("latest_batch_semester: ", latest_batch_semester)
        # Get all class subjects taught by a specific faculty member in the latest batch and semester
-        data_class_subject_grade_handle = db.session.query( ClassSubject.FacultyId, Class.ClassId, Metadata.Batch, Metadata.CourseId, Course.CourseCode, Metadata.Year, Class.Section, func.count(ClassSubject.ClassSubjectId).label('CountClassSubject')).join(Class, Class.ClassId == ClassSubject.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Metadata.CourseId == Course.CourseId).filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == latest_batch_semester.Batch, Class.IsGradeFinalized == False ).group_by(ClassSubject.FacultyId, Class.ClassId, Metadata.Batch, Metadata.CourseId, Course.CourseCode, Metadata.Year, Class.Section, ).all()
+        data_class_subject_grade_handle = db.session.query( ClassSubject.FacultyId, Class.ClassId, Metadata.Batch, Metadata.CourseId, Course.CourseCode, Metadata.Year, Class.Section, func.count(ClassSubject.ClassSubjectId).label('CountClassSubject')).join(Class, Class.ClassId == ClassSubject.ClassId).join(Metadata, Metadata.MetadataId == Class.MetadataId).join(Course, Metadata.CourseId == Course.CourseId).filter(ClassSubject.FacultyId == str_teacher_id, Metadata.Batch == latest_batch_semester.Batch, Class.IsGradeFinalized == False).group_by(ClassSubject.FacultyId, Class.ClassId, Metadata.Batch, Metadata.CourseId, Course.CourseCode, Metadata.Year, Class.Section).all()
         
         print("data_class_subject_grade_handle: ", data_class_subject_grade_handle)
 
         if data_class_subject_grade_handle:
             list_data_class_grade = []
             for data in data_class_subject_grade_handle:
+                print('DATA: ', data)
                 class_batch = data[2]
                 class_section = data[6]
                 class_year = data[5]
@@ -1453,11 +1454,26 @@ def processGradePDFSubmission(file, faculty_id):
                                     student_class_subject_grade.StudentClassSubjectGrade.Grade = 0
                                     # Set AcademicStatus to 3
                                     student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 3
+                                    student_class_subject_grade.StudentClassSubjectGrade.CompletedOnTime = False
+                                    db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
+                                elif row[5] == 'DROP':
+                                      # Update the Class isGradeFinalized to False
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = 0
+                                    # Set AcademicStatus to 3
+                                    student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 5
+                                    student_class_subject_grade.StudentClassSubjectGrade.CompletedOnTime = False
+                                    db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
+                                elif row[5] == "WITHDRAWN":
+                                    student_class_subject_grade.StudentClassSubjectGrade.Grade = 0
+                                    # Set AcademicStatus to 3
+                                    student_class_subject_grade.StudentClassSubjectGrade.AcademicStatus = 4
+                                    student_class_subject_grade.StudentClassSubjectGrade.CompletedOnTime = False
                                     db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
                                 elif row[5] == "PASSED" and grade <= 3 and grade >= 1:
                                     print("PASSED")
                                     # Update the Class isGradeFinalized to False
                                     student_class_subject_grade.StudentClassSubjectGrade.Grade = grade if grade is not None else 0
+                                    student_class_subject_grade.StudentClassSubjectGrade.CompletedOnTime = True
                                     # Save only but dont commit in database
                                     db.session.add(student_class_subject_grade.StudentClassSubjectGrade)
                                 else:
