@@ -2,14 +2,98 @@
 
 The Student Performance System is a dynamic and comprehensive tool designed to optimize the management and analysis of student academic progress in educational institutions. This innovative system empowers educators, administrators, and students to track, assess, and improve educational outcomes with ease.
 
-Key Features:
+Running the flask application.
 
-Effortless Data Management: The system provides a centralized platform for storing and managing critical student data, including grades, attendance records, assignments, and assessment results. This centralized repository simplifies data access and minimizes administrative overhead.
+## Installation
 
-Real-time Performance Insights: Stay informed about students' academic performance in real-time. Receive instant updates on grades, test scores, and attendance, enabling educators and parents to monitor progress and intervene when needed.
+First, you need to clone this repository:
 
-Intuitive User Interface: With an intuitive and user-friendly interface, the Student Performance System caters to educators, students, and parents alike. It is designed to be easily navigable, requiring minimal training for all users.
+```bash
+git clone git@github.com:CodeEx24/student-performance.git
+```
 
-Performance Analytics: Dive deep into performance analytics with robust data visualization tools. Generate insightful reports and charts to identify trends, strengths, and areas for improvement, facilitating data-driven decision-making.
+Or:
 
-Security and Privacy: Rest assured that student data is protected with advanced security measures and strict privacy controls. The system complies with all relevant data protection regulations to safeguard sensitive information.
+```bash
+git clone https://github.com/CodeEx24/student-performance.git
+```
+
+Then change into the `student-performance` folder:
+
+```bash
+cd student-performance
+```
+
+Now, we will need to create a virtual environment and install all the dependencies:
+
+```bash
+python3 -m venv venv  # on Windows, use "python -m venv venv" instead
+. venv/bin/activate   # on Windows, use "venv\Scripts\activate" instead
+pip install -r requirements.txt
+```
+
+## After activating you may setup environment variables
+
+```bash
+CONFIG_MODE = "development" or "production"
+ADD_DATA= True or False (If you want to add a custom data configuration)
+DEVELOPMENT_DATABASE_URI="your_development_database"
+PRODUCTION_DATABASE_URI="your_production_database"
+JWT_SECRET_KEY="your_jwt_secret"
+SECRET_KEY="secret_key"
+```
+
+### Mail server configuration
+
+```bash
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=465
+MAIL_USERNAME="username"
+MAIL_PASSWORD="password"
+MAIL_DEFAULT_SENDER="your sender email address"
+```
+
+### Default env configuration
+
+```bash
+STUDENT_API_BASE_URL=/api/v1/student
+FACULTY_API_BASE_URL=/api/v1/faculty
+UNIVERSITY_ADMIN_API_BASE_URL=/api/v1/university-admin
+SYSTEM_ADMIN_API_BASE_URL=/api/v1/system-admin
+REGISTRAR_API_BASE_URL=/api/v1/registrar
+```
+
+## How to Run a Specific Example Application?
+
+**Before run a specific example application, make sure you have activated the virtual enviroment.**
+
+If you want to run the Hello application, just execute these commands:
+
+```bash
+flask run --reload
+```
+
+Similarly, you can run HTTP application like this:
+
+```bash
+cd http
+flask run
+```
+
+The applications will always running on http:///127.0.0.1:5000.
+
+## Example Applications Menu
+
+- Student Role (`/student`): For students portal.
+- Faculty Role (`/faculty`): For faculty portal.
+- Registrar Role (`/registrar`): For registrar portal.
+- University Admin Role (`/university-admin`): For university admin portal.
+- System Admin Role (`/system-admin`): For system admin portal.
+
+## Contributions
+
+Any contribution is welcome, just fork and submit your PR.
+
+## License
+
+This project is licensed under the MIT License (see the `LICENSE` file for details).
