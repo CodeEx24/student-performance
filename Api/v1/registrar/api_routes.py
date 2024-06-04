@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements, getListerTrends, processUpdatingSingleStudentRequirements, noticeStudentsEmail, getOutcomeRates, getBatchLatest, getGradDropWithdrawnRate
+from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements, getListerTrends, processUpdatingSingleStudentRequirements, noticeStudentsEmail, getOutcomeRates, getBatchLatest, getGradDropWithdrawnRate, getPassFailedAndDropout, getAllCourses
 import os
 import re
 
@@ -92,12 +92,12 @@ def fetchStatistics():
     
 
 # Getting the enrollment trends of different courses
-@registrar_api.route('/enrollment/trends', methods=['GET'])
+@registrar_api.route('/enrollment/trends/<int:startYear>/<int:endYear>', methods=['GET'])
 @role_required('registrar')
-def enrollmentTrends():
+def enrollmentTrends(startYear, endYear):
     registrar = getCurrentUser()
     if registrar:
-        json_performance_data = getEnrollmentTrends()
+        json_performance_data = getEnrollmentTrends(startYear, endYear)
 
         if json_performance_data:
             return (json_performance_data)
@@ -109,7 +109,7 @@ def enrollmentTrends():
 
 @registrar_api.route('/outcome/rates/<int:semester>', methods=['GET'])
 @role_required('registrar')
-def fetchOutcomRates(semester):
+def fetchOutcomeRates(semester):
     registrar = getCurrentUser()
     if registrar:
         json_outcome_data = getOutcomeRates(semester)
@@ -353,3 +353,26 @@ def fetchGraduateDropWithdrawnRates(year):
         return render_template('404.html'), 404    
         
     
+
+@registrar_api.route('/passing-drop-withdrawn-and-failed/<int:programId>/<int:startingYear>/<int:endingYear>', methods=['GET'])
+@role_required('registrar')
+def fetchPassFailedAndDropout(programId, startingYear, endingYear):
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        return getPassFailedAndDropout(programId, startingYear, endingYear)
+    else:
+        return render_template('404.html'), 404    
+    
+
+@registrar_api.route('/courses', methods=['GET'])
+@role_required('registrar')
+def fetchAllCourses():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_courses = getAllCourses()
+        if json_courses:
+            return  json_courses
+        else:
+            return jsonify(error="No Performance data available")
+    else:
+        return render_template('404.html'), 404

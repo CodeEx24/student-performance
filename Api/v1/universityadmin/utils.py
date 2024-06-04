@@ -365,9 +365,20 @@ def predict_future_performance(data_list, years_to_predict=3):
     
     return predictions
 
-def getOverallCoursePerformance():
+
+
+def getOverallCoursePerformance(startYear, endYear):
     try:
-        # Get course performance for the last 5 years
+        # Get the latest batch semester that is finalized
+        data_latest_batch_semester = db.session.query(LatestBatchSemester).filter(LatestBatchSemester.IsGradeFinalized == True).order_by(LatestBatchSemester.Batch.desc()).first()
+        
+        print('data_latest_batch_semester: ', data_latest_batch_semester.Batch)
+        latest_batch = data_latest_batch_semester.Batch
+        
+        print('latest_batch: ', latest_batch)
+        print('latest_batch: ', endYear - latest_batch)
+        
+        # Get the previous average grade for each course in the batch and previous 5 years
         data_course_grade = db.session.query(
             Course.CourseId,
             Course.CourseCode,
@@ -375,18 +386,19 @@ def getOverallCoursePerformance():
             func.avg(CourseGrade.Grade).label('average_grade')
         ).join(
             Course, Course.CourseId == CourseGrade.CourseId
-        ).group_by(
+        ).filter(CourseGrade.Batch >= latest_batch - 5).group_by(
             Course.CourseId, CourseGrade.Batch
         ).order_by(
             CourseGrade.Batch, Course.CourseId
         ).all()
-
+        
         list_course = []
         data_list = {}
-
+        
+        data_list_predicted = []
         if data_course_grade:
             course_year_grades = defaultdict(dict)
-
+            
             for course_grade in data_course_grade:
                 course_code = course_grade.CourseCode
                 year = course_grade.Batch
@@ -401,6 +413,8 @@ def getOverallCoursePerformance():
                     
                 grade = round(convertGradeToPercentage(course_grade.average_grade), 2)
 
+                print("HERE IS YEAR AND COURSE: ", year, course_code)
+                
                 if year not in course_year_grades:
                     course_year_grades[year] = {"x": year}
                     if "x" not in data_list:
@@ -414,31 +428,34 @@ def getOverallCoursePerformance():
             # Convert the data into a list of dictionaries
             formatted_data = list(course_year_grades.values())
             
-            predicted_results = predict_future_performance(data_list)
-            
-            # Loop into three the predicted results
+            predicted_results = predict_future_performance(data_list, endYear - latest_batch)
+            # Loop through the predicted results and filter for the specified years
             for i, year in enumerate(predicted_results['x']):
-                # Initialize a dictionary for the current year
-                year_data = {'x': year}
-                
-                # Iterate over the list of courses
-                for course_code in list_course:
-                    # Retrieve the predicted grade for the current course and year
-                    grade = math.ceil(predicted_results[course_code][i])
+                if year >= startYear and year <= endYear:
+                  
+                    # Initialize a dictionary for the current year
+                    year_data = {'x': year}
                     
-                    # Add the course grade to the year's data
-                    year_data[course_code] = grade
-                
-                # Append the year's data to the formatted data list
-                formatted_data.append(year_data)
+                    # Iterate over the list of courses
+                    for course_code in list_course:
+                        # Retrieve the predicted grade for the current course and year
+                        grade = math.ceil(predicted_results[course_code][i])
                         
-            return jsonify({'success': True, 'list_course': list_course, 'course_performance': formatted_data})
+                        # Add the course grade to the year's data
+                        year_data[course_code] = grade
+                    
+                    # Append the year's data to the formatted data list
+                    data_list_predicted.append(year_data)
+
+            return jsonify({'success': True, 'list_course': list_course, 'course_performance': data_list_predicted})
         else:
             return None
     except Exception as e:
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
         return e
+
+
     
 
     
@@ -4723,118 +4740,154 @@ def finalizedGradesBatchSemester(batch_semester_id, honors_criteria_id):
         # Handle the exception here, e.g., log it or return an error response
         return jsonify(error=str(e))
 
-def getPassingAndDropRates():
+
+def get_total_distinct_students_by_status(status, year, programId):
+    if programId == 0:
+        return db.session.query(
+            func.count(func.distinct(StudentClassSubjectGrade.StudentId))
+        ).join(
+            ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId
+        ).join(
+            Class, Class.ClassId == ClassSubject.ClassId
+        ).join(
+            Metadata, Metadata.MetadataId == Class.MetadataId
+        ).filter(
+            StudentClassSubjectGrade.AcademicStatus == status,
+            Metadata.Batch == year
+        ).scalar()
+    else: 
+        return db.session.query(
+            func.count(func.distinct(StudentClassSubjectGrade.StudentId))
+        ).join(
+            ClassSubject, ClassSubject.ClassSubjectId == StudentClassSubjectGrade.ClassSubjectId
+        ).join(
+            Class, Class.ClassId == ClassSubject.ClassId
+        ).join(
+            Metadata, Metadata.MetadataId == Class.MetadataId
+        ).filter(
+            StudentClassSubjectGrade.AcademicStatus == status,
+            Metadata.Batch == year,
+            Metadata.CourseId == programId
+        ).scalar()
+    
+def get_total_sum_by_metric(metric, year):
+    return db.session.query(
+        func.sum(metric)
+    ).join(
+        ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId
+    ).join(
+        Class, Class.ClassId == ClassSubject.ClassId
+    ).join(
+        Metadata, Metadata.MetadataId == Class.MetadataId
+    ).filter(
+        Metadata.Batch == year
+    ).scalar() or 0
+
+ # Predict the next 3 years
+def predict_next_years(data_list, years_to_predict=3):
+    years = np.array(data_list['Year']).reshape(-1, 1)
+    
+    predictions = {'Year': [], 'Dropped': [], 'Failed': [], 'Withdrawn': []}
+    future_years = [max(data_list['Year']) + i for i in range(1, years_to_predict + 1)]
+
+    for key in ['Dropped', 'Failed', 'Withdrawn']:
+        values = np.array(data_list[key])
+        model = LinearRegression()
+        model.fit(years, values)
+        future_values = model.predict(np.array(future_years).reshape(-1, 1))
+        predictions[key] = future_values.tolist()
+    
+    predictions['Year'] = future_years
+    return predictions
+
+
+def getPassFailedAndDropout(programId, startingYear, endingYear):
     try:
         # Get latest batch semester
-        latest_batch_semester = db.session.query(LatestBatchSemester).first()
+        latest_batch_semester = db.session.query(LatestBatchSemester).filter_by(IsGradeFinalized = True).order_by(desc(LatestBatchSemester.Batch)).first()
+        earliest_batch_semester = db.session.query(LatestBatchSemester).filter_by(IsGradeFinalized = True).order_by((LatestBatchSemester.Batch)).first()
+       
         latest_batch = latest_batch_semester.Batch
-        earliest_batch = latest_batch_semester.Batch - 4
+        earliest_batch = earliest_batch_semester.Batch
+
+        predict_length = endingYear - latest_batch
 
         # Initialize a dictionary to store total passing for each batch
         total_stats_by_year = []
 
         data_list = {
             "Year": [],
-            "Passed": [],
+            "Withdrawn": [],
             "Dropped": [],
             "Failed": [],
         }
 
-        for year in range(latest_batch, earliest_batch - 1, -1):
+        for year in range(latest_batch, earliest_batch, -1):
             total_enrolled_students = db.session.query(func.sum(Metadata.TotalEnrolledStudents)) \
                 .filter(Metadata.Batch == year) \
                 .scalar()
-
-            total_passing = db.session.query(func.sum(ClassSubjectGrade.Passed)) \
-                .join(ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId) \
-                .join(Class, Class.ClassId == ClassSubject.ClassId) \
-                .join(Metadata, Metadata.MetadataId == Class.MetadataId) \
-                .filter(Metadata.Batch == year) \
-                .scalar() or 0
-
-            total_incomplete = db.session.query(func.sum(ClassSubjectGrade.Incomplete)) \
-                .join(ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId) \
-                .join(Class, Class.ClassId == ClassSubject.ClassId) \
-                .join(Metadata, Metadata.MetadataId == Class.MetadataId) \
-                .filter(Metadata.Batch == year) \
-                .scalar() or 0
-
-            total_failed = db.session.query(func.sum(ClassSubjectGrade.Failed)) \
-                .join(ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId) \
-                .join(Class, Class.ClassId == ClassSubject.ClassId) \
-                .join(Metadata, Metadata.MetadataId == Class.MetadataId) \
-                .filter(Metadata.Batch == year) \
-                .scalar() or 0
-
-            total_dropped = db.session.query(func.sum(ClassSubjectGrade.Dropout)) \
-                .join(ClassSubject, ClassSubject.ClassSubjectId == ClassSubjectGrade.ClassSubjectId) \
-                .join(Class, Class.ClassId == ClassSubject.ClassId) \
-                .join(Metadata, Metadata.MetadataId == Class.MetadataId) \
-                .filter(Metadata.Batch == year) \
-                .scalar() or 0
                 
-            total = (total_passing + total_incomplete + total_failed + total_dropped) or 1
-            dropout_rate_percentage = ((total_dropped / total) * 100) or 0
-            failed_rate_percentage = ((total_failed / total) * 100) or 0
-            total_enrolled_students = total_enrolled_students or 0
+            # total_graduated = db.session.query(func.sum(Metadata.TotalGraduatedStudents)).filter(Metadata.Batch == year).scalar() or 0
 
-            dropout_ceiling = math.ceil(dropout_rate_percentage)
-            failed_ceiling = math.ceil(failed_rate_percentage)
-            passed_value = 100 - dropout_ceiling - failed_ceiling
+            metadata = db.session.query(Metadata).filter(Metadata.Batch == year).first()
+            # total_passing = get_total_sum_by_metric(ClassSubjectGrade.Passed, year)
+            # total_incomplete = get_total_sum_by_metric(ClassSubjectGrade.Incomplete, year)
+            # total_failed = get_total_sum_by_metric(ClassSubjectGrade.Failed, year)
+            # total_dropped = get_total_sum_by_metric(ClassSubjectGrade.Dropout, year)
+            
+            # total = (total_passing + total_incomplete + total_failed + total_dropped) or 1
+            # dropout_rate_percentage = ((total_dropped / total) * 100) or 0
+            # failed_rate_percentage = ((total_failed / total) * 100) or 0
+            # total_enrolled_students = total_enrolled_students or 0
+
+            # dropout_ceiling = math.ceil(dropout_rate_percentage)
+            # failed_ceiling = math.ceil(failed_rate_percentage)
+            # passed_value = 100 - dropout_ceiling - failed_ceiling
+            
+            total_distinct_student_failed = get_total_distinct_students_by_status(2, year, programId)
+            total_distinct_student_incomplete = get_total_distinct_students_by_status(3, year, programId)
+            total_distinct_student_withdrawn = get_total_distinct_students_by_status(4, year, programId)
+            total_distinct_student_drop = get_total_distinct_students_by_status(5, year, programId)
+            
+            print('\ntotal_distinct_student_drop:', year, total_distinct_student_drop)
+            print('total_distinct_student_withdrawn:', year, total_distinct_student_withdrawn)
+            print('total_distinct_student_failed:', year, total_distinct_student_failed)
+            print('total_distinct_student_incomplete:', year, total_distinct_student_incomplete)
+            
 
             data_list['Year'].append(year)
-            data_list['Passed'].append(passed_value)
-            data_list['Dropped'].append(dropout_ceiling)
-            data_list["Failed"].append(failed_ceiling)
-            
+            data_list['Withdrawn'].append(total_distinct_student_withdrawn)
+            data_list['Dropped'].append(total_distinct_student_drop)
+            data_list["Failed"].append(total_distinct_student_failed)
+            print("NO ERROR IN WITHDRAWN")
             total_stats_by_year.append({
                 "x": year,
-                "Passed": passed_value,
-                "Dropout": dropout_ceiling,
-                "Failed": failed_ceiling,
+                "Withdrawn": total_distinct_student_withdrawn,
+                "Dropped": total_distinct_student_drop,
+                "Failed": total_distinct_student_failed,
             })
-
-        # Predict the next 3 years
-        def predict_next_years(data_list, years_to_predict=3):
-            years = np.array(data_list['Year']).reshape(-1, 1)
-            
-            predictions = {'Year': [], 'Dropped': [], 'Failed': []}
-            future_years = [max(data_list['Year']) + i for i in range(1, years_to_predict + 1)]
-
-            for key in ['Dropped', 'Failed']:
-                values = np.array(data_list[key])
-                model = LinearRegression()
-                model.fit(years, values)
-                future_values = model.predict(np.array(future_years).reshape(-1, 1))
-                predictions[key] = future_values.tolist()
-            
-            predictions['Year'] = future_years
-            return predictions
-
-        future_predictions = predict_next_years(data_list)
+       
+        future_predictions = predict_next_years(data_list, predict_length)
         
-        
-        max_year = 2020
-        min_year = 2020
+        predicted_year = []
         for i, year in enumerate(future_predictions['Year']):
-            dropout_ceiling = math.ceil(future_predictions['Dropped'][i]) 
-            failed_ceiling = math.ceil(future_predictions['Failed'][i]) 
-            passed_value = 100 - dropout_ceiling - failed_ceiling
-            
-            # Create a model similar to total_stats
-            total_stats_by_year.append({
-                "x": year,
-                "Passed": passed_value,
-                "Dropout": dropout_ceiling,
-                "Failed": failed_ceiling,
-            })
-            max_year = year
-            min_year = year-8
+            if year >= startingYear and year <= endingYear:
+                print("YEAR: ", year)
+                dropout_ceiling = max(math.ceil(future_predictions['Dropped'][i]), 0)
+                failed_ceiling = max(math.ceil(future_predictions['Failed'][i]), 0)
+                withdrawn_ceiling = max(math.ceil(future_predictions['Withdrawn'][i]), 0)
+                
+                # Create a model similar to total_stats
+                predicted_year.append({
+                    "x": year,
+                    "Withdrawn": withdrawn_ceiling,
+                    "Dropout": dropout_ceiling,
+                    "Failed": failed_ceiling,
+                })
+        predicted_year.sort(key=lambda x: x['x'])
 
-        total_stats_by_year.sort(key=lambda x: x['x'])
-
-        print(total_stats_by_year)
-        return jsonify({"data": total_stats_by_year, "max_year": max_year, "min_year": min_year, "success": True})
+        # print(predicted_year)
+        return jsonify({"data": predicted_year, "max_year": endingYear, "min_year": startingYear, "success": True})
     except Exception as e:
         print("ERROR: ", e )
         # Handle the exception here, e.g., log it or return an error response
@@ -4843,10 +4896,25 @@ def getPassingAndDropRates():
 def getBatchLatest():
     try:
         # Get latest batch semester
-        latest_batch_semester = db.session.query(LatestBatchSemester).first()
+        latest_batch_semester = db.session.query(LatestBatchSemester).filter_by(IsGradeFinalized = True).order_by(desc(LatestBatchSemester.Batch)).first()
         latest_batch = latest_batch_semester.Batch
         
-        return jsonify({"data": latest_batch - 1, "success": True })
+        return jsonify({"data": latest_batch, "success": True })
+    except Exception as e:
+        print("ERROR: ", e)
+        # Handle the exception here, e.g., log it or return an error response
+        return jsonify({'error': str(e)}), 500
+    
+def getAllCourses():
+    try:
+        # Get latest batch semester
+        all_program = db.session.query(Course).all()
+        list_program = [{"ProgramId": 0, "Program":"All"}]
+        if all_program:
+            for course in all_program:
+                list_program.append({"ProgramId": course.CourseId, "Program": course.CourseCode})  
+            return jsonify({"data": list_program, "success": True })
+        return jsonify({"message": "Data couldn't found", "success": False })
     except Exception as e:
         print("ERROR: ", e)
         # Handle the exception here, e.g., log it or return an error response
@@ -5005,9 +5073,16 @@ def getLatinHonorRates(desired_year):
                     },
                     "cum_laude": {
                         "rate": round(historical_cum[index], 2),
-                        "count": historical_cumlaude_count[index]
+                        "count": historical_cumlaude_count[index] 
                     }
                 }
+
+                # Loop through each item in data_dict
+                for key, value in data_dict.items():
+                    # Check if rate is greater than 0 and count is 0
+                    if value["rate"] > 0 and value["count"] == 0:
+                        # Set count to 1
+                        value["count"] = 1
                 
                 return jsonify({"data": data_dict, "predicted": True, "success": True})
         else:
@@ -5067,7 +5142,7 @@ def getLatinHonors(skip, top, order_by, filter):
                     if column_name.strip() == 'FinalGWAGrade':
                         column_num = CourseEnrolled.FinalGWAGrade
                     elif column_name.strip() == 'YearGraduated':
-                        column_num = CourseEnrolled.YearGraduated
+                        column_num = CourseEnrolled.BatchYearGraduated
                     elif column_name.strip() == 'LatinHonors':
                         column_num = CourseEnrolled.LatinHonors
 
@@ -5091,14 +5166,21 @@ def getLatinHonors(skip, top, order_by, filter):
         
         if order_by:
             # Determine the order attribute
-            if order_by.split(' ')[0] == 'CourseCode':
-                order_attr = getattr(Course, 'CourseCode')
-            elif order_by.split(' ')[0] == "Course":
-                order_attr = getattr(Course, 'Name')
-            elif order_by.split(' ')[0] == 'Batch':
-                order_attr = getattr(Metadata, 'Batch')
-            elif order_by.split(' ')[0] == 'Semester':
-                order_attr = getattr(Metadata, 'Semester')           
+            if order_by.split(' ')[0] == 'LastName':
+                order_attr = getattr(Student, 'LastName')
+            elif order_by.split(' ')[0] == "FirstName":
+                order_attr = getattr(Student, 'FirstName')
+            elif order_by.split(' ')[0] == 'MiddleName':
+                order_attr = getattr(Student, 'MiddleName')
+            elif order_by.split(' ')[0] == 'CourseCode':
+                order_attr = getattr(Course, 'CourseCode')   
+            elif order_by.split(' ')[0] == 'LatinHonors':
+                order_attr = getattr(CourseEnrolled, 'LatinHonors')
+            elif order_by.split(' ')[0] == 'FinalGWAGrade':
+                order_attr = getattr(CourseEnrolled, 'FinalGWAGrade')   
+            elif order_by.split(' ')[0] == 'YearGraduated':
+                order_attr = getattr(CourseEnrolled, 'BatchYearGraduated')  
+                        
            
             if ' ' in order_by:
                 order_query = filter_query.order_by(desc(order_attr))

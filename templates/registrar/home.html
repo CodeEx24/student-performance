@@ -158,17 +158,38 @@ endblock title %}
         <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
           Enrollment Trends
         </h4>
+       
         <div id="enrollment"></div>
+        <div class="flex gap-4 justify-center px-20 mb-8">
+          <div class="w-6/12">
+            <label for="">Year Start: </label>
+            <select
+              id="enrollment-start-year-select"
+              name="enrollmentStartYear"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="fetchEnrollmentTrends(this.value, document.getElementById('enrollment-end-year-select').value)"
+            ></select>
+          </div>
+          <div class="w-6/12">
+            <label for="">Year End: </label>
+            <select
+              id="enrollment-end-year-select"
+              name="enrollmentEndYear"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="fetchEnrollmentTrends(document.getElementById('enrollment-start-year-select').value, this.value)"
+            ></select>
+          </div>
+        </div>
       </div>
 
       <div
-        class="bg-white col-span-6 lg:col-span-2 lg:row-span-8 shadow-md p-4 rounded-md shadow-sm flex flex-col justify-center items-center"
+        class="bg-white col-span-6 lg:col-span-2 lg:row-span-6 shadow-md p-4 rounded-md shadow-sm flex flex-col justify-center items-center"
       >
         <div class="w-full px-4 mt-4 space-y-2">
           <label class="text-xl font-bold text-c1">Please select a year</label>
           <select
-            id="semesterSelect"
-            name="semester"
+            id="yearly-rates-select"
+            name="yearlyRates"
             class="border rounded-md p-2 py-2.5 w-full"
             placeholder="Please select semester"
             onchange="fetchYearlyRates(this.value)"
@@ -213,9 +234,39 @@ endblock title %}
         class="bg-white col-span-6 lg:col-span-4 lg:row-span-4 lg:row-span-0 shadow-md p-4 rounded-md shadow-sm"
       >
         <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
-          Student Outcome Rates
+          Student Outcome
         </h4>
+        
         <div id="outcome-rates"></div>
+        <div class="flex gap-4 justify-center px-20 mb-8">
+          <div class="w-4/12">
+            <label for="">Program:</label>
+            <select
+              id="outcome-program-select"
+              name="programSelect"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="handleFetchOutcomeTrigger()"
+            ></select>
+          </div>
+          <div class="w-4/12">
+            <label for="">Year Start:</label>
+            <select
+              id="outcome-start-year-select"
+              name="outcomeStartYear"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="handleFetchOutcomeTrigger()"
+            ></select>
+          </div>
+          <div class="w-4/12">
+            <label for="">Year End:</label>
+            <select
+              id="outcome-end-year-select"
+              name="outcomeEndYear"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="handleFetchOutcomeTrigger()"
+            ></select>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -234,11 +285,31 @@ endblock title %}
 </div>
 
 {% endblock content %} {% block script %}
+<script>
+  async function handleFetchOutcomeTrigger() {
+    // Get the select input outcome-program-select
+
+    const outcomeProgram = document.getElementById(
+      'outcome-program-select'
+    ).value;
+    const outcomeStartYear = document.getElementById(
+      'outcome-start-year-select'
+    ).value;
+    const outcomeEndYear = document.getElementById(
+      'outcome-end-year-select'
+    ).value;
+
+    fetchStudentOutcomeRates(outcomeProgram, outcomeStartYear, outcomeEndYear);
+  }
+</script>
+
 <!-- ENROLLMENT TRENDS OF COURSES -->
 <script>
-  async function fetchEnrollmentTrends() {
+  async function fetchEnrollmentTrends(startYear, endYear) {
+    console.log('startYear', startYear);
+    console.log('endYear', endYear);
     try {
-      const response = await fetch(`${api_base_url}/enrollment/trends`);
+      const response = await fetch(`${api_base_url}/enrollment/trends/${startYear}/${endYear}`);
 
       if (!response.ok) {
         throw new Error(
@@ -256,6 +327,7 @@ endblock title %}
   }
 
   function displayEnrollmentTrendChart(json_enrollment_trends) {
+    console.log("HERE IN DISPLAYED")
     if (json_enrollment_trends.success == true) {
       console.log('json_enrollment_trends: ', json_enrollment_trends);
       var chartData = [...json_enrollment_trends.enrollment_trends];
@@ -267,12 +339,14 @@ endblock title %}
           type: 'StackingLine',
           dataSource: chartData,
           marker: { visible: true, width: 8, height: 8 },
-          xName: 'x',
+          xName: 'Year',
           width: 2,
           yName: course,
           name: course,
         });
       });
+
+      console.log('series_template: ', series_template);
 
       var chart = new ej.charts.Chart({
         //Initializing Primary X Axis
@@ -312,11 +386,11 @@ endblock title %}
         // Initializing Primary X Axis
         primaryXAxis: {
           interval: 1,
-          valueType: 'Category',
+          // valueType: 'Category',
         },
         primaryYAxis: {
-          minimum: 0, // Set your desired minimum value
-          maximum: 500, // Set your desired maximum value
+          // minimum: 0, // Set your desired minimum value
+          // maximum: 500, // Set your desired maximum value
           interval: 50,
         },
         // Sample series to be displayed when there is no data
@@ -355,11 +429,11 @@ endblock title %}
     text_student_enrolled_count.innerText = json_enrollment.TotalEnrolled;
   }
 
-  fetchEnrollmentTrends();
+
 </script>
 
 <!-- OUTCOME RATES (CLASS AVERAGE) -->
-<script>
+<!-- <script>
   async function fetchOutcomeRates(semester) {
     try {
       const response = await fetch(`${api_base_url}/outcome/rates/${semester}`);
@@ -488,6 +562,88 @@ endblock title %}
 
     text_student_enrolled_count.innerText = json_enrollment.TotalEnrolled;
   }
+</script> -->
+
+
+<script>
+  async function fetchStudentOutcomeRates(program, startYear, endYear) {
+    console.log("HERE IN FETCH");
+    try {
+      const response = await fetch(
+        `${api_base_url}/passing-drop-withdrawn-and-failed/${program}/${startYear}/${endYear}`
+      );
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const studentOutcomeRates = await response.json();
+      displayStudentOutcomeRates(studentOutcomeRates);
+      // displayedEnrollmentNumbers(json_enrollment_trends);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function displayStudentOutcomeRates(studentOutcome) {
+    if (studentOutcome.success == true) {
+      var chart = new ej.charts.Chart({
+        // Initializing Primary X Axis
+        primaryXAxis: {
+          valueType: 'Double',
+          title: 'Year',
+          interval: 1,
+        },
+        // Initializing Primary Y Axis
+        primaryYAxis: {
+          title: 'Total Students',
+        },
+        series: [
+          {
+            type: 'Line',
+            dataSource: studentOutcome.data,
+            xName: 'x',
+            yName: 'Withdrawn',
+            name: 'Withdrawn',
+            marker: {
+              visible: true,
+            },
+          },
+          {
+            type: 'Line',
+            dataSource: studentOutcome.data,
+            xName: 'x',
+            yName: 'Failed',
+            name: 'Failed',
+            marker: {
+              visible: true,
+            },
+          },
+          {
+            type: 'Line',
+            dataSource: studentOutcome.data,
+            xName: 'x',
+            yName: 'Dropout',
+            name: 'Dropout',
+            marker: {
+              visible: true,
+            },
+          },
+        ],
+        // Chart Title
+        title: 'Student Outcome Rates: Pass, Fail, and Dropout Analysis',
+        // Tooltip for chart
+        tooltip: {
+          enable: true,
+        },
+      });
+
+      // Render initialized Chart
+      chart.appendTo('#outcome-rates');
+    }
+  }
+
 </script>
 
 <script>
@@ -522,6 +678,9 @@ endblock title %}
 
 <!-- FETCH LATEST BATCH SEMESTER -->
 <script>
+  fetchLatestBatchSemester();
+  fetchAllCourses();
+
   async function fetchLatestBatchSemester() {
     try {
       const response = await fetch(`${api_base_url}/batch/latest`);
@@ -533,18 +692,58 @@ endblock title %}
 
       const data = await response.json();
       const latestYear = data.data;
-      console.log('latestYear: ', latestYear);
+
       if (data.data) {
-        console.log('DATA: ', data.data);
-        const selectElement = document.getElementById('semesterSelect');
-        for (let year = latestYear - 3; year <= latestYear + 7; year++) {
-          const option = document.createElement('option');
-          option.value = year;
-          option.textContent = year;
-          selectElement.appendChild(option);
+        const yearlyRatesSelect = document.getElementById('yearly-rates-select')
+        const enrollmentStartSelect = document.getElementById('enrollment-start-year-select');
+        const enrollmentEndSelect = document.getElementById('enrollment-end-year-select');
+
+        const outcomeStartYear = document.getElementById(
+          'outcome-start-year-select'
+        );
+        const outcomeEndYear = document.getElementById(
+          'outcome-end-year-select'
+        );
+
+        // For loop option for starting year
+        for (let year = latestYear - 5; year <= latestYear + 10; year++) {
+          const option1 = document.createElement('option');
+          option1.value = year;
+          option1.textContent = year;
+          yearlyRatesSelect.appendChild(option1);
+
         }
 
+        // For loop option for starting year
+        for (let year = latestYear + 1; year <= latestYear + 6; year++) {
+          const option1 = document.createElement('option');
+          option1.value = year;
+          option1.textContent = year;
+          enrollmentStartSelect.appendChild(option1);
+          
+
+          const option2 = document.createElement('option');
+          option2.value = year;
+          option2.textContent = year;
+          outcomeStartYear.appendChild(option2);
+        }
+
+        for (let year = latestYear + 7; year <= latestYear + 15; year++) {
+          const option1 = document.createElement('option');
+          option1.value = year;
+          option1.textContent = year;
+          enrollmentEndSelect.appendChild(option1);
+
+          const option2 = document.createElement('option');
+          option2.value = year;
+          option2.textContent = year;
+          outcomeEndYear.appendChild(option2);  
+        }
+
+
+        fetchEnrollmentTrends(latestYear + 1, latestYear + 6);
         fetchYearlyRates(latestYear);
+        fetchStudentOutcomeRates(0, latestYear + 1, latestYear + 6);
       } else {
         console.log(data);
       }
@@ -553,10 +752,39 @@ endblock title %}
     }
   }
 
-  fetchLatestBatchSemester();
+
+  async function fetchAllCourses() {
+    try {
+      const response = await fetch(`${api_base_url}/courses`);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const data = await response.json();
+      console.log('ALL COURSES: ', data.data);
+
+      if (data.success === true) {
+        const programs = data.data;
+        const programSelect = document.getElementById('outcome-program-select');
+        for (const program of programs) {
+          const option = document.createElement('option');
+          option.value = program.ProgramId; // Assuming each program has an 'id' property
+          option.textContent = program.Program; // Assuming each program has a 'course_code' property
+          programSelect.appendChild(option);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
+  
 
   async function fetchYearlyRates(year) {
-    const selectElement = document.getElementById('semesterSelect');
+    const selectElement = document.getElementById('yearly-rates-select');
     selectElement.value = year;
     try {
       const response = await fetch(
@@ -616,14 +844,7 @@ endblock title %}
       }
     });
 
-    // // Function to update percentage value
-    // function updatePercentage(value) {
-    //   var percentageElement = document.getElementById('percentage');
-    //   percentageElement.innerHTML = `${value}` + '%';
-    // }
-
-    // // Example usage: Update percentage to 85%
-    // updatePercentage(85);
+ 
   }
 
   function createCircularGauge(containerId, value, rangeColor) {

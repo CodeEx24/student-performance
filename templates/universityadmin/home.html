@@ -158,20 +158,46 @@
         <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
           GWA Program Performance
         </h4>
+
         <div id="course-performance"></div>
-        <!-- <div id="enrollment"></div> -->
+        <div class="flex gap-4 justify-center px-20 mb-8">
+          <div class="w-6/12">
+            <label for="">Year Start: </label>
+            <select
+              id="program-performance-starting-select"
+              name="startYear"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="fetchCoursePerformance(this.value, document.getElementById('program-performance-ending-select').value)"
+            >
+              <!-- Placeholder-like option -->
+            </select>
+          </div>
+          <div class="w-6/12">
+            <label for="">Year End: </label>
+            <select
+              id="program-performance-ending-select"
+              name="endYear"
+              class="border rounded-md p-2 py-2 w-full"
+              placeholder="Please select end year"
+              onchange="fetchCoursePerformance(document.getElementById('program-performance-starting-select').value, this.value)"
+            ></select>
+          </div>
+        </div>
       </div>
 
       <div
-        class="bg-white col-span-6 lg:col-span-2 lg:row-span-8 shadow-md p-4 rounded-md shadow-sm flex flex-col justify-center items-center"
+        class="bg-white col-span-6 lg:col-span-2 lg:row-span-6 shadow-md p-4 rounded-md shadow-sm flex flex-col justify-center items-center"
       >
         <div class="w-full px-4 mt-4 space-y-2">
+          <h4 class="text-3xl text-c1 font-extrabold text-center mb-6">
+            Latin Honors
+          </h4>
           <label class="text-xl font-bold text-c1">Please select a year</label>
           <select
-            id="semesterSelect"
-            name="semester"
+            id="latin-year-select"
+            name="latinYear"
             class="border rounded-md p-2 py-2.5 w-full"
-            placeholder="Please select semester"
+            placeholder="Please select a year"
             onchange="fetchLatinHonorRates(this.value)"
           ></select>
           <div
@@ -212,7 +238,37 @@
         <h4 class="text-3xl text-c1 font-extrabold text-center my-2 mt-10">
           Student Outcome Rates
         </h4>
+
         <div id="outcome-rates"></div>
+        <div class="flex gap-4 justify-center px-20 mb-8">
+          <div class="w-4/12">
+            <label for="">Program:</label>
+            <select
+              id="outcome-program-select"
+              name="programSelect"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="handleFetchOutcomeTrigger()"
+            ></select>
+          </div>
+          <div class="w-4/12">
+            <label for="">Year Start:</label>
+            <select
+              id="outcome-start-year-select"
+              name="outcomeStartYear"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="handleFetchOutcomeTrigger()"
+            ></select>
+          </div>
+          <div class="w-4/12">
+            <label for="">Year End:</label>
+            <select
+              id="outcome-end-year-select"
+              name="outcomeEndYear"
+              class="border rounded-md p-2 py-2 w-full"
+              onchange="handleFetchOutcomeTrigger()"
+            ></select>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -232,6 +288,27 @@
 
 {% endblock content %} {% block script %}
 <script>
+  async function handleFetchOutcomeTrigger() {
+    // Get the select input outcome-program-select
+
+    const outcomeProgram = document.getElementById(
+      'outcome-program-select'
+    ).value;
+    const outcomeStartYear = document.getElementById(
+      'outcome-start-year-select'
+    ).value;
+    const outcomeEndYear = document.getElementById(
+      'outcome-end-year-select'
+    ).value;
+
+    fetchStudentOutcomeRates(outcomeProgram, outcomeStartYear, outcomeEndYear);
+  }
+</script>
+
+<script>
+  fetchLatestBatchSemester();
+  fetchAllCourses();
+
   async function fetchLatestBatchSemester() {
     try {
       const response = await fetch(`${api_base_url}/batch/latest`);
@@ -243,16 +320,59 @@
 
       const data = await response.json();
       const latestYear = data.data;
+
       if (data.data) {
-        const selectElement = document.getElementById('semesterSelect');
-        for (let year = latestYear - 3; year <= latestYear + 5; year++) {
+        const selectElement = document.getElementById('latin-year-select');
+        for (let year = latestYear - 5; year <= latestYear + 15; year++) {
           const option = document.createElement('option');
           option.value = year;
           option.textContent = year;
           selectElement.appendChild(option);
         }
 
+        const programPerformanceStartingSelect = document.getElementById(
+          'program-performance-starting-select'
+        );
+        const programPerformanceEndingSelect = document.getElementById(
+          'program-performance-ending-select'
+        );
+
+        const outcomeStartYear = document.getElementById(
+          'outcome-start-year-select'
+        );
+        const outcomeEndYear = document.getElementById(
+          'outcome-end-year-select'
+        );
+
+        // For loop option for starting year
+        for (let year = latestYear + 1; year <= latestYear + 6; year++) {
+          const option1 = document.createElement('option');
+          option1.value = year;
+          option1.textContent = year;
+          programPerformanceStartingSelect.appendChild(option1);
+
+          const option2 = document.createElement('option');
+          option2.value = year;
+          option2.textContent = year;
+          outcomeStartYear.appendChild(option2);
+        }
+
+        for (let year = latestYear + 7; year <= latestYear + 15; year++) {
+          const option1 = document.createElement('option');
+          option1.value = year;
+          option1.textContent = year;
+          programPerformanceEndingSelect.appendChild(option1);
+
+          const option2 = document.createElement('option');
+          option2.value = year;
+          option2.textContent = year;
+          outcomeEndYear.appendChild(option2);
+        }
+
         fetchLatinHonorRates(latestYear);
+        fetchCoursePerformance(latestYear, latestYear + 5);
+        console.log('FETCH COURSE PERFORMANCE SUCCESS: ');
+        fetchStudentOutcomeRates(0, latestYear + 1, latestYear + 6);
       } else {
         console.log(data);
       }
@@ -261,10 +381,35 @@
     }
   }
 
-  fetchLatestBatchSemester();
+  async function fetchAllCourses() {
+    try {
+      const response = await fetch(`${api_base_url}/courses`);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch data. Try to contact the system admin to resolve the issue.`
+        );
+      }
+
+      const data = await response.json();
+      console.log('ALL COURSES: ', data.data);
+
+      if (data.success === true) {
+        const programs = data.data;
+        const programSelect = document.getElementById('outcome-program-select');
+        for (const program of programs) {
+          const option = document.createElement('option');
+          option.value = program.ProgramId; // Assuming each program has an 'id' property
+          option.textContent = program.Program; // Assuming each program has a 'course_code' property
+          programSelect.appendChild(option);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   async function fetchLatinHonorRates(year) {
-    const selectElement = document.getElementById('semesterSelect');
+    const selectElement = document.getElementById('latin-year-select');
     selectElement.value = year;
     try {
       const response = await fetch(
@@ -453,9 +598,11 @@
 </script>
 
 <script>
-  async function fetchStudentOutcomeRates() {
+  async function fetchStudentOutcomeRates(program, startYear, endYear) {
     try {
-      const response = await fetch(`${api_base_url}/passing-and-drop/rates`);
+      const response = await fetch(
+        `${api_base_url}/passing-drop-withdrawn-and-failed/${program}/${startYear}/${endYear}`
+      );
       if (!response.ok) {
         throw new Error(
           `Failed to fetch data. Try to contact the system admin to resolve the issue.`
@@ -469,11 +616,8 @@
       console.error(error);
     }
   }
-
-  fetchStudentOutcomeRates();
 </script>
 
-<!-- ENROLLMENT TRENDS OF COURSES -->
 <script>
   function displayStudentOutcomeRates(studentOutcome) {
     if (studentOutcome.success == true) {
@@ -486,18 +630,15 @@
         },
         // Initializing Primary Y Axis
         primaryYAxis: {
-          title: 'Percentage Rates',
-          min: 0,
-          max: 80,
+          title: 'Total Students',
         },
-        // Initializing Chart Series
         series: [
           {
             type: 'Line',
             dataSource: studentOutcome.data,
             xName: 'x',
-            yName: 'Passed',
-            name: 'Passed',
+            yName: 'Withdrawn',
+            name: 'Withdrawn',
             marker: {
               visible: true,
             },
@@ -687,79 +828,14 @@
       console.error(error);
     }
   }
-
-  // function displayPerformance(data_performance) {
-  //   var chartData = [...data_performance];
-  //   // Create the chart
-  //   var chart = new ej.charts.Chart({
-  //     primaryXAxis: {
-  //       title: 'Year',
-  //       minimum: data_performance[data_performance.length - 1].Year - 1,
-  //       maximum: data_performance[0].Year + 1,
-  //       interval: 1,
-  //     },
-  //     primaryYAxis: {
-  //       minimum: 20,
-  //       maximum: 100,
-  //       interval: 20,
-  //       title: 'Grade',
-  //       labelFormat: '{value}',
-  //     },
-  //     series: [
-  //       {
-  //         dataSource: chartData.filter((data) => data.Semester === 1),
-  //         xName: 'Year',
-  //         yName: 'Grade',
-  //         name: '1st Semester',
-  //         type: 'Column',
-  //         fill: '#6376EB',
-  //       },
-  //       {
-  //         dataSource: chartData.filter((data) => data.Semester === 2),
-  //         xName: 'Year',
-  //         yName: 'Grade',
-  //         name: '2nd Semester',
-  //         type: 'Column',
-  //         fill: '#5EEE82',
-  //       },
-  //       {
-  //         dataSource: chartData.filter((data) => data.Semester === 3),
-  //         xName: 'Year',
-  //         yName: 'Grade',
-  //         name: 'Summer Term',
-  //         type: 'Column',
-  //         fill: '#29BAF2',
-  //       },
-  //     ],
-  //     title: 'Performance',
-  //     // dataLabel: {
-  //     //   visible: true,
-  //     //   position: 'Top',
-  //     //   font: {
-  //     //     fontWeight: '600',
-  //     //   },
-  //     //   format: '${point.y}%',
-  //     // },
-  //     tooltip: {
-  //       enable: true,
-  //       format:
-  //         'Semester: ${series.name}<br>Year: ${point.x}<br>Grade: ${point.y}%',
-  //     },
-  //   });
-
-  //   // Render the chart
-  //   chart.appendTo('#columnChartContainer');
-  // }
-
-  // fetchStudentPerformanceOvertime();
 </script>
 
 <!-- COURSE PERFORMANCE -->
 <script>
-  async function fetchCoursePerformance() {
+  async function fetchCoursePerformance(startYear, endYear) {
     try {
       const response = await fetch(
-        `${api_base_url}/overall/course/performance`
+        `${api_base_url}/overall/course/performance/${startYear}/${endYear}`
       );
 
       if (!response.ok) {

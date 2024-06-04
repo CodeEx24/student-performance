@@ -7,7 +7,7 @@ from decorators.auth_decorators import role_required
 from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent, getListerTrends, getStudentList, createCriteria, getCriteriaList, getSpecificCriteriaData, getCriteriaOptions, getPassingAndDropRates, getLatinHonorRates, getBatchLatest, getLatinHonors
+from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent, getListerTrends, getStudentList, createCriteria, getCriteriaList, getSpecificCriteriaData, getCriteriaOptions, getPassFailedAndDropout, getLatinHonorRates, getBatchLatest, getLatinHonors, getAllCourses
 import os
 import re
 
@@ -160,13 +160,12 @@ def currentGpaGiven():
 
 
 # Getting the overall course performance
-@university_admin_api.route('/overall/course/performance', methods=['GET'])
+@university_admin_api.route('/overall/course/performance/<int:startYear>/<int:endYear>', methods=['GET'])
 @role_required('universityAdmin')
-def overallCoursePerformance():
+def overallCoursePerformance(startYear, endYear):
     universityAdmin = getCurrentUser()
-    
     if universityAdmin:
-        json_performance_data = getOverallCoursePerformance()
+        json_performance_data = getOverallCoursePerformance(startYear, endYear)
 
         if json_performance_data:
             return  json_performance_data
@@ -174,6 +173,22 @@ def overallCoursePerformance():
             return jsonify(error="No Performance data available")
     else:
         return render_template('404.html'), 404
+
+
+@university_admin_api.route('/courses', methods=['GET'])
+@role_required('universityAdmin')
+def fetchAllCourses():
+    universityAdmin = getCurrentUser()
+    if universityAdmin:
+        json_courses = getAllCourses()
+
+        if json_courses:
+            return  json_courses
+        else:
+            return jsonify(error="No Performance data available")
+    else:
+        return render_template('404.html'), 404
+
 
 
 # Getting all the class data in current year
@@ -611,12 +626,12 @@ def submitStudentsClassSubject(class_subject_id):
         return render_template('404.html'), 404    
     
     
-@university_admin_api.route('/passing-and-drop/rates', methods=['GET'])
+@university_admin_api.route('/passing-drop-withdrawn-and-failed/<int:programId>/<int:startingYear>/<int:endingYear>', methods=['GET'])
 @role_required('universityAdmin')
-def passingAndDropRates():
+def fetchPassFailedAndDropout(programId, startingYear, endingYear):
     universityAdmin = getCurrentUser()
     if universityAdmin:
-        return getPassingAndDropRates()
+        return getPassFailedAndDropout(programId, startingYear, endingYear)
     else:
         return render_template('404.html'), 404    
     
