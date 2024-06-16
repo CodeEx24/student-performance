@@ -1,60 +1,64 @@
 {% extends "main/base2.html" %} {% block content %}
 
-<div class="flex h-screen w-screen items-center justify-center mx-auto">
+<div
+  class="flex flex-col h-screen w-screen items-center justify-center mx-auto"
+>
   <div
-    class="bg-white shadow-lg p-10 text-center rounded-lg w-[36rem] border-2 border-gray-100"
+    class="bg-white shadow-lg p-10 text-center rounded-lg border-2 border-gray-100 z-10 w-11/12 md:w-[36rem]"
   >
     <div>
-      <img
-        src="{{ url_for('static', filename='images/pup.png') }}"
-        alt="Logo"
-        class="object-cover object-center rounded-lg mx-auto w-16 md:w-28 lg:w-32"
-      />
-
       <h1
-        class="text-gray-800 font-poppins text-2xl font-extrabold mt-3 md:text-4xl md:mt-8"
+        class="text-accent1 font-poppins text-4xl font-extrabold mt-3 md:text-4xl md:mt-8"
       >
-        Welcome PUPian!
+        PUP-SPS
       </h1>
-      <p class="text-gray-800 text-md font-poppins mt-3 mb-3 md:text-lg">
-        Please click or tap your destination.
+      <p
+        class="text-gray-800 text-2xl md:text-3xl font-semibold font-poppins mt-3 mb-3 opacity-60"
+      >
+        Log In As
       </p>
     </div>
 
     <div class="">
       <a href="{{ url_for('studentLogin') }}">
-        <button class="bg-sky-600 text-white w-full rounded-md py-2 mt-3">
+        <button
+          class="bg-primary text-white w-full rounded-md py-3 mt-3 rounded-lg font-bold"
+        >
           Student
         </button>
       </a>
       <a href="{{ url_for('facultyLogin') }}">
         <button
-          class="bg-red-700 text-white w-full rounded-md py-2 mt-3 md:mt-4"
+          class="bg-primary text-white w-full rounded-md py-3 mt-3 md:mt-4 rounded-lg font-bold"
         >
           Faculty
         </button>
       </a>
-    </div>
-    <div>
-      <div class="text-sm text-gray-800 mt-3">
-        By using this service, you understand and agree to the PUP Online
-        Services
-        <a
-          class="text-blue-500"
-          href="https://www.pup.edu.ph/terms/"
-          target="_blank"
-          >Terms of Use</a
+      <a href="{{ url_for('registrarLogin') }}">
+        <button
+          class="bg-primary text-white w-full rounded-md py-3 mt-3 md:mt-4 rounded-lg font-bold"
         >
-        and
-        <a
-          class="text-blue-500"
-          href="https://www.pup.edu.ph/privacy/"
-          target="_blank"
-          >Privacy Statement</a
+          Registrar
+        </button>
+      </a>
+      <a href="{{ url_for('universityAdminLogin') }}">
+        <button
+          class="bg-primary text-white w-full rounded-md py-2 mt-3 md:mt-4 rounded-lg font-bold"
         >
-      </div>
+          University Admin
+        </button>
+      </a>
     </div>
   </div>
+  <p class="z-10 text-accent1 opacity-60 absolute bottom-10">
+    myPUPQC © <span id="year"></span>
+  </p>
 </div>
 
-{% endblock content %}
+{% endblock content %} {% block script %}
+<!-- Get current year -->
+<script>
+  const year = new Date().getFullYear();
+  document.getElementById('year').innerHTML = year;
+</script>
+{% endblock script %}

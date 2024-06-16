@@ -1,16 +1,25 @@
 # api/api_routes.py
 from flask import Blueprint, jsonify, request, redirect, url_for, flash, session, render_template
-from models import Registrar
+from models import Registrar, db
 
 from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
-from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
 from .utils import getCurrentUser, getRegistrarData, updatePassword, getStatistics, getEnrollmentTrends, getOverallCoursePerformance, getStudentData, processAddingStudents, deleteStudentData, getStudentAddOptions, updateRegistrarData, getStudentRequirements, processUpdatingStudentRequirements, getListerTrends, processUpdatingSingleStudentRequirements, noticeStudentsEmail, getOutcomeRates, getBatchLatest, getGradDropWithdrawnRate, getPassFailedAndDropout, getAllCourses
+
+from datetime import datetime, timedelta
+from decorators.auth_decorators import preventAuthenticated, role_required
+from werkzeug.security import generate_password_hash
+from flask_mail import Message
+from mail import mail  # Import mail from the mail.py module
+
 import os
 import re
+import secrets
 
+
+registrar_api_base_url = os.getenv("REGISTRAR_API_BASE_URL")
 registrar_api = Blueprint('registrar_api', __name__)
 
 @registrar_api.route('/login', methods=['POST'])
@@ -20,13 +29,14 @@ def login():
             print("DONE 1")
             email = request.form['email']
             password = request.form['password']
-            print("DONE 2")
+            print("DONE 2: ", password)
             if not email or not password:
                 return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
             print("DONE 3")
             if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
                 return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
             print("DONE 4")
+            print("EMAIL: ", email)
             registrar = Registrar.query.filter_by(Email=email).first()
             if not registrar:
                 return jsonify({'error': True, 'message': 'Invalid email or password'}), 401
@@ -45,6 +55,100 @@ def login():
             print("Except into error: ", e)
             return jsonify({'error': True, 'message': 'Invalid email or password'})
   
+       
+# Step 4: Handle the form submission for requesting a password reset email
+@registrar_api.route('/reset_password', methods=['POST'])
+def forgotPassword():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'error': True, 'message': 'Please input an email'}), 401
+
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+        return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+    
+    # Check if email exists in the database
+    registrar = Registrar.query.filter_by(Email=email).first()
+
+    if not registrar:
+        # Intended so the intruder cannot be able to know whether email is registered or not
+        return jsonify({'success': True, 'message': 'An email with instructions to reset your password has been sent to email.'}),200
+        # return jsonify({'error': True, 'message': 'Email is invalid'}), 400
+
+    if registrar:
+        # Generate a secure token
+        token = secrets.token_hex(16)
+
+        # Save the token and its expiration time in the database
+        registrar.Token = token
+        registrar.TokenExpiration = datetime.now() + timedelta(minutes=30)
+        db.session.commit()
+
+        # Send the reset email
+        msg = Message('Password Reset Request', sender='your_email@example.com', recipients=[email])
+        msg.body = f"Please click the following link to reset your password: {url_for('registrar_api.resetPasswordConfirm', token=token, _external=True)}"
+        mail.send(msg)
+        flash('An email with instructions to reset your password has been sent.', 'info')
+        return jsonify({'success': True, 'message': 'An email with instructions to reset your password has been sent to email.'}),200
+    else:
+        return jsonify({'error': True, 'message': 'Email is invalid'}), 400
+
+
+# Step 6: Create a route to render the password reset confirmation form
+@registrar_api.route('/reset_password_confirm/<token>', methods=['GET'])
+@preventAuthenticated
+def resetPasswordConfirm(token):
+    # Check if the token is valid and not expired
+    registrar = Registrar.query.filter_by(Token=token).first()
+    if registrar and registrar.TokenExpiration > datetime.now():
+        return render_template('registrar/reset_password_confirm.html', token=token, registrar_api_base_url=registrar_api_base_url)
+    else:
+        flash('Invalid or expired token.', 'danger')
+        return render_template('404.html')
+# registrar_api.py (continued)
+
+
+# Step 8: Handle the form submission for resetting the password
+@registrar_api.route('/reset_password_confirm/<token>', methods=['POST'])
+def resetPassword(token):
+    data = request.get_json()
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
+    print("BY PASS")
+    # Check new password if length is 8
+    if len(new_password) < 8:
+        return jsonify({'message': 'New Password must be at least 8 characters', 'status': 400})
+    
+    if len(confirm_password) < 8:
+        return jsonify({'message': 'Confirm Password must be at least 8 characters', 'status': 400})
+    
+    if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$', new_password):
+        return jsonify({'message': 'New Password must contain uppercase, lowercase characters and number', 'status': 400})
+    
+    if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$', confirm_password):
+        return jsonify({'message': 'New Password must contain uppercase, lowercase characters and number', 'status': 400})
+    print("BY PASS2")
+    if new_password != confirm_password:
+        return jsonify({'message': 'Passwords do not match', 'status': 400})
+    else: 
+        # Check if the token is valid and not expired
+        registrar = Registrar.query.filter_by(Token=token).first()
+        print("registrar: ", registrar)
+        if registrar and registrar.TokenExpiration > datetime.now():
+            # Update the password for the user in the database
+            registrar.Password = generate_password_hash(new_password)
+
+            # Clear the token and expiration
+            registrar.Token = None
+            registrar.TokenExpiration = None
+
+            db.session.commit()
+
+            return jsonify({'message': 'Password reset successfully', 'success': True, 'status': 200})
+        else:
+            return jsonify({'message': 'Invalid or expired token', 'status': 400})
+       
        
     
 # ===================================================

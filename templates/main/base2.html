@@ -26,12 +26,11 @@
         theme: {
           extend: {
             colors: {
-              c1: '#2b2d42', // dark red
-              c2: '#8d99ae', // light red
-              c3: '#edf2f4', // white
-              c4: '#ef233c', // gray
-              c5: '#d90429', // dark black
-              primary: '#6376EB',
+              primary: '#700001',
+
+              accent1: '#000000',
+              accent2: '#656363',
+
               secondary: '#CDD3D8',
               info: '#29BAF2',
               success: '#5EEE82',
@@ -64,8 +63,37 @@
     </title>
     <!-- Include CSS and other common resources here -->
   </head>
-  <body>
-    <main class="text-white bg-[#F6F8FB]">
+  <body class="overflow-x-hidden">
+    <main class="text-black">
+      <img
+        src="{{ url_for('static', filename='images/login/my-pupqc.png') }}"
+        alt="Logo"
+        class="object-cover object-center rounded-lg mx-auto w-32 md:w-28 lg:w-32 absolute top-10 left-10 md:top-20 md:left-20 z-10"
+      />
+
+      <img
+        src="{{ url_for('static', filename='images/login/bg.jpg') }}"
+        alt="Logo"
+        class="object-cover h-screen w-screen absolute z-0"
+      />
+
+      <img
+        src="{{ url_for('static', filename='images/login/1.png') }}"
+        alt="Logo"
+        class="object-cover top-0 right-[-20px] z-0 absolute w-48 md:w-auto"
+      />
+
+      <img
+        src="{{ url_for('static', filename='images/login/3.png') }}"
+        alt="Logo"
+        class="object-cover bottom-20 left-20 z-0 absolute"
+      />
+
+      <img
+        src="{{ url_for('static', filename='images/login/2.png') }}"
+        alt="Logo"
+        class="object-cover bottom-40 right-20 z-0 absolute"
+      />
       {% block content %} {% endblock %}
     </main>
 
@@ -96,15 +124,17 @@
     </script>
 
     <script>
-      function removeErrorMessage() {
+      function removeErrorMessage(idError, idInput) {
         // select message-container
-        const messageContainer = document.getElementById('message-container');
+        const errorMessage = document.getElementById(idError);
+        const errorInput = document.getElementById(idInput);
         // Clear the message
-        messageContainer.textContent = '';
+        errorInput.classList.remove('border-primary');
+        errorMessage.textContent = '';
       }
 
       function validateEmail() {
-        removeErrorMessage();
+        removeErrorMessage('email-error', 'email');
         const emailInput = document.getElementById('email');
         const email = emailInput.value;
         // Select email-error
@@ -115,18 +145,20 @@
 
         if (!email) {
           emailError.textContent = 'Email is required';
+          emailInput.classList.add('border-primary');
         } else if (!emailFormat.test(email)) {
           emailError.textContent = 'Please enter a valid email address';
-          // Clear the input field if the email is not valid
+          emailInput.classList.add('border-primary');
         }
 
         if (email && emailFormat.test(email)) {
           emailError.textContent = '';
+          emailInput.classList.remove('border-primary');
         }
       }
 
       function validatePassword() {
-        removeErrorMessage();
+        removeErrorMessage('password-error', 'password');
         const passwordInput = document.getElementById('password');
         const password = passwordInput.value;
         // Select password-error

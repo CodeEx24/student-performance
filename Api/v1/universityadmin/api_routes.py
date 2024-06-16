@@ -1,16 +1,24 @@
 # api/api_routes.py
 from flask import Blueprint, jsonify, request, redirect, url_for, flash, session, render_template
-from models import UniversityAdmin
+from models import UniversityAdmin, db
 
 from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required
-from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
 from .utils import getEnrollmentTrends, getCurrentGpaGiven, getOverallCoursePerformance, getAllClassData, getClassPerformance, getCurrentUser, getUniversityAdminData, updateUniversityAdminData, updatePassword, processAddingStudents, getStudentData, processAddingClass, getAllClassSubjectData, getClassSubject, getClassDetails, getStudentClassSubjectData, getCurriculumData, getCurriculumSubject, processAddingCurriculumSubjects, getActiveTeacher, processUpdatingClassSubjectDetails, processAddingStudentInSubject, getMetadata, processClassStudents, deleteClassSubjectStudent, getCurriculumOptions, deleteCurriculumSubjectData, getStudentAddOptions, deleteStudentData, getClassListDropdown, getStudentClassSubjectGrade, getStudentPerformance, processGradeSubmission, getStatistics, getListersCount, deleteClassData, getBatchSemester, finalizedGradesBatchSemester, startEnrollmentProcess, getListerStudent, getListerTrends, getStudentList, createCriteria, getCriteriaList, getSpecificCriteriaData, getCriteriaOptions, getPassFailedAndDropout, getLatinHonorRates, getBatchLatest, getLatinHonors, getAllCourses
+
+from datetime import datetime, timedelta
+from decorators.auth_decorators import preventAuthenticated, role_required
+from werkzeug.security import generate_password_hash
+from flask_mail import Message
+from mail import mail  # Import mail from the mail.py module
+
 import os
 import re
+import secrets
 
+university_admin_api_base_url = os.getenv("UNIVERSITY_ADMIN_API_BASE_URL")
 university_admin_api = Blueprint('university_admin_api', __name__)
 
 @university_admin_api.route('/login', methods=['POST'])
@@ -42,6 +50,100 @@ def login():
         except Exception as e:
             print('An exception occurred')
             return jsonify({"error": True, "message": "Invalid email or password"}), 401
+
+
+@university_admin_api.route('/reset_password', methods=['POST'])
+def forgotPassword():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'error': True, 'message': 'Please input an email'}), 401
+
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email): 
+        return jsonify({'error': True, 'message': 'Invalid email format type'}), 401
+    
+    # Check if email exists in the database
+    universityAdmin = UniversityAdmin.query.filter_by(Email=email).first()
+
+    if not universityAdmin:
+        # Intended so the intruder cannot be able to know whether email is registered or not
+        return jsonify({'success': True, 'message': 'An email with instructions to reset your password has been sent to email.'}),200
+        # return jsonify({'error': True, 'message': 'Email is invalid'}), 400
+
+    if universityAdmin:
+        # Generate a secure token
+        token = secrets.token_hex(16)
+
+        # Save the token and its expiration time in the database
+        universityAdmin.Token = token
+        universityAdmin.TokenExpiration = datetime.now() + timedelta(minutes=30)
+        db.session.commit()
+
+        # Send the reset email
+        msg = Message('Password Reset Request', sender='your_email@example.com', recipients=[email])
+        msg.body = f"Please click the following link to reset your password: {url_for('university_admin_api.resetPasswordConfirm', token=token, _external=True)}"
+        mail.send(msg)
+        flash('An email with instructions to reset your password has been sent.', 'info')
+        return jsonify({'success': True, 'message': 'An email with instructions to reset your password has been sent to email.'}),200
+    else:
+        return jsonify({'error': True, 'message': 'Email is invalid'}), 400
+
+
+# Step 6: Create a route to render the password reset confirmation form
+@university_admin_api.route('/reset_password_confirm/<token>', methods=['GET'])
+@preventAuthenticated
+def resetPasswordConfirm(token):
+    # Check if the token is valid and not expired
+    universityAdmin = UniversityAdmin.query.filter_by(Token=token).first()
+    if universityAdmin and universityAdmin.TokenExpiration > datetime.now():
+        return render_template('universityadmin/reset_password_confirm.html', token=token, university_admin_api_base_url=university_admin_api_base_url)
+    else:
+        flash('Invalid or expired token.', 'danger')
+        return render_template('404.html')
+# university_admin_api.py (continued)
+
+
+# Step 8: Handle the form submission for resetting the password
+@university_admin_api.route('/reset_password_confirm/<token>', methods=['POST'])
+def resetPassword(token):
+    data = request.get_json()
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
+    
+    # Check new password if length is 8
+    if len(new_password) < 8:
+        return jsonify({'message': 'New Password must be at least 8 characters', 'status': 400})
+    
+    if len(confirm_password) < 8:
+        return jsonify({'message': 'Confirm Password must be at least 8 characters', 'status': 400})
+    
+    if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$', new_password):
+        return jsonify({'message': 'New Password must contain uppercase, lowercase characters and number', 'status': 400})
+    
+    if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$', confirm_password):
+        return jsonify({'message': 'New Password must contain uppercase, lowercase characters and number', 'status': 400})
+    
+    if new_password != confirm_password:
+        return jsonify({'message': 'Passwords do not match', 'status': 400})
+    else: 
+        # Check if the token is valid and not expired
+        universityAdmin = UniversityAdmin.query.filter_by(Token=token).first()
+
+        if universityAdmin and universityAdmin.TokenExpiration > datetime.now():
+            # Update the password for the user in the database
+            universityAdmin.Password = generate_password_hash(new_password)
+
+            # Clear the token and expiration
+            universityAdmin.Token = None
+            universityAdmin.TokenExpiration = None
+
+            db.session.commit()
+
+            return jsonify({'message': 'Password reset successfully', 'status': 200})
+        else:
+            return jsonify({'message': 'Invalid or expired token', 'status': 400})
+
 
 # ===================================================
 # TESTING AREA

@@ -4,16 +4,14 @@ from flask import Blueprint, jsonify, request, redirect, url_for, flash, session
 from sqlalchemy import desc
 from werkzeug.security import check_password_hash, gen_salt
 from models import Student, db, OAuth2Token, CourseEnrolled, Course
-from oauth2 import authorization, require_oauth
+from oauth2 import require_oauth
 import os
 import time
-from authlib.integrations.flask_oauth2 import current_token
 
 from decorators.auth_decorators import preventAuthenticated, role_required
-from decorators.rate_decorators import login_decorator, resend_otp_decorator
 
 # FUNCTIONS IMPORT
-from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, getStudentData, updateStudentData, updatePassword, getCurrentUser, saveSessionValues, getUnitsTaken
+from .utils import getStudentGpa, getStudentPerformance, getCoursePerformance, getLatestSubjectGrade, getOverallGrade, getSubjectsGrade, updateStudentData, updatePassword, getCurrentUser, getUnitsTaken
 from werkzeug.security import generate_password_hash
 
 import random

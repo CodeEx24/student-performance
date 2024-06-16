@@ -5,12 +5,10 @@ import secrets
 from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash
 from decorators.auth_decorators import role_required, preventAuthenticated
-from decorators.rate_decorators import login_decorator, resend_otp_decorator
 from werkzeug.security import generate_password_hash
 from flask_mail import Message
 from mail import mail  # Import mail from the mail.py module
 from .utils import getSubjectCount, getHighLowAverageClass, getAllClassAverageWithPreviousYear, getPassFailRates, getTopPerformerStudent, getStudentClassSubjectGrade, getAllClass, getClassPerformance, updateFacultyData, getFacultyData, updatePassword, getStudentPerformance, getCurrentUser, processGradeSubmission, processGradePDFSubmission
-import re
 import os
 
 faculty_api_base_url = os.getenv("FACULTY_API_BASE_URL")
@@ -73,7 +71,7 @@ def forgotPassword():
         msg.body = f"Please click the following link to reset your password: {url_for('faculty_api.resetPasswordConfirm', token=token, _external=True)}"
         mail.send(msg)
         flash('An email with instructions to reset your password has been sent.', 'info')
-        return jsonify({'message': 'An email with instructions to reset your password has been sent to email.'}),200
+        return jsonify({'message': 'An email with instructions to reset your password has been sent to email.', 'success': True}),200
     else:
         return jsonify({'message': 'Invalid email'}), 400
 
@@ -84,9 +82,9 @@ def forgotPassword():
 @preventAuthenticated
 def resetPasswordConfirm(token):
     # Check if the token is valid and not expired
-    student = Faculty.query.filter_by(Token=token).first()
-    if student and student.TokenExpiration > datetime.now():
-        return render_template('student/reset_password_confirm.html', token=token, faculty_api_base_url=faculty_api_base_url)
+    faculty = Faculty.query.filter_by(Token=token).first()
+    if faculty and faculty.TokenExpiration > datetime.now():
+        return render_template('faculty/reset_password_confirm.html', token=token, faculty_api_base_url=faculty_api_base_url)
     else:
         flash('Invalid or expired token.', 'danger')
         return render_template('404.html')
@@ -104,15 +102,15 @@ def resetPassword(token):
         return jsonify({'message': 'Passwords do not match', 'status': 400})
     else: 
         # Check if the token is valid and not expired
-        student = Faculty.query.filter_by(Token=token).first()
+        faculty = Faculty.query.filter_by(Token=token).first()
 
-        if student and student.TokenExpiration > datetime.now():
+        if faculty and faculty.TokenExpiration > datetime.now():
             # Update the password for the user in the database
-            student.Password = generate_password_hash(new_password)
+            faculty.Password = generate_password_hash(new_password)
 
             # Clear the token and expiration
-            student.Token = None
-            student.TokenExpiration = None
+            faculty.Token = None
+            faculty.TokenExpiration = None
 
             db.session.commit()
 

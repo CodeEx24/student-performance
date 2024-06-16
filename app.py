@@ -171,6 +171,12 @@ def create_app():
     @preventAuthenticated
     def facultyLogin():
         return render_template('faculty/login.html')
+    
+    @app.route('/faculty/reset-request')
+    @preventAuthenticated
+    def facultyResetRequest():
+        print("faculty_api_base_url: ", faculty_api_base_url)
+        return render_template('faculty/reset_password_request.html', faculty_api_base_url=faculty_api_base_url)
 
 
     @app.route('/faculty/dashboard')
@@ -215,6 +221,12 @@ def create_app():
     @preventAuthenticated
     def universityAdminLogin():
         return render_template('universityadmin/login.html', university_admin_api_base_url=university_admin_api_base_url)
+
+    @app.route('/university-admin/reset-request')
+    @preventAuthenticated
+    def universityAdminResetRequest():
+        print("university_admin_api_base_url: ", university_admin_api_base_url)
+        return render_template('universityadmin/reset_password_request.html', university_admin_api_base_url=university_admin_api_base_url)
 
 
     @app.route('/university-admin/home')
@@ -303,7 +315,13 @@ def create_app():
     @app.route('/registrar')
     @preventAuthenticated
     def registrarLogin():
-        return render_template('registrar/login_new.html')
+        return render_template('registrar/login.html')
+
+    @app.route('/registrar/reset-request')
+    @preventAuthenticated
+    def registrarResetRequest():
+        print("registrar_api_base_url: ", registrar_api_base_url)
+        return render_template('registrar/reset_password_request.html', registrar_api_base_url=registrar_api_base_url)
 
     @app.route('/registrar/home')
     @role_required('registrar')
@@ -340,6 +358,13 @@ def create_app():
     @preventAuthenticated
     def systemAdminLogin():
         return render_template('systemadmin/login.html')
+
+    @app.route('/system-admin/reset-request')
+    @preventAuthenticated
+    def systemAdminResetRequest():
+        print("system_admin_api_base_url: ", system_admin_api_base_url)
+        return render_template('systemadmin/reset_password_request.html', system_admin_api_base_url=system_admin_api_base_url)
+
 
     @app.route('/system-admin/home')
     @role_required('systemAdmin')

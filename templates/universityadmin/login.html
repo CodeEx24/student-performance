@@ -2,97 +2,106 @@
 
 <div class="flex h-screen w-screen items-center justify-center mx-auto">
   <div
-    class="bg-white shadow-lg p-10 text-center rounded-lg w-[36rem] border-2 border-gray-100"
+    class="bg-white shadow-lg p-10 text-center rounded-lg border-2 border-gray-100 z-10 w-11/12 md:w-[36rem]"
   >
     <div>
-      <img
-        src="{{ url_for('static', filename='images/pup.png') }}"
-        alt="Logo"
-        class="object-cover object-center rounded-lg mx-auto w-16 md:w-28 lg:w-32"
-      />
-
       <h1
-        class="text-gray-800 font-poppins text-2xl font-extrabold mt-3 md:text-4xl md:mt-8"
+        class="text-accent1 font-poppins text-4xl font-extrabold mt-3 md:text-4xl md:mt-8"
       >
-        SPS Admin Module
+        PUP-SPS University <br />
+        Admin Module
       </h1>
-      <p class="text-gray-800 text-md font-poppins mt-3 mb-3 md:text-lg">
+      <p class="text-accent2 text-base md:text-lg font-poppins mt-3 mb-3">
         Sign in to start your session
       </p>
     </div>
 
     <form class="flex flex-col gap-3" id="login-form">
-      <!-- ADD CSRF /> -->
-
       <div class="">
-        <label
-          htmlFor="email"
-          class="flex text-left mb-2 font-medium text-gray-800"
-        >
-          Your email
-        </label>
         <input
           id="email"
           name="email"
-          placeholder="username@gmail.com"
+          placeholder="Email address"
           onchange="validateEmail()"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-white block w-full px-5 py-3"
         />
-        <p id="email-error" class="text-c4 text-sm text-left mt-2"></p>
+        <p id="email-error" class="text-primary text-sm text-left mt-2"></p>
       </div>
 
       <div class="">
-        <label
-          htmlFor="password"
-          class="flex text-left mb-2 font-medium text-gray-800"
-        >
-          Your password
-        </label>
         <input
           id="password"
           name="password"
           type="password"
-          placeholder="password"
+          placeholder="Password"
           onchange="validatePassword()"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-white block w-full px-5 py-3"
         />
-        <p id="password-error" class="text-c4 text-sm text-left mt-2"></p>
+        <p id="password-error" class="text-primary text-sm text-left mt-2"></p>
       </div>
-
+      
       <button
         type="submit"
-        class="text-white bg-sky-700 hover:bg-sky-600 focus:ring-4 focus:outline-none mt-4 focus:ring-sky-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+        class="text-white bg-primary hover:opacity-80 font-medium rounded-lg text-base w-full sm:w-auto px-6 py-3 text-center"
       >
-        Sign In
+        Log In
       </button>
-      <a
-        href="{{ url_for('studentResetRequest') }}"
-        class="text-c5 font-semibold"
-        >Forgot Password?</a
-      >
-      <ul class="messages text-red-500">
-        <li id="message-container"></li>
-      </ul>
+      <hr class="mt-4" />
+      <a    href="{{ url_for('universityAdminResetRequest') }}"
+      id="forgot"
+      class="text-primary font-bold hidden"
+      target="blank">
+        I forgot my password
+      </a>      
+      <div class="w-full">
+        <p class="text-accent2 text-base">
+          A university admin's guide on how to use the Student Information System
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+          <a href="w-full"
+            ><button
+              class="w-full border py-2 rounded-lg flex items-center justify-center gap-2 text-accent2"
+            >
+              <img
+                src="{{ url_for('static', filename='images/login/youtube.webp') }}"
+                class="size-6"
+                alt="Youtube"
+              />
+              Youtube
+            </button></a
+          >
+          <a href="w-full"
+            ><button
+              class="w-full border py-2 rounded-lg flex items-center justify-center gap-2 text-accent2"
+            >
+              <img
+                src="{{ url_for('static', filename='images/login/facebook.webp') }}"
+                class="size-6"
+                alt="Facebook"
+              />
+              Facebook
+            </button></a
+          >
+        </div>
+      </div>
     </form>
 
-    <div>
-      <div class="text-sm text-gray-800 mt-3">
-        By using this service, you understand and agree to the PUP Online
-        Services
-        <a
-          class="text-blue-500"
-          href="https://www.pup.edu.ph/terms/"
-          target="_blank"
-          >Terms of Use</a
-        >
-        and
-        <a
-          class="text-blue-500"
-          href="https://www.pup.edu.ph/privacy/"
-          target="_blank"
-          >Privacy Statement</a
-        >
-      </div>
+    <div class="text-base text-accent2 mt-3">
+      By using this service, you understand and agree to the PUP Online Services
+      <a
+        class="text-blue-500 underline"
+        href="https://www.pup.edu.ph/terms/"
+        target="_blank"
+        >Terms of Use</a
+      >
+      and
+      <a
+        class="text-blue-500 underline"
+        href="https://www.pup.edu.ph/privacy/"
+        target="_blank"
+        >Privacy Statement</a
+      >
+    </div>
     </div>
   </div>
 </div>
@@ -109,15 +118,19 @@
       const apiUrl = '/api/v1/university-admin/login';
 
       const emailError = document.getElementById('email-error');
+      const emailInput = document.getElementById('email');
       const passwordError = document.getElementById('password-error');
+      const passwordInput = document.getElementById('password');
       const email = formData.get('email');
       const password = formData.get('password');
 
       if (!email) {
+        emailInput.classList.add('border-primary');
         emailError.textContent = 'Email is required';
       }
 
       if (!password) {
+        emailInput.classList.add('border-primary');
         passwordError.textContent = 'Password is required';
       }
 
@@ -141,14 +154,12 @@
             window.location.href = "{{ url_for('universityAdminHome') }}";
           } else if (data.error) {
             // Thrown error
-            const messageContainer =
-              document.getElementById('message-container');
-            messageContainer.innerHTML = `<div class="text-red-500">${data.message}</div>`;
+            notyf.error(data.message);
+            document.getElementById('forgot').classList.remove('hidden')
           }
         })
         .catch((error) => {
-          const messageContainer = document.getElementById('message-container');
-          messageContainer.innerHTML = `<div class="text-red-500">${error.message}</div>`;
+          notyf.error(error.message);
         });
     });
 </script>

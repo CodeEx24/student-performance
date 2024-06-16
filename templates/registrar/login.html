@@ -8,15 +8,16 @@
       <h1
         class="text-accent1 font-poppins text-4xl font-extrabold mt-3 md:text-4xl md:mt-8"
       >
-        PUP-SPS System <br />
-        Admin Module
+        PUP-SPS Registrar Module
       </h1>
       <p class="text-accent2 text-base md:text-lg font-poppins mt-3 mb-3">
         Sign in to start your session
       </p>
     </div>
 
-    <form class="flex flex-col gap-3" method="POST" id="login-form">
+    <form class="flex flex-col gap-3" id="login-form">
+      <!-- ADD CSRF /> -->
+
       <div class="">
         <input
           id="email"
@@ -39,7 +40,6 @@
         />
         <p id="password-error" class="text-primary text-sm text-left mt-2"></p>
       </div>
-
       <button
         type="submit"
         class="text-white bg-primary hover:opacity-80 font-medium rounded-lg text-base w-full sm:w-auto px-6 py-3 text-center"
@@ -47,17 +47,15 @@
         Log In
       </button>
       <hr class="mt-4" />
-      <a
-        href="{{ url_for('systemAdminResetRequest') }}"
+      <a 
+        href="{{ url_for('registrarResetRequest') }}"
         id="forgot"
+        target="blank" 
         class="text-primary font-bold hidden"
-        target="blank"
-      >
-        I forgot my password
-      </a>
+      >I forgot my password</a>
       <div class="w-full">
         <p class="text-accent2 text-base">
-          A system admin's guide on how to use the Student Information System
+          A registrar's guide on how to use the Student Information System
         </p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
           <a href="w-full"
@@ -104,35 +102,42 @@
         >Privacy Statement</a
       >
     </div>
+    </div>
   </div>
 </div>
-
-{% endblock content %} {% block script %}
+{% endblock content %}
+<!-- SCRIPTS -->
+{% block script %}
 <script>
   document
     .getElementById('login-form')
     .addEventListener('submit', function (event) {
       event.preventDefault();
-
+      console.log('STARTING');
       const formData = new FormData(event.target);
-      const apiUrl = '/api/v1/system-admin/login';
+      const apiUrl = '/api/v1/registrar/login';
 
       const emailError = document.getElementById('email-error');
+      const emailInput = document.getElementById('email');
       const passwordError = document.getElementById('password-error');
+      const passwordInput = document.getElementById('password');
       const email = formData.get('email');
       const password = formData.get('password');
 
       if (!email) {
+        emailInput.classList.add('border-primary');
         emailError.textContent = 'Email is required';
       }
 
       if (!password) {
+        emailInput.classList.add('border-primary');
         passwordError.textContent = 'Password is required';
       }
 
       if (emailError.textContent !== '' || passwordError.textContent !== '') {
         return;
       }
+      console.log('DONE CHECKINGS');
 
       fetch(apiUrl, {
         method: 'POST',
@@ -147,11 +152,11 @@
           if (data.success) {
             // Redirect to dashboard
             console.log(data.message);
-            window.location.href = "{{ url_for('systemAdminHome') }}";
+            window.location.href = "{{ url_for('registrarHome') }}";
           } else if (data.error) {
             // Thrown error
             notyf.error(data.message);
-            document.getElementById('forgot').classList.remove('hidden');
+            document.getElementById('forgot').classList.remove('hidden')
           }
         })
         .catch((error) => {

@@ -92,6 +92,10 @@ class Faculty(db.Model):
     ProfilePic= db.Column(db.String(50),default="14wkc8rPgd8NcrqFoRFO_CNyrJ7nhmU08")  # Profile Pic
     Status = db.Column(db.String(50), default="Deactivated")
     Login_Attempt = db.Column(db.Integer, default=12)
+    
+    Token = db.Column(db.String(128))  # This is for handling reset password 
+    TokenExpiration = db.Column(db.DateTime) # This is for handling reset password 
+    
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -130,6 +134,9 @@ class UniversityAdmin(db.Model):
     ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
     MobileNumber = db.Column(db.String(11))  # MobileNumber
     IsActive = db.Column(db.Boolean, default=True)
+    
+    Token = db.Column(db.String(128))  # This is for handling reset password 
+    TokenExpiration = db.Column(db.DateTime) # This is for handling reset password 
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -169,6 +176,9 @@ class Registrar(db.Model):
     ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
     MobileNumber = db.Column(db.String(11))  # MobileNumber
     IsActive = db.Column(db.Boolean, default=True)
+    
+    Token = db.Column(db.String(128))  # This is for handling reset password 
+    TokenExpiration = db.Column(db.DateTime) # This is for handling reset password 
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -238,6 +248,9 @@ class SystemAdmin(db.Model):
     ResidentialAddress = db.Column(db.String(50))  # ResidentialAddress
     MobileNumber = db.Column(db.String(11))  # MobileNumber
     IsActive = db.Column(db.Boolean, default=True)
+    
+    Token = db.Column(db.String(128))  # This is for handling reset password 
+    TokenExpiration = db.Column(db.DateTime) # This is for handling reset password 
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
