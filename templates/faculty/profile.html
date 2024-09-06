@@ -54,7 +54,7 @@
                 </div>
                 <div>
                   <p class="text-c1 font-extrabold">Email:</p>
-                  <p class="text-c1 opacity-90 font-normal" id="gender">
+                  <p class="text-c1 opacity-90 font-normal" id="email">
                     {{ faculty.Email }}
                   </p>
                 </div>
@@ -279,6 +279,7 @@
     const text_faculty_type = document.getElementById('faculty-type');
     const text_gender = document.getElementById('gender');
     const text_course = document.getElementById('course');
+    const text_email = document.getElementById('email');
 
     input_number.value = `${data.MobileNumber ? data.MobileNumber : ''}`;
 
@@ -289,6 +290,7 @@
     text_name.innerHTML = data.Name;
     text_faculty_type.innerHTML = data.FacultyType;
     text_gender.innerHTML = data.Gender;
+    text_email.innerHTML = data.Email;
   }
 
   fetchFacultyDetails();
